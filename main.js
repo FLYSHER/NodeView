@@ -76,7 +76,13 @@ cc.game.onStart = function(){
     cc.log("[CHECK] " , cc.winSize.width, cc.winSize.height );
     // Setup the resolution policy and design resolution size
     //cc.view.setDesignResolutionSize(cc.winSize.width, cc.winSize.height, cc.ResolutionPolicy.EXACT_FIT);
-    cc.view.setDesignResolutionSize(1700, 860, cc.ResolutionPolicy.FIXED_HEIGHT);
+    // cc.view.setDesignResolutionSize(1700, 860, cc.ResolutionPolicy.FIXED_HEIGHT);
+
+    // set _orientationChanging to false for resize
+    cc.view._orientationChanging = false;
+
+    var newPolicy = new cc.ResolutionPolicy(new CustomContainerStrategy, new CustomContentStrategy);
+    cc.view.setDesignResolutionSize(1700, 860, newPolicy);
 
     // The game will be resized when browser size change
     cc.view.resizeWithBrowserSize(true);

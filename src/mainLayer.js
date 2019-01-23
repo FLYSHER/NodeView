@@ -107,7 +107,9 @@ var MainLayer = cc.Layer.extend({
         this._treeView.setup();
 
         NodeList = this._nodeList;
+
         this.onResize();
+        ScreenUtil.addResizeListener( this.onResize, this );
         return true;
     },
 
@@ -346,5 +348,11 @@ var ManiLayerScene = cc.Scene.extend({
 
         var layer = new MainLayer();
         this.addChild( layer, -1, "MainLayer" );
+    },
+
+    onExit: function() {
+        ScreenUtil.removeAllResizeListener();
+
+        this._super();
     }
 });

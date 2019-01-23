@@ -1,50 +1,96 @@
-// 사용하지 않음 (Test용)
+/**
+ * 스크린과 관련된 함수 모음
+ * @namespace
+ */
+var ScreenUtil = {};
+ScreenUtil.contentScale = 1;
+ScreenUtil.minWHRatio = 0.75;
+ScreenUtil.resizeListeners = [];
 
-var NewContainerStrategy = cc.ContainerStrategy.extend({
-	apply: function ( view, designedResolution ) {
-		var newWidth = window.innerWidth;
-		var newHeight = window.innerHeight;
-		if( newHeight > 6 * newWidth / 8 ) {
-			newHeight = Math.round(6 * newWidth / 8);
-		}
-		return this._setupContainer(view, newWidth, newHeight);
-	}
-});
+// 따로 관리하고 싶은 resizeListener는 직접 addCustomListener를 호출하여 등록한다.
+/**
+ * Canvas Resize 이벤트 때 실행할 리스너 등록
+ * @param callback
+ * @param target
+ */
+ScreenUtil.addResizeListener = function( callback, target ) {
+    EventDispatcher.getInstance().addCustomListener( "canvas-resize", callback, target );
+    ScreenUtil.resizeListeners.push( {callback: callback, target: target} );
+};
 
-var NewContentStrategy = cc.ContentStrategy.extend({
-	apply: function (view, designedResolution) {
-		var innerWidth = window.innerWidth;
-		var innerHeight = window.innerHeight;
-		if( innerHeight > 6 * innerWidth / 8 ) {
-			innerHeight = Math.round( 6 * innerWidth / 8 );
-		}
-		var newInnerWidth = innerWidth;
-		var newInnerHeight = innerHeight;
-		var contentScale = 1;
-		if( 860 > newInnerHeight ) {
-			contentScale = 430 > newInnerHeight ? 430 / 860 : newInnerHeight / 860;
-			newInnerHeight = 860;
-			newInnerWidth /= contentScale;
-		} else {
-			if( 1000 < newInnerHeight ) {
-				contentScale = newInnerHeight / 1000;
-				newInnerHeight = 1000;
-				newInnerWidth /= contentScale;
-			}
-		}
+/**
+ * 등록된 모든 resize 리스너 삭제
+ */
+ScreenUtil.removeAllResizeListener = function() {
+    ScreenUtil.resizeListeners.forEach( function( listener ) {
+        EventDispatcher.getInstance().removeCustomListener( "canvas-resize", listener.callback, listener.target );
+    } );
+    ScreenUtil.resizeListeners = [];
+};
 
-		if( 1700 > newInnerWidth ) {
-			contentScale = contentScale * newInnerWidth / 1700;
-			newInnerWidth = 1700;
-			newInnerHeight = newInnerHeight / contentScale;
-		} else {
-			if( 2700 < newInnerWidth ) {
-				newInnerWidth = 2700;
-			}
-		}
+/**
+ * 센터 위치 값 리턴
+ * @return {cc.Point|{x, y}}
+ */
+ScreenUtil.getCenterPos = function() {
+    return cc.p( cc.winSize.width / 2, cc.winSize.height / 2 );
+};
 
-		designedResolution.width = newInnerWidth;
-		designedResolution.height = newInnerHeight;
-		return this._buildResult(innerWidth, innerHeight, innerWidth, innerHeight, contentScale, contentScale);
-	}
-});
+if( !cc.sys.isNative ) {
+    // JSB 에는 cc.ContainerStrategy 와 cc.ContentStrategy 가 정의되어 있지 않음
+
+    var CustomContainerStrategy = cc.ContainerStrategy.extend({
+        apply: function (view, designedResolution) {
+            var w = window.innerWidth;
+            var h = window.innerHeight;
+
+            if( h > ScreenUtil.minWHRatio * w) {
+                h = Math.round( ScreenUtil.minWHRatio * w );
+            }
+            return this._setupContainer(view, w, h);
+        }
+    });
+
+    var CustomContentStrategy = cc.ContentStrategy.extend({
+        apply: function (view, designedResolution) {
+            var w = window.innerWidth;
+            var h = window.innerHeight;
+
+            if( h > ScreenUtil.minWHRatio * w) {
+                h = Math.round( ScreenUtil.minWHRatio * w );
+            }
+
+            var contentW = w;//e
+            var contentH = h;//f
+            var scale = 1;//g
+
+            if(contentH < 670) {
+                if( contentH < 400 ) {
+                    scale = 400 / 670;
+                } else {
+                    scale = contentH / 670;
+                }
+                contentH = 670;
+                contentW /= scale;
+            } else if(contentH > 1000) {
+                scale = contentH / 1000;
+                contentH = 1000;
+                contentW /= scale;
+            }
+
+            if(contentW < 1080) {
+                scale = scale * contentW / 1080;
+                contentW = 1080;
+                contentH = h / scale;
+            } else if(contentW > 2700) {
+                contentW = 2700;
+            }
+
+            ScreenUtil.contentScale = scale;
+
+            designedResolution.width = contentW;
+            designedResolution.height = contentH;
+            return this._buildResult(w, h, w, h, scale, scale);
+        }
+    });
+}
