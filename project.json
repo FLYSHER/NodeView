@@ -14,9 +14,15 @@
     "jsList" : [
         "src/resolution.js",
         "src/resource.js",
+        "src/arPool.js",
         "src/app.js",
+        "src/uiListViewTest.js",
+        "src/uiItemList.js",
+        "src/uiPositionCtrl.js",
+        "src/uiScreenCtrl.js",
+        "src/uiScrollTreeViewCtrl.js",
         "src/loader.js",
         "src/draggableNode.js",
-        "src/newMenu.js"
+        "src/mainLayer.js"
     ]
 }
