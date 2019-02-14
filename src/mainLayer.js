@@ -111,7 +111,7 @@ var MainLayer = cc.Layer.extend({
         this._btnHideButtons.setTouchEnabled(true);
         this._btnHideButtons.addTouchEventListener(this.onHideButtonsTouch.bind(this), this);
         this._btnHideButtons.setTitleText("HIDE ALL BUTTONS");
-        this.addChild(this._btnHideButtons,-128);
+        this.addChild(this._btnHideButtons,200000);
 
         NodeList = this._nodeList;
 
