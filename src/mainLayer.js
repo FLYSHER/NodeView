@@ -92,7 +92,6 @@ var MainLayer = cc.Layer.extend({
         this.addChild(this._movementCtrl,-128);
         this._movementCtrl.setLocalZOrder(100000);
 
-
         this._itemList = new UIItemList();
         this.addChild(this._itemList,-128);
         this._itemList.setLocalZOrder(100000);
@@ -105,6 +104,14 @@ var MainLayer = cc.Layer.extend({
         this._treeView.setContentSize(cc.size(150, 200));
         this._treeView.setVisible(false);
         this._treeView.setup();
+
+        this._btnHideButtons = new ccui.Button();
+        this._btnHideButtons.setName("btnHideButtons");
+        this._btnHideButtons.titleFontSize = 16;
+        this._btnHideButtons.setTouchEnabled(true);
+        this._btnHideButtons.addTouchEventListener(this.onHideButtonsTouch.bind(this), this);
+        this._btnHideButtons.setTitleText("HIDE ALL BUTTONS");
+        this.addChild(this._btnHideButtons,-128);
 
         NodeList = this._nodeList;
 
@@ -122,6 +129,7 @@ var MainLayer = cc.Layer.extend({
         this._itemList.setPosition(size.width - this._itemList.getContentSize().width , size.height - (this._itemList.getContentSize().height + 60));
         this._screenSize.setPosition(size.width - this._screenSize.getContentSize().width , size.height - this._screenSize.getContentSize().height);
         this._movementCtrl.setPosition(100, 0);
+        this._btnHideButtons.setPosition( cc.winSize.width - 100, 30 );
 
         this._treeView.setPosition(0, size.height - this._animationList.getContentSize().height);
 
@@ -326,6 +334,35 @@ var MainLayer = cc.Layer.extend({
         if( this._nodeList.hasOwnProperty( name ) ) {
             this._nodeList[ name ].setDraggable( true );
             Target = this._nodeList[ name ];
+        }
+    },
+
+    onHideButtonsTouch: function( sender, type ) {
+        switch( type ) {
+            case ccui.Widget.TOUCH_ENDED:
+            {
+                if( this._screenSize.visible ) {
+                    this._screenSize.visible = false;
+                    this._prevAnimationListVisble = this._animationList.visible;
+                    this._prevItemListVisble = this._itemList.visible;
+                    this._prevMovementCtrlVisble = this._movementCtrl.visible;
+                    this._prevTreeViewVisible = this._treeView.visible;
+
+                    this._animationList.visible = false;
+                    this._itemList.visible = false;
+                    this._movementCtrl.visible = false;
+                    this._treeView.visible = false;
+                    this._btnHideButtons.setTitleText("SHOW ALL BUTTONS");
+                } else {
+                    this._screenSize.visible = true;
+                    this._animationList.visible = this._prevAnimationListVisble;
+                    this._itemList.visible = this._prevItemListVisble;
+                    this._movementCtrl.visible = this._prevMovementCtrlVisble;
+                    this._treeView.visible = this._prevTreeViewVisible;
+                    this._btnHideButtons.setTitleText("HIDE ALL BUTTONS");
+                }
+                break;
+            }
         }
     },
 
