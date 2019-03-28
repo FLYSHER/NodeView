@@ -149,7 +149,18 @@ var UIScrollTreeViewCtrl = cc.LayerColor.extend({
 
         this._selectNode = null;
         if(node && node.ui) {
-            this.treeInfo = this.createUIChildList(node.ui);
+            var childTree = this.createUIChildList(node.ui);
+
+            this.treeInfo = [{
+                info :{
+                    obj : node.ui,
+                    name : node.ui.getName(),
+                    initScale : node.ui.getScale(),
+                },
+                childList : childTree
+            }] ;
+
+
             this.content.removeAllChildrenWithCleanup(true);
 
             this.content.x = 0;
@@ -167,9 +178,7 @@ var UIScrollTreeViewCtrl = cc.LayerColor.extend({
     createUIChildList :function (node) {
         if(!node)
             return null;
-
         var childList = [];
-
         var children = node.getChildren();
         for(var  i=0; i< children.length; i++)  {
             childList[i] = {};
