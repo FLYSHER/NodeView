@@ -101,7 +101,7 @@ var MainLayer = cc.Layer.extend({
         this._treeView = new UIScrollTreeViewCtrl();
         this.addChild(this._treeView,-128);
         this._treeView.setLocalZOrder(100000);
-        this._treeView.setContentSize(cc.size(150, 200));
+        this._treeView.setContentSize(cc.size(300, 500));
         this._treeView.setVisible(false);
         this._treeView.setup();
 
@@ -131,7 +131,7 @@ var MainLayer = cc.Layer.extend({
         this._movementCtrl.setPosition(100, 0);
         this._btnHideButtons.setPosition( cc.winSize.width - 100, 30 );
 
-        this._treeView.setPosition(0, size.height - this._animationList.getContentSize().height);
+        this._treeView.setPosition(0, size.height - this._treeView.getContentSize().height);
 
         var children = this.getChildren();
 
@@ -285,7 +285,6 @@ var MainLayer = cc.Layer.extend({
             var animNameArr = animations._animationData.movementNames;
 
             var playCb = function (index) {
-                cc.log("[CHECK] : ",index);
                 animations.playWithIndex(index);
             };
 
