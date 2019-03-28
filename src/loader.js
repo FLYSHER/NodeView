@@ -18,6 +18,8 @@ Loader.armatureData = {};
 Loader.textures = {};
 Loader.plistFiles = {};
 
+var ResourceMapData = {};
+
 Loader.init = function() {
     var canvas = cc._canvas;
 
@@ -29,7 +31,8 @@ Loader.init = function() {
             item.file(function( file ) {
                 Loader.readFile( file );
             });
-        } else if (item.isDirectory) {
+        }
+        else if (item.isDirectory) {
             // Get folder contents
             var dirReader = item.createReader();
             var read = dirReader.readEntries.bind( dirReader, function( entries ) {
@@ -37,7 +40,8 @@ Loader.init = function() {
                     return;
                 }
                 for (var i=0; i<entries.length; i++) {
-                    traverseFileTree(entries[i], path + item.name + "/");
+                    ResourceMapData[entries[i].name] = entries[i];
+                    //traverseFileTree(entries[i], path + item.name + "/");
                 }
                 read();
             } );
@@ -89,7 +93,6 @@ Loader.readFile = function( file ) {
     }
 
     reader = new FileReader();
-
     ext = cc.path.extname(file.name).toLowerCase();
     if (ext === ".json" || ext === ".exportjson") {
         reader.readAsText(file);
@@ -153,11 +156,16 @@ Loader._processFileData = function( url, fileContents, ext ) {
                 // UI
                 cc.loader.cache[url] = dic;
                 this.uiURL[ fileName ] = url;
+
+
+                this.readResoueces(dic['textures'], dic['texturesPng'] );
                 this.uiTextures[ fileName ] = dic[ "textures" ];
                 this.checkFiles( fileName, 'ui' );
             } else if( dic[ ccs.CONST_ARMATURE_DATA ] ) {
                 // Armature
                 this.armatureData[ fileName ] = dic;
+                this.readResoueces(dic['config_png_path'], dic['config_file_path'] );
+
 
                 armatureDataArr = dic[ccs.CONST_ARMATURE_DATA] || [];
                 if( !self.armatureIDs.hasOwnProperty( fileName ) ) {
@@ -177,6 +185,46 @@ Loader._processFileData = function( url, fileContents, ext ) {
             break;
     }
 };
+
+
+Loader.readResoueces = function ( pngData, plistData ) {
+
+    var i, pngNameSplit, plistgNameSplit;
+    var pngNames = [];
+    var plistNames = [];
+
+
+    for( i = 0;i < pngData.length;i++){
+        pngNameSplit =  pngData[i].split('/');
+        pngNames.push(pngNameSplit[pngNameSplit.length - 1 ]);
+    }
+
+
+    for( i = 0;i < plistData.length;i++) {
+        plistgNameSplit = plistData[i].split('/');
+        plistNames.push(plistgNameSplit[plistgNameSplit.length - 1]);
+    }
+
+
+    var item = null;
+    for (i=0; i<pngNames.length; i++) {
+        item = ResourceMapData[pngNames[i] ];
+
+        item.file(function( file ) {
+            Loader.readFile( file );
+        });
+        //Loader.readFile(file);
+    }
+
+    for (i=0; i<plistNames.length; i++) {
+        item = ResourceMapData[plistNames[i] ];
+        item.file(function( file ) {
+            Loader.readFile( file );
+        });
+    }
+
+};
+
 
 Loader.checkFiles = function ( fileName, type ) {
     var i;
