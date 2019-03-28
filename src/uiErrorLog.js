@@ -9,6 +9,10 @@ var printLog = function( message, color ){
         return;
     }
 
+    if( !!message === false ){
+        return;
+    }
+
     if( LogContainer.length > 0 ) {
         cc.each( LogContainer, function( label ) {
             if( label !== null && cc.sys.isObjectValid( label ) ) {
@@ -47,4 +51,37 @@ var printLog = function( message, color ){
 };
 
 
+var gizmoNodTag = 999;
 
+var Gizmo_DrawTouchLayerByRect = function( rect ){
+
+
+    var rectNode = cc.director.getRunningScene().getChildByTag(gizmoNodTag);
+    if(!rectNode) {
+        rectNode = new cc.DrawNode();
+        rectNode.setTag(gizmoNodTag);
+        cc.director.getRunningScene().addChild(rectNode, 999999, gizmoNodTag);
+    }
+    else{
+        rectNode.clear();
+    }
+
+    // var rectangle = [];
+    // rectangle[0] = cc.p(rect.x, rect.y);
+    // rectangle[1] = cc.p(rect.x + rect.width, rect.y);
+    // rectangle[2] = cc.p(rect.x + rect.width, rect.y + rect.height);
+    // rectangle[3] = cc.p(rect.x, rect.y + rect.height);
+
+
+    rectNode.drawRect(
+        cc.p(rect.x, rect.y),
+        cc.p(rect.x + rect.width, rect.y + rect.height), cc.color(255,0,0,50), 0, cc.color(255,255,255,255));
+};
+
+var Gizmo_ClearDraw = function(){
+
+    var rectNode = cc.director.getRunningScene().getChildByTag(gizmoNodTag);
+    if(rectNode) {
+        rectNode.clear();
+    }
+};

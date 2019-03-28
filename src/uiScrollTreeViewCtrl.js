@@ -49,6 +49,9 @@ var UIScrollTreeViewCtrl = cc.LayerColor.extend({
 
             this.localPos.x =  0;
             this.localPos.y = -this.FONTSIZE *2;
+
+            this.localSize.x =  0;
+            this.localSize.y = -this.FONTSIZE *3;
         }
     },
 
@@ -121,6 +124,14 @@ var UIScrollTreeViewCtrl = cc.LayerColor.extend({
         this.localPos.setAnchorPoint(0,1);
         this.addChild(this.localPos);
         this.localPos.setVisible(false);
+
+
+        this.localSize = new cc.LabelTTF("LocalScale", "Arial", this.FONTSIZE);
+        this.localSize.setContentSize(cc.size(this.FONTSIZE , this.FONTSIZE));
+        this.localSize.setHorizontalAlignment(cc.TEXT_ALIGNMENT_LEFT);
+        this.localSize.setAnchorPoint(0,1);
+        this.addChild(this.localSize);
+        this.localSize.setVisible(false);
 
         this.resize();
     },
@@ -257,6 +268,25 @@ var UIScrollTreeViewCtrl = cc.LayerColor.extend({
         this.viewBtn.setTitleText("Visible : " + this._selectNode.isVisible());
         this.localPos.setVisible(true);
         this.localPos.setString("localPos : " + this._selectNode.getPosition().x.toFixed(2) + " X " +this._selectNode.getPosition().y.toFixed(2));
+
+        this.localSize.setVisible(true);
+        this.localSize.setString("contentSize : " + this._selectNode.getContentSize().width.toFixed(2) + " X " +this._selectNode.getContentSize().height.toFixed(2));
+
+
+
+        var rect = this._selectNode.getBoundingBox();
+        var po = this._selectNode.getParent().convertToWorldSpace( cc.p(rect.x, rect.y));
+
+
+
+        if(rect.width < 5)
+            rect.width = 10;
+        if (rect.height < 5 )
+            rect.height = 10;
+
+        Gizmo_DrawTouchLayerByRect(
+            cc.rect(po.x, po.y, rect.width, rect.height)
+        );
 
     }
 });
