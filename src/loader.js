@@ -209,7 +209,10 @@ Loader.readResoueces = function ( pngData, plistData ) {
     var item = null;
     for (i=0; i<pngNames.length; i++) {
         item = ResourceMapData[pngNames[i] ];
-
+        if( !!item === false){
+            printLog( "No resource file : "+ pngNames[i]);
+            continue;
+        }
         item.file(function( file ) {
             Loader.readFile( file );
         });
@@ -218,6 +221,11 @@ Loader.readResoueces = function ( pngData, plistData ) {
 
     for (i=0; i<plistNames.length; i++) {
         item = ResourceMapData[plistNames[i] ];
+        if( !!item === false){
+            //console.log("There is no ", plistNames[i]);
+            printLog( "No resource file : "+ plistNames[i]);
+            continue;
+        }
         item.file(function( file ) {
             Loader.readFile( file );
         });
