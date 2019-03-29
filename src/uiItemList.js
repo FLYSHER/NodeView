@@ -175,8 +175,6 @@ var UIItemList = cc.LayerColor.extend({
         if(!this.selectItem)
             return;
 
-        cc.log("Item Delete: " + this.selectItem);
-
         this.listView.removeItem( this.selectIndex); //this.listView.getCurSelectedIndex());
 
         this.totalListItemCount = this.listView.getItems().length;
@@ -191,6 +189,7 @@ var UIItemList = cc.LayerColor.extend({
         if(this.selectItem.cb)
             this.selectItem.cb(this.selectItem.itemName,ItemListClickType.DELETE);
 
+        Loader.removeData(this.selectItem.itemName);
         this.selectItem = null;
         this.selectIndex = -1;
     },

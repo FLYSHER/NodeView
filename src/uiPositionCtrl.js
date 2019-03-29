@@ -54,8 +54,6 @@ var UiPositionCtrl = cc.LayerColor.extend({
     },
 
     init : function (targetNode) {
-
-        cc.log("[CHECK] INIT : ");
         this.targetNode = targetNode;
         this.updateLock = false;
         if(this.targetNode) {

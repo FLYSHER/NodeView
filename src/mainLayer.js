@@ -63,6 +63,8 @@ var MainLayer = cc.Layer.extend({
 
         var self = this;
         this._loadArmatureListener = cc.eventManager.addCustomListener( 'loadArmature', function( event ) {
+            // cc.log(new Error().stack);
+            //cc.log( "JSON.parse( event.getUserData() ", JSON.parse( event.getUserData()));
             self.onLoadArmature( JSON.parse( event.getUserData() ) );
         } );
 

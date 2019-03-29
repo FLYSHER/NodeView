@@ -233,6 +233,14 @@ Loader.readResoueces = function ( pngData, plistData ) {
 
 };
 
+Loader.removeData = function ( fileName ){
+    //console.log('Loader.removeData', fileName );
+    if( !!this.armatureFrames[fileName] === true)
+        delete this.armatureFrames[fileName];
+
+    if( !!this.uiTextures[fileName] === true)
+        delete this.uiTextures[fileName];
+};
 
 Loader.checkFiles = function ( fileName, type ) {
     var i;
