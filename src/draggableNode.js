@@ -86,6 +86,10 @@ var DraggableNode = cc.Node.extend( {
         this.selectMark.setVisible(this._draggable);
     },
 
+    isDraggable: function() {
+        return this._draggable;
+    },
+
     addChildToCenter: function( child, localZOrder, tag ) {
         child.x = this.width / 2;
         child.y = this.height / 2;

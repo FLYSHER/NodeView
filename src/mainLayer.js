@@ -385,7 +385,77 @@ var ManiLayerScene = cc.Scene.extend({
         Loader.init();
 
         var layer = new MainLayer();
-        this.addChild( layer, -1, "MainLayer" );
+        this.addChild( layer, 1, "MainLayer" );
+
+        var self = this;
+        cc.eventManager.addListener( {
+            event: cc.EventListener.MOUSE,
+            onMouseDown: function( event ) {
+                var nodeObj = self.getFrontTouchedNode( event.getLocation() );
+                if( nodeObj.node ) {
+                    layer.updateMenu( nodeObj.nodeName );
+                }
+            },
+            swallowTouches: false
+        }, this );
+    },
+
+    getFrontTouchedNode: function( touchPos ) {
+        var maxZOrderList = [];
+        var frontNode = null;
+        var frontNodeName = '';
+        var zOrderList = [];
+        var node = null;
+
+        var updateData = function( zOrderList, node, name ) {
+            maxZOrderList = zOrderList;
+            frontNode = node;
+            frontNodeName = name;
+        };
+
+        for( var name in NodeList ) {
+            if( NodeList.hasOwnProperty( name ) ) {
+                node = NodeList[ name ];
+                var isOver = cc.rectContainsPoint(node.getBoundingBoxToWorld(), touchPos);
+                if( !isOver ) {
+                    continue;
+                }
+
+                zOrderList = this.getZOrderList( node );
+                if( maxZOrderList.length > 0 ) {
+                    var determined = false;
+                    for( var i = 0; i < zOrderList.length && i < maxZOrderList.length; i++ ) {
+                        if( zOrderList[ i ] > maxZOrderList[ i ] ) {
+                            updateData( zOrderList, node, name );
+
+                            determined = true;
+                            break;
+                        } else if( zOrderList[ i ] < maxZOrderList[ i ] ) {
+                            determined = true;
+                            break;
+                        }
+                    }
+
+                    if( !determined && zOrderList.length > maxZOrderList.length ) {
+                        updateData( zOrderList, node, name );
+                    }
+                } else {
+                    updateData( zOrderList, node, name );
+                }
+            }
+        }
+        return {
+            node: frontNode,
+            nodeName: frontNodeName
+        };
+    },
+
+    getZOrderList: function( node ) {
+        var zOrderList = [];
+        for( let p = node; !!p; p = p.getParent() ) {
+            zOrderList.unshift( p.zIndex );
+        }
+        return zOrderList;
     },
 
     onExit: function() {
