@@ -73,6 +73,14 @@ ccs.actionManager = /** @lends ccs.actionManager# */{
         return null;
     },
 
+    getActionList : function(jsonName){
+        var path = jsonName;
+        var pos = path.lastIndexOf("/");
+        var fileName = path.substr(pos + 1, path.length);
+       // var fileName = node.getName() + ".ExportJson";
+        return this._actionDic[fileName]
+    },
+
     /**
      * Play an Action with a name.
      * @param {String} jsonName

@@ -180,10 +180,30 @@ var UIScrollTreeViewCtrl = cc.LayerColor.extend({
             this.drawTree(this.treeInfo, 0, 0);
             this.content.setVisible(true);
             this.setVisible(true);
+
+
+            var jsonName = node.getName() + '.ExportJson';
+            var actionList = ccs.actionManager.getActionList(jsonName);
+            this._actionList && this._actionList.removeFromParent( true );
+            if( actionList.length > 0){
+
+                this._actionList = new UIItemList();
+                this.addChild(this._actionList,-128);
+                this._actionList.setLocalZOrder(100000);
+                this._actionList.setContentSize(cc.size(150, 300));
+                this._actionList.setPosition(0,- 320);
+                this._actionList.setVisible(true);
+                for( var i = 0 ; i < actionList.length ; i++ ){
+                    this._actionList.add( actionList[i].getName(), function(index){
+                        ccs.actionManager.playActionByName( jsonName , actionList[index].getName() );
+                    }.bind(this, i));
+                }
+            }
         }
         else {
             this.setVisible(false);
         }
+
     },
 
     createUIChildList :function (node) {
