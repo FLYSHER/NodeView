@@ -177,7 +177,12 @@ var UIScrollTreeViewCtrl = cc.LayerColor.extend({
             this.content.x = 0;
             this.content.y = this.clipper.height;
 
-            this.drawTree(this.treeInfo, 0, 0);
+
+
+            var treeObj = [];
+            this.drawTree(this.treeInfo, 0, 0,treeObj);
+            $('#data_test').jstree(true).settings.core.data = treeObj;
+            $('#data_test').jstree("refresh");
             this.content.setVisible(true);
             this.setVisible(true);
 
@@ -242,7 +247,7 @@ var UIScrollTreeViewCtrl = cc.LayerColor.extend({
         return childList;
     },
 
-    drawTree :function (treeInfo, depth, line) {
+    drawTree :function (treeInfo, depth, line, dataObj) {
         if(!treeInfo)
             return line;
 
@@ -253,6 +258,7 @@ var UIScrollTreeViewCtrl = cc.LayerColor.extend({
             var info = treeInfo[i];
             var btn = new ccui.Button();
             btn.setName(info.info.name);
+
             btn.titleFontSize = 24;
             btn.setTouchEnabled(true);
             btn.setAnchorPoint(0,0);
@@ -276,7 +282,16 @@ var UIScrollTreeViewCtrl = cc.LayerColor.extend({
             btn.x = btn.titleFontSize * depth;
             btn.y = (btn.titleFontSize * line * -1);
             this.content.addChild(btn);
-            line = this.drawTree(info.childList, depth+1, line);
+
+
+            var obj = {
+                "text" : info.info.name
+            };
+            if( info.childList.length > 0){
+                obj.children = [];
+            }
+            dataObj.push( obj );
+            line = this.drawTree(info.childList, depth+1, line, obj.children);
         }
         return line;
     },

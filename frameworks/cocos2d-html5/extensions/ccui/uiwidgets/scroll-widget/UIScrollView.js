@@ -251,13 +251,17 @@ ccui.ScrollView = ccui.Layout.extend(/** @lends ccui.ScrollView# */{
             locSize = this._contentSize,
             innerSizeWidth = locSize.width, innerSizeHeight = locSize.height;
 
-        if (size.width < locSize.width)
-            cc.log("Inner width <= ScrollView width, it will be force sized!");
+        if (size.width < locSize.width){
+
+        }
+        //    cc.log("Inner width <= ScrollView width, it will be force sized!");
         else
             innerSizeWidth = size.width;
 
-        if (size.height < locSize.height)
-            cc.log("Inner height <= ScrollView height, it will be force sized!");
+        if (size.height < locSize.height){
+
+        }
+        //    cc.log("Inner height <= ScrollView height, it will be force sized!");
         else
             innerSizeHeight = size.height;
 
@@ -284,8 +288,10 @@ ccui.ScrollView = ccui.Layout.extend(/** @lends ccui.ScrollView# */{
             innerWidth = locW,
             container = this._innerContainer,
             oldInnerWidth = container.width;
-        if (width < locW)
-            cc.log("Inner width <= scrollview width, it will be force sized!");
+        if (width < locW){
+
+        }
+        //    cc.log("Inner width <= scrollview width, it will be force sized!");
         else
             innerWidth = width;
         container.width = innerWidth;
@@ -312,8 +318,10 @@ ccui.ScrollView = ccui.Layout.extend(/** @lends ccui.ScrollView# */{
             innerHeight = locH,
             container = this._innerContainer,
             oldInnerHeight = container.height;
-        if (height < locH)
-            cc.log("Inner height <= scrollview height, it will be force sized!");
+        if (height < locH){
+
+        }
+        //    cc.log("Inner height <= scrollview height, it will be force sized!");
         else
             innerHeight = height;
         container.height = innerHeight;

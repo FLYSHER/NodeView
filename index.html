@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/jstree.min.js"></script>
     <meta charset="utf-8">
     <title>Cocos2d-html5 Hello World test</title>
     <link rel="icon" type="image/GIF" href="res/favicon.ico"/>
@@ -69,28 +73,46 @@ body {
   flex-direction: column;
 }
 
-#Cocos2dGameContainer {
-  position: absolute;
-  margin: 0;
-  overflow: hidden;
-  left: 0px;
-  top: 0px;
 
-  display: -webkit-box;
-  -webkit-box-orient: horizontal;
-  -webkit-box-align: center;
-  -webkit-box-pack: center;
-}
 
 canvas {
-  background-color: rgba(0, 0, 0, 0);
+  background-color: rgba(255, 0, 0, 0);
 }
 </style>
 </head>
 <body>
+<div class="sidenav">
+    <div id="data_test"></div>
+</div>
 <script src="res/loading.js"></script>
 <canvas id="gameCanvas" width="480" height="720"></canvas>
 <script src="frameworks/cocos2d-html5/CCBoot.js"></script>
 <script cocos src="main.js"></script>
+
+
+<style type="text/css">
+    .sidenav {
+        height: 100%; /* Full-height: remove this if you want "auto" height */
+        width: 260px; /* Set the width of the sidebar */
+        position: fixed; /* Fixed Sidebar (stay in place on scroll) */
+        z-index: 1; /* Stay on top */
+        top: 0; /* Stay at the top */
+        left: 0;
+        background-color: #FFFFFF; /* Black */
+        overflow-x: hidden; /* Disable horizontal scroll */
+        padding-top: 20px;
+        text-align: left;
+    }
+
+    #Cocos2dGameContainer {
+        position: relative;
+        overflow: hidden;
+        margin-left: 260px;
+        display: -webkit-box;
+        -webkit-box-orient: horizontal;
+        -webkit-box-align: center;
+        -webkit-box-pack: center;
+    }
+    </style>
 </body>
 </html>
