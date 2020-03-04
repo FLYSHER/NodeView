@@ -43,7 +43,7 @@ if( !cc.sys.isNative ) {
         apply: function (view, designedResolution) {
 
             var sidebarWidth = document.getElementsByClassName('sidenav')[0].clientWidth;//	$('.sidenav').css("width");
-            cc.log( document.getElementById('Cocos2dGameContainer'));
+            //cc.log( document.getElementById('Cocos2dGameContainer'));
             var w = window.innerWidth - sidebarWidth;
             var h = window.innerHeight;
 

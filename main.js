@@ -91,16 +91,5 @@ cc.game.onStart = function(){
     cc.LoaderScene.preload(g_resources, function () {
         cc.director.runScene(new ManiLayerScene());
     }, this);
-
-    $('#data_test').jstree({
-        'core' : {
-            'data' : [
-                { "text" : "Root node", "children" : [
-                        { "text" : "Child node 1" },
-                        { "text" : "Child node 2" }
-                    ]}
-            ]
-        }
-    });
 };
 cc.game.run();

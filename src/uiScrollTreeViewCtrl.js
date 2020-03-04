@@ -1,164 +1,76 @@
-var UIScrollTreeViewCtrl = cc.LayerColor.extend({
+var UIScrollTreeViewCtrl = cc.Node.extend({
     _scrolling:false,
     _lastPoint:null,
     TAG_CLIPPERNODE  : 1,
     TAG_CONTENTNODE  : 2,
 
     _selectNode : null,
+
+    _treeWidgetObj : {},
     ctor : function () {
         this._super("");
-        this.setColor(color.backgroundColor);
-    },
+        $('#widgetTree').jstree({
+            'core' : {
+                'data' : [
+                ]
+            }
+        });
+        var self = this;
+        $('#widgetTree').on("changed.jstree", function (e, data) {
+            if( !!data.node === false)
+                return;
+            var selectedObj = self._treeWidgetObj[ data.node.text ];
+            if( !!selectedObj === false )
+                return;
+            var actionBy = cc.scaleBy(0.15, 1.2).easing( cc.easeElasticOut( 1.5 ));
+            selectedObj.obj.setScale(selectedObj.initScale);
+            selectedObj.obj.stopActionByTag(100);
+            selectedObj.obj.runAction(cc.sequence(actionBy, actionBy.reverse())).setTag(100);
 
-    onEnter: function() {
-
-        this._super();
-        this.setCascadeOpacityEnabled(true);
-        this.setCascadeColorEnabled(true);
-        this.setOpacity(128);
-    },
-
-    setContentSize :function(x, y) {
-        this._super(x,y);
-        this.resize();
-    },
-
-    resize : function () {
-        if(this.clipper) {
-            this.clipper.setContentSize(this.getContentSize());
-            this.clipper.anchorX = 0.5;
-            this.clipper.anchorY = 0.5;
-            this.clipper.x = this.width / 2;
-            this.clipper.y = this.height / 2;
-
-            var rectangle = [cc.p(0, 0),cc.p(this.clipper.width, 0),
-                cc.p(this.clipper.width, this.clipper.height),
-                cc.p(0, this.clipper.height)];
-
-            var white = cc.color(255, 255, 255, 255);
-            this.clipper.stencil.cleanup();
-            this.clipper.stencil.drawPoly(rectangle, white, 1, white);
-
-            this.content.setAnchorPoint(0, 1);
-            this.content.x = 0;
-            this.content.y = this.clipper.height;
-
-            this.viewBtn.x =  this.width / 2;
-            this.viewBtn.y =  -this.FONTSIZE;
+            self.selectNode(selectedObj.obj);
+        });
 
 
-            this.localPos.x =  0;
-            this.localPos.y = -this.FONTSIZE *2;
+        $('#actionTree').jstree({
+            'core' : {
+                'data' : [
+                ],
+                'themes' : {
+                    "dots" : false,
+                    "icons" : null,
+                }
+            }
+        });
+        $('#actionTree').on("changed.jstree", function (e, data) {
+            if( !!data.node === false)
+                return;
+            ccs.actionManager.playActionByName( self._jsonName , data.node.text );
+        });
 
-            this.localSize.x =  0;
-            this.localSize.y = -this.FONTSIZE *3;
-        }
+        this._jsonName = null;
     },
 
     setup:function () {
-        this.clipper = new cc.ClippingNode();
-        this.clipper.tag = this.TAG_CLIPPERNODE;
-        this.addChild(this.clipper);
 
-        this.stencil = new cc.DrawNode();
-        this.clipper.stencil = this.stencil;
+        $('#toggleVisible').click( function(){
+            if(this._selectNode){
+                this._selectNode.setVisible(!this._selectNode.isVisible());
+                this.selectNode(this._selectNode);
 
-        this.content = new cc.Node();//cc.Sprite(res.HelloWorld_png);
-        this.content.setName("content");
-        this.content.tag = this.TAG_CONTENTNODE;
-        this.content.setAnchorPoint(0, 1);
-        this.content.x = 0;
-        this.content.y = this.clipper.height;
-        this.clipper.addChild(this.content);
-
-
-        this._scrolling = false;
-        var self = this;
-        cc.eventManager.addListener(cc.EventListener.create({
-            event: cc.EventListener.MOUSE,
-            onMouseDown: function (event) {
-                var target = event.getCurrentTarget();
-
-                var touch = event;
-                var clipper = target.getChildByTag(self.TAG_CLIPPERNODE);
-                var point = clipper.convertToNodeSpace(touch.getLocation());
-                var rect = cc.rect(0, 0, clipper.width, clipper.height);
-                self._scrolling = cc.rectContainsPoint(rect, point);
-                self._lastPoint = point;
-            },
-
-            onMouseMove: function (event) {
-                if (!self._scrolling)
-                    return;
-                var target = event.getCurrentTarget();
-
-                var touch = event;
-                var clipper = target.getChildByTag(self.TAG_CLIPPERNODE);
-                var point = clipper.convertToNodeSpace(touch.getLocation());
-                var diff = cc.pSub(point, self._lastPoint);
-                var content = clipper.getChildByTag(self.TAG_CONTENTNODE);
-                content.setPosition(cc.pAdd(content.getPosition(), diff));
-                self._lastPoint = point;
-            },
-
-            onMouseUp: function (event) {
-                if (!self._scrolling) return;
-                self._scrolling = false;
             }
-        }), this);
+        }.bind(this));
 
-        this.FONTSIZE = 18;
-        this.viewBtn = new ccui.Button();
-        this.viewBtn.setName("viewBtn");
-        this.viewBtn.titleFontSize = 24;
-        this.viewBtn.setTouchEnabled(true);
-        this.viewBtn.addTouchEventListener(this.onButtonClick.bind(this), this);
-        this.viewBtn.setTitleText("BACK");
-        this.addChild(this.viewBtn);
-        this.viewBtn.setVisible(false);
-
-
-        this.localPos = new cc.LabelTTF("Local", "Arial", this.FONTSIZE);
-        this.localPos.setContentSize(cc.size(this.FONTSIZE , this.FONTSIZE));
-        this.localPos.setHorizontalAlignment(cc.TEXT_ALIGNMENT_LEFT);
-        this.localPos.setAnchorPoint(0,1);
-        this.addChild(this.localPos);
-        this.localPos.setVisible(false);
-
-
-        this.localSize = new cc.LabelTTF("LocalScale", "Arial", this.FONTSIZE);
-        this.localSize.setContentSize(cc.size(this.FONTSIZE , this.FONTSIZE));
-        this.localSize.setHorizontalAlignment(cc.TEXT_ALIGNMENT_LEFT);
-        this.localSize.setAnchorPoint(0,1);
-        this.addChild(this.localSize);
-        this.localSize.setVisible(false);
-
-        this.resize();
     },
 
-    onButtonClick :function (sender, type) {
-        cc.log("[CHECK] ",type);
-
-        switch (type) {
-            case ccui.Widget.TOUCH_BEGAN:
-                break;
-            case ccui.Widget.TOUCH_ENDED:
-                if(sender === this.viewBtn) {
-                    if(this._selectNode){
-                        this._selectNode.setVisible(!this._selectNode.isVisible());
-
-                        this.selectNode(this._selectNode);
-
-                    }
-                }
-                break;
-        }
-    },
 
     setNode :function (node) {
         delete this.treeInfo;
-
+        
+        this._treeWidgetObj = {};
         this._selectNode = null;
+        var treeObj = [];
+        var actionObj = [];
+
         if(node && node.ui) {
             var childTree = this.createUIChildList(node.ui);
 
@@ -171,44 +83,27 @@ var UIScrollTreeViewCtrl = cc.LayerColor.extend({
                 childList : childTree
             }] ;
 
-
-            this.content.removeAllChildrenWithCleanup(true);
-
-            this.content.x = 0;
-            this.content.y = this.clipper.height;
+            //treeWidget
+            this.drawTree(this.treeInfo, 0, 0, treeObj);
 
 
-
-            var treeObj = [];
-            this.drawTree(this.treeInfo, 0, 0,treeObj);
-            $('#data_test').jstree(true).settings.core.data = treeObj;
-            $('#data_test').jstree("refresh");
-            this.content.setVisible(true);
-            this.setVisible(true);
-
-
-            var jsonName = node.getName() + '.ExportJson';
-            var actionList = ccs.actionManager.getActionList(jsonName);
-            this._actionList && this._actionList.removeFromParent( true );
-            if( actionList.length > 0){
-
-                this._actionList = new UIItemList();
-                this.addChild(this._actionList,-128);
-                this._actionList.setLocalZOrder(100000);
-                this._actionList.setContentSize(cc.size(150, 300));
-                this._actionList.setPosition(0,- 320);
-                this._actionList.setVisible(true);
-                for( var i = 0 ; i < actionList.length ; i++ ){
-                    this._actionList.add( actionList[i].getName(), function(index){
-                        ccs.actionManager.playActionByName( jsonName , actionList[index].getName() );
-                    }.bind(this, i));
+            //UI Action 추가되는 부분
+            this._jsonName = node.getName() + '.ExportJson';
+            var actionList = ccs.actionManager.getActionList(this._jsonName);
+            for( var i = 0 ; i < actionList.length ; i++ ){
+                var obj = {
+                    'text' : actionList[i].getName()
                 }
+                actionObj.push(obj);
             }
-        }
-        else {
-            this.setVisible(false);
+
         }
 
+
+        $('#widgetTree').jstree(true).settings.core.data = treeObj;
+        $('#widgetTree').jstree("refresh");
+        $('#actionTree').jstree(true).settings.core.data = actionObj;
+        $('#actionTree').jstree("refresh");
     },
 
     createUIChildList :function (node) {
@@ -241,7 +136,6 @@ var UIScrollTreeViewCtrl = cc.LayerColor.extend({
             childList[i].info ={};
             childList[i].info.obj = boneDic[b];
             childList[i].info.name =  boneDic[b].name;
-            //childList[i].childList = this.createArChildList( boneDic[b]);
             i++;
         }
         return childList;
@@ -255,43 +149,25 @@ var UIScrollTreeViewCtrl = cc.LayerColor.extend({
         for(var i = 0; i < len; i++) {
             line++;
 
-            var info = treeInfo[i];
-            var btn = new ccui.Button();
-            btn.setName(info.info.name);
-
-            btn.titleFontSize = 24;
-            btn.setTouchEnabled(true);
-            btn.setAnchorPoint(0,0);
-            btn.setTitleText(info.info.name);
-            btn.info = info.info;
-            btn.addTouchEventListener(
-                function (sender, type) {
-                    //his, ccui.Widget.TOUCH_BEGAN
-                    switch (type){
-                        case ccui.Widget.TOUCH_ENDED:
-                            var actionBy = cc.scaleBy(0.15, 1.2).easing( cc.easeElasticOut( 1.5 ));
-                            sender.info.obj.setScale(sender.info.initScale);
-                            sender.info.obj.stopActionByTag(100);
-                            sender.info.obj.runAction(cc.sequence(actionBy, actionBy.reverse())).setTag(100);
-
-                            this.selectNode(sender.info.obj);
-                            break;
-                    }
-                },
-                this);
-            btn.x = btn.titleFontSize * depth;
-            btn.y = (btn.titleFontSize * line * -1);
-            this.content.addChild(btn);
-
-
+             var info = treeInfo[i];
             var obj = {
-                "text" : info.info.name
+                "text" : info.info.name,
+                "state": {
+                    "opened": true
+                },
             };
             if( info.childList.length > 0){
                 obj.children = [];
             }
+            this._treeWidgetObj[ info.info.name ] = {};
+            this._treeWidgetObj[ info.info.name ].obj = info.info.obj;
+            this._treeWidgetObj[ info.info.name ].initScale = info.info.obj.getScale();
             dataObj.push( obj );
+
+
             line = this.drawTree(info.childList, depth+1, line, obj.children);
+
+
         }
         return line;
     },
@@ -299,14 +175,21 @@ var UIScrollTreeViewCtrl = cc.LayerColor.extend({
     selectNode :function (nodeObj)
     {
         this._selectNode = nodeObj;
-        this.viewBtn.setVisible(true);
-        this.viewBtn.setTitleText("Visible : " + this._selectNode.isVisible());
-        this.localPos.setVisible(true);
-        this.localPos.setString("localPos : " + this._selectNode.getPosition().x.toFixed(2) + " X " +this._selectNode.getPosition().y.toFixed(2));
 
-        this.localSize.setVisible(true);
-        this.localSize.setString("contentSize : " + this._selectNode.getContentSize().width.toFixed(2) + " X " +this._selectNode.getContentSize().height.toFixed(2));
+        if(this._selectNode.isVisible() )
+            $('#toggleVisible').html('Hide');
+        else
+            $('#toggleVisible').html('Show');
+        
+        $('#localPos').html("(" + this._selectNode.getPosition().x.toFixed(2) + " , " +this._selectNode.getPosition().y.toFixed(2) + ")");
+        $('#LocalSize').html("(" + this._selectNode.getContentSize().width.toFixed(2) + " , " +this._selectNode.getContentSize().height.toFixed(2) + ")");
 
+        //TODO 이거 왜 안되냐
+        if( typeof nodeObj.setString === 'function'  ){
+            if( nodeObj.getString() === ''){
+                nodeObj.setString("434510");
+            }
+        }
 
 
         var rect = this._selectNode.getBoundingBox();

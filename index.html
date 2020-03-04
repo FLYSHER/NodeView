@@ -82,7 +82,31 @@ canvas {
 </head>
 <body>
 <div class="sidenav">
-    <div id="data_test"></div>
+    <div class = "smallWidget">
+      <div id="fileNameTree"></div>
+    </div>
+    <button type="button", id="deleteBtn"> Delete </button>
+    <div class = "treeWidget">
+      <div id="widgetTree"></div>
+      <div id="animationTree"></div>
+    </div>
+    <div class = "hideWidget">
+      <div id="actionTree"></div>
+    </div>
+    <div class = "NodeInfoWidget">
+      <button type="button", id="toggleVisible"> Visible </button>
+      <br>
+      <label>LocalPos  : </label> 
+      <label id = "localPos">(0,0) </label>
+      <br>
+      <label>LocalSize : </label> 
+      <label id = "LocalSize">(0,0) </label>
+      <br><br>
+      WorldPos : <input type="text" id="worldPos" name="wPosX", value="">
+      <input type="text" id="worldPos" name="wPosY", value="">
+      <br><br>
+    </div>
+
 </div>
 <script src="res/loading.js"></script>
 <canvas id="gameCanvas" width="480" height="720"></canvas>
@@ -92,16 +116,46 @@ canvas {
 
 <style type="text/css">
     .sidenav {
-        height: 100%; /* Full-height: remove this if you want "auto" height */
-        width: 260px; /* Set the width of the sidebar */
-        position: fixed; /* Fixed Sidebar (stay in place on scroll) */
-        z-index: 1; /* Stay on top */
-        top: 0; /* Stay at the top */
+        height: 100%;
+        width: 260px; 
+        position: fixed;
+        z-index: 1; 
+        top: 0; 
         left: 0;
-        background-color: #FFFFFF; /* Black */
-        overflow-x: hidden; /* Disable horizontal scroll */
-        padding-top: 20px;
+        background-color: #FFFFFF;
+        padding-top: 5px; 
         text-align: left;
+    }
+
+    .smallWidget {
+      height : 20%;
+      overflow-y: scroll;
+      border-bottom:1px solid black;
+    }
+
+    .hideWidget {
+      border-bottom:1px solid black;
+    }
+
+    .treeWidget {
+        height: 50%;
+        overflow-y: scroll;
+        border-top:1px solid black;
+        border-bottom:1px solid black;
+    }
+
+    #worldPos {
+        width: 50px;
+    }
+
+    .NodeInfoWidget{
+      color: black;
+    }
+
+    #toggleVisible{
+      top : 5;
+      left : 5;
+      text-align: left;
     }
 
     #Cocos2dGameContainer {

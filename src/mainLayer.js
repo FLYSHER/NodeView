@@ -72,7 +72,7 @@ var MainLayer = cc.Layer.extend({
             self.onLoadUI( event.getUserData() );
         } );
 
-        var label = new cc.LabelTTF( "파일을 이쪽으로 드래그해 주세요", "Arial", 20 );
+        var label = new cc.LabelTTF( "파일을 이쪽으로 드래그해 주세요", "Arial", 30 );
         label.setPosition( this.CX, this.CY );
         this.addChild( label, 0, this.DESC_TAG );
 
@@ -107,18 +107,19 @@ var MainLayer = cc.Layer.extend({
         this._treeView.setVisible(false);
         this._treeView.setup();
 
-        this._btnHideButtons = new ccui.Button();
-        this._btnHideButtons.setName("btnHideButtons");
-        this._btnHideButtons.titleFontSize = 16;
-        this._btnHideButtons.setTouchEnabled(true);
-        this._btnHideButtons.addTouchEventListener(this.onHideButtonsTouch.bind(this), this);
-        this._btnHideButtons.setTitleText("HIDE ALL BUTTONS");
-        this.addChild(this._btnHideButtons,200000);
+        // this._btnHideButtons = new ccui.Button();
+        // this._btnHideButtons.setName("btnHideButtons");
+        // this._btnHideButtons.titleFontSize = 16;
+        // this._btnHideButtons.setTouchEnabled(true);
+        // this._btnHideButtons.addTouchEventListener(this.onHideButtonsTouch.bind(this), this);
+        // this._btnHideButtons.setTitleText("HIDE ALL BUTTONS");
+        // this.addChild(this._btnHideButtons,200000);
 
         NodeList = this._nodeList;
 
         this.onResize();
         ScreenUtil.addResizeListener( this.onResize, this );
+
         return true;
     },
 
@@ -131,7 +132,7 @@ var MainLayer = cc.Layer.extend({
         this._itemList.setPosition(size.width - this._itemList.getContentSize().width , size.height - (this._itemList.getContentSize().height + 60));
         this._screenSize.setPosition(size.width - this._screenSize.getContentSize().width , size.height - this._screenSize.getContentSize().height);
         this._movementCtrl.setPosition(100, 0);
-        this._btnHideButtons.setPosition( cc.winSize.width - 100, 30 );
+       // this._btnHideButtons.setPosition( cc.winSize.width - 100, 30 );
 
         this._treeView.setPosition(0, size.height - this._treeView.getContentSize().height);
 
@@ -256,8 +257,8 @@ var MainLayer = cc.Layer.extend({
 
     _addToJsonListMenu: function( name , node )  {
         this._itemList.add(name,
-            function (str, type) {
-                cc.log("[CHECK]",str, type);
+            function ( type ) {
+
                 switch(type){
                     case ItemListClickType.SELECT:
                         this.updateMenu( name );
@@ -280,36 +281,39 @@ var MainLayer = cc.Layer.extend({
 
     updateMenu: function( name ) {
         var selectNode = this._nodeList[ name ];
+        if( !selectNode ) return;
+        
         selectNode.setName(name);
-        if(selectNode && selectNode.armature) {
+        if( selectNode.armature) {
             this._animationList.setVisible(true);
             var animations =  selectNode.armature.getAnimation();
             var animNameArr = animations._animationData.movementNames;
 
-            var playCb = function (index) {
-                animations.playWithIndex(index);
+            var playCb = function ( animName) {
+                animations.play(animName);
             };
-
             this._animationList.init(animNameArr,playCb);
         }
         else{
             this._animationList.setVisible(false);
+            this._animationList.init([],null);
         }
 
         this._movementCtrl.init(selectNode);
-
         this._treeView.setNode(selectNode);
+
         this.setDraggableItem( name );
     },
 
     deleteItem : function ( name) {
-        var selectNode =this._nodeList[ name ];
+        var selectNode = this._nodeList[ name ];
         if(selectNode) {
             if(Target === selectNode)
                 Target = null;
             var order = selectNode.order;
             selectNode.removeFromParent();
             this._animationList.setVisible(false);
+            this._animationList.init([],null);
 
             delete this._nodeList[ name ];
             this._movementCtrl.init(null);
@@ -353,14 +357,14 @@ var MainLayer = cc.Layer.extend({
                     this._itemList.visible = false;
                     this._movementCtrl.visible = false;
                     this._treeView.visible = false;
-                    this._btnHideButtons.setTitleText("SHOW ALL BUTTONS");
+                 //   this._btnHideButtons.setTitleText("SHOW ALL BUTTONS");
                 } else {
                     this._screenSize.visible = true;
                     this._animationList.visible = this._prevAnimationListVisble;
                     this._itemList.visible = this._prevItemListVisble;
                     this._movementCtrl.visible = this._prevMovementCtrlVisble;
                     this._treeView.visible = this._prevTreeViewVisible;
-                    this._btnHideButtons.setTitleText("HIDE ALL BUTTONS");
+                 //   this._btnHideButtons.setTitleText("HIDE ALL BUTTONS");
                 }
                 break;
             }
