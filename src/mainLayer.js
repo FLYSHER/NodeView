@@ -293,6 +293,8 @@ var MainLayer = cc.Layer.extend({
                 animations.play(animName);
             };
             this._animationList.init(animNameArr,playCb);
+            //TODO 이거 다른곳으로 옮겨야 할거 같다
+            $('#LocalSize').html("(" + selectNode.armature.getContentSize().width.toFixed(2) + " , " +selectNode.armature.getContentSize().height.toFixed(2) + ")");
         }
         else{
             this._animationList.setVisible(false);
