@@ -73,20 +73,6 @@ Loader.init = function() {
 
             // Loader.readFile( evt.dataTransfer.files );
         }, false);
-
-    var errorHandler = function errorHandler(e) {
-        cc.log('Error: ' +e.name);
-    };
-    window.requestFileSystem  = window.requestFileSystem || window.webkitRequestFileSystem;
-    window.requestFileSystem(window.TEMPORARY, 1024*1024,
-        function(fs){
-            cc.log('Opened file system: ' + fs.name);
-            fs.root.getFile('main.js', { create: true, exclusive: true} ,function(fileEntry) {
-                cc.log('success : ', fileEntry);
-            },
-            errorHandler);
-        },
-        errorHandler);
 };
 
 Loader.reset = function() {
