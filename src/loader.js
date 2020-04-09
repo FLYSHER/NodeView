@@ -84,11 +84,12 @@ Loader.reset = function() {
     };
 };
 
-Loader.readFile = function( file ) {
+Loader.readFile = function( file , cb) {
     var self = this;
     var i, reader, ext;
 
     if( !file ) {
+        cb && cb();
         return;
     }
 
@@ -104,6 +105,7 @@ Loader.readFile = function( file ) {
         reader.readAsText(file);
     } else {
         cc.log("지원하지 않는 포멧: " + file.name );
+        cb && cb();
         return;
     }
 
@@ -112,20 +114,21 @@ Loader.readFile = function( file ) {
             var url = f.name;
             var fileContents = e.target.result;
             var ext = cc.path.extname(f.name).toLowerCase();
-            self._processFileData(url, fileContents, ext);
+            self._processFileData(url, fileContents, ext, cb);
         }; // end of return function
     } )( file ); // end of onload funtion
 };
 
-Loader._processFileData = function( url, fileContents, ext ) {
+Loader._processFileData = function( url, fileContents, ext, cb ) {
     var self = this,
         armatureDataArr, i,dic;
 
     var fileName = cc.path.mainFileName( url );
 
+
     switch (ext) {
         case ".fnt":
-            // cc.loader.cache[ "image/" + url ] = _fntLoader.parseFnt( fileContents, "image/" + url );
+            cc.loader.cache[ "image/" + url ] = _fntLoader.parseFnt( fileContents, "image/" + url );
             break;
         case ".plist":
             var plistData = cc.plistParser.parse(fileContents);
@@ -145,9 +148,15 @@ Loader._processFileData = function( url, fileContents, ext ) {
                     self.textures[ fileName ] = tex2d;
                     self.textureList.push( fileName );
 
+
+                    if (!cc.loader.cache['image/' + url]) {
+                        cc.loader.cache['image/' + url] = tex2d;
+                    }
                     self.checkFiles( fileName, 'png' );
+                    cb && cb();
                 }
             );
+            return;
             break;
         case ".json":
         case ".exportjson":
@@ -157,10 +166,56 @@ Loader._processFileData = function( url, fileContents, ext ) {
                 cc.loader.cache[url] = dic;
                 this.uiURL[ fileName ] = url;
 
+                var loadFntFinishCallback = function(){
+                    this.readResoueces(dic['textures'], dic['texturesPng'] );
+                    this.uiTextures[ fileName ] = dic[ "textures" ];
+                    this.checkFiles( fileName, 'ui' );
+                }.bind(this);
 
-                this.readResoueces(dic['textures'], dic['texturesPng'] );
-                this.uiTextures[ fileName ] = dic[ "textures" ];
-                this.checkFiles( fileName, 'ui' );
+
+                var fntList = [];
+                function findChild( obj ){
+                    var children = obj['children'];
+                    for( var i = 0; i< children.length ; i++ ){
+                        if(children[i]["classname"] ===  "LabelBMFont"){
+                            fntList.push( children[i]['options']['fileNameData']['path'] );
+                        }
+                        if( children[i]["children"].length > 0 ){
+                            findChild( children[i] );
+                        }
+                    }
+                }
+                findChild(dic['widgetTree'] );
+
+                var loadCount = 0;
+                function loadFnt( fntFile ){
+                    var fntFileName = fntFile.split('/');
+                    var item =  ResourceMapData[ fntFileName[ fntFileName.length - 1 ]];
+                    item.file(function( file ) {
+                        Loader.readFile( file , function(){
+                            var newConf = cc.loader.getRes(fntFile);
+                            var pngName = newConf.atlasName.split('/');
+                            var pngItem = ResourceMapData[ pngName[ pngName.length - 1 ]];
+                            pngItem.file( function( pngfile ) {
+                                Loader.readFile( pngfile , function(){
+                                    loadCount++;
+                                    if( loadCount < fntList.length)
+                                        loadFnt( fntList[loadCount]);
+                                    else
+                                        loadFntFinishCallback();
+                                });
+                            });
+                        });
+                    });
+                }
+
+
+                if( loadCount < fntList.length)
+                    loadFnt( fntList[loadCount]);
+                else
+                    loadFntFinishCallback();
+
+
             } else if( dic[ ccs.CONST_ARMATURE_DATA ] ) {
                 // Armature
                 this.armatureData[ fileName ] = dic;
@@ -184,6 +239,7 @@ Loader._processFileData = function( url, fileContents, ext ) {
             }
             break;
     }
+    cb && cb();
 };
 
 

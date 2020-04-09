@@ -236,13 +236,8 @@ cc.LabelBMFont = cc.SpriteBatchNode.extend(/** @lends cc.LabelBMFont# */{
 
             self._config = newConf;
             self._fntFile = fntFile;
-            var spriteFrameBaseName = newConf.atlasName;
-            var spriteFrame = cc.spriteFrameCache.getSpriteFrame(spriteFrameBaseName) || cc.spriteFrameCache.getSpriteFrame(cc.path.basename(spriteFrameBaseName));
-            if(spriteFrame) {
-                texture = spriteFrame.getTexture();
-                this._spriteFrame = spriteFrame;
-            } else {
-                texture = cc.textureCache.addImage(newConf.atlasName);
+            if (cc.loader.cache[newConf.atlasName]) {
+                texture = cc.loader.cache[newConf.atlasName];
             }
             var locIsLoaded = texture.isLoaded();
             self._textureLoaded = locIsLoaded;
@@ -256,12 +251,14 @@ cc.LabelBMFont = cc.SpriteBatchNode.extend(/** @lends cc.LabelBMFont# */{
                     self1.dispatchEvent("load");
                 }, self);
             }
-        } else {
+        }
+        else {
             texture = new cc.Texture2D();
             var image = new Image();
             texture.initWithElement(image);
             self._textureLoaded = false;
         }
+
 
         if (self.initWithTexture(texture, theString.length)) {
             self._alignment = alignment || cc.TEXT_ALIGNMENT_LEFT;
