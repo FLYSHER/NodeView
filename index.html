@@ -3,6 +3,7 @@
 <head>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <link href="style.css" rel="stylesheet" type="text/css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/jstree.min.js"></script>
     <meta charset="utf-8">
@@ -35,143 +36,77 @@
 
     <meta name="browsermode" content="application">
     <meta name="x5-page-mode" content="app">
-
-<style type="text/css">
-html {
-  -ms-touch-action: none;
-}
-
-body, canvas, div {
-  margin: 0;
-  padding: 0;
-  outline: none;
-  -moz-user-select: none;
-  -webkit-user-select: none;
-  -ms-user-select: none;
-  -khtml-user-select: none;
-  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-}
-
-body {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  padding: 0;
-  border: 0;
-  margin: 0;
-
-  cursor: default;
-  color: #888;
-  background-color: #333;
-
-  text-align: center;
-  font-family: Helvetica, Verdana, Arial, sans-serif;
-
-  display: flex;
-  flex-direction: column;
-}
-
-
-
-canvas {
-  background-color: rgba(255, 0, 0, 0);
-}
-</style>
 </head>
 <body>
+<!-- 사이드 메뉴 -->
 <div id="sidenav" class="sidenav">
+    <!-- File List Label 및 가운데 정렬 -->
+    <div align="center">
+        <label id = "fileLabel" class="styleLabel">File List</label>
+    </div>
+    <!-- File List Widget -->
     <div class = "smallWidget">
-      <div id="fileNameTree"></div>
+        <div id="fileNameTree"></div>
     </div>
-    <button type="button", id="deleteBtn"> Delete </button>
+    <!-- File Delete Button -->
+    <button type="button" id="deleteBtn" class="styleButton">Delete</button>
+    <!-- Widget Label 및 가운데 정렬 -->
+    <div align="center">
+        <label id = "nodeTreeLabel" class="styleLabel">Widget</label>
+    </div>
+    <!-- Widget Tree -->
     <div class = "treeWidget">
-      <div id="widgetTree"></div>
-      <div id="animationTree"></div>
+        <div id="widgetTree"></div>
+        <div id="animationTree"></div>
     </div>
-    <div class = "hideWidget">
-      <div id="actionTree"></div>
-    </div>
-    <div class = "NodeInfoWidget">
-      <button type="button", id="toggleVisible"> Visible </button>
-      <br>
-      <label>LocalPos  : </label> 
-      <label id = "localPos">(0,0) </label>
-      <br>
-      <label>LocalSize : </label> 
-      <label id = "LocalSize">(0,0) </label>
-      <br><br>
-      WorldPos : <input type="text" id="worldPos" name="wPosX", value="">
-      <input type="text" id="worldPos" name="wPosY", value="">
-      <br><br>
-    </div>
+    <!-- Widget Tree Visible Button -->
+    <button type="button" id="toggleVisible" class="styleButton">Visible</button>
 
+    <div class = "hideWidget">
+        <!-- UI Animation Label 및 가운데 정렬 -->
+        <div align="center">
+            <label id = "animationTreeLabel" class="styleLabel"></label>
+        </div>
+        <!-- UI Animation Widget -->
+        <div class = "actionWidget">
+            <div id="actionTree"></div>
+        </div>
+    </div>
+    <!-- Node Info, Table 로 구성 -->
+    <div class = "NodeInfoWidget">
+        <table>
+            <tr>
+                <td>
+                    <label class="styleLabel">LocalPos : </label>
+                </td>
+                <td>
+                    <label id = "localPos" class="styleLabel">(0, 0) </label>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label class="styleLabel">LocalSize : </label>
+                </td>
+                <td>
+                    <label id = "LocalSize" class="styleLabel">(0, 0) </label>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label class="styleLabel">WorldPos : </label>
+                </td>
+                <td>
+                    <input type="text" id="worldPos" name="wPosX" value="">
+                    <input type="text" id="worldPos" name="wPosY" value="">
+                </td>
+            </tr>
+        </table>
+    </div>
 </div>
 <div id="side_hr" class="side_hr"></div>
 <script src="res/loading.js"></script>
 <canvas id="gameCanvas" width="480" height="720"></canvas>
 <script src="frameworks/cocos2d-html5/CCBoot.js"></script>
 <script cocos src="main.js"></script>
-
-
-<style type="text/css">
-    .sidenav {
-        height: 100%;
-        width: 270px;
-        position: fixed;
-        z-index: 1; 
-        top: 0; 
-        left: 0;
-        background-color: #FFFFFF;
-        padding-top: 5px; 
-        text-align: left;
-    }
-
-    .smallWidget {
-      height : 20%;
-      overflow-y: scroll;
-      border-bottom:1px solid black;
-    }
-
-    .hideWidget {
-      border-bottom:1px solid black;
-    }
-
-    .treeWidget {
-        height: 50%;
-        overflow-y: scroll;
-        border-top:1px solid black;
-        border-bottom:1px solid black;
-    }
-
-    #worldPos {
-        width: 50px;
-    }
-
-    .NodeInfoWidget{
-      color: black;
-    }
-
-    #toggleVisible{
-      top : 5;
-      left : 5;
-      text-align: left;
-    }
-
-    .side_hr { width:5px; height:100%; position: fixed; margin-left: 265px; z-index: 2; background-color:#888888; }
-    .Cocos2dGameContainer { z-index: 0; }
-    #side_hr { cursor:pointer; }
-
-    #Cocos2dGameContainer {
-        position: relative;
-        overflow: hidden;
-        margin-left: 270px;
-        display: -webkit-box;
-        -webkit-box-orient: horizontal;
-        -webkit-box-align: center;
-        -webkit-box-pack: center;
-    }
-    </style>
 </body>
 </html>

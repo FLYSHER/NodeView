@@ -104,6 +104,15 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
         $('#widgetTree').jstree("refresh");
         $('#actionTree').jstree(true).settings.core.data = actionObj;
         $('#actionTree').jstree("refresh");
+
+        var label = document.getElementById( "animationTreeLabel" );
+
+        if( actionObj.length > 0 ) {
+            label.innerText = "UI Animation";
+        }
+        else {
+            label.innerText = "";
+        }
     },
 
     createUIChildList :function (node) {
@@ -153,7 +162,7 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
             var obj = {
                 "text" : info.info.name,
                 "state": {
-                    "opened": true
+                    "opened": false
                 },
             };
             if( info.childList.length > 0){

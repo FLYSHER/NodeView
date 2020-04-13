@@ -55,6 +55,8 @@
 var startpos, diffpos=0, range=50;
 var isEnable = false;
 
+
+// 사이드 메뉴 크기 조절 바를 클릭할 경우
 function onSideHrMouseDown( e ) {
     startpos = event.clientX + diffpos;
     isEnable = true;
@@ -65,6 +67,7 @@ function onSideHrMouseDown( e ) {
 
 }
 
+// 사이드 메뉴 크기 조절 바 클릭을 뗄 경우
 function onSideHrMouseUp( e ) {
     isEnable = false;
 
@@ -73,6 +76,7 @@ function onSideHrMouseUp( e ) {
     return false;
 }
 
+// 사이드 메뉴 크기 조절 바 클릭 후 이동 시 사이드 메뉴와 캔버스 사이즈 조절
 function onSideHrMouseMove( e ) {
 
     if (isEnable) {
@@ -80,15 +84,19 @@ function onSideHrMouseMove( e ) {
         diffpos = startpos-pos;
 
         var sideNav_width = ( startpos - diffpos );
-        document.getElementById("sidenav").style.width = sideNav_width + "px";
-        document.getElementById("side_hr").style.marginLeft = sideNav_width - 5 + "px";
-        document.getElementById("Cocos2dGameContainer").style.marginLeft = sideNav_width + "px";
-        document.getElementById("Cocos2dGameContainer").style.width = window.innerWidth - sideNav_width + "px";
 
-        cc.view.setFrameSize( document.getElementById("Cocos2dGameContainer").clientWidth, document.getElementById("Cocos2dGameContainer").clientHeight );
+        if ( sideNav_width > 210 ) {
+            document.getElementById("sidenav").style.width = sideNav_width + "px";
+            document.getElementById("side_hr").style.marginLeft = sideNav_width + "px";
+            document.getElementById("Cocos2dGameContainer").style.marginLeft = sideNav_width + "px";
+            document.getElementById("Cocos2dGameContainer").style.width = window.innerWidth - sideNav_width + "px";
+
+            cc.view.setFrameSize( document.getElementById("Cocos2dGameContainer").clientWidth, document.getElementById("Cocos2dGameContainer").clientHeight );
+        }
     }
 }
 
+// 사이드 메뉴와 캔버스 사이에 사이즈 조절을 위한 바 생성
 function initSideHrMouseEvent() {
     var container = document.getElementById("Cocos2dGameContainer");
     container.setAttribute('class', 'Cocos2dGameContainer');
@@ -98,6 +106,7 @@ function initSideHrMouseEvent() {
     document.onmousemove = onSideHrMouseMove;
 }
 
+// 사이즈 조절 바 클릭 후 드래그 시 캔버스 위에는 드래그 인식이 안되기 때문에 캔버스 위에 div 하나 생성
 function createOverDiv() {
     var container = document.getElementById("Cocos2dGameContainer");
     var overDiv = document.createElement('over_div');
@@ -113,10 +122,14 @@ function createOverDiv() {
     container.appendChild( overDiv );
 }
 
+// 캔버스 위에 생성한 div 를 제거
+// 캔버스 위에 div 가 존재하면 파일 드래그 앤 드롭이 동작하지 않는다.
 function removeOverDiv() {
     var container = document.getElementById("Cocos2dGameContainer");
     var overDiv = document.getElementById('over_div')
-    container.removeChild( overDiv );
+
+    if( overDiv )
+        container.removeChild( overDiv );
 }
 
 cc.game.onStart = function(){
