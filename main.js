@@ -52,7 +52,76 @@
  *
  */
 
+var startpos, diffpos=0, range=50;
+var isEnable = false;
+
+function onSideHrMouseDown( e ) {
+    startpos = event.clientX + diffpos;
+    isEnable = true;
+
+    createOverDiv();
+
+    return false;
+
+}
+
+function onSideHrMouseUp( e ) {
+    isEnable = false;
+
+    removeOverDiv();
+
+    return false;
+}
+
+function onSideHrMouseMove( e ) {
+
+    if (isEnable) {
+        var pos = event.clientX;
+        diffpos = startpos-pos;
+
+        var sideNav_width = ( startpos - diffpos );
+        document.getElementById("sidenav").style.width = sideNav_width + "px";
+        document.getElementById("side_hr").style.marginLeft = sideNav_width - 5 + "px";
+        document.getElementById("Cocos2dGameContainer").style.marginLeft = sideNav_width + "px";
+        document.getElementById("Cocos2dGameContainer").style.width = window.innerWidth - sideNav_width + "px";
+
+        cc.view.setFrameSize( document.getElementById("Cocos2dGameContainer").clientWidth, document.getElementById("Cocos2dGameContainer").clientHeight );
+    }
+}
+
+function initSideHrMouseEvent() {
+    var container = document.getElementById("Cocos2dGameContainer");
+    container.setAttribute('class', 'Cocos2dGameContainer');
+
+    document.getElementById("side_hr").onmousedown = onSideHrMouseDown;
+    document.onmouseup = onSideHrMouseUp;
+    document.onmousemove = onSideHrMouseMove;
+}
+
+function createOverDiv() {
+    var container = document.getElementById("Cocos2dGameContainer");
+    var overDiv = document.createElement('over_div');
+    overDiv.id = 'over_div';
+    overDiv.style.position = 'absolute';
+    overDiv.style.padding = '3px';
+    overDiv.style.backgroundColor = 'rgb(0, 0, 34)';
+    overDiv.style.bottom = cc.DIRECTOR_STATS_POSITION.y + '0px';
+    overDiv.style.left = cc.DIRECTOR_STATS_POSITION.x + 'px';
+    overDiv.style.opacity = '0';
+    overDiv.style.width = window.innerWidth + 'px';
+    overDiv.style.height = window.innerHeight  + 'px';
+    container.appendChild( overDiv );
+}
+
+function removeOverDiv() {
+    var container = document.getElementById("Cocos2dGameContainer");
+    var overDiv = document.getElementById('over_div')
+    container.removeChild( overDiv );
+}
+
 cc.game.onStart = function(){
+    initSideHrMouseEvent();
+
     var sys = cc.sys;
     if(!sys.isNative && document.getElementById("cocosLoading")) //If referenced loading.js, please remove it
         document.body.removeChild(document.getElementById("cocosLoading"));

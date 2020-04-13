@@ -81,7 +81,7 @@ canvas {
 </style>
 </head>
 <body>
-<div class="sidenav">
+<div id="sidenav" class="sidenav">
     <div class = "smallWidget">
       <div id="fileNameTree"></div>
     </div>
@@ -108,6 +108,7 @@ canvas {
     </div>
 
 </div>
+<div id="side_hr" class="side_hr"></div>
 <script src="res/loading.js"></script>
 <canvas id="gameCanvas" width="480" height="720"></canvas>
 <script src="frameworks/cocos2d-html5/CCBoot.js"></script>
@@ -117,7 +118,7 @@ canvas {
 <style type="text/css">
     .sidenav {
         height: 100%;
-        width: 260px; 
+        width: 270px;
         position: fixed;
         z-index: 1; 
         top: 0; 
@@ -158,10 +159,14 @@ canvas {
       text-align: left;
     }
 
+    .side_hr { width:5px; height:100%; position: fixed; margin-left: 265px; z-index: 2; background-color:#888888; }
+    .Cocos2dGameContainer { z-index: 0; }
+    #side_hr { cursor:pointer; }
+
     #Cocos2dGameContainer {
         position: relative;
         overflow: hidden;
-        margin-left: 260px;
+        margin-left: 270px;
         display: -webkit-box;
         -webkit-box-orient: horizontal;
         -webkit-box-align: center;
