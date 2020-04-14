@@ -105,13 +105,14 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
         $('#actionTree').jstree(true).settings.core.data = actionObj;
         $('#actionTree').jstree("refresh");
 
-        var label = document.getElementById( "animationTreeLabel" );
+        var uiAnimationContainer = document.getElementById( "uiAnimationContainer" );
 
         if( actionObj.length > 0 ) {
-            label.innerText = "UI Animation";
+
+            uiAnimationContainer.style.display = "block";
         }
         else {
-            label.innerText = "";
+            uiAnimationContainer.style.display = "none";
         }
     },
 

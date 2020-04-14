@@ -38,69 +38,111 @@
     <meta name="x5-page-mode" content="app">
 </head>
 <body>
+
 <!-- 사이드 메뉴 -->
 <div id="sidenav" class="sidenav">
-    <!-- File List Label 및 가운데 정렬 -->
-    <div align="center">
-        <label id = "fileLabel" class="styleLabel">File List</label>
+
+    <!-- File -->
+    <div id="fileContainer" class="fileContainer">
+        <ul class="tabs">
+            <li class="tab-link current">
+                <!-- File Label 및 가운데 정렬 -->
+                <div align="center">
+                    <label id = "fileLabel" class="styleLabel">File List</label>
+                </div>
+            </li>
+        </ul>
+        <div id="tab-1" class="tab-fileContent current">
+            <!-- File Tree -->
+            <div class = "smallWidget">
+                <div id="fileNameTree"></div>
+            </div>
+        </div>
     </div>
-    <!-- File List Widget -->
-    <div class = "smallWidget">
-        <div id="fileNameTree"></div>
-    </div>
+
     <!-- File Delete Button -->
     <button type="button" id="deleteBtn" class="styleButton">Delete</button>
-    <!-- Widget Label 및 가운데 정렬 -->
-    <div align="center">
-        <label id = "nodeTreeLabel" class="styleLabel">Widget</label>
+
+    <!-- Widget -->
+    <div id="widgetContainer" class="widgetContainer">
+        <ul class="tabs">
+            <li class="tab-link current">
+                <!-- Widget Label 및 가운데 정렬 -->
+                <div align="center">
+                    <label id = "nodeTreeLabel" class="styleLabel">Widget</label>
+                </div>
+            </li>
+        </ul>
+        <div id="tab-1" class="tab-widgetContent current">
+            <!-- Widget Tree -->
+            <div class = "treeWidget">
+                <div id="widgetTree"></div>
+                <div id="animationTree"></div>
+            </div>
+        </div>
     </div>
-    <!-- Widget Tree -->
-    <div class = "treeWidget">
-        <div id="widgetTree"></div>
-        <div id="animationTree"></div>
-    </div>
+
     <!-- Widget Tree Visible Button -->
     <button type="button" id="toggleVisible" class="styleButton">Visible</button>
 
-    <div class = "hideWidget">
-        <!-- UI Animation Label 및 가운데 정렬 -->
-        <div align="center">
-            <label id = "animationTreeLabel" class="styleLabel"></label>
-        </div>
-        <!-- UI Animation Widget -->
-        <div class = "actionWidget">
-            <div id="actionTree"></div>
+    <!-- Widget -->
+    <div id="uiAnimationContainer" class="uiAnimationContainer">
+        <ul class="tabs">
+            <li class="tab-link current">
+                <!-- UI Animation Label 및 가운데 정렬 -->
+                <div align="center">
+                    <label id = "animationTreeLabel" class="styleLabel">UI Animation</label>
+                </div>
+            </li>
+        </ul>
+        <div id="tab-1" class="tab-uiAnimContent current">
+            <!-- UI Animation Widget -->
+            <div class = "actionWidget">
+                <div id="actionTree"></div>
+            </div>
         </div>
     </div>
+
     <!-- Node Info, Table 로 구성 -->
-    <div class = "NodeInfoWidget">
-        <table>
-            <tr>
-                <td>
-                    <label class="styleLabel">LocalPos : </label>
-                </td>
-                <td>
-                    <label id = "localPos" class="styleLabel">(0, 0) </label>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <label class="styleLabel">LocalSize : </label>
-                </td>
-                <td>
-                    <label id = "LocalSize" class="styleLabel">(0, 0) </label>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <label class="styleLabel">WorldPos : </label>
-                </td>
-                <td>
-                    <input type="text" id="worldPos" name="wPosX" value="">
-                    <input type="text" id="worldPos" name="wPosY" value="">
-                </td>
-            </tr>
-        </table>
+    <div id="nodeInfoContainer" class="nodeInfoContainer">
+        <ul class="tabs">
+            <li class="tab-link current">
+                <!-- Properties Label 및 가운데 정렬 -->
+                <div align="center">
+                    <label id = "propertiesLabel" class="styleLabel">Properties</label>
+                </div>
+            </li>
+        </ul>
+        <div id="tab-1" class="tab-propertiesContent current">
+            <!-- UI Animation Widget -->
+            <table style="width:98%; height:auto; background-color: #353535;">
+                <tr>
+                    <td>
+                        <label class="styleLabel">LocalPos : </label>
+                    </td>
+                    <td>
+                        <label id = "localPos" class="styleLabel">(0, 0) </label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label class="styleLabel">LocalSize : </label>
+                    </td>
+                    <td>
+                        <label id = "LocalSize" class="styleLabel">(0, 0) </label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label class="styleLabel">WorldPos : </label>
+                    </td>
+                    <td>
+                        <input type="text" id="worldPos" name="wPosX" value="">
+                        <input type="text" id="worldPos" name="wPosY" value="">
+                    </td>
+                </tr>
+            </table>
+        </div>
     </div>
 </div>
 <div id="side_hr" class="side_hr"></div>
