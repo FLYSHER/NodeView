@@ -3,10 +3,9 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
     _lastPoint:null,
     TAG_CLIPPERNODE  : 1,
     TAG_CONTENTNODE  : 2,
-
     _selectNode : null,
-
     _treeWidgetObj : {},
+    _treeString : "",
     ctor : function () {
         this._super("");
         $('#widgetTree').jstree({
@@ -60,6 +59,23 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
             }
         }.bind(this));
 
+        $('#openAll').click( function(){
+            if( this.treeInfo ){
+                $('#widgetTree').jstree("open_all");
+            }
+        }.bind(this));
+
+        $('#closeAll').click( function(){
+            if( this.treeInfo ){
+                $('#widgetTree').jstree("close_all");
+            }
+        }.bind(this));
+
+        $('#copyBtn').click( function(){
+            if( this.treeInfo ){
+                copyStringToClipboard( this._treeString );
+            }
+        }.bind(this));
     },
 
 
@@ -113,6 +129,24 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
         }
         else {
             uiAnimationContainer.style.display = "none";
+        }
+
+        var visibleBtn = document.getElementById( "toggleVisible" );
+        var openBtn = document.getElementById( "openAll" );
+        var closeBtn = document.getElementById( "closeAll" );
+        var copyBtn = document.getElementById( "copyBtn" );
+
+        if( treeObj.length > 0 ) {
+            visibleBtn.style.display = '';
+            openBtn.style.display = '';
+            closeBtn.style.display = '';
+            copyBtn.style.display = '';
+        }
+        else {
+            visibleBtn.style.display = 'none';
+            openBtn.style.display = 'none';
+            closeBtn.style.display = 'none';
+            copyBtn.style.display = 'none';
         }
     },
 
@@ -173,6 +207,8 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
             this._treeWidgetObj[ info.info.name ].obj = info.info.obj;
             this._treeWidgetObj[ info.info.name ].initScale = info.info.obj.getScale();
             dataObj.push( obj );
+
+            this._treeString += info.info.name + "\n";
 
 
             line = this.drawTree(info.childList, depth+1, line, obj.children);

@@ -132,6 +132,15 @@ function removeOverDiv() {
         container.removeChild( overDiv );
 }
 
+function copyStringToClipboard( string ) {
+    var clipboardElement = document.createElement("textarea");
+    document.body.appendChild(clipboardElement);
+    clipboardElement.value = string;
+    clipboardElement.select();
+    document.execCommand('copy');
+    document.body.removeChild(clipboardElement);
+}
+
 cc.game.onStart = function(){
     initSideHrMouseEvent();
 
