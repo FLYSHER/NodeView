@@ -81,7 +81,7 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
                     this._treeString += obj[ key ].copyString;
                 }
 
-                this._treeString += "}";
+                this._treeString += "};";
 
                 copyStringToClipboard( this._treeString );
             }
