@@ -73,6 +73,16 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
 
         $('#copyBtn').click( function(){
             if( this.treeInfo ){
+                var obj = this.getTreeObjName();
+
+                this._treeString = "this._uiWidgets = {\n";
+
+                for( var key in obj ) {
+                    this._treeString += obj[ key ].copyString;
+                }
+
+                this._treeString += "}";
+
                 copyStringToClipboard( this._treeString );
             }
         }.bind(this));
@@ -137,16 +147,16 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
         var copyBtn = document.getElementById( "copyBtn" );
 
         if( treeObj.length > 0 ) {
-            visibleBtn.style.display = '';
-            openBtn.style.display = '';
-            closeBtn.style.display = '';
-            copyBtn.style.display = '';
+            visibleBtn.style.visibility = 'visible';
+            openBtn.style.visibility = 'visible';
+            closeBtn.style.visibility = 'visible';
+            copyBtn.style.visibility = 'visible';
         }
         else {
-            visibleBtn.style.display = 'none';
-            openBtn.style.display = 'none';
-            closeBtn.style.display = 'none';
-            copyBtn.style.display = 'none';
+            visibleBtn.style.visibility = 'hidden';
+            openBtn.style.visibility = 'hidden';
+            closeBtn.style.visibility = 'hidden';
+            copyBtn.style.visibility = 'hidden';
         }
     },
 
@@ -208,12 +218,7 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
             this._treeWidgetObj[ info.info.name ].initScale = info.info.obj.getScale();
             dataObj.push( obj );
 
-            this._treeString += info.info.name + "\n";
-
-
             line = this.drawTree(info.childList, depth+1, line, obj.children);
-
-
         }
         return line;
     },
@@ -252,5 +257,63 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
             cc.rect(po.x, po.y, rect.width, rect.height)
         );
 
+    },
+
+    getTreeObjName: function() {
+        var length = Object.keys( this._treeWidgetObj ).length;
+        var treeArrName = {};
+        var treeObjName = [];
+
+        for( var key1 in this._treeWidgetObj ) {
+            treeArrName [ key1 ] = {};
+            treeArrName [ key1 ].name = key1;
+            treeArrName [ key1 ].copyString = key1 + " : null,\n";
+            treeObjName[ treeObjName.length ] = key1;
+        }
+
+        for( var loop1 = 0; loop1 < length; loop1++ ) {
+            var name = treeObjName[ loop1 ];
+            var subString1 = name.substring( 0, name.length - 2 );
+            var subString2 = name.substring( name.length - 2, name.length );
+
+            if( subString2 === '01' ) {
+                var find = true;
+                var idx = 1;
+                var addTreeNameArr = null;
+
+                while( find ) {
+                    for( var key2 in treeArrName ) {
+                        // console.log( key + '=>' + this._treeWidgetObj[ key ] );
+
+                        var objName = subString1 + ( idx < 10 ? '0' + idx : idx );
+                        find = false;
+
+                        if( objName === 'lbFpTt03' ) {
+                            console.log( objName );
+                        }
+
+                        if( key2 === objName ) {
+                            addTreeNameArr = subString1;
+                            find = true;
+                            idx++;
+
+                            delete treeArrName[ key2 ];
+
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if( addTreeNameArr ) {
+                treeArrName [ addTreeNameArr ] = {};
+                treeArrName [ addTreeNameArr ].name = addTreeNameArr;
+                treeArrName [ addTreeNameArr ].copyString = addTreeNameArr + " : [],\n";
+                addTreeNameArr = null;
+            }
+        }
+
+        return treeArrName;
     }
 });
+
