@@ -57,11 +57,12 @@
             <div class = "smallWidget">
                 <div id="fileNameTree"></div>
             </div>
+            <div>
+                <!-- File Delete Button -->
+                <button type="button" id="deleteBtn" class="styleButton" title="파일 삭제" style="width: 100%;">Delete</button>
+            </div>
         </div>
     </div>
-
-    <!-- File Delete Button -->
-    <button type="button" id="deleteBtn" class="styleButton" title="파일 삭" style="width: 98%;">Delete</button>
 
     <!-- Widget -->
     <div id="widgetContainer" class="widgetContainer">
@@ -74,8 +75,8 @@
             </li>
             <li class="tab-link">
                 <!-- Widget Label 및 가운데 정렬 -->
-                <div align="right">
-                    <input type="text" id = "searchNode" class = "searchNode" placeholder="Search" size="17" style="visibility:hidden">
+                <div align="center">
+                    <input type="text" id = "searchNode" class = "searchNode" placeholder="Search" size="17" style="width: 100%;visibility:hidden">
                 </div>
             </li>
         </ul>
@@ -85,14 +86,15 @@
                 <div id="widgetTree"></div>
                 <div id="animationTree"></div>
             </div>
+            <div align="center">
+                <!-- Widget Tree Visible Button -->
+                <button type="button" id="toggleVisible" class="styleButton" title="노드 표시" style="width: 22%;visibility:hidden;">Visible</button>
+                <button type="button" id="openAll" class="styleButton" title="모든 노드 트리 열기" style="width: 22%;visibility:hidden;">Open</button>
+                <button type="button" id="closeAll" class="styleButton" title="모든 노드 트리 닫기" style="width: 22%;visibility:hidden;">Close</button>
+                <button type="button" id="copyBtn" class="styleButton" title="위젯 노드 트리 복사" style="width: 22%;visibility:hidden;">Copy</button>
+            </div>
         </div>
     </div>
-
-    <!-- Widget Tree Visible Button -->
-    <button type="button" id="toggleVisible" class="styleButton" title="노드 표시" style="width: 22%;visibility:hidden;">Visible</button>
-    <button type="button" id="openAll" class="styleButton" title="모든 노드 트리 열기" style="width: 22%;visibility:hidden;">Open</button>
-    <button type="button" id="closeAll" class="styleButton" title="모든 노드 트리 닫기" style="width: 22%;visibility:hidden;">Close</button>
-    <button type="button" id="copyBtn" class="styleButton" title="위젯 노드 트리 복사" style="width: 22%;visibility:hidden;">Copy</button>
 
     <!-- Widget -->
     <div id="uiAnimationContainer" class="uiAnimationContainer">
@@ -124,7 +126,7 @@
         </ul>
         <div id="tab-1" class="tab-propertiesContent current">
             <!-- UI Animation Widget -->
-            <table style="width:100%; height:auto; background-color: #353535;">
+            <table style="width:100%; height:100%; background-color: #353535;">
                 <tr>
                     <td>
                         <label class="styleLabel">LocalPos : </label>

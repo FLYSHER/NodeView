@@ -88,7 +88,7 @@ function onSideHrMouseMove( e ) {
         if ( sideNav_width > 210 ) {
             document.getElementById("sidenav").style.width = sideNav_width + "px";
             document.getElementById("side_hr").style.marginLeft = sideNav_width + "px";
-            document.getElementById("Cocos2dGameContainer").style.marginLeft = sideNav_width + "px";
+            document.getElementById("Cocos2dGameContainer").style.marginLeft = ( sideNav_width + 5 ) + "px";
             document.getElementById("Cocos2dGameContainer").style.width = window.innerWidth - sideNav_width + "px";
 
             cc.view.setFrameSize( document.getElementById("Cocos2dGameContainer").clientWidth, document.getElementById("Cocos2dGameContainer").clientHeight );
