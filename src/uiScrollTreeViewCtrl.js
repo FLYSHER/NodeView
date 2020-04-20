@@ -21,10 +21,13 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
             var selectedObj = self._treeWidgetObj[ data.node.text ];
             if( !!selectedObj === false )
                 return;
-            var actionBy = cc.scaleBy(0.15, 1.2).easing( cc.easeElasticOut( 1.5 ));
-            selectedObj.obj.setScale(selectedObj.initScale);
-            selectedObj.obj.stopActionByTag(100);
-            selectedObj.obj.runAction(cc.sequence(actionBy, actionBy.reverse())).setTag(100);
+
+            if( selectedObj.obj.getNumberOfRunningActions() === 0 ) {
+                var actionBy = cc.scaleBy(0.15, 1.2).easing( cc.easeElasticOut( 1.5 ));
+                // selectedObj.obj.setScale(selectedObj.initScale);
+                // selectedObj.obj.stopActionByTag(100);
+                selectedObj.obj.runAction(cc.sequence(actionBy, actionBy.reverse())).setTag(100);
+            }
 
             self.selectNode(selectedObj.obj);
         });
