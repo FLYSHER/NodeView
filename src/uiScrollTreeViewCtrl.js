@@ -31,7 +31,7 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
         $('#widgetTree').on("changed.jstree", function (e, data) {
             if( !!data.node === false)
                 return;
-            var selectedObj = self._treeWidgetObj[ data.node.text ];
+            var selectedObj = self._treeWidgetObj[ data.node.id ];
             if( !!selectedObj === false )
                 return;
 
@@ -189,6 +189,7 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
             childList[i].info.obj = children[i];
             childList[i].info.name = children[i].getName();
             childList[i].info.initScale = children[i].getScale();
+            childList[i].info.id = children[i].__instanceId;
             childList[i].childList = this.createUIChildList(children[i]);
         }
         return childList;
@@ -223,17 +224,20 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
 
             var info = treeInfo[i];
             var obj = {
+                "id" : info.info.id,
                 "text" : info.info.name,
                 "state": {
                     "opened": true
                 },
+                "instanceID" : 0
             };
             if( info.childList.length > 0){
                 obj.children = [];
             }
-            this._treeWidgetObj[ info.info.name ] = {};
-            this._treeWidgetObj[ info.info.name ].obj = info.info.obj;
-            this._treeWidgetObj[ info.info.name ].initScale = info.info.obj.getScale();
+            this._treeWidgetObj[ info.info.id ] = {};
+            this._treeWidgetObj[ info.info.id ].obj = info.info.obj;
+            this._treeWidgetObj[ info.info.id ].id = info.info.id;
+            this._treeWidgetObj[ info.info.id ].initScale = info.info.obj.getScale();
             dataObj.push( obj );
 
             line = this.drawTree(info.childList, depth+1, line, obj.children);
@@ -334,4 +338,6 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
         return treeArrName;
     }
 });
+
+
 
