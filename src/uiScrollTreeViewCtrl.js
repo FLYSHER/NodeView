@@ -12,8 +12,21 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
             'core' : {
                 'data' : [
                 ]
+            },
+            "plugins": ["search"],
+            "search": {
+                "case_sensitive": false,
+                "show_only_matches": true
             }
         });
+
+        $(document).ready(function () {
+            $(".searchNode").keyup(function () {
+                var searchString = $(this).val();
+                $('#widgetTree').jstree('search', searchString);
+            });
+        });
+
         var self = this;
         $('#widgetTree').on("changed.jstree", function (e, data) {
             if( !!data.node === false)
@@ -128,7 +141,6 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
 
         }
 
-
         $('#widgetTree').jstree(true).settings.core.data = treeObj;
         $('#widgetTree').jstree("refresh");
         $('#actionTree').jstree(true).settings.core.data = actionObj;
@@ -144,18 +156,21 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
             uiAnimationContainer.style.display = "none";
         }
 
+        var searchBox = document.getElementById( "searchNode" );
         var visibleBtn = document.getElementById( "toggleVisible" );
         var openBtn = document.getElementById( "openAll" );
         var closeBtn = document.getElementById( "closeAll" );
         var copyBtn = document.getElementById( "copyBtn" );
 
         if( treeObj.length > 0 ) {
+            searchBox.style.visibility = 'visible';
             visibleBtn.style.visibility = 'visible';
             openBtn.style.visibility = 'visible';
             closeBtn.style.visibility = 'visible';
             copyBtn.style.visibility = 'visible';
         }
         else {
+            searchBox.style.visibility = 'hidden';
             visibleBtn.style.visibility = 'hidden';
             openBtn.style.visibility = 'hidden';
             closeBtn.style.visibility = 'hidden';
@@ -206,11 +221,11 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
         for(var i = 0; i < len; i++) {
             line++;
 
-             var info = treeInfo[i];
+            var info = treeInfo[i];
             var obj = {
                 "text" : info.info.name,
                 "state": {
-                    "opened": false
+                    "opened": true
                 },
             };
             if( info.childList.length > 0){

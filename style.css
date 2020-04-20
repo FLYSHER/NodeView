@@ -150,7 +150,7 @@ ul.tabs{
 }
 ul.tabs li{
     z-index: 1;
-    width:50%;
+    width:45%;
     background: none;
     color: #222;
     display: inline-block;
