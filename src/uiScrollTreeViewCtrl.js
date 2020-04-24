@@ -118,6 +118,7 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
 
             this.treeInfo = [{
                 info :{
+                    id : node.ui.__instanceId,
                     obj : node.ui,
                     name : node.ui.getName(),
                     initScale : node.ui.getScale(),
@@ -237,6 +238,7 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
             this._treeWidgetObj[ info.info.id ] = {};
             this._treeWidgetObj[ info.info.id ].obj = info.info.obj;
             this._treeWidgetObj[ info.info.id ].id = info.info.id;
+            this._treeWidgetObj[ info.info.id ].name = info.info.name;
             this._treeWidgetObj[ info.info.id ].initScale = info.info.obj.getScale();
             dataObj.push( obj );
 
@@ -288,8 +290,8 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
 
         for( var key1 in this._treeWidgetObj ) {
             treeArrName [ key1 ] = {};
-            treeArrName [ key1 ].name = key1;
-            treeArrName [ key1 ].copyString = key1 + " : null,\n";
+            treeArrName [ key1 ].name = this._treeWidgetObj[ key1 ].name;
+            treeArrName [ key1 ].copyString = this._treeWidgetObj[ key1 ].name + " : null,\n";
             treeObjName[ treeObjName.length ] = key1;
         }
 
