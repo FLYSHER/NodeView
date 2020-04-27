@@ -102,10 +102,19 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
                 copyStringToClipboard( this._treeString );
             }
         }.bind(this));
+
+        // console.log($("input[name=opacity]").val());
+        $("input[name=opacity]").change(function(){
+            if(this._selectNode){
+                this._selectNode.setOpacity($("input[name=opacity]").val());
+                $('#opacityValue').html(this._selectNode.getOpacity());
+            }
+        }.bind(this));
+
     },
 
 
-    setNode :function (node) {
+    setNode :function (node, finalNode) {
         delete this.treeInfo;
         
         this._treeWidgetObj = {};
@@ -144,6 +153,16 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
 
         $('#widgetTree').jstree(true).settings.core.data = treeObj;
         $('#widgetTree').jstree("refresh");
+
+        var self = this;
+
+        if(!!finalNode){
+            setTimeout(function(){
+                $('#widgetTree').jstree("deselect_all");
+                $('#widgetTree').jstree('select_node',self.recursiveTreeCheck(treeObj,finalNode.name));
+            },50);
+        }
+
         $('#actionTree').jstree(true).settings.core.data = actionObj;
         $('#actionTree').jstree("refresh");
 
@@ -176,6 +195,16 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
             openBtn.style.visibility = 'hidden';
             closeBtn.style.visibility = 'hidden';
             copyBtn.style.visibility = 'hidden';
+        }
+    },
+
+    recursiveTreeCheck : function(arr, name){
+        for(var idx = 0; idx < arr.length;idx++){
+            if(arr[idx].text === name) return arr[idx].id;
+
+            if(!!arr[idx] && !!arr[idx].children){
+                return this.recursiveTreeCheck(arr[idx].children, name);
+            }
         }
     },
 
@@ -259,6 +288,8 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
         $('#localPos').html("(" + this._selectNode.getPosition().x.toFixed(2) + " , " +this._selectNode.getPosition().y.toFixed(2) + ")");
         $('#LocalSize').html("(" + this._selectNode.getContentSize().width.toFixed(2) + " , " +this._selectNode.getContentSize().height.toFixed(2) + ")");
 
+        $("input[name=opacity]").val(this._selectNode.getOpacity());
+        $('#opacityValue').html(this._selectNode.getOpacity());
         //TODO 이거 왜 안되냐
         if( typeof nodeObj.setString === 'function'  ){
             if( nodeObj.getString() === ''){

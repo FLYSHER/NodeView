@@ -228,6 +228,8 @@ var MainLayer = cc.Layer.extend({
     },
 
     reOrderup : function (nodeName, orderPlus) {
+        nodeName = this._itemList.getSelectedName();
+
         var node = this._nodeList[ nodeName ];
         if(!node)
             return;
@@ -256,7 +258,7 @@ var MainLayer = cc.Layer.extend({
     },
 
     _addToJsonListMenu: function( name , node )  {
-        this._itemList.add(name,
+        this._itemList.add(name, node,
             function ( type ) {
 
                 switch(type){
@@ -279,7 +281,7 @@ var MainLayer = cc.Layer.extend({
         // this.setDraggableItem( name );
     },
 
-    updateMenu: function( name ) {
+    updateMenu: function( name, finalNode ) {
         var selectNode = this._nodeList[ name ];
         if( !selectNode ) return;
         
@@ -302,7 +304,7 @@ var MainLayer = cc.Layer.extend({
         }
 
         this._movementCtrl.init(selectNode);
-        this._treeView.setNode(selectNode);
+        this._treeView.setNode(selectNode, finalNode);
 
         this.setDraggableItem( name );
     },
@@ -399,7 +401,11 @@ var ManiLayerScene = cc.Scene.extend({
             onMouseDown: function( event ) {
                 var nodeObj = self.getFrontTouchedNode( event.getLocation() );
                 if( nodeObj.node ) {
-                    layer.updateMenu( nodeObj.nodeName );
+                    layer.updateMenu( nodeObj.nodeName, nodeObj.finalNode );
+                    setTimeout(function(){
+                        $('#fileNameTree').jstree("deselect_all");
+                        $('#fileNameTree').jstree('select_node',nodeObj.node.__instanceId);
+                    },100);
                 }
             },
             swallowTouches: false
@@ -450,10 +456,29 @@ var ManiLayerScene = cc.Scene.extend({
                 }
             }
         }
+        var finalNode = this.recursiveCheckNode(frontNode, touchPos);
         return {
             node: frontNode,
-            nodeName: frontNodeName
+            nodeName: frontNodeName,
+            finalNode : finalNode
         };
+    },
+
+    recursiveCheckNode: function(node, touchpos){
+        var flag = false;
+
+        if(!node || !node.children) return node;
+
+        for (var idx = 0; idx < node.children.length; idx++) {
+            if (cc.rectContainsPoint(node.children[idx].getBoundingBoxToWorld(), touchpos)) {
+                return this.recursiveCheckNode(node.children[idx], touchpos);
+            }
+        }
+
+        if (flag === false) {
+            return node;
+        }
+
     },
 
     getZOrderList: function( node ) {

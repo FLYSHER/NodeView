@@ -54,12 +54,12 @@ var UIItemList = cc.Node.extend({
         // this.delBtn.titleFontSize = 32;
         // this.delBtn.setTouchEnabled(true);
         // this.delBtn.addTouchEventListener(this.onButtonClick.bind(this), this);
-        // this.delBtn.x = this.listItemModel.width / 2;
-        // this.delBtn.y = this.listItemModel.height / 2;
+        // // this.delBtn.x = this.listItemModel.width / 2;
+        // // this.delBtn.y = this.listItemModel.height / 2;
         // this.delBtn.setTitleText("Delete");
         // this.addChild(this.delBtn);
         // this.delBtn.setVisible(false);
-
+        //
         // this.upBtn = new ccui.Button();
         // this.upBtn.setName("upBtn");
         // this.upBtn.titleFontSize = 32;
@@ -70,7 +70,7 @@ var UIItemList = cc.Node.extend({
         // this.upBtn.setTitleText("BACK");
         // this.addChild(this.upBtn);
         // this.upBtn.setVisible(false);
-
+        //
         // this.downBtn = new ccui.Button();
         // this.downBtn.setName("downBtn");
         // this.downBtn.titleFontSize = 32;
@@ -94,7 +94,7 @@ var UIItemList = cc.Node.extend({
                     "dots" : false,
                     "icons" : null,
                 }
-            }   
+            }
         });
         $('#fileNameTree').jstree("refresh");
         this.itemCallbacks = {};
@@ -110,6 +110,14 @@ var UIItemList = cc.Node.extend({
 
         $("#deleteBtn").click( function(e){
             self.delBySelectItem();
+        });
+
+        $("#frontBtn").click( function(e){
+            self.onButtonClick(true);
+        });
+
+        $("#backBtn").click( function(e){
+            self.onButtonClick(false);
         });
 
 
@@ -147,7 +155,7 @@ var UIItemList = cc.Node.extend({
     //     }
     // },
 
-    add : function (addItem, cb) {
+    add : function (addItem, node, cb) {
         // this.totalListItemCount = this.listView.getItems().length + 1;
 
         // var item = this.listItemModel.clone();
@@ -167,6 +175,7 @@ var UIItemList = cc.Node.extend({
 
 
         var treeNodeObj = {
+            "id" : node.__instanceId,
             "text" : addItem,
             "state": {
                 "opened": true
@@ -182,41 +191,90 @@ var UIItemList = cc.Node.extend({
 
     },
 
-    // changeItem : function (selectIndex, targetIndex){
-    //     if(selectIndex < 0 || targetIndex < 0)
-    //         return;
-
-    //     var select = this.listView.getItem(selectIndex);
-    //     var target = this.listView.getItem(targetIndex);
-
-    //     var button = select.getChildByName('ButtonItem');
-    //     var targetButton = target.getChildByName('ButtonItem');
-
-    //     var tempCB = select.cb;
-    //     var tempName = select.itemName;
-    //     var tempColor = button.getColor();
+    changeItem : function (selectIndex, targetIndex){
+        if(!this.selectItem){
+            return false;
+        }
 
 
-    //     select.cb = target.cb;
-    //     select.itemName = target.itemName;
-    //     button.setTitleText( select.itemName);
-    //     button.setColor(targetButton.getColor());
+        if(selectIndex < 0 || targetIndex < 0)
+            return false;
 
-    //     target.cb = tempCB;
-    //     target.itemName = tempName;
-    //     targetButton.setTitleText( target.itemName);
-    //     targetButton.setColor(tempColor);
+        // var select = this.listView.getItem(selectIndex);
+        // var target = this.listView.getItem(targetIndex);
+        //
+        // var button = select.getChildByName('ButtonItem');
+        // var targetButton = target.getChildByName('ButtonItem');
+        //
+        // var tempCB = select.cb;
+        // var tempName = select.itemName;
+        // var tempColor = button.getColor();
+        //
+        //
+        // select.cb = target.cb;
+        // select.itemName = target.itemName;
+        // button.setTitleText( select.itemName);
+        // button.setColor(targetButton.getColor());
+        //
+        // target.cb = tempCB;
+        // target.itemName = tempName;
+        // targetButton.setTitleText( target.itemName);
+        // targetButton.setColor(tempColor);
+        //
+        // if(this.selectItem === target) {
+        //     this.selectItem = select;
+        //     this.selectIndex = selectIndex;
+        // }
+        // else if(this.selectItem === select) {
+        //     this.selectItem = target;
+        //     this.selectIndex = targetIndex;
+        // }
 
-    //     if(this.selectItem === target) {
-    //         this.selectItem = select;
-    //         this.selectIndex = selectIndex;
-    //     }
-    //     else if(this.selectItem === select) {
-    //         this.selectItem = target;
-    //         this.selectIndex = targetIndex;
-    //     }
+        var testArr = $("#fileNameTree").jstree(true).settings.core.data;
+        var tempObj = testArr[selectIndex];
 
-    // },
+        testArr[selectIndex] = testArr[targetIndex];
+        testArr[targetIndex] = tempObj;
+
+        // for( var i = 0; i < testArr.length ; i++){
+        //     if( testArr[i].text === this.selectItem.itemName ){
+        //         testArr.splice(i,1);
+        //         break;
+        //     }
+        // }
+
+        var nodeId = $('#fileNameTree').jstree('get_selected')[0];
+
+        // var nodeId = node[0].id;
+        // cc.log(selectIndex,targetIndex);
+        // cc.log(nodeId);
+        // var nodeName = 'j2_'+(targetIndex+1);
+
+        $("#fileNameTree").jstree(true).settings.core.data = testArr;
+
+        $('#fileNameTree').jstree("refresh");
+
+        setTimeout(function(){
+            $('#fileNameTree').jstree("deselect_all");
+
+            $('#fileNameTree').jstree('select_node',nodeId);
+
+            // $('#fileNameTree').jstree("refresh");
+        },100);
+
+        //
+        //
+        // var newNodeId = "j2_"+(targetIndex+1)+"_anchor";
+        // //
+        // $(newNodeId).addClass('jstree-clicked');
+        // //
+        //
+
+
+
+
+        return true;
+    },
 
     delBySelectItem : function () {
         if(!this.selectItem)
@@ -280,7 +338,7 @@ var UIItemList = cc.Node.extend({
 
     // onButtonClick :function (sender, type) {
     //     cc.log("[CHECK] ",type);
-
+    //
     //     switch (type) {
     //         case ccui.Widget.TOUCH_BEGAN:
     //             break;
@@ -288,7 +346,7 @@ var UIItemList = cc.Node.extend({
     //             var item = this.selectItem;
     //             if(!item)
     //                 return;
-
+    //
     //             if(sender === this.delBtn) {
     //                 this.delBySelectItem();
     //             }
@@ -310,6 +368,59 @@ var UIItemList = cc.Node.extend({
     //     }
     //     this.refreshBtn();
     // },
+
+    onButtonClick :function (isFront) {
+        cc.log("[CHECK] ",isFront);
+
+        if(this.isEnableToMove(isFront) === false){
+            return;
+        }
+
+        var item = this.selectItem;
+        if(!item)
+            return;
+
+        if(isFront){
+            // this.tagetIndex =  this.selectIndex - 1;
+            this.tagetIndex = this.getSelectedIndex() + 1;
+            cc.log("try to change ",this.getSelectedIndex(),this.tagetIndex);
+
+            if(this.changeItem(this.getSelectedIndex(),  this.tagetIndex) === false){
+                return;
+            }
+            // this.listView._curSelectedIndex =  this.tagetIndex;
+            if(item.cb)
+                item.cb(ItemListClickType.UP);
+        }
+        else {
+            this.tagetIndex = this.getSelectedIndex() - 1;
+            cc.log("try to change ",this.getSelectedIndex(),this.tagetIndex);
+
+            if(this.changeItem(this.getSelectedIndex(),  this.tagetIndex) === false){
+                return;
+            }
+            // this.listView._curSelectedIndex =  this.tagetIndex;
+            if(item.cb)
+                item.cb(ItemListClickType.DOWN);
+        }
+
+        // this.refreshBtn();
+    },
+
+    getSelectedIndex : function(){
+        var testArr = $("#fileNameTree").jstree(true).settings.core.data;
+
+        for( var i = 0; i < testArr.length ; i++){
+            if( testArr[i].text === this.selectItem.itemName ){
+                return i;
+            }
+        }
+        return -1;
+    },
+
+    getSelectedName : function(){
+        return this.selectItem.itemName;
+    },
 
     selectedItemEvent: function(sender, type) {
         var targetListView = sender;
@@ -335,21 +446,31 @@ var UIItemList = cc.Node.extend({
                 break;
         }
     },
-    refreshBtn : function () {
-        if(this.selectItem) {
-            this.delBtn.setVisible(true);
-            this.upBtn.setVisible(true);
-            this.downBtn.setVisible(true);
-            if (this.selectIndex === 0)
-                this.upBtn.setVisible(false);
+    // refreshBtn : function () {
+    //     if(this.selectItem) {
+    //         this.delBtn.setVisible(true);
+    //         this.upBtn.setVisible(true);
+    //         this.downBtn.setVisible(true);
+    //         if (this.selectIndex === 0)
+    //             this.upBtn.setVisible(false);
+    //
+    //         if (this.selectIndex === this.listView.getItems().length - 1)
+    //             this.downBtn.setVisible(false);
+    //     }
+    //     else {
+    //         this.delBtn.setVisible(false);
+    //         this.upBtn.setVisible(false);
+    //         this.downBtn.setVisible(false);
+    //     }
+    // }
+    isEnableToMove : function( isFront ){
+        var testArr = $("#fileNameTree").jstree(true).settings.core.data;
 
-            if (this.selectIndex === this.listView.getItems().length - 1)
-                this.downBtn.setVisible(false);
-        }
-        else {
-            this.delBtn.setVisible(false);
-            this.upBtn.setVisible(false);
-            this.downBtn.setVisible(false);
+
+        if(isFront){
+            return this.getSelectedIndex() !== testArr.length - 1;
+        } else {
+            return this.getSelectedIndex() !== 0;
         }
     }
 });
