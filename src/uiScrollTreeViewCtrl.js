@@ -36,7 +36,10 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
                 return;
 
             if( selectedObj.obj.getNumberOfRunningActions() === 0 ) {
+
                 var actionBy = cc.scaleBy(0.15, 1.2).easing( cc.easeElasticOut( 1.5 ));
+
+                $('#scaleValue').html("("+selectedObj.initScaleX+" , "+selectedObj.initScaleY+")");
                 // selectedObj.obj.setScale(selectedObj.initScale);
                 // selectedObj.obj.stopActionByTag(100);
                 selectedObj.obj.runAction(cc.sequence(actionBy, actionBy.reverse())).setTag(100);
@@ -219,6 +222,9 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
             childList[i].info.obj = children[i];
             childList[i].info.name = children[i].getName();
             childList[i].info.initScale = children[i].getScale();
+            childList[i].info.initScaleX = children[i].getScaleX();
+            childList[i].info.initScaleY = children[i].getScaleY();
+
             childList[i].info.id = children[i].__instanceId;
             childList[i].childList = this.createUIChildList(children[i]);
         }
@@ -269,6 +275,10 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
             this._treeWidgetObj[ info.info.id ].id = info.info.id;
             this._treeWidgetObj[ info.info.id ].name = info.info.name;
             this._treeWidgetObj[ info.info.id ].initScale = info.info.obj.getScale();
+            this._treeWidgetObj[ info.info.id ].initScaleX = info.info.obj.getScaleX();
+            this._treeWidgetObj[ info.info.id ].initScaleY = info.info.obj.getScaleY();
+
+
             dataObj.push( obj );
 
             line = this.drawTree(info.childList, depth+1, line, obj.children);
@@ -290,6 +300,9 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
 
         $("input[name=opacity]").val(this._selectNode.getOpacity());
         $('#opacityValue').html(this._selectNode.getOpacity());
+
+        $('#anchorValue').html("("+ this._selectNode._getAnchorX()+" , "+this._selectNode._getAnchorY()+")");
+
         //TODO 이거 왜 안되냐
         if( typeof nodeObj.setString === 'function'  ){
             if( nodeObj.getString() === ''){
