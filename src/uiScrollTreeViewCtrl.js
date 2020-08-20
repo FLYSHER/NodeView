@@ -336,7 +336,7 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
             treeArrName [ key1 ] = {};
             treeArrName [ key1 ].name = this._treeWidgetObj[ key1 ].name;
             treeArrName [ key1 ].copyString = this._treeWidgetObj[ key1 ].name + " : null,\n";
-            treeObjName[ treeObjName.length ] = key1;
+            treeObjName[ treeObjName.length ] = treeArrName [ key1 ].name;
         }
 
         for( var loop1 = 0; loop1 < length; loop1++ ) {
@@ -354,13 +354,10 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
                         // console.log( key + '=>' + this._treeWidgetObj[ key ] );
 
                         var objName = subString1 + ( idx < 10 ? '0' + idx : idx );
+                        var objName2 = treeArrName[ key2 ].name;
                         find = false;
 
-                        if( objName === 'lbFpTt03' ) {
-                            console.log( objName );
-                        }
-
-                        if( key2 === objName ) {
+                        if( objName2 === objName ) {
                             addTreeNameArr = subString1;
                             find = true;
                             idx++;
