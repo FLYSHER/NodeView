@@ -341,24 +341,35 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
 
         for( var loop1 = 0; loop1 < length; loop1++ ) {
             var name = treeObjName[ loop1 ];
-            var subString1 = name.substring( 0, name.length - 2 );
-            var subString2 = name.substring( name.length - 2, name.length );
+            var firstSubString1 = name.substring( 0, name.length - 2 );
+            var firstSubString2 = name.substring( name.length - 2, name.length );
 
-            if( subString2 === '01' ) {
-                var find = true;
+            if( firstSubString2 === '01' ) {
+                var find = false;
                 var idx = 1;
                 var addTreeNameArr = null;
+
+                for( var loop2 = 0; loop2 < length; loop2++ ) {
+                    name = treeObjName[ loop2 ];
+                    var secondSubString1 = name.substring( 0, name.length - 2 );
+                    var secondSubString2 = name.substring( name.length - 2, name.length );
+                    secondSubString2 = name.substring( name.length - 2, name.length );
+
+                    if( firstSubString1 === secondSubString1 && secondSubString2 === '02' ) {
+                        find = true;
+                    }
+                }
 
                 while( find ) {
                     for( var key2 in treeArrName ) {
                         // console.log( key + '=>' + this._treeWidgetObj[ key ] );
 
-                        var objName = subString1 + ( idx < 10 ? '0' + idx : idx );
+                        var objName = firstSubString1 + ( idx < 10 ? '0' + idx : idx );
                         var objName2 = treeArrName[ key2 ].name;
                         find = false;
 
                         if( objName2 === objName ) {
-                            addTreeNameArr = subString1;
+                            addTreeNameArr = firstSubString1;
                             find = true;
                             idx++;
 
