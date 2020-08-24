@@ -115,6 +115,10 @@ Loader.readFile = function( file , cb) {
             var fileContents = e.target.result;
             var ext = cc.path.extname(f.name).toLowerCase();
             self._processFileData(url, fileContents, ext, cb);
+            if (ext === ".json" || ext === ".exportjson") {
+                g_fileName = f.name;
+                g_fileContext = e.target.result;
+            }
         }; // end of return function
     } )( file ); // end of onload funtion
 };
