@@ -137,8 +137,8 @@
                     </td>
                     <td>
                         <label id = "localPos" class="styleLabel">(0, 0) </label>
-                        <input type="text" id="positionInput" name="lPosX" value="">
-                        <input type="text" id="positionInput" name="lPosY" value="">
+                        <input type="text" class="positionInput" id ="lPosX" name="lPosX" value="" style="visibility: hidden">
+                        <input type="text" class="positionInput" id ="lPosY" name="lPosY" value="" style="visibility: hidden">
                     </td>
                 </tr>
                 <tr>
@@ -154,8 +154,8 @@
                         <label class="styleLabel">WorldPos : </label>
                     </td>
                     <td>
-                        <input type="text" id="positionInput" name="wPosX" value="">
-                        <input type="text" id="positionInput" name="wPosY" value="">
+                        <input type="text" class="positionInput" name="wPosX" value="">
+                        <input type="text" class="positionInput" name="wPosY" value="">
                     </td>
                 </tr>
                 <tr>
@@ -189,7 +189,7 @@
 
 
     <div align="center">
-        <button type="button" id="DownloadBtn" class="styleButton" title="Download" style="width: 80%;">Download</button>
+        <button type="button" id="DownloadBtn" class="styleButton" title="Download" style="width: 80%; visibility: hidden;">Download</button>
     </div>
 </div>
 <div id="side_hr" class="side_hr"></div>

@@ -119,9 +119,14 @@ Loader.readFile = function( file , cb) {
                url = url.replace( '.json', ' (JSON).ExportJson');
                ext = '.exportjson';
                self._processFileData(url, exportjson, ext, cb);
+                toggleJSONUI( true );
             }
             else {
                 self._processFileData(url, fileContents, ext, cb);
+            }
+
+            if ( ext === ".exportjson" ){
+                toggleJSONUI( false );
             }
 
             if (ext === ".json" || ext === ".exportjson") {

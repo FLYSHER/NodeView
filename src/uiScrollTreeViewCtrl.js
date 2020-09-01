@@ -309,9 +309,7 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
         else
             $('#toggleVisible').html('Show');
         
-       // $('#localPos').html("(" + this._selectNode.getPosition().x.toFixed(2) + " , " +this._selectNode.getPosition().y.toFixed(2) + ")");
-
-        console.log(this._selectNode.getPosition().x);
+        $('#localPos').html("(" + this._selectNode.getPosition().x.toFixed(2) + " , " +this._selectNode.getPosition().y.toFixed(2) + ")");
         $("input[name=lPosX]").val(this._selectNode.getPosition().x.toFixed(2));
         $("input[name=lPosY]").val(this._selectNode.getPosition().y.toFixed(2));
         $('#LocalSize').html("(" + this._selectNode.getContentSize().width.toFixed(2) + " , " +this._selectNode.getContentSize().height.toFixed(2) + ")");

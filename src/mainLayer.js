@@ -281,6 +281,7 @@ var MainLayer = cc.Layer.extend({
 
     updateMenu: function( name, finalNode ) {
         var selectNode = this._nodeList[ name ];
+        toggleJSONUI(name.indexOf('(JSON)') !== -1  );
         if( !selectNode ) return;
         
         selectNode.setName(name);
@@ -379,8 +380,11 @@ var MainLayer = cc.Layer.extend({
         cc.eventManager.removeListener( this._loadUIListener );
 
         this._super();
-    }
+    },
+
 });
+
+
 
 var ManiLayerScene = cc.Scene.extend({
     onEnter:function () {

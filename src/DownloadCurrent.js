@@ -87,21 +87,42 @@ function changePosition( obj, name, position){
     for( var item in obj ){
         if ( Array.isArray( obj[item] )){
             for( var i = 0; i < obj[item].length ; i ++ ){
-                changePosition( obj[item] , name, position);
+                var ret = changePosition( obj[item] , name, position);
+                if ( ret )
+                    return ret;
             }
         }
         else if ( typeof obj[item] === "object" && obj[item] !== null ){
             if ( obj[item]['name'] === name){
-                console.log( "FIND : ", name);
+                console.log( "find  : " , obj[item]['name'] );
                 obj[item]['x'] = position.x;
                 obj[item]['y'] = position.y;
-                return;
+                return true;
             }
             else {
-                changePosition( obj[item] , name, position);
+                var ret = changePosition( obj[item] , name, position);
+                if ( ret )
+                    return ret;
             }
         }
 
 
     }
+    return false;
+}
+
+function toggleJSONUI( isJson){
+    if ( isJson ){
+        document.getElementById( "localPos" ).style.visibility = 'hidden';
+        document.getElementById( "lPosX" ).style.visibility = 'visible';
+        document.getElementById( "lPosY" ).style.visibility = 'visible';
+        document.getElementById( "DownloadBtn" ).style.visibility = 'visible';
+    }
+    else {
+        document.getElementById( "localPos" ).style.visibility = 'visible';
+        document.getElementById( "lPosX" ).style.visibility = 'hidden';
+        document.getElementById( "lPosY" ).style.visibility = 'hidden';
+        document.getElementById( "DownloadBtn" ).style.visibility = 'hidden';
+    }
+
 }
