@@ -6,9 +6,8 @@ var g_currentObj = null;
 $('#DownloadBtn').click( function(){
     //console.log( 'Download Button is under construction');
     if ( !!g_currentObj ){
-        var exportjson = JSON.stringify( g_currentObj );
-        exportjson = exportjson.replace(/image\//g, 'image\\/');
-        download(g_fileName,exportjson);
+        var string = JSON.stringify( g_currentObj );
+        download(g_fileName,string);
     }
 
 }.bind(this));
@@ -42,20 +41,18 @@ function convertToJSON(exportJson){
 }
 
 function convertToExportJson(json){
+
     var obj = JSON.parse( json );
+    g_currentObj = JSON.parse( json );
     var textures = obj['textures'];
     for( var i = 0 ;i < textures.length ; i ++){
         obj['texturesPng'][i] = obj['textures'][i].replace(/image\//, '').replace(/.plist/, '.png');
     }
-
-
     objectSearchInCascade(obj);
-
-    g_currentObj = obj;
-    replaced_str = JSON.stringify( obj );
+    var replaced_str = JSON.stringify( obj );
     replaced_str = replaced_str.replace(/image\//g, 'image\\/');
     return replaced_str;
-   // download( 'test.Exportjson', replaced_str );
+
 }
 
 
