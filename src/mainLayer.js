@@ -258,7 +258,6 @@ var MainLayer = cc.Layer.extend({
     _addToJsonListMenu: function( name , node )  {
         this._itemList.add(name, node,
             function ( type ) {
-                console.log( name, node, type);
                 switch(type){
                     case ItemListClickType.SELECT:
                         this.updateMenu( name );
@@ -300,7 +299,6 @@ var MainLayer = cc.Layer.extend({
         else{
             this._animationList.setVisible(false);
             this._animationList.init([],null);
-            //this._movementCtrl.updatePosition(selectNode);
         }
 
         this._movementCtrl.init(selectNode);

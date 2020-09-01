@@ -110,15 +110,13 @@ function changePosition( obj, name, position){
 
 function toggleJSONUI( isJson){
     if ( isJson ){
-        document.getElementById( "localPos" ).style.visibility = 'hidden';
-        document.getElementById( "lPosX" ).style.visibility = 'visible';
-        document.getElementById( "lPosY" ).style.visibility = 'visible';
+        document.getElementById( "localPos" ).style.display = "none";
+        document.getElementById( "localPosition" ).style.display = "block";
         document.getElementById( "DownloadBtn" ).style.visibility = 'visible';
     }
     else {
-        document.getElementById( "localPos" ).style.visibility = 'visible';
-        document.getElementById( "lPosX" ).style.visibility = 'hidden';
-        document.getElementById( "lPosY" ).style.visibility = 'hidden';
+        document.getElementById( "localPos" ).style.display = "block";
+        document.getElementById( "localPosition" ).style.display = "none";
         document.getElementById( "DownloadBtn" ).style.visibility = 'hidden';
     }
 

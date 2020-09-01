@@ -3,7 +3,8 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
     _lastPoint:null,
     TAG_CLIPPERNODE  : 1,
     TAG_CONTENTNODE  : 2,
-    _selectNode : null,
+    _selectNode : [],
+    _masterNode : null,
     _treeWidgetObj : {},
     _treeString : "",
     ctor : function () {
@@ -31,21 +32,42 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
         $('#widgetTree').on("changed.jstree", function (e, data) {
             if( !!data.node === false)
                 return;
-            var selectedObj = self._treeWidgetObj[ data.node.id ];
-            if( !!selectedObj === false )
-                return;
 
-            if( selectedObj.obj.getNumberOfRunningActions() === 0 ) {
+            if( data.selected.length < 2 ){
+                var selectedObj = self._treeWidgetObj[ data.node.id ];
+                if( !!selectedObj === false )
+                    return;
 
-                var actionBy = cc.scaleBy(0.15, 1.2).easing( cc.easeElasticOut( 1.5 ));
+                if( selectedObj.obj.getNumberOfRunningActions() === 0 ) {
 
-                $('#scaleValue').html("("+selectedObj.initScaleX+" , "+selectedObj.initScaleY+")");
-                // selectedObj.obj.setScale(selectedObj.initScale);
-                // selectedObj.obj.stopActionByTag(100);
-                selectedObj.obj.runAction(cc.sequence(actionBy, actionBy.reverse())).setTag(100);
+                    var actionBy = cc.scaleBy(0.15, 1.2).easing( cc.easeElasticOut( 1.5 ));
+
+                    $('#scaleValue').html("("+selectedObj.initScaleX+" , "+selectedObj.initScaleY+")");
+                    selectedObj.obj.runAction(cc.sequence(actionBy, actionBy.reverse())).setTag(100);
+                }
+
+                self.selectNode(selectedObj.obj);
+            }
+            else {
+                var objArr = [];
+                for ( var i = 0 ; i < data.selected.length ; i ++ ){
+                    var selectedObj = self._treeWidgetObj[ data.selected[i] ];
+                    if( !!selectedObj === false )
+                        return;
+
+                    if( selectedObj.obj.getNumberOfRunningActions() === 0 ) {
+
+                        var actionBy = cc.scaleBy(0.15, 1.2).easing( cc.easeElasticOut( 1.5 ));
+
+                        $('#scaleValue').html("("+selectedObj.initScaleX+" , "+selectedObj.initScaleY+")");
+                        selectedObj.obj.runAction(cc.sequence(actionBy, actionBy.reverse())).setTag(100);
+                    }
+
+                    objArr.push( selectedObj.obj);
+                }
+                self.selectNodeMulti(objArr);
             }
 
-            self.selectNode(selectedObj.obj);
         });
 
 
@@ -69,13 +91,17 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
     },
 
     setup:function () {
-
+        var self = this;
         $('#toggleVisible').click( function(){
-            if(this._selectNode){
-                this._selectNode.setVisible(!this._selectNode.isVisible());
-                this.selectNode(this._selectNode);
-
-            }
+            this._selectNode.forEach( item => {
+                item.setVisible( !item.isVisible());
+            });
+            // if(this._selectNode){
+            //
+            //     this._selectNode.setVisible(!this._selectNode.isVisible());
+            //     this.selectNode(this._selectNode);
+            //
+            // }
         }.bind(this));
 
         $('#openAll').click( function(){
@@ -108,34 +134,42 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
 
         // console.log($("input[name=opacity]").val());
         $("input[name=opacity]").change(function(){
-            if(this._selectNode){
-                this._selectNode.setOpacity($("input[name=opacity]").val());
-                $('#opacityValue').html(this._selectNode.getOpacity());
-            }
+            this._selectNode.forEach( item => {
+                item.setOpacity($("input[name=opacity]").val());
+                $('#opacityValue').html(item.getOpacity());
+            });
         }.bind(this));
 
         $("input[name=lPosX]").change(function(){
-            this._selectNode && this._selectNode.setPositionX(parseFloat($("input[name=lPosX]").val()));
-            var position = this._selectNode.getPosition();
-            console.log( this._selectNode.getName() );
-            changePosition(g_currentObj, this._selectNode.getName(),position );
+            this._selectNode.forEach( item => {
+                item.setPositionX(parseFloat($("input[name=lPosX]").val()));
+                var position = item.getPosition();
+                var anchorPP = item.getParent()._renderCmd._anchorPointInPoints;
+                position.x -= anchorPP.x;
+                position.y -= anchorPP.y;
+                changePosition(g_currentObj, item.getName(), position );
+            });
         }.bind(this));
 
         $("input[name=lPosY]").change(function(){
-            this._selectNode && this._selectNode.setPositionX( parseFloat($("input[name=lPosY]").val()));
-            var position = this._selectNode.getPosition();
-            console.log( this._selectNode.getName() );
-            changePosition(g_currentObj, this._selectNode.getName(),position );
+            this._selectNode.forEach( item => {
+                item.setPositionY(parseFloat($("input[name=lPosY]").val()));
+                var position = item.getPosition();
+                var anchorPP = item.getParent()._renderCmd._anchorPointInPoints;
+                position.x -= anchorPP.x;
+                position.y -= anchorPP.y;
+                changePosition(g_currentObj, item.getName(), position );
+            });
         }.bind(this));
-      //  console.log("input[name=lPosX]" , $("input[name=lPosX]"));
     },
-
 
     setNode :function (node, finalNode) {
         delete this.treeInfo;
-        
+        this._selectNode.length = 0;
+        this._selectNode = [];
+        this._masterNode = node;
         this._treeWidgetObj = {};
-        this._selectNode = null;
+
         var treeObj = [];
         var actionObj = [];
 
@@ -300,35 +334,27 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
         return line;
     },
 
-    selectNode :function (nodeObj)
-    {
-        this._selectNode = nodeObj;
+    selectNode :function (nodeObj) {
+        this._selectNode.length = 0;
+        this._selectNode = [nodeObj];
 
-        if(this._selectNode.isVisible() )
+        if(nodeObj.isVisible() )
             $('#toggleVisible').html('Hide');
         else
             $('#toggleVisible').html('Show');
         
-        $('#localPos').html("(" + this._selectNode.getPosition().x.toFixed(2) + " , " +this._selectNode.getPosition().y.toFixed(2) + ")");
-        $("input[name=lPosX]").val(this._selectNode.getPosition().x.toFixed(2));
-        $("input[name=lPosY]").val(this._selectNode.getPosition().y.toFixed(2));
-        $('#LocalSize').html("(" + this._selectNode.getContentSize().width.toFixed(2) + " , " +this._selectNode.getContentSize().height.toFixed(2) + ")");
+        $('#localPos').html("(" + nodeObj.getPosition().x.toFixed(2) + " , " +nodeObj.getPosition().y.toFixed(2) + ")");
+        $("input[name=lPosX]").val(nodeObj.getPosition().x.toFixed(2));
+        $("input[name=lPosY]").val(nodeObj.getPosition().y.toFixed(2));
+        $('#LocalSize').html("(" + nodeObj.getContentSize().width.toFixed(2) + " , " +nodeObj.getContentSize().height.toFixed(2) + ")");
 
-        $("input[name=opacity]").val(this._selectNode.getOpacity());
-        $('#opacityValue').html(this._selectNode.getOpacity());
+        $("input[name=opacity]").val(nodeObj.getOpacity());
+        $('#opacityValue').html(nodeObj.getOpacity());
 
-        $('#anchorValue').html("("+ this._selectNode._getAnchorX()+" , "+this._selectNode._getAnchorY()+")");
+        $('#anchorValue').html("("+ nodeObj._getAnchorX()+" , "+nodeObj._getAnchorY()+")");
 
-        //TODO 이거 왜 안되냐
-        if( typeof nodeObj.setString === 'function'  ){
-            if( nodeObj.getString() === ''){
-                nodeObj.setString("434510");
-            }
-        }
-
-
-        var rect = this._selectNode.getBoundingBox();
-        var po = this._selectNode.getParent().convertToWorldSpace( cc.p(rect.x, rect.y));
+        var rect = nodeObj.getBoundingBox();
+        var po =   nodeObj.getParent().convertToWorldSpace( cc.p(rect.x, rect.y));
 
 
 
@@ -341,6 +367,59 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
             cc.rect(po.x, po.y, rect.width, rect.height)
         );
 
+    },
+
+    selectNodeMulti :function (nodeArr) {
+        this._selectNode.length = 0;
+        this._selectNode = nodeArr;
+
+
+        var posX = this._selectNode[0].getPosition().x.toFixed(2);
+        var posY= this._selectNode[0].getPosition().y.toFixed(2);
+        var sizeW= this._selectNode[0].getContentSize().width;
+        var sizeH= this._selectNode[0].getContentSize().height;
+        var opa= this._selectNode[0].getOpacity();
+        var ancX= this._selectNode[0].getAnchorPoint().x;
+        var ancY= this._selectNode[0].getAnchorPoint().y;
+
+        this._selectNode.forEach( item => {
+            posX = posX === item.getPosition().x.toFixed(2) ? posX : "-";
+            posY = posY === item.getPosition().y.toFixed(2) ? posY : "-";
+            sizeW = sizeW === item.getContentSize().width ? sizeW : "-";
+            sizeH = sizeH === item.getContentSize().height ? sizeH : "-";
+            opa = opa === item.getOpacity() ? opa : "-";
+            ancX = ancX === item.getAnchorPoint().x ? ancX : "-";
+            ancY = ancY === item.getAnchorPoint().x ? ancY : "-";
+
+        });
+
+        if(this._selectNode[0].isVisible() )
+            $('#toggleVisible').html('Hide');
+        else
+            $('#toggleVisible').html('Show');
+
+
+
+        $('#localPos').html("(" + posX + " , " + posY + ")");
+        $("input[name=lPosX]").val(posX);
+        $("input[name=lPosY]").val(posY);
+        $('#LocalSize').html("(" + sizeW + " , " + sizeH + ")");
+
+        $("input[name=opacity]").val( opa);
+        $('#opacityValue').html( opa );
+
+        $('#anchorValue').html("("+ ancX+" , "+ancY+")");
+
+
+        var rectNode = cc.director.getRunningScene().getChildByTag(gizmoNodTag);
+        if(!rectNode) {
+            rectNode = new cc.DrawNode();
+            rectNode.setTag(gizmoNodTag);
+            cc.director.getRunningScene().addChild(rectNode, 999999, gizmoNodTag);
+        }
+        else{
+            rectNode.clear();
+        }
     },
 
     getTreeObjName: function() {

@@ -11,14 +11,15 @@ var UiPositionCtrl = cc.Node.extend({
     init : function (targetNode) {
         this.targetNode = targetNode;
         this.updateLock = false;
-    },
-
-
-    update: function(dt) {
         if(this.targetNode && this.updateLock === false) {
             $("input[name=wPosX]").val(this.targetNode.getPosition().x.toFixed(2));
             $("input[name=wPosY]").val(this.targetNode.getPosition().y.toFixed(2));
 
         }
+    },
+
+
+    update: function(dt) {
+
     }
 });
