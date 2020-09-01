@@ -114,6 +114,20 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
             }
         }.bind(this));
 
+        $("input[name=lPosX]").change(function(){
+            this._selectNode && this._selectNode.setPositionX(parseFloat($("input[name=lPosX]").val()));
+            var position = this._selectNode.getPosition();
+            console.log( this._selectNode.getName() );
+            changePosition(g_currentObj, this._selectNode.getName(),position );
+        }.bind(this));
+
+        $("input[name=lPosY]").change(function(){
+            this._selectNode && this._selectNode.setPositionX( parseFloat($("input[name=lPosY]").val()));
+            var position = this._selectNode.getPosition();
+            console.log( this._selectNode.getName() );
+            changePosition(g_currentObj, this._selectNode.getName(),position );
+        }.bind(this));
+      //  console.log("input[name=lPosX]" , $("input[name=lPosX]"));
     },
 
 
@@ -295,7 +309,11 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
         else
             $('#toggleVisible').html('Show');
         
-        $('#localPos').html("(" + this._selectNode.getPosition().x.toFixed(2) + " , " +this._selectNode.getPosition().y.toFixed(2) + ")");
+       // $('#localPos').html("(" + this._selectNode.getPosition().x.toFixed(2) + " , " +this._selectNode.getPosition().y.toFixed(2) + ")");
+
+        console.log(this._selectNode.getPosition().x);
+        $("input[name=lPosX]").val(this._selectNode.getPosition().x.toFixed(2));
+        $("input[name=lPosY]").val(this._selectNode.getPosition().y.toFixed(2));
         $('#LocalSize').html("(" + this._selectNode.getContentSize().width.toFixed(2) + " , " +this._selectNode.getContentSize().height.toFixed(2) + ")");
 
         $("input[name=opacity]").val(this._selectNode.getOpacity());

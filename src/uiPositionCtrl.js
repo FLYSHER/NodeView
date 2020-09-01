@@ -13,6 +13,7 @@ var UiPositionCtrl = cc.Node.extend({
         this.updateLock = false;
     },
 
+
     update: function(dt) {
         if(this.targetNode && this.updateLock === false) {
             $("input[name=wPosX]").val(this.targetNode.getPosition().x.toFixed(2));

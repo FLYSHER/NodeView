@@ -116,7 +116,7 @@ Loader.readFile = function( file , cb) {
             var ext = cc.path.extname(f.name).toLowerCase();
             if ( ext === ".json" ){
                var exportjson = convertToExportJson( fileContents );
-               url = url.replace( '.json', '.ExportJson');
+               url = url.replace( '.json', ' (JSON).ExportJson');
                ext = '.exportjson';
                self._processFileData(url, exportjson, ext, cb);
             }
@@ -124,11 +124,11 @@ Loader.readFile = function( file , cb) {
                 self._processFileData(url, fileContents, ext, cb);
             }
 
-            // if (ext === ".json" || ext === ".exportjson") {
-            //   //  console.log( ext , "processed ");
-            //     g_fileName = f.name;
-            //     g_fileContext = e.target.result;
-            // }
+            if (ext === ".json" || ext === ".exportjson") {
+              //  console.log( ext , "processed ");
+                g_fileName = f.name;
+                g_fileContext = e.target.result;
+            }
 
         }; // end of return function
     } )( file ); // end of onload funtion
@@ -176,7 +176,6 @@ Loader._processFileData = function( url, fileContents, ext, cb ) {
         case ".json":
         case ".exportjson":
             dic = JSON.parse(fileContents);
-            console.log(dic);
             if( dic[ "widgetTree" ] ) {
                 // UI
                 cc.loader.cache[url] = dic;

@@ -214,8 +214,6 @@ var MainLayer = cc.Layer.extend({
         ui.setAnchorPoint( 0.5, 0.5 );
         node.addChildToCenter( ui );
 
-        cc.log("[CHECK] zOrder :", node.getLocalZOrder());
-
         node.armature = null;
         node.ui = ui;
 
@@ -260,7 +258,7 @@ var MainLayer = cc.Layer.extend({
     _addToJsonListMenu: function( name , node )  {
         this._itemList.add(name, node,
             function ( type ) {
-
+                console.log( name, node, type);
                 switch(type){
                     case ItemListClickType.SELECT:
                         this.updateMenu( name );
@@ -295,12 +293,13 @@ var MainLayer = cc.Layer.extend({
                 animations.play(animName);
             };
             this._animationList.init(animNameArr,playCb);
-            //TODO 이거 다른곳으로 옮겨야 할거 같다
+
             $('#LocalSize').html("(" + selectNode.armature.getContentSize().width.toFixed(2) + " , " +selectNode.armature.getContentSize().height.toFixed(2) + ")");
         }
         else{
             this._animationList.setVisible(false);
             this._animationList.init([],null);
+            //this._movementCtrl.updatePosition(selectNode);
         }
 
         this._movementCtrl.init(selectNode);

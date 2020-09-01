@@ -1,12 +1,16 @@
 var g_fileName = "test.txt";
 var g_fileContext ="nothing :)";
-
-
+var g_currentObj = null;
 
 
 $('#DownloadBtn').click( function(){
     //console.log( 'Download Button is under construction');
-    //download(g_fileName,g_fileContext);
+    if ( !!g_currentObj ){
+        var exportjson = JSON.stringify( g_currentObj );
+        exportjson = exportjson.replace(/image\//g, 'image\\/');
+        download(g_fileName,exportjson);
+    }
+
 }.bind(this));
 
 function download(filename, text) {
@@ -46,6 +50,8 @@ function convertToExportJson(json){
 
 
     objectSearchInCascade(obj);
+
+    g_currentObj = obj;
     replaced_str = JSON.stringify( obj );
     replaced_str = replaced_str.replace(/image\//g, 'image\\/');
     return replaced_str;
@@ -74,4 +80,28 @@ function objectSearchInCascade( obj ){
         }
     }
 
+}
+
+
+function changePosition( obj, name, position){
+    for( var item in obj ){
+        if ( Array.isArray( obj[item] )){
+            for( var i = 0; i < obj[item].length ; i ++ ){
+                changePosition( obj[item] , name, position);
+            }
+        }
+        else if ( typeof obj[item] === "object" && obj[item] !== null ){
+            if ( obj[item]['name'] === name){
+                console.log( "FIND : ", name);
+                obj[item]['x'] = position.x;
+                obj[item]['y'] = position.y;
+                return;
+            }
+            else {
+                changePosition( obj[item] , name, position);
+            }
+        }
+
+
+    }
 }

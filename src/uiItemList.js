@@ -17,74 +17,7 @@ var UIItemList = cc.Node.extend({
     selectItem : null,
     selectIndex : -1,
     ctor: function() {
-
          this._super(color.backgroundColor);
-
-        // this.listView = new ccui.ListView();
-        // this.listView.setDirection(ccui.ScrollView.DIR_VERTICAL);
-        // this.listView.setTouchEnabled(true);
-        // this.listView.setBounceEnabled(true);
-        // //this.listView.setContentSize(cc.size(this.WIDTH, this.HEIGHT));//cc.winSize.width * 0.1, cc.winSize.height * 0.1 - 160));
-
-        // this.listView.x = 0;
-        // this.listView.y = 0;
-        // this.listView.addEventListener(this.selectedItemEvent.bind(this), this);
-        // this.listView.setGravity(ccui.ListView.GRAVITY_CENTER_VERTICAL);
-        // this.addChild(this.listView);
-
-        // this.listItemModel = new ccui.Layout();
-        // this.listItemModel.setTouchEnabled(true);
-        // this.listItemModel.setBackGroundColorType(ccui.Layout.BG_COLOR_SOLID);
-        // this.listItemModel.setBackGroundColor(cc.color(200, 200, 200));
-
-        // this.listButton = new ccui.Button();
-        // this.listButton.setName("ButtonItem");
-        // this.listButton.titleFontSize = 64;
-        // this.listButton.setTouchEnabled(true);
-        // this.listButton.x = this.listItemModel.width / 2;
-        // this.listButton.y = this.listItemModel.height / 2;
-        // this.listItemModel.addChild( this.listButton);
-
-        // this.listView.setItemModel(this.listItemModel);
-
-        // this.listView.setItemsMargin(this.itemMargin);
-
-        // this.delBtn = new ccui.Button();
-        // this.delBtn.setName("delBtn");
-        // this.delBtn.titleFontSize = 32;
-        // this.delBtn.setTouchEnabled(true);
-        // this.delBtn.addTouchEventListener(this.onButtonClick.bind(this), this);
-        // // this.delBtn.x = this.listItemModel.width / 2;
-        // // this.delBtn.y = this.listItemModel.height / 2;
-        // this.delBtn.setTitleText("Delete");
-        // this.addChild(this.delBtn);
-        // this.delBtn.setVisible(false);
-        //
-        // this.upBtn = new ccui.Button();
-        // this.upBtn.setName("upBtn");
-        // this.upBtn.titleFontSize = 32;
-        // this.upBtn.setTouchEnabled(true);
-        // this.upBtn.addTouchEventListener(this.onButtonClick.bind(this), this);
-        // this.upBtn.x = this.listItemModel.width / 2;
-        // this.upBtn.y = this.listItemModel.height / 2;
-        // this.upBtn.setTitleText("BACK");
-        // this.addChild(this.upBtn);
-        // this.upBtn.setVisible(false);
-        //
-        // this.downBtn = new ccui.Button();
-        // this.downBtn.setName("downBtn");
-        // this.downBtn.titleFontSize = 32;
-        // this.downBtn.setTouchEnabled(true);
-        // this.downBtn.addTouchEventListener(this.onButtonClick.bind(this), this);
-        // this.downBtn.x = this.listItemModel.width / 2;
-        // this.downBtn.y = this.listItemModel.height / 2;
-        // this.downBtn.setTitleText("FRONT");
-        // this.addChild(this.downBtn);
-        // this.downBtn.setVisible(false);
-        // //this.init(["[TEST1]","[TEST2]","[TEST3]","[TEST4]","[TEST5]","[TEST6]","[TEST7]","[TEST8]","[TEST9]"]);
-
-
-
         
         $('#fileNameTree').jstree({
             'core' : {
@@ -120,59 +53,10 @@ var UIItemList = cc.Node.extend({
             self.onButtonClick(false);
         });
 
-
         return true;
     },
 
-
-    // setContentSize : function(size) {
-    //     this.WIDTH =  size.width;
-    //     this.HEIGHT = size.height;
-    //     cc.Node.prototype.setContentSize.call(this, size);
-    //     if( this.listView )
-    //         this.listView.setContentSize(size);
-
-    //     if( this.listItemModel ) {
-    //         this.listItemModel.setContentSize(cc.size(this.WIDTH, this.listItemHeight));
-
-    //         var but = this.listItemModel.getChildByName('ButtonItem');
-    //         but.x = this.listItemModel.width * 0.5;
-    //         but.y = this.listItemModel.height * 0.5;
-    //     }
-    //     if(this.delBtn) {
-    //         this.delBtn.x =   this.WIDTH / 2;
-    //         this.delBtn.y = -32;
-    //     }
-
-    //     if(this.upBtn) {
-    //         this.upBtn.x =   this.WIDTH / 2;
-    //         this.upBtn.y = -64;
-    //     }
-
-    //     if(this.downBtn) {
-    //         this.downBtn.x =   this.WIDTH / 2;
-    //         this.downBtn.y = -96;
-    //     }
-    // },
-
     add : function (addItem, node, cb) {
-        // this.totalListItemCount = this.listView.getItems().length + 1;
-
-        // var item = this.listItemModel.clone();
-        // item.setTag(this.totalListItemCount - 1);
-  //      var button = item.getChildByName('ButtonItem');
-   //     button.setTitleText(addItem);
-    //    button.setColor(color.textColor);
-   //     this.listView.pushBackCustomItem(item);
-        // item.cb = cb;
-        // item.itemName = addItem;
-
-        // this.totalListViewHeight = this.listItemHeight * this.totalListItemCount + (this.totalListItemCount - 1) * this.itemMargin;
-        // this.listView.getInnerContainer().setContentSize(cc.size(this.listView.getInnerContainerSize().width, this.totalListViewHeight));
-        // this.listView.jumpToTop();
-
-        // this.setVisible(true);
-
 
         var treeNodeObj = {
             "id" : node.__instanceId,
