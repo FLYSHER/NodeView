@@ -144,9 +144,12 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
             this._selectNode.forEach( item => {
                 item.setPositionX(parseFloat($("input[name=lPosX]").val()));
                 var position = item.getPosition();
-                var anchorPP = item.getParent()._renderCmd._anchorPointInPoints;
-                position.x -= anchorPP.x;
-                position.y -= anchorPP.y;
+                if ( item.getParent() instanceof  ccui.Layout  === false ){
+                    var anchorPP = item.getParent()._renderCmd._anchorPointInPoints;
+                    console.log("lposx change" , anchorPP );
+                    position.x -= anchorPP.x;
+                    position.y -= anchorPP.y;
+                }
                 changePosition(g_currentObj, item.getName(), position );
             });
         }.bind(this));
@@ -155,9 +158,12 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
             this._selectNode.forEach( item => {
                 item.setPositionY(parseFloat($("input[name=lPosY]").val()));
                 var position = item.getPosition();
-                var anchorPP = item.getParent()._renderCmd._anchorPointInPoints;
-                position.x -= anchorPP.x;
-                position.y -= anchorPP.y;
+                if ( item.getParent() instanceof  ccui.Layout  === false ){
+                    var anchorPP = item.getParent()._renderCmd._anchorPointInPoints;
+                    console.log("lposx change" , anchorPP );
+                    position.x -= anchorPP.x;
+                    position.y -= anchorPP.y;
+                }
                 changePosition(g_currentObj, item.getName(), position );
             });
         }.bind(this));
