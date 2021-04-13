@@ -454,8 +454,18 @@ ccui.Text = ccui.Widget.extend(/** @lends ccui.Text# */{
     },
 
     setColor: function (color) {
-        cc.ProtectedNode.prototype.setColor.call(this, color);
-        this._labelRenderer.setColor(color);
+        //todo 웹에서 폰트 색상 지정할때 지정한 색과 다른 문
+        //cc.ProtectedNode.prototype.setColor.call(this, color);
+        //this._labelRenderer.setColor(color);
+
+        //[폰트 공통화] 툴에서 텍스트에 UIAction을 줄 경우 color가 틴트로 먹혀서 색상이 어두워지는 현상 수정 (모바일도 같은 방식으로 수정예정)
+        this._labelRenderer.setFontFillColor(color);
+
+    },
+
+    //[폰트 공통화] 툴에서 텍스트에 UIAction을 줄 경우 color가 틴트로 먹혀서 색상이 어두워지는 현상 수정 (모바일도 같은 방식으로 수정예정)
+    getColor: function (){
+        return this._labelRenderer._getFillStyle();
     },
 
     setTextColor: function (color) {

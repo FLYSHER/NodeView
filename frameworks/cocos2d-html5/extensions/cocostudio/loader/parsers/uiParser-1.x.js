@@ -70,7 +70,7 @@
                 this.generalAttributes(node, options);
                 parser.handle(node, options, resourcePath);
                 this.colorAttributes(node, options);
-                
+
                 parent = curr.parent;
                 curr.parent = null;
                 if (parent instanceof ccui.PageView) {
@@ -78,7 +78,7 @@
                 }
                 else if (parent instanceof ccui.ListView) {
                     parent.pushBackCustomItem(node);
-                } 
+                }
                 else if (parent) {
                     if (!(parent instanceof ccui.Layout)) {
                         if (node.getPositionType() === ccui.Widget.POSITION_PERCENT) {
@@ -212,7 +212,13 @@
         var colorR = options["colorR"];
         var colorG = options["colorG"];
         var colorB = options["colorB"];
-        widget.setColor(cc.color((colorR == null) ? 255 : colorR, (colorG == null) ? 255 : colorG, (colorB == null) ? 255 : colorB));
+
+
+        var color = cc.color((colorR == null) ? 255 : colorR, (colorG == null) ? 255 : colorG, (colorB == null) ? 255 : colorB);
+        if (widget instanceof ccui.Text)        //@Terry  텍스트 폰트 색상 세팅 ccui.Text 별도 처리 (모바일과 색상이 다른 현상 수정)
+            widget.setTextColor(color);
+        else
+            widget.setColor(color);
 
         widget.setFlippedX(options["flipX"]);
         widget.setFlippedY(options["flipY"]);
@@ -480,6 +486,28 @@
         widget.setTouchScaleChangeEnabled(touchScaleChangeAble);
         var text = options["text"] || "";
         if(text) {
+
+            /////////////////////////////////////////////////////////////
+            // 툴에서 shadow, outline 효과 적용하기  (문자열에 아래와 같은 형식의 문자열이 포함되어 있으면 효과 적용)
+            // {shadow(#ffff44,-1,-1)}  그림자 효과
+            // {outline(#ffff44,1)}  외곽선 효과
+            /////////////////////////////////////////////////////////////
+            var replacer = function(match){
+                var shadowMatch =  match.match(/({shadow\s*\()(.*?),(.*?),(.*?)(\)\s*})/);   //{shadow(#ffff44,-1,-1)}  문자열 형식찾기
+                if (shadowMatch && shadowMatch.length>0) {
+                    widget.enableShadow(cc.hexToColor(shadowMatch[2].trim()), cc.size(parseFloat(shadowMatch[3].trim()), parseFloat(shadowMatch[4].trim())), 0);
+                }
+
+                var outlineMatch =  match.match(/({outline\s*\()(.*?),(.*?)(\)\s*})/);       //{outline(#ffff44,1)}  문자열 형식찾기
+                if (outlineMatch && outlineMatch.length>0) {
+                    widget.enableOutline(cc.hexToColor(outlineMatch[2].trim()), parseFloat(outlineMatch[3].trim()));
+                }
+
+                return "";
+            };
+            text = text.replace(/{shadow\s*\(.+?\)\s*}|{outline\s*\(.+?\)\s*}/g, replacer);
+            /////////////////////////////////////////////////////////////
+
             widget._setString(text);
         }
 
@@ -488,6 +516,12 @@
             widget._setFontSize(options["fontSize"]);
         }
         var fn = options["fontName"];
+        //@BJ ADD
+        // 히스토리 : 이 폰트를 받으면 강제로 변환해줌
+        if( fn === null || fn === 'verdana' || fn === '微软雅黑' || fn === 'verdanab' || fn === 'verdanab.ttf' || fn === 'verdana.ttf') {
+            fn = 'RobotoCondensed-Bold';
+        }
+
         if (fn != null) {
             if (cc.sys.isNative) {
                 if (regTTF.test(fn)) {
