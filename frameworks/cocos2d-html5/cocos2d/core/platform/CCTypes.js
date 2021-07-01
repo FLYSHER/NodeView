@@ -361,7 +361,7 @@ cc.defineGetterSetter(_p, "br", _p._getBR, _p._setBR);
 cc.Quad3 = function (bl, br, tl, tr, arrayBuffer, offset) {
     this._arrayBuffer = arrayBuffer || new ArrayBuffer(cc.Quad3.BYTES_PER_ELEMENT);
     this._offset = offset || 0;
-    
+
     var locArrayBuffer = this._arrayBuffer, locOffset = this._offset, locElementLen = cc.Vertex3F.BYTES_PER_ELEMENT;
     this.bl = bl ? new cc.Vertex3F(bl.x, bl.y, bl.z, locArrayBuffer, locOffset) : new cc.Vertex3F(0, 0, 0, locArrayBuffer, locOffset);
     locOffset += locElementLen;
@@ -956,7 +956,7 @@ cc.FontDefinition = function (properties) {
     var _t = this;
     _t.fontName = "Arial";
     _t.fontSize = 12;
-    _t.textAlign = cc.TEXT_ALIGNMENT_CENTER;
+    _t.textAlign = cc.TEXT_ALIGNMENT_LEFT;
     _t.verticalAlign = cc.VERTICAL_TEXT_ALIGNMENT_TOP;
     _t.fillStyle = cc.color(255, 255, 255, 255);
     _t.boundingWidth = 0;
@@ -970,6 +970,7 @@ cc.FontDefinition = function (properties) {
     _t.fontWeight = "normal";
 
     _t.shadowEnabled = false;
+    _t.shadowStyle = cc.color(255,255,255,255);
     _t.shadowOffsetX = 0;
     _t.shadowOffsetY = 0;
     _t.shadowBlur = 0;

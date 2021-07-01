@@ -1,11 +1,67 @@
 <!DOCTYPE html>
 <html>
 <head>
+<!--    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">-->
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <!--    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>-->
+    <link href="public/css/bootstrap.css" rel="stylesheet" type="text/css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+
+    <script src="./textEditor.js"></script>
     <link href="style.css" rel="stylesheet" type="text/css">
+    <link href="editor.css" rel="stylesheet" type="text/css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/jstree.min.js"></script>
+
+    <script type="module" src="acolorpicker.js"></script>
+
+    <script type="text/javascript" src="public/js/bootstrap.js"></script>
+
+
+
+    <!-- jquery -->
+    <link href="public/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+    <!-- Ionicons -->
+    <link href="public/css/ionicons.min.css" rel="stylesheet" type="text/css" />
+    <!-- DATA TABLES -->
+<!--    <link href="/css/jvectormap/jquery-jvectormap-1.2.2.css" rel="stylesheet" type="text/css" />-->
+    <!-- fullCalendar -->
+<!--    <link href="/css/fullcalendar/fullcalendar.css" rel="stylesheet" type="text/css" />-->
+    <!-- Daterange picker -->
+<!--    <link href="/css/daterangepicker/daterangepicker-bs3.css" rel="stylesheet" type="text/css" />-->
+    <!-- Theme style -->
+<!--    <link href="public/css/AdminLTE.css" rel="stylesheet" type="text/css" />-->
+    <!-- Custom style -->
+<!--    <link href="/css/style.css" rel="stylesheet" type="text/css" />-->
+
+    <!--
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.3.0/css/datepicker.min.css" />
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.3.0/css/datepicker3.min.css" />
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.3.0/js/bootstrap-datepicker.min.js"></script>
+    -->
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+
+
+    <![endif]-->
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/diff2html/dist/diff2html.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/diff2html/dist/diff2html.min.js"></script>
+    <!-- CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/diff2html/bundles/css/diff2html.min.css" />
+    <!-- Javascripts -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/diff2html/bundles/js/diff2html-ui.min.js"></script>
+
+
+
+
+
     <meta charset="utf-8">
     <title>Cocos2d-html5 Hello World test</title>
     <link rel="icon" type="image/GIF" href="res/favicon.ico"/>
@@ -36,8 +92,56 @@
 
     <meta name="browsermode" content="application">
     <meta name="x5-page-mode" content="app">
+
+    <style>
+        .btn {
+
+        }
+
+        .btn:hover{
+            color:#fff;
+        }
+
+        .hover4:hover{
+            box-shadow: 200px 0 0 0 rgba(0,0,0,0.25) inset,
+            -200px 0 0 0 rgba(0,0,0,0.25) inset;
+        }
+
+    </style>
 </head>
+
 <body>
+<!-- 모달 영역 -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                <h4 class="modal-title" id="myModalLabel">Option</h4>
+            </div>
+            <div class="modal-body">
+                <p style="font-size:7px">Show Label only</p>
+                <label class="switch">
+                    <input id="showLabel" type="checkbox">
+                    <span class="slider round"></span>
+                </label>
+                <br>
+                <p style="font-size:7px">Show Object Area</p>
+                <label class="switch">
+                    <input checked id="showArea" type="checkbox">
+                    <span class="slider round"></span>
+                </label>
+
+            </div>
+<!--            <div class="modal-footer">-->
+<!--                <button id="loadBanner" type="button" class="btn btn-primary">불러오기</button>-->
+<!--                <button type="button" class="btn btn-default" data-dismiss="modal">취소</button>-->
+<!--            </div>-->
+        </div>
+    </div>
+</div>
+
+<canvas id="gameCanvas" width="480" height="720"></canvas>
 
 <!-- 사이드 메뉴 -->
 <div id="sidenav" class="sidenav">
@@ -84,7 +188,7 @@
                 </div>
             </li>
         </ul>
-        <div id="tab-1" class="tab-widgetContent current">
+        <div id="tab-2" class="tab-widgetContent current">
             <!-- Widget Tree -->
             <div class = "treeWidget">
                 <div id="widgetTree"></div>
@@ -110,7 +214,7 @@
                 </div>
             </li>
         </ul>
-        <div id="tab-1" class="tab-uiAnimContent current">
+        <div id="tab-3" class="tab-uiAnimContent current">
             <!-- UI Animation Widget -->
             <div class = "actionWidget">
                 <div id="actionTree"></div>
@@ -125,10 +229,19 @@
                 <!-- Properties Label 및 가운데 정렬 -->
                 <div align="center">
                     <label id = "propertiesLabel" class="styleLabel">Properties</label>
+
+
+
+
+
                 </div>
             </li>
+
+            <button class="btn btn-info" onclick="openOption();">Option</button>
+<!--            <p>OFF</p><p style="display:none;">ON</p>-->
+
         </ul>
-        <div id="tab-1" class="tab-propertiesContent current">
+        <div id="tab-4" class="tab-propertiesContent current">
             <!-- UI Animation Widget -->
             <table style="width:100%; height:100%; background-color: #353535;" style="table-layout: fixed">
                 <tr>
@@ -195,10 +308,1307 @@
     </div>
 </div>
 <div id="side_hr" class="side_hr"></div>
+
+
+<div id="bottom_hr" class="bottom_hr"></div>
+
+<div id="textEditor" class="textEditor">
+    <fieldset style="height:35px;">
+        <button style="float:left;" class="btn hover4 fontStyle italic" onclick="document.execCommand('italic',false,null);" title="Italicize Highlighted Text"></button>
+        <button style="float:left;" class="btn hover4 fontStyle bold" onclick="document.execCommand( 'bold',false,null);" title="Bold Highlighted Text"></button>
+<!--        <button class="fontStyle underline" onclick="document.execCommand( 'insertHTML',true,'<div>HELLO</div>');"></button>-->
+        <select style="float:left;width:50px;" disabled id="input-font" class="input"  onchange="changeFont (this);">FONT
+            <option value="PPasdfz_xcv">none</option>
+            <option value="Helvetica">Helvetica</option>
+            <option value="Times New Roman">Times New Roman</option>
+            <option value="Sans serif">Sans serif</option>
+            <option value="Courier New">Courier New</option>
+            <option value="Verdana">Verdana</option>
+            <option value="Georgia">Georgia</option>
+            <option value="Palatino">Palatino</option>
+            <option value="Garamond">Garamond</option>
+            <option value="Comic Sans MS">Comic Sans MS</option>
+            <option value="Arial Black">Arial Black</option>
+            <option value="Tahoma">Tahoma</option>
+            <option value="Comic Sans MS">Comic Sans MS</option>
+        </select>
+
+        <!-- font size start -->
+        <select style="float:left;" id="fontSize" onchange="applyFontSize()">
+            <option value="1">1px</option>
+            <option value="1.5">1.5px</option>
+            <option value="2">2px</option>
+            <option value="2.5">2.5px</option>
+            <option value="3">3px</option>
+            <option value="3.5">3.5px</option>
+            <option value="4">4px</option>
+            <option value="4.5">4.5px</option>
+            <option value="5">5px</option>
+            <option value="5.5">5.5px</option>
+            <option value="6">6px</option>
+            <option value="6.5">6.5px</option>
+            <option value="7">7</option>
+            <option value="7.5">7.5px</option>
+            <option value="8">8px</option>
+            <option value="8.5">8.5px</option>
+            <option value="9">9px</option>
+            <option value="9.5">9.5px</option>
+            <option value="10">10px</option>
+            <option value="11">11px</option>
+            <option value="12">12px</option>
+            <option value="13">13px</option>
+            <option value="14" selected>14px</option>
+            <option value="15">15px</option>
+            <option value="16">16px</option>
+            <option value="17">17px</option>
+            <option value="18">18px</option>
+            <option value="19">19px</option>
+            <option value="20">20px</option>
+            <option value="21">21px</option>
+            <option value="22">22px</option>
+            <option value="23">23px</option>
+            <option value="24">24px</option>
+            <option value="25">25px</option>
+            <option value="26">26px</option>
+            <option value="27">27px</option>
+            <option value="28">28px</option>
+            <option value="29">29px</option>
+            <option value="30">30px</option>
+            <option value="31">31px</option>
+            <option value="32">32px</option>
+            <option value="33">33px</option>
+            <option value="34">34px</option>
+            <option value="35">35px</option>
+            <option value="36">36px</option>
+            <option value="37">37px</option>
+            <option value="38">38px</option>
+            <option value="39">39px</option>
+            <option value="40">40px</option>
+            <option value="41">41px</option>
+            <option value="42">42px</option>
+            <option value="43">43px</option>
+            <option value="44">44px</option>
+            <option value="45">45px</option>
+            <option value="46">46px</option>
+            <option value="47">47px</option>
+            <option value="48">48px</option>
+            <option value="49">49px</option>
+            <option value="50">50px</option>
+
+        </select>
+        <!-- font size end -->
+
+<!--        <button class="fontStyle strikethrough" onclick="document.execCommand( 'strikethrough',false,null);"><strikethrough></strikethrough></button>-->
+        <button style="float:left;" class="btn hover4 fontStyle align-left" onclick="document.execCommand( 'justifyLeft',false,null);"><justifyLeft></justifyLeft></button>
+        <button style="float:left;" class="btn hover4 fontStyle align-center" onclick="document.execCommand( 'justifyCenter',false,null);"><justifyCenter></justifyCenter></button>
+        <button style="float:left;" class="btn hover4 fontStyle align-right" onclick="document.execCommand( 'justifyRight',false,null);"><justifyRight></justifyRight></button>
+<!--        <button class="fontStyle redo-apply" onclick="document.execCommand( 'redo',false,null);"><redo></redo></button>-->
+<!--        <button class="fontStyle undo-apply" onclick="document.execCommand( 'undo',false,null);"><undo></undo></button>-->
+<!--        <button class="fontStyle orderedlist" onclick="document.execCommand('insertOrderedList', false, null);"><insertOrderedList></insertOrderedList></button>-->
+<!--        <button class="fontStyle unorderedlist" onclick="document.execCommand('insertUnorderedList',false, null)"><insertUnorderedList></insertUnorderedList></button>-->
+        <button class="btn hover4" style="float:left;" type="button" onclick="applyFontColor();"><img src="./image/color.png" alt=""></button>
+
+
+        <div style="float:left;">
+            <button class="btn hover4" style="z-index:99999;float:left;width:20px;margin-left:-6px;" type="button" onclick="openFontColor();"><img src="./image/downArrow.png" alt=""></button>
+            <div style="z-index:100;top:-315px;position:absolute;background-color:white" class="fontColorEditor">
+                <div acp-show-hsl="no" class="fontColorPicker"></div>
+<!--                <div style="height:15px;" class="a-color-picker-row a-color-picker-single-input outlineValue">-->
+<!--                    <button class="btn btn-success" id="colorOK">확인</button>-->
+<!--                    <button class="btn btn-warning" id="colorCancel">취소</button>-->
+<!--                </div>-->
+            </div>
+            <div class="colorInspector" style="top: 37px;left: 310px;position:absolute;width: 20px;height:3px;background-color:red;"></div>
+        </div>
+
+
+        <button class="btn hover4" style="float:left;" type="button" onclick="applyFontShadow();"><img src="./image/shadow.png" alt=""></button>
+        <div style="float:left;">
+            <button class="btn hover4" style="z-index:99999;float:left;width:20px;margin-left:-6px;" type="button" onclick="openFontShadow();"><img src="./image/downArrow.png" alt=""></button>
+            <div style="z-index:100;top:-357px;position:absolute;background-color:white" class="fontShadowEditor">
+                <div acp-show-hsl="no"  class="fontShadowPicker"></div>
+                <div style="height:15px;" class="a-color-picker-row a-color-picker-single-input outlineValue">
+
+                    <label>X</label>
+                    <input type="number" value="0" aria-valuemax="9" aria-valuemin="-9" maxlength="1">
+                    <label>Y</label>
+                    <input type="number" value="2" aria-valuemax="9" aria-valuemin="-9" maxlength="1">
+                    <label>Blur</label>
+                    <input type="number" value="1" aria-valuemax="9" aria-valuemin="0" maxlength="1">
+                </div>
+<!--                <div style="height:15px;" class="a-color-picker-row a-color-picker-single-input outlineValue">-->
+<!--                    <button class="btn btn-success" id="shadowOK">확인</button>-->
+<!--                    <button class="btn btn-warning" id="shadowCancel">취소</button>-->
+<!--                </div>-->
+            </div>
+
+            <div class="shadowInspector" style="top: 37px;left: 354px;position:absolute;width: 20px;height:3px;background-color:red;"></div>
+
+
+        </div>
+
+
+        <button class="btn hover4" style="float:left;" type="button" onclick="applyFontOutline();"><img src="./image/outline.png" alt=""></button>
+
+        <div style="float:left;">
+            <button class="btn hover4" style="z-index:99999;float:left;width:20px;margin-left:-6px;" type="button" onclick="openFontOutline();"><img src="./image/downArrow.png" alt=""></button>
+            <div style="z-index:100;top:-357px;position:absolute;background-color:white" class="fontOutlineEditor">
+                <div acp-show-hsl="no"  class="fontOutlinePicker"></div>
+                <div style="height:15px;" class="a-color-picker-row a-color-picker-single-input outlineValue">
+                    <label>외곽선 두께</label>
+                    <input type="number" value="2" aria-valuemax="9" aria-valuemin="0" maxlength="1">
+                </div>
+<!--                <div style="height:15px;" class="a-color-picker-row a-color-picker-single-input outlineValue">-->
+<!--                    <button class="btn btn-success" id="outlineOK">확인</button>-->
+<!--                    <button class="btn btn-warning" id="outlineCancel">취소</button>-->
+<!--                </div>-->
+            </div>
+
+            <div class="outlineInspector" style="top: 37px;left: 399px;position:absolute;width: 20px;height:3px;background-color:red;"></div>
+
+        </div>
+
+        <div style="float:left;">
+            <button class="btn btn-info" onclick="onCopyClick();" style="margin-left:10px;width:40px;">Copy</button>
+        </div>
+
+        <!--        <button style="width:100px;"class="color-apply" id="fontColor">폰트 컬러 변경</button>-->
+<!--        <button style="width:100px;"class="color-apply" id="fontShadow">그림자 변경</button>-->
+<!--        <button style="width:100px;"class="color-apply" id="fontOutline">외곽선 변경</button>-->
+
+
+
+<!--        <div class="picker"-->
+<!--             acp-color="#EFE9E7"-->
+<!--             acp-palette="red|#ffc107|rgb(255,221,0)">-->
+<!--        </div>-->
+<!--        <div class="picker"-->
+<!--             acp-color="#EFE9E7"-->
+<!--             acp-palette="PALETTE_MATERIAL_CHROME"-->
+<!--             acp-palette-editable>-->
+<!--        </div>-->
+
+    </fieldset>
+
+    <div style="color:#ffffff" id="editor1" contenteditable="true"></div>
+</div>
+
+
+
 <script src="res/loading.js"></script>
-<canvas id="gameCanvas" width="480" height="720"></canvas>
 <script src="frameworks/cocos2d-html5/CCBoot.js"></script>
 <script cocos src="main.js"></script>
 <script src="src/DownloadCurrent.js"></script>
+
+
+<script>
+
+    function onCopyClick(){
+        if(!selectedText){
+            alert('선택된 richText가 없습니다.');
+            return;
+        }
+
+        var text = RockNUI.RichTextHtmlParser.ParseHTML(replaceHtml(editor.innerHTML));
+
+        copyToClipboard(text);
+
+        alert('복사 성공');
+    }
+    function openOption(){
+        $('#myModal').modal('show');
+    }
+    function alignModal(){
+        var height = 500;
+        var marginVal = Math.max(0,($(window).height()-height)/2);
+        $('.modal-dialog').css("margin-top",marginVal);
+        // alert('모달 정렬'+$(window).height()+'/'+$('.modal-dialog').height()+'/'+marginVal);
+    }
+    alignModal();
+
+    var fontColorEditor;
+    var fontShadowEditor;
+    var fontOutlineEditor;
+
+    var fontColorPicker;
+    var fontShadowPicker;
+    var fontOutlinePicker;
+
+    var fontColorInspector, fontShadowInspector, fontOutlineInspector;
+    // AColorPicker.from('.picker')
+    //     .on('change', (picker, color) => {
+    //         document.body.style.backgroundColor = color;
+    //     })
+    //     .on('coloradd', (picker, color) => {
+    //         // color added: color
+    //         // modified palette: picker.palette
+    //     })
+    //     .on('colorremove', (picker, color) => {
+    //         // color removed: color
+    //         // modified palette: picker.palette
+    //     });
+
+    var editor;
+
+    $(document).ready(function(){
+        fontColorPicker = AColorPicker.from('.fontColorPicker')[0];
+        fontShadowPicker = AColorPicker.from('.fontShadowPicker')[0];
+        fontOutlinePicker = AColorPicker.from('.fontOutlinePicker')[0];
+
+        fontColorInspector = document.getElementsByClassName('colorInspector')[0];
+        fontShadowInspector = document.getElementsByClassName('shadowInspector')[0];
+        fontOutlineInspector = document.getElementsByClassName('outlineInspector')[0];
+
+        // fontColorInspector.style.border = "1px solid black";
+        // fontShadowInspector.style.border = "1px solid black";
+        // fontOutlineInspector.style.border = "1px solid black";
+
+        fontColorPicker.on('change', (picker, color) => {
+            fontColorInspector.style.backgroundColor = color;
+        });
+
+        fontShadowPicker.on('change', (picker, color) => {
+            fontShadowInspector.style.backgroundColor = color;
+        });
+
+        fontOutlinePicker.on('change', (picker, color) => {
+            fontOutlineInspector.style.backgroundColor = color;
+        });
+
+
+        fontColorEditor = document.getElementsByClassName('fontColorEditor')[0];
+        fontShadowEditor = document.getElementsByClassName('fontShadowEditor')[0];
+        fontOutlineEditor = document.getElementsByClassName('fontOutlineEditor')[0];
+
+        hide(fontColorEditor);
+        hide(fontShadowEditor);
+        hide(fontOutlineEditor);
+
+        editor = document.getElementById('editor1');
+        editor.innerHTML = '';
+        editor.contentEditable = false;
+        editor.style.backgroundColor = '#444444';
+
+
+        document.getElementById("editor1").addEventListener("input", function() {
+            onEditorChanged();
+        }, false);
+
+
+        $('#colorCancel').click(function(e){
+            openFontColor();
+        });
+
+        $('#shadowCancel').click(function(e){
+            openFontShadow();
+        });
+
+        $('#outlineCancel').click(function(e){
+            openFontOutline();
+        });
+    });
+
+
+
+    function applyFontShadow(){
+        var c = AColorPicker.parseColor(fontShadowPicker.color,"rgb");
+        c = {
+            r : c[0],
+            g : c[1],
+            b : c[2]
+        }
+
+        var offsetX = parseInt(fontShadowEditor.querySelectorAll('input')[5].value);
+        var offsetY = parseInt(fontShadowEditor.querySelectorAll('input')[6].value);
+        var blur    = parseInt(fontShadowEditor.querySelectorAll('input')[7].value);
+
+        if(isNaN(offsetX)){
+            offsetX = 0;
+        }
+
+        if(isNaN(offsetY)){
+            offsetY = 2;
+        }
+
+        if(isNaN(blur)){
+            blur = 1;
+        }
+
+
+        console.log(c,offsetX,offsetY,blur);
+
+        setShadow(c, offsetX, offsetY, blur);
+
+        onEditorChanged();
+
+    }
+
+    function applyFontOutline(){
+        var c = AColorPicker.parseColor(fontOutlinePicker.color,"rgb");
+        c = {
+            r : c[0],
+            g : c[1],
+            b : c[2]
+        }
+
+        var width = parseInt(fontOutlineEditor.querySelectorAll('input')[5].value);
+
+        if(isNaN(width)){
+            width = 1;
+        }
+
+        setOutline(c, width);
+
+        onEditorChanged();
+
+    }
+
+    function onEditorChanged(){
+        if(!selectedText) return;
+
+        if(!!selectedText.getChildByName('richText')){
+            selectedText.getChildByName('richText').removeFromParent(true);
+        }
+
+
+        var text = RockNUI.RichTextHtmlParser.ParseHTML(replaceHtml(editor.innerHTML));
+
+        var parseRes = RockNUI.RichTextParser.Parse(selectedText, text);
+
+        if(!!parseRes){
+            selectedText.setString('');
+            parseRes.setName('richText');
+            selectedText.addChild(parseRes);
+            parseRes._render();
+            parseRes.refreshParentSize();
+        }
+
+
+
+    }
+
+    function setFontSize(size) {
+        var targetShadow = size+'px';
+
+        const sel = window.getSelection();
+        const range = sel.getRangeAt(0);
+        const {
+            commonAncestorContainer,
+            startContainer,
+            endContainer,
+            startOffset,
+            endOffset,
+        } = range;
+        const nodes = [];
+
+        // console.group("range");
+        //
+        // console.log("range", range);
+        // console.log("commonAncestorContainer", commonAncestorContainer);
+        // console.log("startContainer", startContainer);
+        // console.log("endContainer", endContainer);
+        // console.log("startOffset", startOffset);
+        // console.log("endOffset", endOffset);
+        // console.log("startContainer.parentNode", startContainer.parentNode);//
+        // console.groupEnd();
+
+        if (startContainer === endContainer) {
+            //이때는 무조건 surround하는게 맞는거같음 ..
+            // console.warn('check none RETURN');
+
+            var span = document.createElement("span");
+
+            span.style.fontSize = targetShadow;
+
+            range.surroundContents(span);
+            // console.warn('same container');
+
+            return;
+        }
+
+        // get all posibles selected nodes
+        function getNodes(childList) {
+            // console.group("***** getNode: ", childList);
+            childList.forEach((node) => {
+                // console.log("node:", node, "nodoType", node.nodeType);
+
+                const nodeSel = sel.containsNode(node, true);
+                // console.log("nodeSel", nodeSel);
+
+                // if is not selected
+                if (!nodeSel) return;
+
+                const tempStr = node.nodeValue;
+                // console.log("nodeValue:", tempStr);
+
+                if (node.nodeType === 3 && tempStr.replace(/^\s+|\s+$/gm, "") !== "") {
+                    // console.log("nodo agregado");
+                    nodes.push(node);
+                }
+
+                if (node.nodeType === 1) {
+                    if (node.childNodes) getNodes(node.childNodes);
+                }
+            });
+            console.groupEnd();
+        }
+
+        getNodes(commonAncestorContainer.childNodes);
+
+        console.log(nodes);
+
+        nodes.forEach((node, index, listObj) => {
+            const { nodeValue } = node;
+            let text, prevText, nextText;
+
+            if (index === 0) {
+                prevText = nodeValue.substring(0, startOffset);
+                text = nodeValue.substring(startOffset);
+            } else if (index === listObj.length - 1) {
+                text = nodeValue.substring(0, endOffset);
+                nextText = nodeValue.substring(endOffset);
+            } else {
+                text = nodeValue;
+            }
+
+
+
+
+
+
+            const { parentNode } = node;
+
+            console.warn(' parentNode =>>>> ',parentNode);
+
+            if( checkSpan(parentNode) ) {
+                console.warn('check span');
+
+                parentNode.style.fontSize = targetShadow;
+            } else {
+                var span = document.createElement("span");
+                span.append(document.createTextNode(text));
+                span.style.fontSize = targetShadow;
+
+                parentNode.replaceChild(span, node);
+
+                if (prevText) {
+                    const prevDOM = document.createTextNode(prevText);
+                    parentNode.insertBefore(prevDOM, span);
+                }
+
+                if (nextText) {
+                    const nextDOM = document.createTextNode(nextText);
+                    parentNode.insertBefore(nextDOM, span.nextSibling);
+                }
+            }
+
+
+
+
+
+        });
+
+        sel.removeRange(range);
+
+        clearSelection();
+
+        window.getSelection().empty();
+    }
+
+    function checkSelectionHasAllSameShadow(targetShadow){
+        var isAllSame = true;
+
+        const sel = window.getSelection();
+        const range = sel.getRangeAt(0);
+        const {
+            commonAncestorContainer,
+            startContainer,
+            endContainer,
+            startOffset,
+            endOffset,
+        } = range;
+        const nodes = [];
+
+        if (startContainer === endContainer) {
+            // if(checkShadow(startContainer.parentNode)){
+            //     if(startContainer.parentNode.style.textShadow === targetShadow){
+            //         return true;
+            //     }
+            // }
+            return false;
+        }
+
+        // get all posibles selected nodes
+        function getNodes(childList) {
+            // console.group("***** getNode: ", childList);
+            childList.forEach((node) => {
+                // console.log("node:", node, "nodoType", node.nodeType);
+
+                const nodeSel = sel.containsNode(node, true);
+                // console.log("nodeSel", nodeSel);
+
+                // if is not selected
+                if (!nodeSel) return;
+
+                const tempStr = node.nodeValue;
+                // console.log("nodeValue:", tempStr);
+
+                if (node.nodeType === 3 && tempStr.replace(/^\s+|\s+$/gm, "") !== "") {
+                    // console.log("nodo agregado");
+                    nodes.push(node);
+                }
+
+                if (node.nodeType === 1) {
+                    if (node.childNodes) getNodes(node.childNodes);
+                }
+            });
+            console.groupEnd();
+        }
+
+        getNodes(commonAncestorContainer.childNodes);
+
+        console.log(nodes);
+
+        nodes.forEach((node, index, listObj) => {
+            const { nodeValue } = node;
+            let text, prevText, nextText;
+
+            if (index === 0) {
+                prevText = nodeValue.substring(0, startOffset);
+                text = nodeValue.substring(startOffset);
+            } else if (index === listObj.length - 1) {
+                text = nodeValue.substring(0, endOffset);
+                nextText = nodeValue.substring(endOffset);
+            } else {
+                text = nodeValue;
+            }
+
+
+
+
+
+
+            const { parentNode } = node;
+
+            console.warn(' parentNode =>>>> ',parentNode);
+
+
+            if( checkShadow(parentNode) ){
+                console.warn('check shadow');
+
+                if(parentNode.style.textShadow.replace(/ /g, '') !== targetShadow.replace(/ /g,'')){
+                    isAllSame = false;
+                }
+
+            } else if( checkOutline(parentNode) ){
+                console.warn('check outline');
+
+                isAllSame = false;
+
+            } else if( checkMixedStatus(parentNode) ) {
+                isAllSame = false;
+
+            } else if( checkSpan(parentNode) ) {
+                console.warn('check span');
+                isAllSame = false;
+
+            } else {
+                isAllSame = false;
+
+            }
+
+
+
+
+
+        });
+
+        return isAllSame;
+    }
+
+    function checkSelectionHasAllSameOutline(targetShadow){
+        var isAllSame = true;
+
+        const sel = window.getSelection();
+        const range = sel.getRangeAt(0);
+        const {
+            commonAncestorContainer,
+            startContainer,
+            endContainer,
+            startOffset,
+            endOffset,
+        } = range;
+        const nodes = [];
+
+        if (startContainer === endContainer) {
+            // if(checkShadow(startContainer.parentNode)){
+            //     if(startContainer.parentNode.style.textShadow === targetShadow){
+            //         return true;
+            //     }
+            // }
+            return false;
+        }
+
+        // get all posibles selected nodes
+        function getNodes(childList) {
+            console.group("***** getNode: ", childList);
+            childList.forEach((node) => {
+                console.log("node:", node, "nodoType", node.nodeType);
+
+                const nodeSel = sel.containsNode(node, true);
+                console.log("nodeSel", nodeSel);
+
+                // if is not selected
+                if (!nodeSel) return;
+
+                const tempStr = node.nodeValue;
+                console.log("nodeValue:", tempStr);
+
+                if (node.nodeType === 3 && tempStr.replace(/^\s+|\s+$/gm, "") !== "") {
+                    console.log("nodo agregado");
+                    nodes.push(node);
+                }
+
+                if (node.nodeType === 1) {
+                    if (node.childNodes) getNodes(node.childNodes);
+                }
+            });
+            console.groupEnd();
+        }
+
+        getNodes(commonAncestorContainer.childNodes);
+
+        console.log(nodes);
+
+        nodes.forEach((node, index, listObj) => {
+            const { nodeValue } = node;
+            let text, prevText, nextText;
+
+            if (index === 0) {
+                prevText = nodeValue.substring(0, startOffset);
+                text = nodeValue.substring(startOffset);
+            } else if (index === listObj.length - 1) {
+                text = nodeValue.substring(0, endOffset);
+                nextText = nodeValue.substring(endOffset);
+            } else {
+                text = nodeValue;
+            }
+
+
+
+
+
+
+            const { parentNode } = node;
+
+            console.warn(' parentNode =>>>> ',parentNode);
+
+
+            if( checkOutline(parentNode) ){
+                console.warn('check shadow');
+
+                if(parentNode.style.textShadow.replace(/ /g,'') !== targetShadow.replace(/ /g,'')){
+                    isAllSame = false;
+                }
+
+            } else if( checkShadow(parentNode) ){
+                console.warn('check outline');
+
+                isAllSame = false;
+
+            } else if( checkMixedStatus(parentNode) ) {
+                isAllSame = false;
+
+            } else if( checkSpan(parentNode) ) {
+                console.warn('check span');
+                isAllSame = false;
+
+            } else {
+                isAllSame = false;
+
+            }
+
+
+
+
+
+        });
+
+        return isAllSame;
+    }
+
+    function setShadow(shadowColor, shadowOffsetX, shadowOffsetY, shadowBlur) {
+        var targetShadow = "rgb("+shadowColor.r+', '+shadowColor.g+', ' +shadowColor.b+') '+shadowOffsetX+'px '+shadowOffsetY+'px '+shadowBlur+'px';
+
+        if(checkSelectionHasAllSameShadow(targetShadow)){
+            // console.log("ALL");
+            targetShadow = "";
+        }
+
+        const sel = window.getSelection();
+        const range = sel.getRangeAt(0);
+        const {
+            commonAncestorContainer,
+            startContainer,
+            endContainer,
+            startOffset,
+            endOffset,
+        } = range;
+        const nodes = [];
+
+        // console.group("range");
+        //
+        // console.log("range", range);
+        // console.log("commonAncestorContainer", commonAncestorContainer);
+        // console.log("startContainer", startContainer);
+        // console.log("endContainer", endContainer);
+        // console.log("startOffset", startOffset);
+        // console.log("endOffset", endOffset);
+        // console.log("startContainer.parentNode", startContainer.parentNode);//
+        // console.groupEnd();
+
+        if (startContainer === endContainer) {
+            //이때는 무조건 surround하는게 맞는거같음 ..
+            var span = document.createElement("span");
+
+            span.style.textShadow = targetShadow;
+
+            range.surroundContents(span);
+            return;
+        }
+
+        // get all posibles selected nodes
+        function getNodes(childList) {
+            // console.group("***** getNode: ", childList);
+            childList.forEach((node) => {
+                // console.log("node:", node, "nodoType", node.nodeType);
+
+                const nodeSel = sel.containsNode(node, true);
+                // console.log("nodeSel", nodeSel);
+
+                // if is not selected
+                if (!nodeSel) return;
+
+                const tempStr = node.nodeValue;
+                // console.log("nodeValue:", tempStr);
+
+                if (node.nodeType === 3 && tempStr.replace(/^\s+|\s+$/gm, "") !== "") {
+                    // console.log("nodo agregado");
+                    nodes.push(node);
+                }
+
+                if (node.nodeType === 1) {
+                    if (node.childNodes) getNodes(node.childNodes);
+                }
+            });
+            console.groupEnd();
+        }
+
+        getNodes(commonAncestorContainer.childNodes);
+
+        console.log(nodes);
+
+        nodes.forEach((node, index, listObj) => {
+            const { nodeValue } = node;
+            let text, prevText, nextText;
+
+            if (index === 0) {
+                prevText = nodeValue.substring(0, startOffset);
+                text = nodeValue.substring(startOffset);
+            } else if (index === listObj.length - 1) {
+                text = nodeValue.substring(0, endOffset);
+                nextText = nodeValue.substring(endOffset);
+            } else {
+                text = nodeValue;
+            }
+
+
+
+
+
+
+            const { parentNode } = node;
+
+            console.warn(' parentNode =>>>> ',parentNode);
+
+
+            if( checkShadow(parentNode) ){
+                console.warn('check shadow');
+
+                parentNode.style.textShadow = targetShadow;
+            } else if( checkOutline(parentNode) ){
+                console.warn('check outline');
+
+                // parentNode.style.textShadow += (','+targetShadow);
+                parentNode.style.textShadow = targetShadow; //outline일 경우 shadow로 덮어쓰게 수정
+
+            } else if( checkMixedStatus(parentNode) ) {
+                console.warn('check mixed dddddd');
+
+                parentNode.style.textShadow = getShadowCSSInMixedStatus(targetShadow, parentNode.style.textShadow);
+            } else if( checkSpan(parentNode) ) {
+                console.warn('check span');
+
+                parentNode.style.textShadow = targetShadow;
+            } else {
+                var span = document.createElement("span");
+                span.append(document.createTextNode(text));
+                span.style.textShadow = targetShadow;
+
+                parentNode.replaceChild(span, node);
+
+                if (prevText) {
+                    const prevDOM = document.createTextNode(prevText);
+                    parentNode.insertBefore(prevDOM, span);
+                }
+
+                if (nextText) {
+                    const nextDOM = document.createTextNode(nextText);
+                    parentNode.insertBefore(nextDOM, span.nextSibling);
+                }
+            }
+
+
+
+
+
+        });
+
+        sel.removeRange(range);
+
+        clearSelection();
+
+        window.getSelection().empty();
+    }
+
+    function setOutline(outlineColor, outlineWidth) {
+        var targetShadow = '';
+        targetShadow += "rgb("+outlineColor.r+', '+outlineColor.g+', ' +outlineColor.b+') '+-outlineWidth+'px '+-outlineWidth+'px '+'0px,';
+        targetShadow += "rgb("+outlineColor.r+', '+outlineColor.g+', ' +outlineColor.b+') '+outlineWidth+'px '+-outlineWidth+'px '+'0px,';
+        targetShadow += "rgb("+outlineColor.r+', '+outlineColor.g+', ' +outlineColor.b+') '+-outlineWidth+'px '+outlineWidth+'px '+'0px,';
+        targetShadow += "rgb("+outlineColor.r+', '+outlineColor.g+', ' +outlineColor.b+') '+outlineWidth+'px '+outlineWidth+'px '+'0px';
+
+        if(checkSelectionHasAllSameOutline(targetShadow)){
+            targetShadow = "";
+        }
+
+        const sel = window.getSelection();
+        const range = sel.getRangeAt(0);
+        const {
+            commonAncestorContainer,
+            startContainer,
+            endContainer,
+            startOffset,
+            endOffset,
+        } = range;
+        const nodes = [];
+
+        // console.group("range");
+        //
+        // console.log("range", range);
+        // console.log("commonAncestorContainer", commonAncestorContainer);
+        // console.log("startContainer", startContainer);
+        // console.log("endContainer", endContainer);
+        // console.log("startOffset", startOffset);
+        // console.log("endOffset", endOffset);
+        // console.log("startContainer.parentNode", startContainer.parentNode);
+        // console.groupEnd();
+
+        if (startContainer === endContainer) {
+            var span = document.createElement("span");
+
+            span.style.textShadow = targetShadow;
+
+            range.surroundContents(span);
+
+            return;
+        }
+
+        // get all posibles selected nodes
+        function getNodes(childList) {
+            // console.group("***** getNode: ", childList);
+            childList.forEach((node) => {
+                // console.log("node:", node, "nodoType", node.nodeType);
+
+                const nodeSel = sel.containsNode(node, true);
+                // console.log("nodeSel", nodeSel);
+
+                // if is not selected
+                if (!nodeSel) return;
+
+                const tempStr = node.nodeValue;
+                // console.log("nodeValue:", tempStr);
+
+                if (node.nodeType === 3 && tempStr.replace(/^\s+|\s+$/gm, "") !== "") {
+                    // console.log("nodo agregado");
+                    nodes.push(node);
+                }
+
+                if (node.nodeType === 1) {
+                    if (node.childNodes) getNodes(node.childNodes);
+                }
+            });
+            console.groupEnd();
+        }
+
+        getNodes(commonAncestorContainer.childNodes);
+
+        console.log(nodes);
+
+        nodes.forEach((node, index, listObj) => {
+            const { nodeValue } = node;
+            let text, prevText, nextText;
+
+            if (index === 0) {
+                prevText = nodeValue.substring(0, startOffset);
+                text = nodeValue.substring(startOffset);
+            } else if (index === listObj.length - 1) {
+                text = nodeValue.substring(0, endOffset);
+                nextText = nodeValue.substring(endOffset);
+            } else {
+                text = nodeValue;
+            }
+
+            const { parentNode } = node;
+
+            if( checkOutline(parentNode) ){
+                console.warn('check shadow');
+
+                parentNode.style.textShadow = targetShadow;
+            } else if( checkShadow(parentNode) ){
+                console.warn('check outline');
+
+                // parentNode.style.textShadow += (','+targetShadow);
+                parentNode.style.textShadow = targetShadow;//shadow 일 경우 outline으로 덮어쓰게 수정
+
+            } else if( checkMixedStatus(parentNode) ) {
+                console.warn('check mixed dddddd');
+
+                parentNode.style.textShadow = getOutlineCSSInMixedStatus(targetShadow, parentNode.style.textShadow);
+            } else if( checkSpan(parentNode) ) {
+                console.warn('check span');
+
+                parentNode.style.textShadow = targetShadow;
+            } else {
+                var span = document.createElement("span");
+                span.append(document.createTextNode(text));
+                span.style.textShadow = targetShadow;
+
+                parentNode.replaceChild(span, node);
+
+                if (prevText) {
+                    const prevDOM = document.createTextNode(prevText);
+                    parentNode.insertBefore(prevDOM, span);
+                }
+
+                if (nextText) {
+                    const nextDOM = document.createTextNode(nextText);
+                    parentNode.insertBefore(nextDOM, span.nextSibling);
+                }
+            }
+
+        });
+
+        sel.removeRange(range);
+    }
+
+
+
+    function resizeTextEditor(){
+        var editor = $('#editor1')[0];
+
+        var tempHeight = (window.innerHeight - parseInt(document.getElementById("Cocos2dGameContainer").style.height) - 100);
+        var tempWidth =  (parseInt(document.getElementById("Cocos2dGameContainer").style.width) - 40);
+
+        editor.style.height = tempHeight + 'px';
+        editor.style.width = tempWidth + 'px';
+    }
+
+    var selectedText = null;
+
+
+    var showOnlyLabel = false;
+    var showOnlyLabelBtn = $("input[id='showLabel']");
+    showOnlyLabelBtn.click(function(){
+        // $("p").toggle();
+        // console.log(t);
+        showOnlyLabel = this.checked;
+
+        cc.eventManager.dispatchCustomEvent( 'refreshTree', showOnlyLabel );
+    });
+
+    var showObjectArea = true;
+    var showObjectAreaBtn = $("input[id='showArea']");
+    showObjectAreaBtn.click(function(){
+        // $("p").toggle();
+        // console.log(t);
+        showObjectArea = this.checked;
+
+        cc.eventManager.dispatchCustomEvent( 'refreshArea', showObjectArea );
+    });
+
+    function toggleDiv(div){
+        if(!div || !div.style) return;
+
+        if(div.style.display === "none"){
+            div.style.display="block";
+        } else if(div.style.display === "block"){
+            div.style.display="none";
+        }
+    }
+    function hide(div){
+        if(!div || !div.style) return;
+        div.style.display="none";
+    }
+
+    function show(div){
+        if(!div || !div.style) return;
+        div.style.display="block";
+    }
+
+
+    //region [Util]
+    function copyToClipboard(val) {
+        const t = document.createElement("textarea");
+        document.body.appendChild(t);
+        t.value = val;
+        t.select();
+        document.execCommand('copy');
+        document.body.removeChild(t);
+    }
+
+    function replaceHtml(text){
+        var replaceHtmlEntites = (function() {
+            var translate_re = /&(nbsp|amp|quot|lt|gt);/g;
+            var translate = {
+                "nbsp": " ",
+                "amp" : "&",
+                "quot": "\"",
+                "lt"  : "<",
+                "gt"  : ">"
+            };
+            return function(s) {
+                return ( s.replace(translate_re, function(match, entity) {
+                    return translate[entity];
+                }) );
+            }
+        })();
+
+        var cleanText = text.replace(/^\xa0*([^\xa0]*)\xa0*$/g,"");
+        cleanText = replaceHtmlEntites(text);
+
+        return cleanText;
+
+    }
+
+    function getOutlineCSSInMixedStatus(targetShadow, shadowStr){
+        //shadow css에서 실제 그림자부분만 바꿔치기하는 함수
+        var arr = shadowStr.split(',');
+
+        for(var i = 0; i<arr.length; i++){
+            if(extractOffsetInString(arr[i])[2] !== 0){
+
+                //이거는 블러값이 0이 아니므로 그림자 맞음 건드리면 안됌
+
+            }
+            else {
+                //여기는 아웃라인이니깐 덮어쓰기 해줘야됌
+                arr[i] = targetShadow;
+
+            }
+        }
+
+        var newShadowStr = '';
+
+        for(var i = 0; i<arr.length;i++){
+            newShadowStr += arr[i];
+            if(i !== arr.length-1){
+                newShadowStr += ',';
+            }
+        }
+
+        return newShadowStr;
+    }
+
+    function getShadowCSSInMixedStatus(targetShadow, shadowStr){
+        //shadow css에서 실제 그림자부분만 바꿔치기하는 함수
+        var arr = shadowStr.split(',');
+
+        for(var i = 0; i<arr.length; i++){
+            if(extractOffsetInString(arr[i])[2] === 0){
+
+                //이거는 outline용 shadow이다...
+
+            }
+            else {
+                //여기가 그림자용 교체하면됌 여기서
+
+                arr[i] = targetShadow;
+            }
+        }
+
+        var newShadowStr = '';
+
+        for(var i = 0; i<arr.length;i++){
+            newShadowStr += arr[i];
+            if(i !== arr.length-1){
+                newShadowStr += ',';
+            }
+        }
+
+        return newShadowStr;
+    }
+
+    function extractRGBInString(str){
+        var rgbObj = str.split('rgb(')[1].split(')')[0].split(',');
+        for(var i = 0; i<rgbObj.length; i++){
+            rgbObj[i] = parseInt(rgbObj[i].trim());
+        }
+
+        rgbObj = {
+            r:rgbObj[0],
+            g:rgbObj[1],
+            b:rgbObj[2]
+        }
+    }
+
+    function extractOffsetInString(str){
+        var obj = str.split(')')[1].split('px');
+
+        for(var i = 0; i<obj.length;i++){
+            obj[i] = parseFloat(obj[i].trim());
+        }
+
+        return obj;
+    }
+
+    function equals(x, y) {
+        if (x === y) return true; // if both x and y are null or undefined and exactly the same
+
+        if (!(x instanceof Object) || !(y instanceof Object)) return false;
+        // if they are not strictly equal, they both need to be Objects
+        if (x.constructor !== y.constructor) return false;
+        // they must have the exact same prototype chain, the closest we can do is
+        // test there constructor.
+        for (var p in x) {
+            if (!x.hasOwnProperty(p)) continue;
+            // other properties were tested using x.constructor === y.constructor
+
+            if (!y.hasOwnProperty(p)) return false;
+            // allows to compare x[ p ] and y[ p ] when set to undefined
+
+            if (x[p] === y[p]) continue;
+            // if they have the same strict value or identity then they are equal
+
+            if (typeof(x[p]) !== "object") return false;
+            // Numbers, Strings, Functions, Booleans must be strictly equal
+
+            if (!Object.equals(x[p], y[p])) return false;
+            // Objects and Arrays must be tested recursively
+
+        }
+        for (p in y) {
+            if (y.hasOwnProperty(p) && !x.hasOwnProperty(p)) return false;
+            // allows x[ p ] to be set to undefined
+
+        }
+
+        return true;
+    }
+
+    function checkMixedStatus(node){
+        if(!!node && !!node.style && !!node.style.textShadow && node.style.textShadow !== ''){
+            var temp = node.style.textShadow;
+
+            if((temp.match(/rgb/g) || []).length === 5){
+                return true;
+            }
+        }
+        return false;
+    }
+    function checkShadow(node){
+        if(!!node && !!node.style && !!node.style.textShadow && node.style.textShadow !== ''){
+            var temp = node.style.textShadow;
+
+            if((temp.match(/rgb/g) || []).length === 1){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function checkOutline(node){
+        if(!!node && !!node.style && !!node.style.textShadow && node.style.textShadow !== ''){
+            var temp = node.style.textShadow;
+
+            if((temp.match(/rgb/g) || []).length === 4){
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    function checkSpan(node) {
+        return !!node && !!node.tagName && node.tagName === 'SPAN';
+    }
+
+    function clearSelection(){
+        if (window.getSelection) {
+            if (window.getSelection().empty) {  // Chrome
+                window.getSelection().empty();
+            } else if (window.getSelection().removeAllRanges) {  // Firefox
+                window.getSelection().removeAllRanges();
+            }
+        } else if (document.selection) {  // IE?
+            document.selection.empty();
+        }
+    }
+    //endregion
+
+
+
+
+
+
+    function openFontColor(){
+        toggleDiv(fontColorEditor);
+        hide(fontShadowEditor);
+        hide(fontOutlineEditor);
+    }
+
+    function openFontShadow(){
+        toggleDiv(fontShadowEditor);
+        hide(fontColorEditor);
+        hide(fontOutlineEditor);
+    }
+
+    function openFontOutline(){
+        toggleDiv(fontOutlineEditor);
+        hide(fontShadowEditor);
+        hide(fontColorEditor);
+    }
+
+
+
+    function applyFontColor(){
+        var mycolor = AColorPicker.parseColor(fontColorPicker.color,"hex");
+        console.log(mycolor);
+        document.execCommand('foreColor', false, mycolor);
+        clearSelection();
+    }
+
+    function applyFontSize(){
+        var mycolor = parseFloat(document.getElementById("fontSize").value);
+        console.log("!!!",mycolor);
+
+        setFontSize(mycolor);
+        clearSelection();
+        onEditorChanged();
+    }
+</script>
 </body>
 </html>
+
+
+

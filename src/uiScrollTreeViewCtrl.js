@@ -216,7 +216,9 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
         if(!!finalNode){
             setTimeout(function(){
                 $('#widgetTree').jstree("deselect_all");
-                $('#widgetTree').jstree('select_node',self.recursiveTreeCheck(treeObj,finalNode.name));
+                if(finalNode){
+                    $('#widgetTree').jstree('select_node',self.recursiveTreeCheck(treeObj,finalNode.name));
+                }
             },50);
         }
 
@@ -257,12 +259,24 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
 
     recursiveTreeCheck : function(arr, name){
         for(var idx = 0; idx < arr.length;idx++){
-            if(arr[idx].text === name) return arr[idx].id;
+            if(arr[idx].text === name) {
+                // cc.log("찾았다!!! ", arr[idx]);
+                return arr[idx].id;
+            }
 
             if(!!arr[idx] && !!arr[idx].children){
-                return this.recursiveTreeCheck(arr[idx].children, name);
+                var flag = this.recursiveTreeCheck(arr[idx].children, name);
+
+                if(flag === false){
+                    // cc.log("여기에 없음... ", arr[idx].children);
+                }
+                else {
+                    return flag;
+                }
             }
         }
+
+        return false;
     },
 
     createUIChildList :function (node) {
@@ -313,6 +327,9 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
             line++;
 
             var info = treeInfo[i];
+
+
+
             var obj = {
                 "id" : info.info.id,
                 "text" : info.info.name,
@@ -332,12 +349,44 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
             this._treeWidgetObj[ info.info.id ].initScaleX = info.info.obj.getScaleX();
             this._treeWidgetObj[ info.info.id ].initScaleY = info.info.obj.getScaleY();
 
+            if(showOnlyLabel === true && info.info.obj._className !== 'Text'){
+                if(!this.recursiveSearch(info.childList)){
+                    continue;
+                }
+                else {
 
-            dataObj.push( obj );
+                    if(info.info.obj.getName() !== 'richText'){
+                        dataObj.push( obj );
+                    }
+
+                }
+            }
+            else {
+                if(info.info.obj.getName() !== 'richText'){
+                    dataObj.push( obj );
+                }
+            }
 
             line = this.drawTree(info.childList, depth+1, line, obj.children);
         }
         return line;
+    },
+
+    recursiveSearch : function(children){
+        if(children){
+            for(var i = 0; i<children.length; i++){
+
+                var flag = this.recursiveSearch(children[i].childList);
+
+                if(flag || children[i].info.obj._className === 'Text'){
+                    return true;
+                }
+            }
+        }
+
+        return false;
+
+
     },
 
     selectNode :function (nodeObj) {
@@ -362,16 +411,44 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
         var rect = nodeObj.getBoundingBox();
         var po =   nodeObj.getParent().convertToWorldSpace( cc.p(rect.x, rect.y));
 
+        if(!!nodeObj && !!nodeObj._className && nodeObj._className === 'Text'){
+            selectedText = nodeObj;
+            editor.contentEditable = true;
+            editor.style.backgroundColor = '';
 
+            var richTextChild = selectedText.getChildByName('richText');
+
+            if(!!richTextChild){
+                var originText = richTextChild.getOriginText();
+
+                var html = RockNUI.RichTextRtfParser.ParseRTF(originText);
+
+                editor.innerHTML = html;
+            }
+            else {
+                //리치텍스트가 아닌 일반 텍스트일 경우
+
+                editor.innerHTML = selectedText.getString(); //텍스트 기본 값 설정
+            }
+        }
+        else {
+            selectedText = null;
+            editor.innerHTML = '';
+            editor.contentEditable = false;
+            editor.style.backgroundColor = '#444444';
+        }
 
         if(rect.width < 5)
             rect.width = 10;
         if (rect.height < 5 )
             rect.height = 10;
 
-        Gizmo_DrawTouchLayerByRect(
-            cc.rect(po.x, po.y, rect.width, rect.height)
-        );
+        if(showObjectArea){
+            Gizmo_DrawTouchLayerByRect(
+                cc.rect(po.x, po.y, rect.width, rect.height)
+            );
+        }
+
 
     },
 

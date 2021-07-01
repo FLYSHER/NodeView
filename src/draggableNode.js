@@ -83,7 +83,12 @@ var DraggableNode = cc.Node.extend( {
 
     setDraggable: function( enable ) {
         this._draggable = enable;
-        this.selectMark.setVisible(this._draggable);
+        if(showObjectArea) {
+            this.selectMark.setVisible(this._draggable);
+        }
+        else {
+            this.selectMark.setVisible(false);
+        }
     },
 
     isDraggable: function() {

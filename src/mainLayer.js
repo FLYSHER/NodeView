@@ -72,6 +72,32 @@ var MainLayer = cc.Layer.extend({
             self.onLoadUI( event.getUserData() );
         } );
 
+        this._refreshTreeListener = cc.eventManager.addCustomListener('refreshTree', function(e){
+            if(Target && Target._name){
+                self.updateMenu( Target._name, null );
+            }
+        });
+
+        this._refreshAreaListener = cc.eventManager.addCustomListener('refreshArea', function(e){
+            if(!showObjectArea){
+                var rectNode = cc.director.getRunningScene().getChildByTag(gizmoNodTag);
+                if(!!rectNode && !!rectNode.clear) {
+                    rectNode.clear();
+                }
+
+                for(var key in this._nodeList){
+                    this._nodeList[key].selectMark.setVisible(false);
+                }
+            }
+
+        }.bind(this));
+
+
+
+        this._richTextEditListener = cc.eventManager.addCustomListener('richTextEdit', function(e){
+
+        });
+
         var label = new cc.LabelTTF( "파일을 이쪽으로 드래그해 주세요", "Arial", 30 );
         label.setPosition( this.CX, this.CY );
         this.addChild( label, 0, this.DESC_TAG );
@@ -411,6 +437,8 @@ var ManiLayerScene = cc.Scene.extend({
             },
             swallowTouches: false
         }, this );
+
+        resizeTextEditor();
     },
 
     getFrontTouchedNode: function( touchPos ) {
@@ -458,6 +486,7 @@ var ManiLayerScene = cc.Scene.extend({
             }
         }
         var finalNode = this.recursiveCheckNode(frontNode, touchPos);
+
         return {
             node: frontNode,
             nodeName: frontNodeName,
@@ -465,21 +494,44 @@ var ManiLayerScene = cc.Scene.extend({
         };
     },
 
-    recursiveCheckNode: function(node, touchpos){
-        var flag = false;
+    // forceSortNode : function(origin){
+    //
+    //     var arr = cloneNodeArr(origin);
+    //
+    //     for(var i = 0; i<arr.length;i++){
+    //         for(var j = i+1; j<arr.length;j++){
+    //             if(arr[i].getLocalZOrder() < arr[j].getLocalZOrder()){
+    //                 var temp = arr[i];
+    //                 arr[i] = arr[j];
+    //                 arr[j] = temp;
+    //             }
+    //         }
+    //     }
+    //
+    //     return arr;
+    // },
 
+    recursiveCheckNode: function(node, touchpos){
         if(!node || !node.children) return node;
+
+        var maxZOrder = -99999999;
+        var maxNode = null;
 
         for (var idx = 0; idx < node.children.length; idx++) {
             if (cc.rectContainsPoint(node.children[idx].getBoundingBoxToWorld(), touchpos)) {
-                return this.recursiveCheckNode(node.children[idx], touchpos);
+                if(node.children[idx].visible === true && node.children[idx].getLocalZOrder() > maxZOrder){
+                    cc.log("max Node 갱신 ", maxNode, node.children[idx], maxZOrder, node.children[idx].getLocalZOrder());
+                    maxZOrder = node.children[idx].getLocalZOrder();
+                    maxNode = node.children[idx];
+                }
             }
         }
-
-        if (flag === false) {
+        if(!maxNode){
             return node;
         }
-
+        else {
+            return this.recursiveCheckNode(maxNode, touchpos);
+        }
     },
 
     getZOrderList: function( node ) {

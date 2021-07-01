@@ -485,30 +485,50 @@
         var touchScaleChangeAble = options["touchScaleEnable"];
         widget.setTouchScaleChangeEnabled(touchScaleChangeAble);
         var text = options["text"] || "";
+
         if(text) {
 
-            /////////////////////////////////////////////////////////////
-            // 툴에서 shadow, outline 효과 적용하기  (문자열에 아래와 같은 형식의 문자열이 포함되어 있으면 효과 적용)
-            // {shadow(#ffff44,-1,-1)}  그림자 효과
-            // {outline(#ffff44,1)}  외곽선 효과
-            /////////////////////////////////////////////////////////////
-            var replacer = function(match){
-                var shadowMatch =  match.match(/({shadow\s*\()(.*?),(.*?),(.*?)(\)\s*})/);   //{shadow(#ffff44,-1,-1)}  문자열 형식찾기
-                if (shadowMatch && shadowMatch.length>0) {
-                    widget.enableShadow(cc.hexToColor(shadowMatch[2].trim()), cc.size(parseFloat(shadowMatch[3].trim()), parseFloat(shadowMatch[4].trim())), 0);
+            var result = RockNUI.RichTextParser.isRichText(text);
+
+            if(!result){
+                /////////////////////////////////////////////////////////////
+                // 툴에서 shadow, outline 효과 적용하기  (문자열에 아래와 같은 형식의 문자열이 포함되어 있으면 효과 적용)
+                // {shadow(#ffff44,-1,-1)}  그림자 효과
+                // {outline(#ffff44,1)}  외곽선 효과
+                /////////////////////////////////////////////////////////////
+                var replacer = function(match){
+                    var shadowMatch =  match.match(/({shadow\s*\()(.*?),(.*?),(.*?)(\)\s*})/);   //{shadow(#ffff44,-1,-1)}  문자열 형식찾기
+                    if (shadowMatch && shadowMatch.length>0) {
+                        widget.enableShadow(cc.hexToColor(shadowMatch[2].trim()), cc.size(parseFloat(shadowMatch[3].trim()), parseFloat(shadowMatch[4].trim())), 0);
+                    }
+
+                    var outlineMatch =  match.match(/({outline\s*\()(.*?),(.*?)(\)\s*})/);       //{outline(#ffff44,1)}  문자열 형식찾기
+                    if (outlineMatch && outlineMatch.length>0) {
+                        widget.enableOutline(cc.hexToColor(outlineMatch[2].trim()), parseFloat(outlineMatch[3].trim()));
+                    }
+
+                    return "";
+                };
+                text = text.replace(/{shadow\s*\(.+?\)\s*}|{outline\s*\(.+?\)\s*}/g, replacer);
+
+                widget._setString(text);
+                /////////////////////////////////////////////////////////////
+            }
+            else {
+                var parseRes = RockNUI.RichTextParser.Parse(widget, text);
+                if(!parseRes){
+                    widget._setString(text);
                 }
-
-                var outlineMatch =  match.match(/({outline\s*\()(.*?),(.*?)(\)\s*})/);       //{outline(#ffff44,1)}  문자열 형식찾기
-                if (outlineMatch && outlineMatch.length>0) {
-                    widget.enableOutline(cc.hexToColor(outlineMatch[2].trim()), parseFloat(outlineMatch[3].trim()));
+                else {
+                    parseRes.setName('richText');
+                    widget._setString('');
+                    widget.addChild(parseRes);
+                    parseRes._render();
+                    parseRes.refreshParentSize();
                 }
+            }
 
-                return "";
-            };
-            text = text.replace(/{shadow\s*\(.+?\)\s*}|{outline\s*\(.+?\)\s*}/g, replacer);
-            /////////////////////////////////////////////////////////////
 
-            widget._setString(text);
         }
 
         var fs = options["fontSize"];

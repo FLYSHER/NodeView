@@ -25,6 +25,12 @@
         "src/draggableNode.js",
         "src/eventDispatcher.js",
         "src/mainLayer.js",
-        "src/uiErrorLog.js"
+        "src/uiErrorLog.js",
+        "src/RockNUIRichText.js",
+        "src/RockNUIRichTextParser.js",
+        "src/RockNUIRichTextHtmlParser.js",
+        "src/RockNUIRichTextRtfParser.js",
+        "src/RockNUIRichTextUI.js",
+        "src/Util.js"
     ]
 }

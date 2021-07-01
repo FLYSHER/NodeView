@@ -522,10 +522,7 @@ cc.LabelTTF = cc.Sprite.extend(/** @lends cc.LabelTTF# */{
 
         // shadow
         if (textDefinition.shadowEnabled)
-            this.enableShadow(textDefinition.shadowOffsetX,
-                textDefinition.shadowOffsetY,
-                textDefinition.shadowOpacity,
-                textDefinition.shadowBlur);
+            this.enableShadow(textDefinition.shadowStyle, cc.size(textDefinition.shadowOffsetX, textDefinition.shadowOffsetY), textDefinition.shadowBlur);
 
         // stroke
         if (textDefinition.strokeEnabled)

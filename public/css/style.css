@@ -1,0 +1,22 @@
+/* custom css */
+
+/*body {*/
+  /*padding: 50px;*/
+  /*font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;*/
+/*}*/
+
+/*a {*/
+  /*color: #00B7FF;*/
+/*}*/
+
+/* google chart flickering issue */
+/* https://stackoverflow.com/questions/37902708/google-charts-tooltip-flickering */
+svg > g > g:last-child { pointer-events: none }
+
+td.details-control {
+    background: url('/img/details_open.png') no-repeat center center;
+    cursor: pointer;
+}
+tr.shown td.details-control {
+    background: url('/img/details_close.png') no-repeat center center;
+}
