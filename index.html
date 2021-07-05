@@ -426,7 +426,7 @@
         <div style="float:left;">
             <button class="btn hover4" style="z-index:99999;float:left;width:20px;margin-left:-6px;" type="button" onclick="openFontShadow();"><img src="./image/downArrow.png" alt=""></button>
             <div style="z-index:100;top:-357px;position:absolute;background-color:white" class="fontShadowEditor">
-                <div acp-show-hsl="no"  class="fontShadowPicker"></div>
+                <div acp-show-alpha acp-show-hsl="no"  class="fontShadowPicker"></div>
                 <div style="height:15px;" class="a-color-picker-row a-color-picker-single-input outlineValue">
 
                     <label>X</label>
@@ -453,7 +453,7 @@
         <div style="float:left;">
             <button class="btn hover4" style="z-index:99999;float:left;width:20px;margin-left:-6px;" type="button" onclick="openFontOutline();"><img src="./image/downArrow.png" alt=""></button>
             <div style="z-index:100;top:-357px;position:absolute;background-color:white" class="fontOutlineEditor">
-                <div acp-show-hsl="no"  class="fontOutlinePicker"></div>
+                <div acp-show-alpha  acp-show-hsl="no"  class="fontOutlinePicker"></div>
                 <div style="height:15px;" class="a-color-picker-row a-color-picker-single-input outlineValue">
                     <label>외곽선 두께</label>
                     <input type="number" value="2" aria-valuemax="9" aria-valuemin="0" maxlength="1">
@@ -471,22 +471,6 @@
         <div style="float:left;">
             <button class="btn btn-info" onclick="onCopyClick();" style="margin-left:10px;width:40px;">Copy</button>
         </div>
-
-        <!--        <button style="width:100px;"class="color-apply" id="fontColor">폰트 컬러 변경</button>-->
-<!--        <button style="width:100px;"class="color-apply" id="fontShadow">그림자 변경</button>-->
-<!--        <button style="width:100px;"class="color-apply" id="fontOutline">외곽선 변경</button>-->
-
-
-
-<!--        <div class="picker"-->
-<!--             acp-color="#EFE9E7"-->
-<!--             acp-palette="red|#ffc107|rgb(255,221,0)">-->
-<!--        </div>-->
-<!--        <div class="picker"-->
-<!--             acp-color="#EFE9E7"-->
-<!--             acp-palette="PALETTE_MATERIAL_CHROME"-->
-<!--             acp-palette-editable>-->
-<!--        </div>-->
 
     </fieldset>
 
