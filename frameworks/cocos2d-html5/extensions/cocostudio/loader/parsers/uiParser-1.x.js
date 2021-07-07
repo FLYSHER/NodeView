@@ -521,10 +521,17 @@
                 }
                 else {
                     parseRes.setName('richText');
-                    widget._setString('');
-                    widget.addChild(parseRes);
-                    parseRes._render();
-                    parseRes.refreshParentSize();
+                    // widget._setString('');
+                    // widget.addChild(parseRes);
+
+                    var size = JSON.parse(JSON.stringify(widget.getContentSize()));
+
+                    widget.removeFromParent(true);
+                    widget = parseRes;
+
+                    widget.setParentSize(size);
+                    // parseRes._render();
+                    // parseRes.refreshParentSize();
                 }
             }
 

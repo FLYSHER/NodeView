@@ -74,6 +74,14 @@ RockNUI.RichTextUI = cc.Node.extend({
         this._render();
     },
 
+    setParentSize : function(size){
+        this._width = size.width;
+        this._height = size.height;
+
+        this._render();
+
+    },
+
     addString: function(text, color, size, fontName, halign,  outline, shadow, xOffset, yOffset)
     {
         //a\n

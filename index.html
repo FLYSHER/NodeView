@@ -650,22 +650,35 @@
     function onEditorChanged(){
         if(!selectedText) return;
 
-        if(!!selectedText.getChildByName('richText')){
-            selectedText.getChildByName('richText').removeFromParent(true);
+        var parent = selectedText;
+
+        if(!!selectedText){
+            if(selectedText instanceof RockNUI.RichTextUI ){
+
+                var originSize = cc.size(selectedText._width, selectedText._height);
+                parent = selectedText.getParent();
+                selectedText.removeFromParent(true);
+
+                var text = RockNUI.RichTextHtmlParser.ParseHTML(replaceHtml(editor.innerHTML));
+                var parseRes = RockNUI.RichTextParser.Parse(parent, text);
+
+                if(!!parseRes){
+                    selectedText = parseRes;
+                    parent.addChild(selectedText);
+                    selectedText.setParentSize(originSize);
+                }
+
+            } else if(selectedText._className === 'Text'){
+                parent = parent.getParent();
+
+                var text = RockNUI.RichTextHtmlParser.ParseHTML(replaceHtml(editor.innerHTML));
+                var parseRes = RockNUI.RichTextParser.Parse(parent, text);
+            }
         }
 
 
-        var text = RockNUI.RichTextHtmlParser.ParseHTML(replaceHtml(editor.innerHTML));
 
-        var parseRes = RockNUI.RichTextParser.Parse(selectedText, text);
 
-        if(!!parseRes){
-            selectedText.setString('');
-            parseRes.setName('richText');
-            selectedText.addChild(parseRes);
-            parseRes._render();
-            parseRes.refreshParentSize();
-        }
 
 
 

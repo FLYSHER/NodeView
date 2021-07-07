@@ -416,9 +416,9 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
             editor.contentEditable = true;
             editor.style.backgroundColor = '';
 
-            var richTextChild = selectedText.getChildByName('richText');
+            var richTextChild = selectedText;
 
-            if(!!richTextChild){
+            if(!!richTextChild && richTextChild instanceof RockNUI.RichTextUI ){
                 var originText = richTextChild.getOriginText();
 
                 var html = RockNUI.RichTextRtfParser.ParseRTF(originText);
