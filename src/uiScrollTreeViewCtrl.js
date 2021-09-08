@@ -411,7 +411,7 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
         var rect = nodeObj.getBoundingBox();
         var po =   nodeObj.getParent().convertToWorldSpace( cc.p(rect.x, rect.y));
 
-        if(!!nodeObj && !!nodeObj._className && nodeObj._className === 'Text'){
+        if(!!nodeObj && !!nodeObj._className && (nodeObj._className === 'Text' || nodeObj instanceof RockNUI.RichTextUI)){
             selectedText = nodeObj;
             editor.contentEditable = true;
             editor.style.backgroundColor = '';

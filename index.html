@@ -657,6 +657,8 @@
 
                 var originSize = cc.size(selectedText._width, selectedText._height);
                 parent = selectedText.getParent();
+                var name = selectedText.getName();
+
                 selectedText.removeFromParent(true);
 
                 var text = RockNUI.RichTextHtmlParser.ParseHTML(replaceHtml(editor.innerHTML));
@@ -664,15 +666,36 @@
 
                 if(!!parseRes){
                     selectedText = parseRes;
+                    selectedText.setName(name);
+
                     parent.addChild(selectedText);
                     selectedText.setParentSize(originSize);
                 }
 
             } else if(selectedText._className === 'Text'){
-                parent = parent.getParent();
+                var realParent = parent.getParent();
+                var name = parent.getName();
+
+                var size = parent.getContentSize();
+                var pos = parent.getPosition();
 
                 var text = RockNUI.RichTextHtmlParser.ParseHTML(replaceHtml(editor.innerHTML));
+
                 var parseRes = RockNUI.RichTextParser.Parse(parent, text);
+
+                if(!!parseRes){
+                    parseRes.setName(name);
+                    parseRes.setContentSize(size);
+                    parseRes.setPosition(pos);
+
+                    parent.removeFromParent();
+
+                    realParent.addChild(parseRes);
+
+                    selectedText = parseRes;
+                }
+
+
             }
         }
 
