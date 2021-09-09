@@ -658,6 +658,8 @@
                 var originSize = cc.size(selectedText._width, selectedText._height);
                 parent = selectedText.getParent();
                 var name = selectedText.getName();
+                var pos = selectedText.getPosition();
+
 
                 selectedText.removeFromParent(true);
 
@@ -667,9 +669,12 @@
                 if(!!parseRes){
                     selectedText = parseRes;
                     selectedText.setName(name);
+                    selectedText.setContentSize(originSize);
+                    selectedText.setPosition(pos);
+                    selectedText.setParentSize(originSize);
+                    selectedText.ignoreContentAdaptWithSize(true);
 
                     parent.addChild(selectedText);
-                    selectedText.setParentSize(originSize);
                 }
 
             } else if(selectedText._className === 'Text'){
@@ -687,6 +692,8 @@
                     parseRes.setName(name);
                     parseRes.setContentSize(size);
                     parseRes.setPosition(pos);
+                    parseRes.setParentSize(size);
+                    parseRes.ignoreContentAdaptWithSize(true);
 
                     parent.removeFromParent();
 

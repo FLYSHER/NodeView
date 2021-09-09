@@ -33,7 +33,7 @@ RockNUI.statusFlag = {
 }
 
 
-RockNUI.RichTextUI = cc.Node.extend({
+RockNUI.RichTextUI = ccui.Widget.extend({
 
     _arrElement : [],
     _richElement : [],
