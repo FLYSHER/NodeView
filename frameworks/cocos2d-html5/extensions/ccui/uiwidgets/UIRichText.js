@@ -99,6 +99,14 @@ ccui.RichElementText = ccui.RichElement.extend(/** @lends ccui.RichElementText# 
         this._text = text;
         this._fontName = fontName;
         this._fontSize = fontSize;
+    },
+
+    setText : function(text){
+        this._text = text;
+    },
+
+    getText : function(){
+        return this._text;
     }
 });
 

@@ -57,6 +57,9 @@ RockNUI.RichTextUI = ccui.Widget.extend({
         this._richElement = [];
         this._originText = '';
 
+
+        this._elementMap = {};
+
     },
 
     setOriginText : function(t){
@@ -82,14 +85,14 @@ RockNUI.RichTextUI = ccui.Widget.extend({
 
     },
 
-    addString: function(text, color, size, fontName, halign,  outline, shadow, xOffset, yOffset)
+    addString: function(text, color, size, fontName, halign,  outline, shadow, bold, italic, xOffset, yOffset, mapStr)
     {
         //a\n
         var arr  = text.split('\n');
         for(var i=0; i < arr.length; i++)
         {
             // this._horizontalAlign.push(halign);
-            this.addSingleLineString(arr[i], color, size, fontName, halign, outline, shadow, xOffset, yOffset);
+            this.addSingleLineString(arr[i], color, size, fontName, halign, outline, shadow, bold, italic, xOffset, yOffset, mapStr);
         }
     },
 
@@ -97,7 +100,7 @@ RockNUI.RichTextUI = ccui.Widget.extend({
         return this.addSingleLineString('\n', cc.color.BLACK,1 );
     },
 
-    getElement : function(text, color, size, fontName, halign, outline, shadow, isBold, isItalic){
+    getElement : function(text, color, size, fontName, halign, outline, shadow, isBold, isItalic, mapStr){
 
         var fontDef = null;
         var loc_fontName = fontName || "RobotoCondensed-bold";
@@ -161,7 +164,7 @@ RockNUI.RichTextUI = ccui.Widget.extend({
         return element;
     },
 
-    addSingleLineString: function(text, color, size, fontName, halign, outline, shadow, isBold, isItalic, xOffset, yOffset )
+    addSingleLineString: function(text, color, size, fontName, halign, outline, shadow, isBold, isItalic, xOffset, yOffset, mapStr )
     {
         var element = this.getElement(text, color, size, fontName, halign, outline, shadow, isBold, isItalic);
 
@@ -200,11 +203,15 @@ RockNUI.RichTextUI = ccui.Widget.extend({
         this.addChild(richText);
         // this._render(); //꼭 매번 해줄 필요 없어서 주석처리 (2021.05.11 - MJ)
 
+        if(!!mapStr){
+            this._elementMap[mapStr] = element;
+        }
+
         return richText;
 
     },
 
-    addStringWithoutLineFeed: function(text, color, size, fontName, outline, shadow, isBold, isItalic)
+    addStringWithoutLineFeed: function(text, color, size, fontName, outline, shadow, isBold, isItalic, mapStr)
     {
 
         var element = this.getElement(text, color, size, fontName, null, outline, shadow, isBold, isItalic);
@@ -213,7 +220,9 @@ RockNUI.RichTextUI = ccui.Widget.extend({
         this._richElement[this._arrElement.length-1].push(element);
         this._arrElement[this._arrElement.length-1].formatText(); // 텍스트 크기 강제로 다시 계산!
 
-
+        if(!!mapStr){
+            this._elementMap[mapStr] = element;
+        }
         // this._render(); //꼭 매번 해줄 필요 없어서 주석처리 (2021.05.11 - MJ)
 
         return element;
@@ -235,10 +244,20 @@ RockNUI.RichTextUI = ccui.Widget.extend({
         this._richElement = [];
     },
 
-    setString: function(text)
+    setString: function(key, value)
     {
-        this.clear();
-        this.addString ( text, cc.color.BLACK, 20);
+        if(!!this._elementMap[key]){
+            var elem = this._elementMap[key];
+
+            elem.setText(value);
+
+            for(var i = 0; i<this._arrElement.length;i++){
+                this._arrElement[i]._formatTextDirty = true;
+                this._arrElement[i].formatText();
+            }
+
+            this._render();
+        }
     },
 
     _render : function(){

@@ -29,6 +29,7 @@ RockNUI.RichTextParser = {
         italic : /<\s*i\s*\S*>/,
         br : /<\s*br\s*>/,
         newline : /\\n/,
+        string : /\${[^\${}]+}/
     },
     regEnd : {
         div : /<\s*\/\s*div\s*>/,
@@ -85,21 +86,21 @@ RockNUI.RichTextParser = {
         return !!text.match(this.regStart.isRichText);
     },
 
-    _generateText : function(text){
+    _generateText : function(text, mapElementStr){
         if(!this._renderer)
             return;
 
         if(this._lineStarted){
             this._renderer.addString(text, this._getLastItem(this._colorStack), this._getLastItem(this._sizeStack),
                 this._getLastItem(this._fontStack), this._getLastItem(this._divStack) ? this._getLastItem(this._divStack)._align : null, this._getLastItem(this._outlineStack),
-                this._getLastItem(this._shadowStack), this._getLastItem(this._boldStack), this._getLastItem(this._italicStack), 0, 0);
+                this._getLastItem(this._shadowStack), this._getLastItem(this._boldStack), this._getLastItem(this._italicStack), 0, 0, mapElementStr);
 
             this._lineStarted = false;
         }
         else {
             this._renderer.addStringWithoutLineFeed(text, this._getLastItem(this._colorStack), this._getLastItem(this._sizeStack),
                 this._getLastItem(this._fontStack), this._getLastItem(this._outlineStack),
-                this._getLastItem(this._shadowStack), this._getLastItem(this._boldStack), this._getLastItem(this._italicStack));
+                this._getLastItem(this._shadowStack), this._getLastItem(this._boldStack), this._getLastItem(this._italicStack), mapElementStr);
         }
 
         this._isFirstText = false;
@@ -466,7 +467,31 @@ RockNUI.RichTextParser = {
             // }
 
 
+            matched = loc_text.match(this.regStart.string);
+            if(!!matched){
 
+                if(!textStarted)
+                    return false;
+
+                if(matched.index !== 0){
+                    var targetText = loc_text.substring(0,matched.index);
+                    this._generateText(targetText);
+                }
+
+
+                var loc_text = matched[0];
+
+                var textStr = loc_text.substring(2,loc_text.length - 1);
+
+
+
+                this._generateText(matched[0], textStr);
+
+
+                lastParsed = i;
+                continue;
+
+            }
 
 
 
