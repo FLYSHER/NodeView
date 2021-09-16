@@ -68,7 +68,15 @@
                 // Parse attributes
                 options = curr["options"];
                 this.generalAttributes(node, options);
-                parser.handle(node, options, resourcePath);
+                var res = parser.handle(node, options, resourcePath);
+                if(!!res){
+                    node = res.node;
+
+                    node.setContentSize(res.size);
+                    node.setPosition(res.pos);
+                    node.setParentSize(res.size);
+                    node.ignoreContentAdaptWithSize(true);
+                }
                 this.colorAttributes(node, options);
 
                 parent = curr.parent;
@@ -512,6 +520,49 @@
                 text = text.replace(/{shadow\s*\(.+?\)\s*}|{outline\s*\(.+?\)\s*}/g, replacer);
 
                 widget._setString(text);
+
+
+
+
+                var fs = options["fontSize"];
+                if (fs != null) {
+                    widget._setFontSize(options["fontSize"]);
+                }
+                var fn = options["fontName"];
+                //@BJ ADD
+                // 히스토리 : 이 폰트를 받으면 강제로 변환해줌
+                if( fn === null || fn === 'verdana' || fn === '微软雅黑' || fn === 'verdanab' || fn === 'verdanab.ttf' || fn === 'verdana.ttf') {
+                    fn = 'RobotoCondensed-Bold';
+                }
+
+                if (fn != null) {
+                    if (cc.sys.isNative) {
+                        if (regTTF.test(fn)) {
+                            widget.setFontName(cc.path.join(cc.loader.resPath, resourcePath, fn));
+                        } else {
+                            widget.setFontName(fn);
+                        }
+                    } else {
+                        widget._setFontName(fn.replace(regTTF, ''));
+                    }
+                }
+                var aw = options["areaWidth"] || 0;
+                var ah = options["areaHeight"] || 0;
+                if (aw && ah) {
+                    var size = cc.size(options["areaWidth"], options["areaHeight"]);
+                    widget._setTextAreaSize(size);
+                }
+                var ha = options["hAlignment"] || 0;
+                if (ha != null) {
+                    widget._setTextHorizontalAlignment(ha);
+                }
+                var va = options["vAlignment"] || 0;
+                if (va != null) {
+                    widget._setTextVerticalAlignment(va);
+                }
+                widget._updateUITextContentSize();
+
+
                 /////////////////////////////////////////////////////////////
             }
             else {
@@ -520,61 +571,60 @@
                     widget._setString(text);
                 }
                 else {
-                    parseRes.setName('richText');
-                    // widget._setString('');
-                    // widget.addChild(parseRes);
-
-                    var size = JSON.parse(JSON.stringify(widget.getContentSize()));
-
-                    widget.removeFromParent(true);
-                    widget = parseRes;
-
-                    widget.setParentSize(size);
+                    // parseRes.setName('richText');
+                    // // widget._setString('');
+                    // // widget.addChild(parseRes);
+                    //
+                    // var size = JSON.parse(JSON.stringify(widget.getContentSize()));
+                    //
+                    // widget.removeFromParent(true);
+                    // widget = parseRes;
+                    //
+                    // widget.setParentSize(size);
                     // parseRes._render();
                     // parseRes.refreshParentSize();
+
+
+                    var name = widget.getName();
+
+                    var size = widget.getContentSize();
+                    var pos = widget.getPosition();
+
+
+                    parseRes.setName(name);
+                    parseRes.setContentSize(size);
+                    parseRes.setPosition(pos);
+                    parseRes.setParentSize(size);
+                    parseRes.ignoreContentAdaptWithSize(true);
+
+                    widget.removeFromParent();
+
+                    widget = parseRes;
+
+                    var aw = options["areaWidth"] || 0;
+                    var ah = options["areaHeight"] || 0;
+                    if (aw && ah) {
+                        size = cc.size(options["areaWidth"], options["areaHeight"]);
+                    }
+
+                    return {
+                        node : widget,
+                        size : size,
+                        pos : pos,
+                        name : name
+                    }
+                    // widget.removeFromParent();
+
+                    // realParent.addChild(parseRes);
+
+
                 }
             }
 
 
         }
 
-        var fs = options["fontSize"];
-        if (fs != null) {
-            widget._setFontSize(options["fontSize"]);
-        }
-        var fn = options["fontName"];
-        //@BJ ADD
-        // 히스토리 : 이 폰트를 받으면 강제로 변환해줌
-        if( fn === null || fn === 'verdana' || fn === '微软雅黑' || fn === 'verdanab' || fn === 'verdanab.ttf' || fn === 'verdana.ttf') {
-            fn = 'RobotoCondensed-Bold';
-        }
 
-        if (fn != null) {
-            if (cc.sys.isNative) {
-                if (regTTF.test(fn)) {
-                    widget.setFontName(cc.path.join(cc.loader.resPath, resourcePath, fn));
-                } else {
-                    widget.setFontName(fn);
-                }
-            } else {
-                widget._setFontName(fn.replace(regTTF, ''));
-            }
-        }
-        var aw = options["areaWidth"] || 0;
-        var ah = options["areaHeight"] || 0;
-        if (aw && ah) {
-            var size = cc.size(options["areaWidth"], options["areaHeight"]);
-            widget._setTextAreaSize(size);
-        }
-        var ha = options["hAlignment"] || 0;
-        if (ha != null) {
-            widget._setTextHorizontalAlignment(ha);
-        }
-        var va = options["vAlignment"] || 0;
-        if (va != null) {
-            widget._setTextVerticalAlignment(va);
-        }
-        widget._updateUITextContentSize();
     };
     /**
      * ListView parser (UIListView)
