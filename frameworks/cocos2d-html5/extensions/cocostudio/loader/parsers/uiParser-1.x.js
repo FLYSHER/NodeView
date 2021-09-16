@@ -74,7 +74,6 @@
 
                     node.setContentSize(res.size);
                     node.setPosition(res.pos);
-                    node.setParentSize(res.size);
                     node.ignoreContentAdaptWithSize(true);
                 }
                 this.colorAttributes(node, options);
@@ -594,7 +593,6 @@
                     parseRes.setName(name);
                     parseRes.setContentSize(size);
                     parseRes.setPosition(pos);
-                    parseRes.setParentSize(size);
                     parseRes.ignoreContentAdaptWithSize(true);
 
                     widget.removeFromParent();
