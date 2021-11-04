@@ -74,6 +74,7 @@
 
                     node.setContentSize(res.size);
                     node.setPosition(res.pos);
+                    node.setParentSize(res.size);
                     node.ignoreContentAdaptWithSize(true);
                 }
                 this.colorAttributes(node, options);
