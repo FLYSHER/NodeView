@@ -10,6 +10,7 @@ function createWindow () {
     width: 800,
     height: 600,
     webPreferences: {
+      webSecurity: false,
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: true,
       contextIsolation: false
@@ -18,7 +19,7 @@ function createWindow () {
 
   console.log("electron created window");
   // and load the index.html of the app.
-  mainWindow.loadFile('../index.html');
+  mainWindow.loadFile('client/index.html');
   //mainWindow.setMenu(null);
   // Open the DevTools.
   // mainWindow.webContents.openDevTools()

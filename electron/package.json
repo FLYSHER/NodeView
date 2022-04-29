@@ -1,12 +1,13 @@
 {
-  "name": "electron-quick-start",
+  "name": "NodeView(flysher)",
   "version": "1.0.0",
   "description": "A minimal Electron application",
   "main": "main_electron.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "deploy": "electron-builder --windows nsis:ia32"
   },
-  "repository": "https://github.com/electron/electron-quick-start",
+  "repository": "https://github.com/flysher/NodeView",
   "keywords": [
     "Electron",
     "quick",
@@ -17,9 +18,44 @@
   "author": "GitHub",
   "license": "CC0-1.0",
   "devDependencies": {
-    "electron": "^18.0.3"
+    "electron": "^18.0.3",
+    "electron-builder": "~22.10.5"
   },
   "dependencies": {
     "image-data-uri": "^2.0.1"
+  },
+  "build": {
+    "productName": "NodeView",
+    "appId": "net.flysher.nodeview",
+    "asar": false,
+    "protocols": {
+      "name": "NodeView",
+      "schemes": [
+        "nodeview"
+      ]
+    },
+    "win": {
+      "target": [
+        "zip",
+        "nsis"
+      ],
+      "icon": "./nodeview.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "directories": {
+      "buildResources": "./resources/installer/",
+      "output": "./dist/",
+      "app": "."
+    },
+    "files": [
+      "./*",
+      "./client/*",
+      "./client/frameworks/**/*",
+      "./client/res/**/*",
+      "./client/src/**/*"
+    ]
   }
 }
