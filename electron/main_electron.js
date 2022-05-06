@@ -1,5 +1,5 @@
 // Modules to control application life and create native browser window
-const {app, BrowserWindow } = require('electron')
+const {app, BrowserWindow, Menu, dialog} = require('electron')
 const path = require('path')
 const loadManager = require('./LoadManager')
 
@@ -20,13 +20,53 @@ function createWindow () {
   console.log("electron created window");
   // and load the index.html of the app.
   mainWindow.loadFile('client/index.html');
+  //mainWindow.setMenu()
   //mainWindow.setMenu(null);
   // Open the DevTools.
   // mainWindow.webContents.openDevTools()
   return mainWindow;
 }
 
+const template = [
+  {
+    label: 'File',
+    submenu: [
+      {
+        label: 'Open',
+        click () {
 
+          dialog.showOpenDialog().then((result)=>{
+            if(result.canceled === false){
+              var files=result.filePaths;
+              //console.log("selectedPaths = "+ files);
+              loadManager.loadFiles(files);
+            }
+          });
+        }
+      },
+      {
+        type: 'separator'
+      },
+      {
+        label: 'Exit',
+        role: 'close'
+      }
+    ]
+  },
+  {
+    role: 'Window',
+    submenu: [
+      {
+        role: 'Minimize'
+      },
+      {
+        role: 'Close'
+      }
+    ]
+  },
+]
+const menu = Menu.buildFromTemplate(template);
+Menu.setApplicationMenu(menu);
 
 
 // This method will be called when Electron has finished
