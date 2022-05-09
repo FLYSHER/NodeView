@@ -28,7 +28,7 @@
   "build": {
     "productName": "NodeView",
     "appId": "net.flysher.nodeview",
-    "asar": false,
+    "asar": true,
     "protocols": {
       "name": "NodeView",
       "schemes": [
@@ -39,18 +39,18 @@
       "target": [
         "default"
       ],
-      "icon": "./build/icon/icon.icns"
+      "icon": "./build/icons/icon.icns"
     },
     "dmg": {
       "title": "NodeView",
-      "icon": "./build/icon/icon.icns"
+      "icon": "./build/icons/icon.icns"
     },
     "win": {
       "target": [
         "zip",
         "nsis"
       ],
-      "icon": "./build/icon/icon.ico"
+      "icon": "./build/icons/icon.ico"
     },
     "nsis": {
       "oneClick": false,
