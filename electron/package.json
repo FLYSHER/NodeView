@@ -5,7 +5,8 @@
   "main": "main_electron.js",
   "scripts": {
     "start": "electron .",
-    "deploy": "electron-builder --windows nsis:ia32"
+    "deploy:win": "electron-builder --windows nsis:ia32",
+    "deploy:mac": "electron-builder --mac"
   },
   "repository": "https://github.com/flysher/NodeView",
   "keywords": [
