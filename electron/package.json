@@ -41,6 +41,10 @@
       ],
       "icon": "./build/icon/icon.icns"
     },
+    "dmg": {
+      "title": "NodeView",
+      "icon": "./build/icon/icon.icns"
+    },
     "win": {
       "target": [
         "zip",
