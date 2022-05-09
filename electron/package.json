@@ -35,6 +35,12 @@
         "nodeview"
       ]
     },
+    "mac": {
+      "target": [
+        "default"
+      ],
+      "icon": "./build/icon/icon.icns"
+    },
     "win": {
       "target": [
         "zip",
