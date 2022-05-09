@@ -40,7 +40,7 @@
         "zip",
         "nsis"
       ],
-      "icon": "./nodeview.ico"
+      "icon": "./build/icon/icon.ico"
     },
     "nsis": {
       "oneClick": false,
