@@ -84,7 +84,12 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
         $('#actionTree').on("changed.jstree", function (e, data) {
             if( !!data.node === false)
                 return;
-            ccs.actionManager.playActionByName( self._jsonName , data.node.text );
+            if(self._masterNode.cocosAction){
+                self._masterNode.cocosAction.play(data.node.text)
+            }
+            else {
+                ccs.actionManager.playActionByName(self._jsonName, data.node.text);
+            }
         });
 
         this._jsonName = null;
@@ -196,14 +201,24 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
             this.drawTree(this.treeInfo, 0, 0, treeObj);
 
 
-            //UI Action 추가되는 부분
-            this._jsonName = node.getName() + '.ExportJson';
-            var actionList = ccs.actionManager.getActionList(this._jsonName);
-            for( var i = 0 ; i < actionList.length ; i++ ){
-                var obj = {
-                    'text' : actionList[i].getName()
+            if(  node.cocosAction ){
+                for(var key in node.cocosAction._animationInfos){
+                    var obj = {
+                        'text': key
+                    }
+                    actionObj.push(obj);
                 }
-                actionObj.push(obj);
+            }
+            else {
+                //UI Action 추가되는 부분
+                this._jsonName = node.getName() + '.ExportJson';
+                var actionList = ccs.actionManager.getActionList(this._jsonName);
+                for (var i = 0; i < actionList.length; i++) {
+                    var obj = {
+                        'text': actionList[i].getName()
+                    }
+                    actionObj.push(obj);
+                }
             }
 
         }

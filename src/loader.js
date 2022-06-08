@@ -18,6 +18,8 @@ Loader.armatureData = {};
 Loader.textures = {};
 Loader.plistFiles = {};
 
+Loader.cocosStudioURL = {};
+
 var ResourceMapData = {};
 
 Loader.init = function() {
@@ -115,10 +117,11 @@ Loader.readFile = function( file , cb) {
             var fileContents = e.target.result;
             var ext = cc.path.extname(f.name).toLowerCase();
             if ( ext === ".json" ){
-               var exportjson = convertToExportJson( fileContents );
-               url = url.replace( '.json', ' (JSON).ExportJson');
-               ext = '.exportjson';
-               self._processFileData(url, exportjson, ext, cb);
+               // var exportjson = convertToExportJson( fileContents );
+               // url = url.replace( '.json', ' (JSON).ExportJson');
+               // ext = '.exportjson';
+               // self._processFileData(url, exportjson, ext, cb);
+                self._processFileData(url, fileContents, ext, cb);
                 toggleJSONUI( true );
             }
             else {
@@ -166,8 +169,8 @@ Loader._processFileData = function( url, fileContents, ext, cb ) {
                     tex2d.initWithElement(img);
                     tex2d.handleLoadedTexture();
                     self.textures[ fileName ] = tex2d;
-                    self.textureList.push( fileName );
-
+                    if( self.textureList.indexOf( fileName ) < 0 )
+                        self.textureList.push( fileName );
 
                     if (!cc.loader.cache['image/' + url]) {
                         cc.loader.cache['image/' + url] = tex2d;
@@ -179,6 +182,34 @@ Loader._processFileData = function( url, fileContents, ext, cb ) {
             return;
             break;
         case ".json":
+            dic = JSON.parse(fileContents);
+            this.cocosStudioURL [ fileName ] = url;
+            cc.loader.cache[url] = dic;
+            if(dic["Content"] && dic["Content"]["Content"] && dic["Content"]["Content"]["UsedResources"]){
+                var fntList = [];
+                var plistList = [];
+                var pngList = []
+                var resArray = dic["Content"]["Content"]["UsedResources"];
+                for(var n = 0; n <resArray.length; n++){
+                    var ext = cc.path.extname(resArray[n]).toLowerCase();
+                    if(ext === '.fnt'){
+                        fntList.push(resArray[n]);
+                    }
+                    else if(ext === '.plist'){
+                        plistList.push(resArray[n]);
+                    }
+                    else if(ext === '.png'){
+                        pngList.push(resArray[n]);
+                    }
+                }
+                this.loadFnt( fntList, function (){
+                    this.readResoueces(plistList, pngList );
+                    this.uiTextures[ fileName ] = plistList;
+                    this.checkFiles( fileName, 'cocosStudio' );
+                }.bind(this))
+            }
+
+            break;
         case ".exportjson":
             dic = JSON.parse(fileContents);
             if( dic[ "widgetTree" ] ) {
@@ -309,6 +340,34 @@ Loader.readResoueces = function ( pngData, plistData ) {
 
 };
 
+Loader.loadFnt = function ( fntFileList , endCallback) {
+    if(!fntFileList || fntFileList.length === 0){
+        endCallback && endCallback();
+        return;
+    }
+
+    var count = fntFileList.length;
+    for(var n = 0; n < fntFileList.length; n++) {
+        var fntFile = fntFileList[n];
+        var fntFileName = fntFile.split('/');
+        var item = ResourceMapData[fntFileName[fntFileName.length - 1]];
+        item.file(function (file) {
+            Loader.readFile(file, function () {
+                var newConf = cc.loader.getRes(fntFile);
+                var pngName = newConf.atlasName.split('/');
+                var pngItem = ResourceMapData[pngName[pngName.length - 1]];
+                pngItem.file(function (pngfile) {
+                    Loader.readFile(pngfile, function () {
+                        count--
+                        if (count <= 0)
+                            endCallback && endCallback();
+                    });
+                });
+            });
+        });
+    }
+}
+
 Loader.removeData = function ( fileName ){
     //console.log('Loader.removeData', fileName );
     if( !!this.armatureFrames[fileName] === true)
@@ -334,7 +393,12 @@ Loader.checkFiles = function ( fileName, type ) {
                 fileNames = this._checkAllUITextures();
                 for( i = 0; i < fileNames.length; i++ ) {
                     this.loadedFileNames.push( fileNames[ i ] );
-                    cc.eventManager.dispatchCustomEvent( 'loadUI', this.uiURL[ fileNames[ i ] ] );
+                    if(this.uiURL[ fileNames[ i ] ] ) {
+                        cc.eventManager.dispatchCustomEvent('loadUI', this.uiURL[fileNames[i]]);
+                    }
+                    else if(this.cocosStudioURL[ fileNames[ i ] ] ){
+                        cc.eventManager.dispatchCustomEvent( 'loadCocosStudio', this.cocosStudioURL[ fileNames[ i ]  ] );
+                    }
                 }
             }
             break;
@@ -349,7 +413,12 @@ Loader.checkFiles = function ( fileName, type ) {
                 fileNames = this._checkAllUITextures();
                 for( i = 0; i < fileNames.length; i++ ) {
                     this.loadedFileNames.push( fileNames[ i ] );
-                    cc.eventManager.dispatchCustomEvent( 'loadUI', this.uiURL[ fileNames[ i ] ] );
+                    if(this.uiURL[ fileNames[ i ] ] ) {
+                        cc.eventManager.dispatchCustomEvent('loadUI', this.uiURL[fileNames[i]]);
+                    }
+                    else if(this.cocosStudioURL[ fileNames[ i ] ] ){
+                        cc.eventManager.dispatchCustomEvent( 'loadCocosStudio', this.cocosStudioURL[ fileNames[ i ]  ] );
+                    }
                 }
             }
             break;
@@ -363,6 +432,12 @@ Loader.checkFiles = function ( fileName, type ) {
             if( this._checkUIFile( fileName ) ) {
                 this.loadedFileNames.push( fileName );
                 cc.eventManager.dispatchCustomEvent( 'loadUI', this.uiURL[ fileName ] );
+            }
+            break;
+        case 'cocosStudio':
+            if( this._checkCocosStudioFile(fileName)){
+                this.loadedFileNames.push( fileName );
+                cc.eventManager.dispatchCustomEvent( 'loadCocosStudio', this.cocosStudioURL[ fileName ] );
             }
             break;
     }
@@ -431,6 +506,10 @@ Loader._checkUIFile = function( fileName ) {
     }
     return loaded;
 };
+
+Loader._checkCocosStudioFile = function (fileName){
+    return Loader._checkUIFile(fileName);
+}
 
 Loader._addSpriteFrames = function( fileName ) {
     var frameConfig = this.plistFiles[ fileName ];

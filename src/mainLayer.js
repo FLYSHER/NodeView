@@ -72,6 +72,11 @@ var MainLayer = cc.Layer.extend({
             self.onLoadUI( event.getUserData() );
         } );
 
+        this._loadCocosStudioListener = cc.eventManager.addCustomListener( 'loadCocosStudio', function (event){
+            self.onLoadCocosStuido( event.getUserData() );
+        });
+
+
         var label = new cc.LabelTTF( "파일을 이쪽으로 드래그해 주세요", "Arial", 30 );
         label.setPosition( this.CX, this.CY );
         this.addChild( label, 0, this.DESC_TAG );
@@ -216,6 +221,45 @@ var MainLayer = cc.Layer.extend({
 
         node.armature = null;
         node.ui = ui;
+
+        node.order = this._nodeOrder.length;
+        node.setLocalZOrder(10 + node.order);
+        this._nodeOrder[node.order] = node;
+
+        this._nodeList[ name ] = node;
+        this._addToJsonListMenu( name ,node);
+    },
+
+    onLoadCocosStuido : function( url ) {
+        var children = this.getChildren();
+
+        var self = this;
+        children.forEach( function( c ) {
+            if( c.getTag() === self.DESC_TAG ) {
+                c.removeFromParent();
+            }
+        } );
+
+        var name = cc.path.mainFileName( url );
+        if(this._nodeList[ name ])
+            return;
+        var json = ccs.load( url );
+        var ui = json.node;
+
+        var node = new DraggableNode( ui.getContentSize() );
+        node.setAnchorPoint( 0.5, 0.5 );
+        node.setPosition( this.CX , this.CY );
+        this.addChild( node );
+
+        ui.setAnchorPoint( 0.5, 0.5 );
+        node.addChildToCenter( ui );
+
+        node.armature = null;
+        node.ui = ui;
+        node.cocosAction = json.action;
+        if(node.cocosAction){
+            node.runAction(node.cocosAction); //타임라인 액션을 적용한 객체 붙임
+        }
 
         node.order = this._nodeOrder.length;
         node.setLocalZOrder(10 + node.order);
@@ -376,7 +420,7 @@ var MainLayer = cc.Layer.extend({
     onExit: function() {
         cc.eventManager.removeListener( this._loadArmatureListener );
         cc.eventManager.removeListener( this._loadUIListener );
-
+        cc.eventManager.removeListener( this._loadCocosStudioListener );
         this._super();
     },
 
