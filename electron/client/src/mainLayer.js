@@ -246,7 +246,12 @@ var MainLayer = cc.Layer.extend({
         var json = ccs.load( url );
         var ui = json.node;
 
-        var node = new DraggableNode( ui.getContentSize() );
+        var size = ui.getContentSize();
+        if(size.width < 0.01 || size.height < 0.01){
+            size = ui.getBoundingBoxToWorld();
+        }
+
+        var node = new DraggableNode( size );
         node.setAnchorPoint( 0.5, 0.5 );
         node.setPosition( this.CX , this.CY );
         this.addChild( node );
