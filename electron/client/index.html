@@ -2,12 +2,15 @@
 <html>
 <head>
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <link href="style.css" rel="stylesheet" type="text/css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
+    <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/jstree.min.js"></script>
+    <script>if (window.module) module = window.module;</script>
+    
     <meta charset="utf-8">
-    <title>Cocos2d-html5 Hello World test</title>
+    <title>NodeView - Flysher</title>
     <link rel="icon" type="image/GIF" href="res/favicon.ico"/>
 
     <meta name="viewport"
@@ -36,6 +39,9 @@
 
     <meta name="browsermode" content="application">
     <meta name="x5-page-mode" content="app">
+
+    <!-- for electron-->
+    <script src="../renderer.js"></script>
 </head>
 <body>
 

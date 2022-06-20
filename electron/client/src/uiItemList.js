@@ -43,6 +43,7 @@ var UIItemList = cc.Node.extend({
 
         $("#deleteBtn").click( function(e){
             self.delBySelectItem();
+            Gizmo_ClearDraw();
         });
 
         $("#frontBtn").click( function(e){

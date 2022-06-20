@@ -437,6 +437,9 @@ var ManiLayerScene = cc.Scene.extend({
          */
         Loader.init();
 
+        if (typeof ElectronRenderer != 'undefined')
+            ElectronRenderer.init();
+
         var layer = new MainLayer();
         this.addChild( layer, 1, "MainLayer" );
 

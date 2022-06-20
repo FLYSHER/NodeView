@@ -1,0 +1,72 @@
+{
+  "name": "NodeView(flysher)",
+  "version": "1.0.0",
+  "description": "A minimal Electron application",
+  "main": "main_electron.js",
+  "scripts": {
+    "start": "electron .",
+    "deploy:win": "electron-builder --windows nsis:ia32",
+    "deploy:mac": "electron-builder --mac"
+  },
+  "repository": "https://github.com/flysher/NodeView",
+  "keywords": [
+    "Electron",
+    "quick",
+    "start",
+    "tutorial",
+    "demo"
+  ],
+  "author": "GitHub",
+  "license": "CC0-1.0",
+  "devDependencies": {
+    "electron": "^18.0.3",
+    "electron-builder": "~22.11.7"
+  },
+  "dependencies": {
+    "image-data-uri": "^2.0.1"
+  },
+  "build": {
+    "productName": "NodeView",
+    "appId": "net.flysher.nodeview",
+    "asar": true,
+    "protocols": {
+      "name": "NodeView",
+      "schemes": [
+        "nodeview"
+      ]
+    },
+    "mac": {
+      "target": [
+        "default"
+      ],
+      "icon": "./build/icons/icon.icns"
+    },
+    "dmg": {
+      "title": "NodeView",
+      "icon": "./build/icons/icon.icns"
+    },
+    "win": {
+      "target": [
+        "zip",
+        "nsis"
+      ],
+      "icon": "./build/icons/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "directories": {
+      "buildResources": "./resources/installer/",
+      "output": "./dist/",
+      "app": "."
+    },
+    "files": [
+      "./*",
+      "./client/*",
+      "./client/frameworks/**/*",
+      "./client/res/**/*",
+      "./client/src/**/*"
+    ]
+  }
+}

@@ -58,23 +58,22 @@ Loader.init = function() {
             evt.preventDefault();
         }, false );
 
-    canvas.addEventListener(
-        "drop",
-        function( evt ){
-            evt.stopPropagation();
-            evt.preventDefault();   // stops the browser from redirecting off to the image.
+    this.onDropHandler = function( evt ){
+        evt.stopPropagation();
+        evt.preventDefault();   // stops the browser from redirecting off to the image.
 
-            var items = event.dataTransfer.items;
-            for (var i=0; i<items.length; i++) {
-                // webkitGetAsEntry is where the magic happens
-                var item = items[i].webkitGetAsEntry();
-                if (item) {
-                    traverseFileTree(item);
-                }
+        var items = event.dataTransfer.items;
+        for (var i=0; i<items.length; i++) {
+            // webkitGetAsEntry is where the magic happens
+            var item = items[i].webkitGetAsEntry();
+            if (item) {
+                traverseFileTree(item);
             }
+        }
 
-            // Loader.readFile( evt.dataTransfer.files );
-        }, false);
+        // Loader.readFile( evt.dataTransfer.files );
+    };
+    canvas.addEventListener("drop",this.onDropHandler, false);
 };
 
 Loader.reset = function() {
