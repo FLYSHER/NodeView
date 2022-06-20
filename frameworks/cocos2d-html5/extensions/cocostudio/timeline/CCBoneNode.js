@@ -288,7 +288,10 @@ ccs.BoneNode = (function () {
                     maxy = Math.max(cc.rectGetMaxY(r), maxy);
                 }
                 //displayRect.setRect(minx, miny, maxx - minx, maxy - miny); =>  cc.rect는 그냥 오브젝트 만드는것 setRect가 없다
-                displayRect = cc.rect(minx, miny, maxx - minx, maxy - miny);
+                displayRect.x = minx;
+                displayRect.y = miny;
+                displayRect.width = maxx - minx;
+                displayRect.height = maxy - miny;
             }
             return displayRect;
         },
