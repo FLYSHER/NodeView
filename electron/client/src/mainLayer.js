@@ -90,11 +90,6 @@ var MainLayer = cc.Layer.extend({
         this.addChild(this._animationList,-128);
         this._animationList.setLocalZOrder(100000);
 
-
-        this._screenSize = new UIScreenCtrl(this.onResize.bind(this));
-        this.addChild(this._screenSize,-128);
-        this._screenSize.setLocalZOrder(100000);
-
         this._movementCtrl = new UiPositionCtrl();
         this.addChild(this._movementCtrl,-128);
         this._movementCtrl.setLocalZOrder(100000);
@@ -112,14 +107,6 @@ var MainLayer = cc.Layer.extend({
         this._treeView.setVisible(false);
         this._treeView.setup();
 
-        // this._btnHideButtons = new ccui.Button();
-        // this._btnHideButtons.setName("btnHideButtons");
-        // this._btnHideButtons.titleFontSize = 16;
-        // this._btnHideButtons.setTouchEnabled(true);
-        // this._btnHideButtons.addTouchEventListener(this.onHideButtonsTouch.bind(this), this);
-        // this._btnHideButtons.setTitleText("HIDE ALL BUTTONS");
-        // this.addChild(this._btnHideButtons,200000);
-
         NodeList = this._nodeList;
 
         this.onResize();
@@ -135,9 +122,7 @@ var MainLayer = cc.Layer.extend({
 
         this._animationList.setPosition(0, size.height - this._animationList.getContentSize().height);
         this._itemList.setPosition(size.width - this._itemList.getContentSize().width , size.height - (this._itemList.getContentSize().height + 60));
-        this._screenSize.setPosition(size.width - this._screenSize.getContentSize().width , size.height - this._screenSize.getContentSize().height);
         this._movementCtrl.setPosition(100, 0);
-       // this._btnHideButtons.setPosition( cc.winSize.width - 100, 30 );
 
         this._treeView.setPosition(0, size.height - this._treeView.getContentSize().height);
 
@@ -331,7 +316,7 @@ var MainLayer = cc.Layer.extend({
         var selectNode = this._nodeList[ name ];
         toggleJSONUI(name.indexOf('(JSON)') !== -1  );
         if( !selectNode ) return;
-        
+
         selectNode.setName(name);
         if( selectNode.armature) {
             this._animationList.setVisible(true);
@@ -393,35 +378,6 @@ var MainLayer = cc.Layer.extend({
         }
     },
 
-    onHideButtonsTouch: function( sender, type ) {
-        switch( type ) {
-            case ccui.Widget.TOUCH_ENDED:
-            {
-                if( this._screenSize.visible ) {
-                    this._screenSize.visible = false;
-                    this._prevAnimationListVisble = this._animationList.visible;
-                    this._prevItemListVisble = this._itemList.visible;
-                    this._prevMovementCtrlVisble = this._movementCtrl.visible;
-                    this._prevTreeViewVisible = this._treeView.visible;
-
-                    this._animationList.visible = false;
-                    this._itemList.visible = false;
-                    this._movementCtrl.visible = false;
-                    this._treeView.visible = false;
-                 //   this._btnHideButtons.setTitleText("SHOW ALL BUTTONS");
-                } else {
-                    this._screenSize.visible = true;
-                    this._animationList.visible = this._prevAnimationListVisble;
-                    this._itemList.visible = this._prevItemListVisble;
-                    this._movementCtrl.visible = this._prevMovementCtrlVisble;
-                    this._treeView.visible = this._prevTreeViewVisible;
-                 //   this._btnHideButtons.setTitleText("HIDE ALL BUTTONS");
-                }
-                break;
-            }
-        }
-    },
-
     onExit: function() {
         cc.eventManager.removeListener( this._loadArmatureListener );
         cc.eventManager.removeListener( this._loadUIListener );
@@ -433,7 +389,7 @@ var MainLayer = cc.Layer.extend({
 
 
 
-var ManiLayerScene = cc.Scene.extend({
+var MainLayerScene = cc.Scene.extend({
     onEnter:function () {
         this._super();
 

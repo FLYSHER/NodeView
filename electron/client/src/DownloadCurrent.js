@@ -2,16 +2,6 @@ var g_fileName = "test.txt";
 var g_fileContext ="nothing :)";
 var g_currentObj = null;
 
-
-$('#DownloadBtn').click( function(){
-    //console.log( 'Download Button is under construction');
-    if ( !!g_currentObj ){
-        var string = JSON.stringify( g_currentObj );
-        download(g_fileName,string);
-    }
-
-}.bind(this));
-
 function download(filename, text) {
     var element = document.createElement('a');
     var ext = cc.path.extname(filename).toLowerCase();
@@ -112,12 +102,10 @@ function toggleJSONUI( isJson){
     if ( isJson ){
         document.getElementById( "localPos" ).style.display = "none";
         document.getElementById( "localPosition" ).style.display = "block";
-        document.getElementById( "DownloadBtn" ).style.visibility = 'visible';
     }
     else {
         document.getElementById( "localPos" ).style.display = "block";
         document.getElementById( "localPosition" ).style.display = "none";
-        document.getElementById( "DownloadBtn" ).style.visibility = 'hidden';
     }
 
 }

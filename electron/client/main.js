@@ -52,12 +52,12 @@
  *
  */
 
-var startpos, diffpos=0, range=50;
+var startpos, diffpos = 0, range = 50;
 var isEnable = false;
 
 
 // 사이드 메뉴 크기 조절 바를 클릭할 경우
-function onSideHrMouseDown( e ) {
+function onSideHrMouseDown(e) {
     startpos = event.clientX + diffpos;
     isEnable = true;
 
@@ -68,7 +68,7 @@ function onSideHrMouseDown( e ) {
 }
 
 // 사이드 메뉴 크기 조절 바 클릭을 뗄 경우
-function onSideHrMouseUp( e ) {
+function onSideHrMouseUp(e) {
     isEnable = false;
 
     removeOverDiv();
@@ -77,22 +77,39 @@ function onSideHrMouseUp( e ) {
 }
 
 // 사이드 메뉴 크기 조절 바 클릭 후 이동 시 사이드 메뉴와 캔버스 사이즈 조절
-function onSideHrMouseMove( e ) {
+function onSideHrMouseMove(e) {
 
     if (isEnable) {
         var pos = event.clientX;
-        diffpos = startpos-pos;
+        diffpos = startpos - pos;
 
-        var sideNav_width = ( startpos - diffpos );
+        var sideNav_width = (startpos - diffpos);
 
-        if ( sideNav_width > 210 ) {
-            document.getElementById("sidenav").style.width = sideNav_width + "px";
-            document.getElementById("side_hr").style.marginLeft = sideNav_width + "px";
-            document.getElementById("Cocos2dGameContainer").style.marginLeft = ( sideNav_width + 5 ) + "px";
-            document.getElementById("Cocos2dGameContainer").style.width = window.innerWidth - sideNav_width + "px";
+        refreshSideHr(sideNav_width);
+    }
+}
 
-            cc.view.setFrameSize( document.getElementById("Cocos2dGameContainer").clientWidth, document.getElementById("Cocos2dGameContainer").clientHeight );
-        }
+function refreshSideHr(sideNav_width) {
+    if (sideNav_width > 210) {
+        document.getElementById("sidenav").style.width = sideNav_width + "px";
+        document.getElementById("side_hr").style.marginLeft = sideNav_width + "px";
+
+        document.getElementById("inspector_hr").style.marginLeft = 1600 + "px";
+
+        //document.getElementById("Cocos2dGameContainer").style.marginLeft = (sideNav_width + 5) + "px";
+        document.getElementById("Cocos2dGameContainer").style.marginLeft = 0 + "px";
+        document.getElementById("Cocos2dGameContainer").style.marginRight = 0 + "px";
+        //document.getElementById("Cocos2dGameContainer").style.width = window.innerWidth - sideNav_width + "px";
+        //cc.view.setFrameSize(document.getElementById("Cocos2dGameContainer").clientWidth, document.getElementById("Cocos2dGameContainer").clientHeight);
+
+        var size = {
+            width: window.innerWidth || document.body.clientWidth,
+            height: window.innerHeight || document.body.clientHeight
+        };
+
+        document.getElementById("Cocos2dGameContainer").style.width = size.width + "px";
+        document.getElementById("Cocos2dGameContainer").style.height = size.height + "px";
+        cc.view.setFrameSize(size);
     }
 }
 
@@ -118,8 +135,8 @@ function createOverDiv() {
     overDiv.style.left = cc.DIRECTOR_STATS_POSITION.x + 'px';
     overDiv.style.opacity = '0';
     overDiv.style.width = window.innerWidth + 'px';
-    overDiv.style.height = window.innerHeight  + 'px';
-    container.appendChild( overDiv );
+    overDiv.style.height = window.innerHeight + 'px';
+    container.appendChild(overDiv);
 }
 
 // 캔버스 위에 생성한 div 를 제거
@@ -128,11 +145,11 @@ function removeOverDiv() {
     var container = document.getElementById("Cocos2dGameContainer");
     var overDiv = document.getElementById('over_div')
 
-    if( overDiv )
-        container.removeChild( overDiv );
+    if (overDiv)
+        container.removeChild(overDiv);
 }
 
-function copyObject( obj ) {
+function copyObject(obj) {
     if (obj === null || typeof obj !== 'object') {
         return obj;
     }
@@ -148,7 +165,7 @@ function copyObject( obj ) {
     return copiedObject;
 }
 
-function copyStringToClipboard( string ) {
+function copyStringToClipboard(string) {
     var clipboardElement = document.createElement("textarea");
     document.body.appendChild(clipboardElement);
     clipboardElement.value = string;
@@ -157,11 +174,11 @@ function copyStringToClipboard( string ) {
     document.body.removeChild(clipboardElement);
 }
 
-cc.game.onStart = function(){
+cc.game.onStart = function () {
     initSideHrMouseEvent();
 
     var sys = cc.sys;
-    if(!sys.isNative && document.getElementById("cocosLoading")) //If referenced loading.js, please remove it
+    if (!sys.isNative && document.getElementById("cocosLoading")) //If referenced loading.js, please remove it
         document.body.removeChild(document.getElementById("cocosLoading"));
 
     // Pass true to enable retina display, on Android disabled by default to improve performance
@@ -180,7 +197,7 @@ cc.game.onStart = function(){
     // Uncomment the following line to set a fixed orientation for your game
     // cc.view.setOrientation(cc.ORIENTATION_PORTRAIT);
 
-    cc.log("[CHECK] " , cc.winSize.width, cc.winSize.height );
+    cc.log("[CHECK] ", cc.winSize.width, cc.winSize.height);
     // Setup the resolution policy and design resolution size
     //cc.view.setDesignResolutionSize(cc.winSize.width, cc.winSize.height, cc.ResolutionPolicy.EXACT_FIT);
     // cc.view.setDesignResolutionSize(1700, 860, cc.ResolutionPolicy.FIXED_HEIGHT);
@@ -189,14 +206,20 @@ cc.game.onStart = function(){
     cc.view._orientationChanging = false;
 
     var newPolicy = new cc.ResolutionPolicy(new CustomContainerStrategy, new CustomContentStrategy);
-    cc.view.setDesignResolutionSize(1700, 860, newPolicy);
+    var size = {
+        width: window.innerWidth || document.body.clientWidth,
+        height: window.innerHeight || document.body.clientHeight
+    };
+
+    cc.view.setDesignResolutionSize(size.width, size.height, newPolicy);
 
     // The game will be resized when browser size change
     cc.view.resizeWithBrowserSize(true);
 
+    refreshSideHr(300);
     //load resources
     cc.LoaderScene.preload(g_resources, function () {
-        cc.director.runScene(new ManiLayerScene());
+        cc.director.runScene(new MainLayerScene());
     }, this);
 };
 cc.game.run();
