@@ -42,10 +42,12 @@ if( !cc.sys.isNative ) {
     var CustomContainerStrategy = cc.ContainerStrategy.extend({
         apply: function (view, designedResolution) {
 
-            var sidebarWidth = document.getElementsByClassName('sidenav')[0].clientWidth + 5;//	$('.sidenav').css("width");
-            //cc.log( document.getElementById('Cocos2dGameContainer'));
-            var w = window.innerWidth - sidebarWidth;
-            var h = window.innerHeight;
+            // var sidebarWidth = document.getElementsByClassName('sidenav')[0].clientWidth + 5;//	$('.sidenav').css("width");
+            // var w = window.innerWidth - sidebarWidth;
+            // var h = window.innerHeight;
+
+            var w = cc.container.clientWidth,
+                h = cc.container.clientHeight;
 
             if( h > ScreenUtil.minWHRatio * w) {
                 h = Math.round( ScreenUtil.minWHRatio * w );
@@ -57,9 +59,12 @@ if( !cc.sys.isNative ) {
     var CustomContentStrategy = cc.ContentStrategy.extend({
         apply: function (view, designedResolution) {
 
-            var sidebarWidth = document.getElementsByClassName('sidenav')[0].clientWidth + 5;
-            var w = window.innerWidth-sidebarWidth;
-            var h = window.innerHeight;
+            // var sidebarWidth = document.getElementsByClassName('sidenav')[0].clientWidth + 5;
+            // var w = window.innerWidth-sidebarWidth;
+            // var h = window.innerHeight;
+
+            var w = cc.container.clientWidth,
+                h = cc.container.clientHeight;
 
             if( h > ScreenUtil.minWHRatio * w) {
                 h = Math.round( ScreenUtil.minWHRatio * w );

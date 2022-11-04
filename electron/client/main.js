@@ -98,38 +98,38 @@ function onSideHrMouseMove( e ) {
 
 // 사이드 메뉴와 캔버스 사이에 사이즈 조절을 위한 바 생성
 function initSideHrMouseEvent() {
-    var container = document.getElementById("Cocos2dGameContainer");
-    container.setAttribute('class', 'Cocos2dGameContainer');
-
-    document.getElementById("side_hr").onmousedown = onSideHrMouseDown;
-    document.onmouseup = onSideHrMouseUp;
-    document.onmousemove = onSideHrMouseMove;
+    // var container = document.getElementById("Cocos2dGameContainer");
+    // container.setAttribute('class', 'Cocos2dGameContainer');
+    //
+    // document.getElementById("side_hr").onmousedown = onSideHrMouseDown;
+    // document.onmouseup = onSideHrMouseUp;
+    // document.onmousemove = onSideHrMouseMove;
 }
 
 // 사이즈 조절 바 클릭 후 드래그 시 캔버스 위에는 드래그 인식이 안되기 때문에 캔버스 위에 div 하나 생성
 function createOverDiv() {
-    var container = document.getElementById("Cocos2dGameContainer");
-    var overDiv = document.createElement('over_div');
-    overDiv.id = 'over_div';
-    overDiv.style.position = 'absolute';
-    overDiv.style.padding = '3px';
-    overDiv.style.backgroundColor = 'rgb(0, 0, 34)';
-    overDiv.style.bottom = cc.DIRECTOR_STATS_POSITION.y + '0px';
-    overDiv.style.left = cc.DIRECTOR_STATS_POSITION.x + 'px';
-    overDiv.style.opacity = '0';
-    overDiv.style.width = window.innerWidth + 'px';
-    overDiv.style.height = window.innerHeight  + 'px';
-    container.appendChild( overDiv );
+    // var container = document.getElementById("Cocos2dGameContainer");
+    // var overDiv = document.createElement('over_div');
+    // overDiv.id = 'over_div';
+    // overDiv.style.position = 'absolute';
+    // overDiv.style.padding = '3px';
+    // overDiv.style.backgroundColor = 'rgb(0, 0, 34)';
+    // overDiv.style.bottom = cc.DIRECTOR_STATS_POSITION.y + '0px';
+    // overDiv.style.left = cc.DIRECTOR_STATS_POSITION.x + 'px';
+    // overDiv.style.opacity = '0';
+    // overDiv.style.width = window.innerWidth + 'px';
+    // overDiv.style.height = window.innerHeight  + 'px';
+    // container.appendChild( overDiv );
 }
 
 // 캔버스 위에 생성한 div 를 제거
 // 캔버스 위에 div 가 존재하면 파일 드래그 앤 드롭이 동작하지 않는다.
 function removeOverDiv() {
-    var container = document.getElementById("Cocos2dGameContainer");
-    var overDiv = document.getElementById('over_div')
-
-    if( overDiv )
-        container.removeChild( overDiv );
+    // var container = document.getElementById("Cocos2dGameContainer");
+    // var overDiv = document.getElementById('over_div')
+    //
+    // if( overDiv )
+    //     container.removeChild( overDiv );
 }
 
 function copyObject( obj ) {

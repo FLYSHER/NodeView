@@ -2,41 +2,80 @@ html {
     -ms-touch-action: none;
 }
 
-body, canvas, div {
-    margin: 0;
-    padding: 0;
-    outline: none;
-    -moz-user-select: none;
-    -webkit-user-select: none;
-    -ms-user-select: none;
-    -khtml-user-select: none;
-    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-}
+/*body, canvas, div {*/
+/*    margin: 0;*/
+/*    padding: 0;*/
+/*    outline: none;*/
+/*    -moz-user-select: none;*/
+/*    -webkit-user-select: none;*/
+/*    -ms-user-select: none;*/
+/*    -khtml-user-select: none;*/
+/*    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);*/
+/*}*/
 
-body {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    padding: 0;
-    border: 0;
-    margin: 0;
+/*body {*/
+/*    position: absolute;*/
+/*    top: 0;*/
+/*    left: 0;*/
+/*    width: 100%;*/
+/*    height: 100%;*/
+/*    padding: 0;*/
+/*    border: 0;*/
+/*    margin: 0;*/
 
-    cursor: default;
-    color: #888;
-    background-color: #333;
+/*    cursor: default;*/
+/*    color: #888;*/
+/*    background-color: #333;*/
 
-    text-align: center;
-    font-family: Helvetica, Verdana, Arial, sans-serif;
+/*    text-align: center;*/
+/*    font-family: Helvetica, Verdana, Arial, sans-serif;*/
 
-    display: flex;
-    flex-direction: column;
-}
+/*    display: flex;*/
+/*    flex-direction: column;*/
+/*}*/
 
 canvas {
     background-color: rgba(255, 0, 0, 0);
 }
+
+.grid_container {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    /*grid-template-rows: repeat(6, 1fr);*/
+    grid-auto-rows: minmax(100px, auto);
+
+    grid-template-areas:
+        "main main main main hierarchy inspector"
+        "main main main main hierarchy inspector"
+        "main main main main hierarchy inspector"
+        "main main main main assets inspector"
+        "sub sub sub sub assets inspector"
+        "sub sub sub sub assets inspector";
+}
+
+.cocosView, .subView, .hierarchy, .assets, .inspector {
+    border: 1px solid #FF0000;
+}
+
+.cocosView {
+    background: #333333;
+    grid-area: main;
+}
+.subView {
+    grid-area: sub;
+}
+.hierarchy {
+    grid-area: hierarchy;
+}
+
+.assets {
+    grid-area: assets;
+}
+
+.inspector {
+    grid-area: inspector;
+}
+
 
 .sidenav {
     height: 100%;
@@ -80,12 +119,13 @@ canvas {
 
 #Cocos2dGameContainer {
     position: relative;
-    overflow: hidden;
-    margin-left: 270px;
-    display: -webkit-box;
-    -webkit-box-orient: horizontal;
-    -webkit-box-align: center;
-    -webkit-box-pack: center;
+    max-width : 100%;
+    height: auto;
+    /*margin-left: 270px;*/
+    /*display: -webkit-box;*/
+    /*-webkit-box-orient: horizontal;*/
+    /*-webkit-box-align: center;*/
+    /*-webkit-box-pack: center;*/
 }
 
 .styleLabel {
