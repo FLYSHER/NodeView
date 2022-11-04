@@ -62,7 +62,7 @@ Loader.init = function() {
         evt.stopPropagation();
         evt.preventDefault();   // stops the browser from redirecting off to the image.
 
-        var items = event.dataTransfer.items;
+        var items = evt.dataTransfer.items;
         for (var i=0; i<items.length; i++) {
             // webkitGetAsEntry is where the magic happens
             var item = items[i].webkitGetAsEntry();

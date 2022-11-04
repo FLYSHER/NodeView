@@ -53,63 +53,60 @@
  */
 
 var startpos, diffpos = 0, range = 50;
+var mouseDownTarget = null;
 var isEnable = false;
 
 
 // 사이드 메뉴 크기 조절 바를 클릭할 경우
 function onSideHrMouseDown(e) {
-    startpos = event.clientX + diffpos;
+    mouseDownTarget = e.currentTarget;
+    if (mouseDownTarget.id === "side_hr") {
+        startpos = e.clientX + diffpos;
+    } else if (mouseDownTarget.id === "inspector_hr") {
+        startpos = e.clientX - diffpos;
+    }
     isEnable = true;
-
     createOverDiv();
-
     return false;
-
 }
 
 // 사이드 메뉴 크기 조절 바 클릭을 뗄 경우
 function onSideHrMouseUp(e) {
     isEnable = false;
-
     removeOverDiv();
-
     return false;
 }
 
 // 사이드 메뉴 크기 조절 바 클릭 후 이동 시 사이드 메뉴와 캔버스 사이즈 조절
 function onSideHrMouseMove(e) {
-
     if (isEnable) {
-        var pos = event.clientX;
-        diffpos = startpos - pos;
-
-        var sideNav_width = (startpos - diffpos);
-
-        refreshSideHr(sideNav_width);
+        if (mouseDownTarget.id === "side_hr") {
+            diffpos = startpos - e.clientX;
+            var width = (startpos - diffpos);
+            refreshSideHr(width);
+        } else if (mouseDownTarget.id === "inspector_hr") {
+            diffpos = startpos - e.clientX;
+            var width = (startpos - diffpos);
+            refreshInspectorHr(width);
+        }
     }
 }
 
 function refreshSideHr(sideNav_width) {
-    if (sideNav_width > 210) {
+    if (sideNav_width >= 315 && sideNav_width <= 715) {
         document.getElementById("sidenav").style.width = sideNav_width + "px";
+        document.getElementById("sidenav").style.left = 0 + "px";
         document.getElementById("side_hr").style.marginLeft = sideNav_width + "px";
+        document.getElementById("fps").style.left = sideNav_width + 5 + "px";
+    }
+}
 
-        document.getElementById("inspector_hr").style.marginLeft = 1600 + "px";
-
-        //document.getElementById("Cocos2dGameContainer").style.marginLeft = (sideNav_width + 5) + "px";
-        document.getElementById("Cocos2dGameContainer").style.marginLeft = 0 + "px";
-        document.getElementById("Cocos2dGameContainer").style.marginRight = 0 + "px";
-        //document.getElementById("Cocos2dGameContainer").style.width = window.innerWidth - sideNav_width + "px";
-        //cc.view.setFrameSize(document.getElementById("Cocos2dGameContainer").clientWidth, document.getElementById("Cocos2dGameContainer").clientHeight);
-
-        var size = {
-            width: window.innerWidth || document.body.clientWidth,
-            height: window.innerHeight || document.body.clientHeight
-        };
-
-        document.getElementById("Cocos2dGameContainer").style.width = size.width + "px";
-        document.getElementById("Cocos2dGameContainer").style.height = size.height + "px";
-        cc.view.setFrameSize(size);
+function refreshInspectorHr(inspector_width) {
+    if (inspector_width >= 1205 && inspector_width <= 1605) {
+        var width = 1605-inspector_width + 315;
+        document.getElementById("inspector_nav").style.width = width + "px";
+        document.getElementById("inspector_nav").style.left = inspector_width + "px";
+        document.getElementById("inspector_hr").style.marginLeft = inspector_width - 5 + "px";
     }
 }
 
@@ -121,6 +118,9 @@ function initSideHrMouseEvent() {
     document.getElementById("side_hr").onmousedown = onSideHrMouseDown;
     document.onmouseup = onSideHrMouseUp;
     document.onmousemove = onSideHrMouseMove;
+
+
+    document.getElementById("inspector_hr").onmousedown = onSideHrMouseDown;
 }
 
 // 사이즈 조절 바 클릭 후 드래그 시 캔버스 위에는 드래그 인식이 안되기 때문에 캔버스 위에 div 하나 생성
@@ -216,7 +216,8 @@ cc.game.onStart = function () {
     // The game will be resized when browser size change
     cc.view.resizeWithBrowserSize(true);
 
-    refreshSideHr(300);
+    refreshSideHr(315);
+    refreshInspectorHr(1605);
     //load resources
     cc.LoaderScene.preload(g_resources, function () {
         cc.director.runScene(new MainLayerScene());

@@ -40,7 +40,7 @@ canvas {
 
 .sidenav {
     height: 100%;
-    width: 300px;
+    width: 315px;
     position: fixed;
     z-index: 1;
     top: 0;
@@ -63,6 +63,13 @@ canvas {
 .smallWidget {
     width: 100%;
     height: 200px;
+    overflow: auto;
+    background-color: #353535;
+}
+
+.slotUIWidget {
+    width: 100%;
+    height: 230px;
     overflow: auto;
     background-color: #353535;
 }

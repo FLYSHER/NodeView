@@ -47,6 +47,31 @@
 
 <!-- 사이드 메뉴 -->
 <div id="sidenav" class="sidenav">
+    <div id="resourceContainer" class="fileContainer">
+        <ul class="tabs">
+            <li class="tab-link current">
+                <!-- File Label 및 가운데 정렬 -->
+                <div class="labelAlign">
+                    <label id = "slotResource" class="styleLabel">resources</label>
+                </div>
+            </li>
+        </ul>
+        <div id="tab-0" class="tab-fileContent current">
+            <!-- File Tree -->
+            <div class = "slotUIWidget">
+                <div id="slotUiTree"></div>
+            </div>
+        </div>
+
+
+        <div>
+            <input type='file' id="SlotLoader" webkitdirectory/>
+            <script src='src/slot/SlotLoader.js' ></script>
+            <div id="file_list" style="overflow:auto; width:315px;height:200px;">
+                <p></p>
+            </div>
+        </div>
+    </div>
     <!-- File -->
     <div id="fileContainer" class="fileContainer">
         <ul class="tabs">

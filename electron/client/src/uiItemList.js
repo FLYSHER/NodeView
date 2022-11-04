@@ -69,11 +69,10 @@ var UIItemList = cc.Node.extend({
 
         $("#fileNameTree").jstree(true).settings.core.data.push(treeNodeObj);
         $('#fileNameTree').jstree("refresh");
-        this.itemCallbacks[addItem ] = {
+        this.itemCallbacks[addItem] = {
             itemName : addItem,
             cb : cb
         };
-
     },
 
     changeItem : function (selectIndex, targetIndex){
@@ -81,39 +80,8 @@ var UIItemList = cc.Node.extend({
             return false;
         }
 
-
         if(selectIndex < 0 || targetIndex < 0)
             return false;
-
-        // var select = this.listView.getItem(selectIndex);
-        // var target = this.listView.getItem(targetIndex);
-        //
-        // var button = select.getChildByName('ButtonItem');
-        // var targetButton = target.getChildByName('ButtonItem');
-        //
-        // var tempCB = select.cb;
-        // var tempName = select.itemName;
-        // var tempColor = button.getColor();
-        //
-        //
-        // select.cb = target.cb;
-        // select.itemName = target.itemName;
-        // button.setTitleText( select.itemName);
-        // button.setColor(targetButton.getColor());
-        //
-        // target.cb = tempCB;
-        // target.itemName = tempName;
-        // targetButton.setTitleText( target.itemName);
-        // targetButton.setColor(tempColor);
-        //
-        // if(this.selectItem === target) {
-        //     this.selectItem = select;
-        //     this.selectIndex = selectIndex;
-        // }
-        // else if(this.selectItem === select) {
-        //     this.selectItem = target;
-        //     this.selectIndex = targetIndex;
-        // }
 
         var testArr = $("#fileNameTree").jstree(true).settings.core.data;
         var tempObj = testArr[selectIndex];
@@ -121,75 +89,32 @@ var UIItemList = cc.Node.extend({
         testArr[selectIndex] = testArr[targetIndex];
         testArr[targetIndex] = tempObj;
 
-        // for( var i = 0; i < testArr.length ; i++){
-        //     if( testArr[i].text === this.selectItem.itemName ){
-        //         testArr.splice(i,1);
-        //         break;
-        //     }
-        // }
-
         var nodeId = $('#fileNameTree').jstree('get_selected')[0];
-
-        // var nodeId = node[0].id;
-        // cc.log(selectIndex,targetIndex);
-        // cc.log(nodeId);
-        // var nodeName = 'j2_'+(targetIndex+1);
-
         $("#fileNameTree").jstree(true).settings.core.data = testArr;
-
         $('#fileNameTree').jstree("refresh");
-
         setTimeout(function(){
             $('#fileNameTree').jstree("deselect_all");
-
             $('#fileNameTree').jstree('select_node',nodeId);
-
-            // $('#fileNameTree').jstree("refresh");
         },100);
-
-        //
-        //
-        // var newNodeId = "j2_"+(targetIndex+1)+"_anchor";
-        // //
-        // $(newNodeId).addClass('jstree-clicked');
-        // //
-        //
-
-
-
-
         return true;
     },
 
     delBySelectItem : function () {
         if(!this.selectItem)
             return;
-
-        // this.listView.removeItem( this.selectIndex); //this.listView.getCurSelectedIndex());
-
-        // this.totalListItemCount = this.listView.getItems().length;
-        // this.totalListViewHeight = this.listItemHeight * this.totalListItemCount + (this.totalListItemCount - 1) * this.itemMargin;
-        // this.listView.getInnerContainer().setContentSize(cc.size(this.listView.getInnerContainerSize().width, this.totalListViewHeight));
-        // this.delBtn.setVisible(false);
-        // this.upBtn.setVisible(false);
-        // this.downBtn.setVisible(false);
-        // if(this.length() === 0)
-        //     this.setVisible(false);
-
-
-
-
-
-
-
             
         var testArr = $("#fileNameTree").jstree(true).settings.core.data;
-        for( var i = 0; i < testArr.length ; i++){
+        for( let i = 0; i < testArr.length ; i++){
             if( testArr[i].text === this.selectItem.itemName ){
                 testArr.splice(i,1);
                 break;
             }
         }
+
+        if(this.itemCallbacks[this.selectItem.itemName] !== undefined){
+            this.itemCallbacks = null;
+        }
+
         $("#fileNameTree").jstree(true).settings.core.data = testArr;
         $('#fileNameTree').jstree("refresh");
 

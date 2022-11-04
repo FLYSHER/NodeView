@@ -24,27 +24,6 @@ var RunAction = function (script) {
     }
 };
 
-var ResetAction = function () {
-    if(Target !== null) {
-        if(TargetRunActionData !== null)
-            Target.stopAction(TargetRunActionData);
-
-        if(TempTargetPos !== null)
-            Target.setPosition(TempTargetPos);
-
-        if(TempTargetScale !== null)
-            Target.setScale(TempTargetScale);
-
-        if(TempTargetRot !== null)
-            Target.setRotation(TempTargetRot);
-
-        TargetRunActionData = null;
-        TempTargetPos = null;
-        TempTargetScale = null;
-        TempTargetRot = null;
-    }
-};
-
 
 var MainLayer = cc.Layer.extend({
     DESC_TAG: 99,
@@ -93,6 +72,14 @@ var MainLayer = cc.Layer.extend({
         this._movementCtrl = new UiPositionCtrl();
         this.addChild(this._movementCtrl,-128);
         this._movementCtrl.setLocalZOrder(100000);
+
+
+        this._resourceList = new uiList();
+        this.addChild(this._resourceList,-128);
+        this._resourceList.setLocalZOrder(100000);
+        this._resourceList.setContentSize(cc.size(150, 300));
+        this._resourceList.setVisible(false);
+
 
         this._itemList = new UIItemList();
         this.addChild(this._itemList,-128);
@@ -308,8 +295,6 @@ var MainLayer = cc.Layer.extend({
 
                 }
             }.bind(this));
-
-        // this.setDraggableItem( name );
     },
 
     updateMenu: function( name, finalNode ) {
@@ -383,6 +368,31 @@ var MainLayer = cc.Layer.extend({
         cc.eventManager.removeListener( this._loadUIListener );
         cc.eventManager.removeListener( this._loadCocosStudioListener );
         this._super();
+    },
+
+    /////////////////////////
+
+    setSlotResource: function( name )  {
+        this._resourceList.add(name,
+            function ( type ) {
+                switch(type){
+                    case ItemListClickType.SELECT:
+                        this.updateMenu( name );
+                        break;
+                    case ItemListClickType.DELETE:
+                        this.deleteItem( name);
+                        break;
+                    case ItemListClickType.UP:
+                        this.reOrderup( name , true);
+                        break;
+                    case ItemListClickType.DOWN:
+                        this.reOrderup( name , false);
+                        break;
+
+                }
+            }.bind(this));
+
+        // this.setDraggableItem( name );
     },
 
 });

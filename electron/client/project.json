@@ -25,6 +25,10 @@
         "src/draggableNode.js",
         "src/eventDispatcher.js",
         "src/mainLayer.js",
-        "src/uiErrorLog.js"
+        "src/uiErrorLog.js",
+
+
+        "src/slot/SlotLoader.js",
+        "src/slot/uiList.js"
     ]
 }
