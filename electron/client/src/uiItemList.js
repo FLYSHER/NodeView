@@ -19,7 +19,7 @@ var UIItemList = cc.Node.extend({
     ctor: function() {
          this._super(color.backgroundColor);
         
-        $('#fileNameTree').jstree({
+        $('#hierarchTree').jstree({
             'core' : {
                 'data' : [
                 ],
@@ -29,16 +29,15 @@ var UIItemList = cc.Node.extend({
                 }
             }
         });
-        $('#fileNameTree').jstree("refresh");
+        $('#hierarchTree').jstree("refresh");
         this.itemCallbacks = {};
 
         var self = this;
-        $('#fileNameTree').on("changed.jstree", function (e, data) {
+        $('#hierarchTree').on("changed.jstree", function (e, data) {
             if( !!data.node === false)
                 return;
             self.selectItem =  self.itemCallbacks[ data.node.text ];
             self.selectItem && self.selectItem.cb( ItemListClickType.SELECT );
-            
         });
 
         $("#deleteBtn").click( function(e){
@@ -58,7 +57,6 @@ var UIItemList = cc.Node.extend({
     },
 
     add : function (addItem, node, cb) {
-
         var treeNodeObj = {
             "id" : node.__instanceId,
             "text" : addItem,
@@ -67,8 +65,8 @@ var UIItemList = cc.Node.extend({
             },
         }
 
-        $("#fileNameTree").jstree(true).settings.core.data.push(treeNodeObj);
-        $('#fileNameTree').jstree("refresh");
+        $("#hierarchTree").jstree(true).settings.core.data.push(treeNodeObj);
+        $('#hierarchTree').jstree("refresh");
         this.itemCallbacks[addItem] = {
             itemName : addItem,
             cb : cb
@@ -83,18 +81,18 @@ var UIItemList = cc.Node.extend({
         if(selectIndex < 0 || targetIndex < 0)
             return false;
 
-        var testArr = $("#fileNameTree").jstree(true).settings.core.data;
+        var testArr = $("#hierarchTree").jstree(true).settings.core.data;
         var tempObj = testArr[selectIndex];
 
         testArr[selectIndex] = testArr[targetIndex];
         testArr[targetIndex] = tempObj;
 
-        var nodeId = $('#fileNameTree').jstree('get_selected')[0];
-        $("#fileNameTree").jstree(true).settings.core.data = testArr;
-        $('#fileNameTree').jstree("refresh");
+        var nodeId = $('#hierarchTree').jstree('get_selected')[0];
+        $("#hierarchTree").jstree(true).settings.core.data = testArr;
+        $('#hierarchTree').jstree("refresh");
         setTimeout(function(){
-            $('#fileNameTree').jstree("deselect_all");
-            $('#fileNameTree').jstree('select_node',nodeId);
+            $('#hierarchTree').jstree("deselect_all");
+            $('#hierarchTree').jstree('select_node',nodeId);
         },100);
         return true;
     },
@@ -103,7 +101,7 @@ var UIItemList = cc.Node.extend({
         if(!this.selectItem)
             return;
             
-        var testArr = $("#fileNameTree").jstree(true).settings.core.data;
+        var testArr = $("#hierarchTree").jstree(true).settings.core.data;
         for( let i = 0; i < testArr.length ; i++){
             if( testArr[i].text === this.selectItem.itemName ){
                 testArr.splice(i,1);
@@ -115,8 +113,8 @@ var UIItemList = cc.Node.extend({
             this.itemCallbacks = null;
         }
 
-        $("#fileNameTree").jstree(true).settings.core.data = testArr;
-        $('#fileNameTree').jstree("refresh");
+        $("#hierarchTree").jstree(true).settings.core.data = testArr;
+        $('#hierarchTree').jstree("refresh");
 
         if(this.selectItem.cb)
             this.selectItem.cb(ItemListClickType.DELETE);
@@ -218,7 +216,7 @@ var UIItemList = cc.Node.extend({
     },
 
     getSelectedIndex : function(){
-        var testArr = $("#fileNameTree").jstree(true).settings.core.data;
+        var testArr = $("#hierarchTree").jstree(true).settings.core.data;
 
         for( var i = 0; i < testArr.length ; i++){
             if( testArr[i].text === this.selectItem.itemName ){
@@ -274,7 +272,7 @@ var UIItemList = cc.Node.extend({
     //     }
     // }
     isEnableToMove : function( isFront ){
-        var testArr = $("#fileNameTree").jstree(true).settings.core.data;
+        var testArr = $("#hierarchTree").jstree(true).settings.core.data;
 
 
         if(isFront){

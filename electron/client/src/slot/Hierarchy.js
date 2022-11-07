@@ -1,3 +1,10 @@
+var ItemListClickType = {
+    SELECT : 0,
+    DELETE : 1,
+    UP : 2,
+    DOWN : 3
+};
+
 var Hierarchy = cc.Node.extend({
     selectItem: null,
     selectIndex: -1,
@@ -5,7 +12,7 @@ var Hierarchy = cc.Node.extend({
     ctor: function () {
         this._super(color.backgroundColor);
 
-        $("#slotUiTree").jstree({
+        $("#hierarchTree").jstree({
             "core": {
                 "themes": {
                     "responsive": false
@@ -33,20 +40,38 @@ var Hierarchy = cc.Node.extend({
         });
 
         this.refresh();
+
+        this.itemCallbacks = {};
+        var self = this;
+        $('#hierarchTree').on("changed.jstree", function (e, data) {
+            if (!!data.node === false)
+                return;
+            self.selectItem = self.itemCallbacks[data.node.text];
+            self.selectItem && self.selectItem.cb(ItemListClickType.SELECT);
+        });
         return true;
     },
 
-    add: function (itemName) {
+    add: function (itemName, node, cb) {
         this.index++;
         let treeNodeObj = {
             "id": this.index,
             "text": itemName,
         }
 
-        $("#slotUiTree").jstree(true).settings.core.data[0].children.push(treeNodeObj);
+        $("#hierarchTree").jstree(true).settings.core.data[0].children.push(treeNodeObj);
+        this.refresh();
+        this.itemCallbacks[itemName] = {
+            itemName: itemName,
+            cb: cb
+        };
     },
 
     refresh: function () {
-        $('#slotUiTree').jstree("refresh");
-    }
+        $('#hierarchTree').jstree("refresh");
+    },
+
+    getSelectedName : function(){
+        return this.selectItem.itemName;
+    },
 });

@@ -80,12 +80,18 @@ var MainLayer = cc.Layer.extend({
         this._resourceList.setContentSize(cc.size(150, 300));
         this._resourceList.setVisible(false);
 
-
-        this._itemList = new UIItemList();
+        this._itemList = new Hierarchy();
         this.addChild(this._itemList,-128);
         this._itemList.setLocalZOrder(100000);
         this._itemList.setContentSize(cc.size(150, 300));
         this._itemList.setVisible(false);
+        //_hierarchy
+
+        // this._itemList = new UIItemList();
+        // this.addChild(this._itemList,-128);
+        // this._itemList.setLocalZOrder(100000);
+        // this._itemList.setContentSize(cc.size(150, 300));
+        // this._itemList.setVisible(false);
 
         this._treeView = new UIScrollTreeViewCtrl();
         this.addChild(this._treeView,-128);

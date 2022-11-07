@@ -29,6 +29,7 @@
 
 
         "src/slot/SlotLoader.js",
-        "src/slot/uiList.js"
+        "src/slot/uiList.js",
+        "src/slot/Hierarchy.js"
     ]
 }

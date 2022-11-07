@@ -176,6 +176,11 @@ li {
     list-style:none;
 }
 
+ul.resources{
+    margin: 0px;
+    padding: 0px;
+}
+
 ul.tabs{
     margin: 0px;
     padding: 0px;
