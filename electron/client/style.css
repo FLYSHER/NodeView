@@ -172,6 +172,10 @@ canvas {
     padding-top:5px;
 }
 
+li {
+    list-style:none;
+}
+
 ul.tabs{
     margin: 0px;
     padding: 0px;

@@ -394,7 +394,6 @@ var MainLayer = cc.Layer.extend({
 
         // this.setDraggableItem( name );
     },
-
 });
 
 
