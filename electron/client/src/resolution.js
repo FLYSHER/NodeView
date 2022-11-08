@@ -46,12 +46,17 @@ if( !cc.sys.isNative ) {
             // var w = window.innerWidth - sidebarWidth;
             // var h = window.innerHeight;
 
-            var w = cc.container.clientWidth,
-                h = cc.container.clientHeight;
+            // var w = cc.container.clientWidth,
+            //     h = cc.container.clientHeight;
+
+            var cocosView = document.getElementsByClassName("cocosView")[0];
+            var w = cocosView.clientWidth,
+                h = cocosView.clientHeight;
 
             if( h > ScreenUtil.minWHRatio * w) {
                 h = Math.round( ScreenUtil.minWHRatio * w );
             }
+            cc.log("CustomContainerStrategy > w, h : ", w, h );
             return this._setupContainer(view, w, h);
         }
     });
@@ -74,32 +79,34 @@ if( !cc.sys.isNative ) {
             var contentH = h;//f
             var scale = 1;//g
 
-            if(contentH < 670) {
-                if( contentH < 400 ) {
-                    scale = 400 / 670;
-                } else {
-                    scale = contentH / 670;
-                }
-                contentH = 670;
-                contentW /= scale;
-            } else if(contentH > 1000) {
-                scale = contentH / 1000;
-                contentH = 1000;
-                contentW /= scale;
-            }
+            // if(contentH < 670) {
+            //     if( contentH < 400 ) {
+            //         scale = 400 / 670;
+            //     } else {
+            //         scale = contentH / 670;
+            //     }
+            //     contentH = 670;
+            //     contentW /= scale;
+            // } else if(contentH > 1000) {
+            //     scale = contentH / 1000;
+            //     contentH = 1000;
+            //     contentW /= scale;
+            // }
+            //
+            // if(contentW < 1080) {
+            //     scale = scale * contentW / 1080;
+            //     contentW = 1080;
+            //     contentH = h / scale;
+            // } else if(contentW > 2700) {
+            //     contentW = 2700;
+            // }
 
-            if(contentW < 1080) {
-                scale = scale * contentW / 1080;
-                contentW = 1080;
-                contentH = h / scale;
-            } else if(contentW > 2700) {
-                contentW = 2700;
-            }
 
             ScreenUtil.contentScale = scale;
 
             designedResolution.width = contentW;
             designedResolution.height = contentH;
+            cc.log("CustomContentStrategy > w, h : ", w, h, scale );
             return this._buildResult(w, h, w, h, scale, scale);
         }
     });
