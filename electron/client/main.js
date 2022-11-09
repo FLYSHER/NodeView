@@ -56,7 +56,6 @@ var startpos, diffpos = 0, range = 50;
 var mouseDownTarget = null;
 var isEnable = false;
 
-
 // 사이드 메뉴 크기 조절 바를 클릭할 경우
 function onSideHrMouseDown(e) {
     mouseDownTarget = e.currentTarget;
@@ -105,8 +104,8 @@ function refreshInspectorHr(inspector_width) {
     if (inspector_width >= 1205 && inspector_width <= 1605) {
         var width = 1605-inspector_width + 315;
         document.getElementById("inspector_nav").style.width = width + "px";
-        document.getElementById("inspector_nav").style.left = inspector_width + "px";
-        document.getElementById("inspector_hr").style.marginLeft = inspector_width - 5 + "px";
+        document.getElementById("inspector_nav").style.left = inspector_width - 5 + "px";
+        document.getElementById("inspector_hr").style.marginLeft = inspector_width - 10 + "px";
     }
 }
 
@@ -115,12 +114,12 @@ function initSideHrMouseEvent() {
     var container = document.getElementById("Cocos2dGameContainer");
     container.setAttribute('class', 'Cocos2dGameContainer');
 
-    document.getElementById("side_hr").onmousedown = onSideHrMouseDown;
-    document.onmouseup = onSideHrMouseUp;
-    document.onmousemove = onSideHrMouseMove;
-
-
-    document.getElementById("inspector_hr").onmousedown = onSideHrMouseDown;
+    // UI 조절  필요없을것같아 일단 주석
+    // document.getElementById("side_hr").onmousedown = onSideHrMouseDown;
+    // document.onmouseup = onSideHrMouseUp;
+    // document.onmousemove = onSideHrMouseMove;
+    //
+    // document.getElementById("inspector_hr").onmousedown = onSideHrMouseDown;
 }
 
 // 사이즈 조절 바 클릭 후 드래그 시 캔버스 위에는 드래그 인식이 안되기 때문에 캔버스 위에 div 하나 생성

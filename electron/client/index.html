@@ -47,12 +47,23 @@
 
 <!-- 사이드 메뉴 -->
 <div id="sidenav" class="sidenav">
+    <!-- File -->
     <div id="resourceContainer" class="fileContainer">
         <ul class="tabs">
             <li class="tab-link current">
                 <!-- File Label 및 가운데 정렬 -->
                 <div class="labelAlign">
-                    <label id = "slotResource" class="styleLabel">resources</label>
+                    <label id = "slotResource" class="styleLabel">Resources</label>
+                </div>
+            </li>
+            <li>
+                <div class="filebox">
+                    <label for='SlotLoader'>load</label>
+                    <input type='file' id="SlotLoader" webkitdirectory/>
+                    <script src='src/slot/SlotLoader.js' ></script>
+                    <div id="file_list" style="overflow:auto; width:0px;height:0px;">
+                        <p></p>
+                    </div>
                 </div>
             </li>
         </ul>
@@ -60,74 +71,38 @@
             <!-- File Tree -->
             <div class="slotUIWidget">
                 <ul class="resources" id="slotUiTree">
-
                 </ul>
             </div>
         </div>
-
-
-        <div>
-            <input type='file' id="SlotLoader" webkitdirectory/>
-            <script src='src/slot/SlotLoader.js' ></script>
-            <div id="file_list" style="overflow:auto; width:315px;height:200px;">
-                <p></p>
-            </div>
-        </div>
     </div>
-    <!-- File -->
-    <div id="fileContainer" class="fileContainer">
-        <ul class="tabs">
-            <li class="tab-link current">
-                <!-- File Label 및 가운데 정렬 -->
+    <!-- Hierarchy -->
+    <div id="hierarchyContainer" class="hierarchyContainer">
+        <ul class="hierarchyTabs">
+            <li class="tab-link current" data-tab="tab-hierarchy">
                 <div class="labelAlign">
-                    <label id = "fileLabel" class="styleLabel">Hierarchy</label>
+                    <label id = "hierarchyLabel" class="styleLabel">Hierarchy</label>
+                </div>
+            </li>
+            <li class="tab-link" data-tab="tab-symbols">
+                <div class="labelAlign">
+                    <label id = "symbolList" class="styleLabel">Symbols</label>
                 </div>
             </li>
         </ul>
-        <div id="tab-1" class="tab-fileContent current">
-            <!-- File Tree -->
+        <div id="tab-hierarchy" class="tab-hierarchyContent current">
             <div class = "smallWidget">
                 <div id="hierarchTree"></div>
             </div>
-            <div>
-                <!-- File Delete Button -->
-                <button type="button" id="deleteBtn" class="styleButton" title="파일 삭제" style="width: 30%;">Delete</button>
-
-                <button type="button" id="frontBtn" class="styleButton" title="zorder 앞으로 변경" style="width:30%;">Front</button>
-
-                <button type="button" id="backBtn" class="styleButton" title="zorder 뒤로 변경" style="width:30%;">Back</button>
-            </div>
+<!--            <div>-->
+<!--                &lt;!&ndash; File Delete Button &ndash;&gt;-->
+<!--                <button type="button" id="deleteBtn" class="styleButton" title="파일 삭제" style="width: 30%;">Delete</button>-->
+<!--                <button type="button" id="frontBtn" class="styleButton" title="zorder 앞으로 변경" style="width:30%;">Front</button>-->
+<!--                <button type="button" id="backBtn" class="styleButton" title="zorder 뒤로 변경" style="width:30%;">Back</button>-->
+<!--            </div>-->
         </div>
-    </div>
-
-    <!-- Widget -->
-    <div id="widgetContainer" class="widgetContainer">
-        <ul class="tabs">
-            <li class="tab-link current">
-                <!-- Widget Label 및 가운데 정렬 -->
-                <div class="labelAlign">
-                    <label id = "nodeTreeLabel" class="styleLabel">Widget</label>
-                </div>
-            </li>
-            <li class="tab-link">
-                <!-- Widget Label 및 가운데 정렬 -->
-                <div class="alignCenter">
-                    <input type="text" id = "searchNode" class = "searchNode" placeholder="Search" size="17" style="width: 100%;visibility:hidden">
-                </div>
-            </li>
-        </ul>
-        <div id="tab-2" class="tab-widgetContent current">
-            <!-- Widget Tree -->
-            <div class = "treeWidget">
-                <div id="widgetTree"></div>
-                <div id="animationTree"></div>
-            </div>
-            <div class="alignCenter">
-                <!-- Widget Tree Visible Button -->
-                <button type="button" id="toggleVisible" class="styleButton" title="노드 표시" style="width: 22%;visibility:hidden;">Visible</button>
-                <button type="button" id="openAll" class="styleButton" title="모든 노드 트리 열기" style="width: 22%;visibility:hidden;">Open</button>
-                <button type="button" id="closeAll" class="styleButton" title="모든 노드 트리 닫기" style="width: 22%;visibility:hidden;">Close</button>
-                <button type="button" id="copyBtn" class="styleButton" title="위젯 노드 트리 복사" style="width: 22%;visibility:hidden;">Copy</button>
+        <div id="tab-symbols" class="tab-hierarchyContent">
+            <div class = "smallWidget">
+                <div id="symbolTree"></div>
             </div>
         </div>
     </div>
@@ -162,9 +137,9 @@
                 </div>
             </li>
         </ul>
-        <div id="tab-4" class="tab-propertiesContent current">
+        <div id="tab-properties" class="tab-propertiesContent current">
             <!-- UI Animation Widget -->
-            <table style="width:100%; height:100%; background-color: #353535;" style="table-layout: fixed">
+            <table style="width:100%; height:87%; background-color: #353535;" style="table-layout: fixed">
                 <tr>
                     <td>
                         <label class="styleLabel">LocalPos : </label>
@@ -220,6 +195,66 @@
                     </td>
                 </tr>
             </table>
+        </div>
+    </div>
+
+    <div id="widgetContainer" class="widgetContainer">
+        <ul class="tabs">
+            <li class="tab-link current">
+                <!-- Widget Label 및 가운데 정렬 -->
+                <div class="labelAlign">
+                    <label id = "nodeTreeLabel" class="styleLabel">Animation</label>
+                </div>
+            </li>
+            <li class="tab-link">
+                <!-- Widget Label 및 가운데 정렬 -->
+                <div class="alignCenter">
+                    <input type="text" id = "searchNode" class = "searchNode" placeholder="Search" size="17" style="width: 100%;visibility:hidden">
+                </div>
+            </li>
+        </ul>
+        <div id="tab-animation" class="tab-widgetContent current">
+            <!-- Animation Widget Tree -->
+            <div class = "animationWidget">
+                <div id="animationTree"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="skinContainer" class="widgetContainer">
+        <ul class="tabs">
+            <li class="tab-link current">
+                <!-- Widget Label 및 가운데 정렬 -->
+                <div class="labelAlign">
+                    <label id="skinTreeLabel" class="styleLabel">Skin</label>
+                </div>
+            </li>
+        </ul>
+        <div id="tab-skin" class="tab-widgetContent current">
+            <!-- Skin Widget Tree -->
+            <div class="skinInfoWidget">
+                <table style="background-color: #353535;" style="table-layout: fixed">
+                    <tr>
+                        <td>
+                            <label class="styleLabel">id : </label>
+                        </td>
+                        <td>
+                            <input type="text" id="idInput" name="name" required minlength="1" maxlength="5" size="4">
+                        </td>
+                        <td>
+                            <label class="styleLabel">index : </label>
+                        </td>
+                        <td>
+                            <input type="text" id="valueInput" name="name" required minlength="1" maxlength="2"
+                                   size="2">
+                            <!--                            <label for="valueInput"> (~10) </label>-->
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div class = "skinWidget">
+                <div id="skinTree"></div>
+            </div>
         </div>
     </div>
 </div>

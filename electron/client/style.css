@@ -51,32 +51,46 @@ canvas {
 
 .inspector_nav {
     height: 100%;
-    width: 315px;
+    width: 320px;
     position: fixed;
     z-index: 1;
     top: 0;
-    left: 1605px;
+    left: 1600px;
     background-color: #353535;
     text-align: left;
 }
 
 .smallWidget {
     width: 100%;
-    height: 200px;
+    height: 470px;
     overflow: auto;
     background-color: #353535;
 }
 
 .slotUIWidget {
     width: 100%;
-    height: 230px;
+    height: 195px;
     overflow: auto;
     background-color: #353535;
 }
 
-.treeWidget {
+.animationWidget {
     width: 100%;
     height: 340px;
+    overflow: auto;
+    background-color: #353535;
+}
+
+.skinWidget{
+    width: 100%;
+    height: 300px;
+    overflow: auto;
+    background-color: #353535;
+}
+
+.skinInfoWidget{
+    width: 100%;
+    height: 30px;
     overflow: auto;
     background-color: #353535;
 }
@@ -95,8 +109,12 @@ canvas {
 .side_hr { width:5px; height:100%; position: fixed; margin-left: 300px; z-index: 2; background-color:#888888; }
 .inspector_hr { width:5px; height:100%; position: fixed; margin-left: 1600px; z-index: 2; background-color:#888888; }
 .Cocos2dGameContainer { z-index: 0; }
+
+/*
+사이드바 클릭 + 사이즈 조절 필요없어서 주석
 #side_hr { cursor:pointer; }
 #inspector_hr { cursor:pointer; }
+ */
 
 #Cocos2dGameContainer {
     position: relative;
@@ -111,6 +129,8 @@ canvas {
 .styleLabel {
     color: white;
 }
+
+
 
 .styleButton {
     background-color: #353535;
@@ -140,7 +160,12 @@ canvas {
 
 .fileContainer{
     width: 95%;
-    height: 280px;
+    height: 245px;
+    padding-top:5px;
+}
+.hierarchyContainer{
+    width: 95%;
+    height: 500px;
     padding-top:5px;
 }
 .alignCenter{
@@ -155,8 +180,9 @@ canvas {
 
 .widgetContainer{
     width: 95%;
-    height: 420px;
+    height: 385px;
     padding-top:5px;
+    margin-left:5px;
 }
 
 .uiAnimationContainer{
@@ -168,8 +194,9 @@ canvas {
 
 .nodeInfoContainer{
     width: 95%;
-    height: 210px;
+    height: 190px;
     padding-top:5px;
+    margin-left: 5px;
 }
 
 li {
@@ -180,6 +207,32 @@ ul.resources{
     margin: 0px;
     padding: 0px;
 }
+
+ul.hierarchyTabs{
+    margin: 0px;
+    padding: 0px;
+    list-style: none;
+}
+ul.hierarchyTabs li{
+    z-index: 1;
+    width:45%;
+    background: none;
+    color: #222;
+    display: inline-block;
+    padding: 5px 1px;
+    float: left;
+}
+
+ul.hierarchyTabs li.current{
+    background: #555555;
+    color: #222;
+    border-top: 1px solid #A6A6A6;
+    border-right: 1px solid #A6A6A6;
+    border-left: 1px solid #A6A6A6;
+    border-bottom: 1px solid #555555;
+    border-radius: 5px 5px 0px 0px / 5px 5px 0px 0px;
+}
+
 
 ul.tabs{
     margin: 0px;
@@ -193,6 +246,7 @@ ul.tabs li{
     color: #222;
     display: inline-block;
     padding: 5px 1px;
+    float: left;
 }
 
 ul.tabs li.current{
@@ -214,6 +268,23 @@ ul.tabs li.current{
 .tab-fileContent.current{
     width: 100%;
     height:235px;
+    display: inherit;
+    padding: 5px;
+    box-shadow: 0px -1px 0 0 #A6A6A6;
+    border-right: 1px solid #A6A6A6;
+    border-left: 1px solid #A6A6A6;
+    border-bottom: 1px solid #A6A6A6;
+}
+
+.tab-hierarchyContent{
+    display: none;
+    background: #555555;
+    padding: 5px;
+}
+
+.tab-hierarchyContent.current{
+    width: 100%;
+    height:500px;
     display: inherit;
     padding: 5px;
     box-shadow: 0px -1px 0 0 #A6A6A6;
@@ -264,11 +335,45 @@ ul.tabs li.current{
 
 .tab-propertiesContent.current{
     width: 100%;
-    height:140px;
+    height:180px;
     display: inherit;
     padding: 5px;
     box-shadow: 0px -1px 0 0 #A6A6A6;
     border-right: 1px solid #A6A6A6;
     border-left: 1px solid #A6A6A6;
     border-bottom: 1px solid #A6A6A6;
+}
+
+.filebox label {
+    display: inline-block;
+    padding: .5em .75em;
+    color: #fff;
+    font-size: inherit;
+    line-height: normal;
+    vertical-align: middle;
+    background-color: #5cb85c;
+    cursor: pointer;
+    border: 1px solid #4cae4c;
+    border-radius: .15em;
+    -webkit-transition: background-color 0.2s;
+    transition: background-color 0.2s;
+}
+
+.filebox label:hover {
+    background-color: #6ed36e;
+}
+
+.filebox label:active {
+    background-color: #367c36;
+}
+
+.filebox input[type="file"] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
 }

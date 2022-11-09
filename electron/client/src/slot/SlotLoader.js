@@ -36,7 +36,7 @@ SlotLoader.showTextFile = function () {
         //summary.textContent = file.webkitRelativePath;
         let str = file.name.split('.');
         if (str[1] === 'ExportJson') {
-            cc.director._scenesStack[0].getChildByName("MainLayer").setSlotResource(str[0]);
+            Tool.setSlotResource(str[0]);
         }
         slotResourceData[file.name] = file;
     }
@@ -114,7 +114,7 @@ SlotLoader._processFileData = function( url, fileContents, ext, cb ) {
 
     switch (ext) {
         case ".fnt":
-            cc.loader.cache[ "image/" + url ] = _fntSlotLoader.parseFnt( fileContents, "image/" + url );
+            cc.loader.cache[ "image/" + url ] = _fntLoader.parseFnt( fileContents, "image/" + url );
             break;
         case ".plist":
             var plistData = cc.plistParser.parse(fileContents);
@@ -209,14 +209,12 @@ SlotLoader._processFileData = function( url, fileContents, ext, cb ) {
                         var newConf = cc.loader.getRes(fntFile);
                         var pngName = newConf.atlasName.split('/');
                         var pngItem = slotResourceData[ pngName[ pngName.length - 1 ]];
-                        pngItem.file( function( pngfile ) {
-                            SlotLoader.readFile( pngfile.name , function(){
-                                loadCount++;
-                                if( loadCount < fntList.length)
-                                    loadFnt( fntList[loadCount]);
-                                else
-                                    loadFntFinishCallback();
-                            });
+                        SlotLoader.readFile( pngItem.name , function(){
+                            loadCount++;
+                            if( loadCount < fntList.length)
+                                loadFnt( fntList[loadCount]);
+                            else
+                                loadFntFinishCallback();
                         });
                     });
                 }
@@ -253,45 +251,40 @@ SlotLoader._processFileData = function( url, fileContents, ext, cb ) {
     }
     cb && cb();
 };
-SlotLoader.readResources = function ( pngData, plistData ) {
-
+SlotLoader.readResources = function (pngData, plistData) {
     var i, pngNameSplit, plistgNameSplit;
     var pngNames = [];
     var plistNames = [];
 
-
-    for( i = 0;i < pngData.length;i++){
-        pngNameSplit =  pngData[i].split('/');
-        pngNames.push(pngNameSplit[pngNameSplit.length - 1 ]);
+    for (i = 0; i < pngData.length; i++) {
+        pngNameSplit = pngData[i].split('/');
+        pngNames.push(pngNameSplit[pngNameSplit.length - 1]);
     }
 
-
-    for( i = 0;i < plistData.length;i++) {
+    for (i = 0; i < plistData.length; i++) {
         plistgNameSplit = plistData[i].split('/');
         plistNames.push(plistgNameSplit[plistgNameSplit.length - 1]);
     }
 
-
     var item = null;
-    for (i=0; i<pngNames.length; i++) {
-        item = slotResourceData[pngNames[i] ];
-        if( !!item === false){
-            printLog( "No resource file : "+ pngNames[i]);
+    for (i = 0; i < pngNames.length; i++) {
+        item = slotResourceData[pngNames[i]];
+        if (!!item === false) {
+            printLog("No resource file : " + pngNames[i]);
             continue;
         }
-        SlotLoader.readFile( item.name );
+        SlotLoader.readFile(item.name);
     }
 
-    for (i=0; i<plistNames.length; i++) {
-        item = slotResourceData[plistNames[i] ];
-        if( !!item === false){
+    for (i = 0; i < plistNames.length; i++) {
+        item = slotResourceData[plistNames[i]];
+        if (!!item === false) {
             //console.log("There is no ", plistNames[i]);
-            printLog( "No resource file : "+ plistNames[i]);
+            printLog("No resource file : " + plistNames[i]);
             continue;
         }
-        SlotLoader.readFile( item.name );
+        SlotLoader.readFile(item.name);
     }
-
 };
 
 SlotLoader.loadFnt = function ( fntFileList , endCallback) {
@@ -309,12 +302,10 @@ SlotLoader.loadFnt = function ( fntFileList , endCallback) {
             var newConf = cc.loader.getRes(fntFile);
             var pngName = newConf.atlasName.split('/');
             var pngItem = slotResourceData[pngName[pngName.length - 1]];
-            pngItem.file(function (pngfile) {
-                SlotLoader.readFile(pngfile.name, function () {
-                    count--
-                    if (count <= 0)
-                        endCallback && endCallback();
-                });
+            SlotLoader.readFile(pngItem.name, function () {
+                count--
+                if (count <= 0)
+                    endCallback && endCallback();
             });
         });
     }
@@ -343,6 +334,10 @@ SlotLoader.checkFiles = function ( fileName, type ) {
                     this.loadedFileNames.push( fileNames[ i ] );
                     cc.eventManager.dispatchCustomEvent( 'loadArmature', JSON.stringify( this.armatureIDs[ fileNames[ i ] ] ) );
                 }
+                if(fileNames.length > 0){
+                    this.armatureIDs = {};
+                    this.armatureFrames = {};
+                }
                 fileNames = this._checkAllUITextures();
                 for( i = 0; i < fileNames.length; i++ ) {
                     this.loadedFileNames.push( fileNames[ i ] );
@@ -363,6 +358,10 @@ SlotLoader.checkFiles = function ( fileName, type ) {
                     this.loadedFileNames.push( fileNames[ i ] );
                     cc.eventManager.dispatchCustomEvent( 'loadArmature', JSON.stringify( this.armatureIDs[ fileNames[ i ] ] ) );
                 }
+                if(fileNames.length > 0){
+                    this.armatureIDs = {};
+                    this.armatureFrames = {};
+                }
                 fileNames = this._checkAllUITextures();
                 for( i = 0; i < fileNames.length; i++ ) {
                     this.loadedFileNames.push( fileNames[ i ] );
@@ -379,6 +378,9 @@ SlotLoader.checkFiles = function ( fileName, type ) {
             if( this._checkArmatureFrames( fileName ) ) {
                 this.loadedFileNames.push( fileName );
                 cc.eventManager.dispatchCustomEvent( 'loadArmature', JSON.stringify( this.armatureIDs[ fileName ] ) );
+
+                this.armatureFrames = {};
+                this.armatureIDs = {};
             }
             break;
         case 'ui':
@@ -425,6 +427,7 @@ SlotLoader._checkArmatureFrames = function( fileName ) {
             break;
         }
     }
+
     return loaded;
 };
 

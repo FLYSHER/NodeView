@@ -1,7 +1,7 @@
 var color = {
-    backgroundColor : cc.color(245,255,245),
-    textColor : cc.color(0, 128, 255),
-    seletTextColor : cc.color(255, 0, 0)
+    backgroundColor: cc.color(245, 255, 245),
+    textColor: cc.color(0, 128, 255),
+    seletTextColor: cc.color(255, 0, 0)
 };
 
 var UIListViewTest = cc.Node.extend({
@@ -12,38 +12,36 @@ var UIListViewTest = cc.Node.extend({
     bufferZone: 240,
     lastContentPosY: 0,
     listView: null,
-    ctor: function() {
+    ctor: function () {
         this._super(color.backgroundColor);
-        this.itemArray = [];
-
         this.cb = null;
-
         $('#animationTree').jstree({
-            'core' : {
-                'data' : [
-                ]
+            'core': {
+                'data': []
             }
         });
         var self = this;
         $('#animationTree').on("changed.jstree", function (e, data) {
-            if( !!data.node === false)
+            if (!!data.node === false)
                 return;
             self.cb && self.cb(data.node.text);
         });
         return true;
     },
-    init : function (itemArray, cb) {
-        this.itemArray = itemArray;
+    setAnimations: function (itemArray, cb) {
         this.cb = cb;
         var treeObj = [];
-
         for (var i = 0; i < itemArray.length; ++i) {
             var obj = {
-                'text' : itemArray[i]
+                'text': itemArray[i]
             }
             treeObj.push(obj);
-        }   
+        }
         $('#animationTree').jstree(true).settings.core.data = treeObj;
+        $('#animationTree').jstree("refresh");
+    },
+    initRefresh: function(){
+        $('#animationTree').jstree(true).settings.core.data = [];
         $('#animationTree').jstree("refresh");
     },
 });

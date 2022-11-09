@@ -4,8 +4,6 @@ var uiList = cc.Node.extend({
     index: 0,
     ctor: function () {
         this._super(color.backgroundColor);
-
-
         return true;
     },
 
