@@ -60,10 +60,15 @@
                 <div class="filebox">
                     <label for='SlotLoader'>load</label>
                     <input type='file' id="SlotLoader" webkitdirectory/>
-                    <script src='src/slot/SlotLoader.js' ></script>
+                    <script src='src/slot/SlotLoader.js'></script>
                     <div id="file_list" style="overflow:auto; width:0px;height:0px;">
                         <p></p>
                     </div>
+                </div>
+                <div class="filebox">
+                    <label for='DefinesLoad'>symbol</label>
+                    <input type='file' accept=".js" id="DefinesLoad"/>
+                    <script src='src/slot/SlotLoader.js'></script>
                 </div>
             </li>
         </ul>
@@ -90,21 +95,28 @@
             </li>
         </ul>
         <div id="tab-hierarchy" class="tab-hierarchyContent current">
-            <div class = "smallWidget">
+            <div class = "hierarchyWidget">
                 <div id="hierarchTree"></div>
             </div>
-<!--            <div>-->
-<!--                &lt;!&ndash; File Delete Button &ndash;&gt;-->
-<!--                <button type="button" id="deleteBtn" class="styleButton" title="파일 삭제" style="width: 30%;">Delete</button>-->
-<!--                <button type="button" id="frontBtn" class="styleButton" title="zorder 앞으로 변경" style="width:30%;">Front</button>-->
-<!--                <button type="button" id="backBtn" class="styleButton" title="zorder 뒤로 변경" style="width:30%;">Back</button>-->
-<!--            </div>-->
         </div>
         <div id="tab-symbols" class="tab-hierarchyContent">
-            <div class = "smallWidget">
+            <div class = "symbolWidget">
                 <div id="symbolTree"></div>
             </div>
         </div>
+    </div>
+
+
+
+    <!-- Save -->
+    <div id="saveContainer" class="saveContainer">
+
+        <div id="tab-save" class="tab-saveContent current">
+            <div class = "saveWidget">
+                <button onclick="saveSymbolData()">그냥 버튼</button>
+            </div>
+        </div>
+
     </div>
 
     <!-- Widget -->
@@ -239,13 +251,13 @@
                             <label class="styleLabel">id : </label>
                         </td>
                         <td>
-                            <input type="text" id="idInput" name="name" required minlength="1" maxlength="5" size="4">
+                            <input type="text" id="idInput" value="" name="name" required minlength="1" maxlength="5" size="4">
                         </td>
                         <td>
-                            <label class="styleLabel">index : </label>
+                            <label class="styleLabel">skin : </label>
                         </td>
                         <td>
-                            <input type="text" id="valueInput" name="name" required minlength="1" maxlength="2"
+                            <input type="text" id="valueInput" value="" name="name" required minlength="1" maxlength="2"
                                    size="2">
                             <!--                            <label for="valueInput"> (~10) </label>-->
                         </td>

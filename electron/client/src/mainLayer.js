@@ -70,10 +70,19 @@ var MainLayer = cc.Layer.extend({
         this.addChild(canvasNode1, 0, type_tab.type_hierarchy);
 
         let canvasNode2 = new cc.Node();
-        this.addChild(canvasNode2, 0,type_tab.type_symbol);
+        this.addChild(canvasNode2, 0, type_tab.type_symbol);
 
         return true;
     },
+
+    initUI: function (checkDelete) {
+        Tool.refreshCanvasNode();
+        Tool._skins.initRefresh(checkDelete);
+        Tool._hierarchy.refresh();
+        Tool._hierarchy.deselectAll();
+        Tool._animationList.initRefresh();
+    },
+
     /*
     -리소스 컨트롤 방식 (기존거 잊어버리고)
      AR : anchor 는 만지지않는다. (Tool에서 컨트롤)
@@ -106,6 +115,11 @@ var MainLayer = cc.Layer.extend({
             let parent = this.getChildByTag(Tool_Select_Type);
             parent.addChild(node);
 
+            let skinList = getSkinList(armature.armatureData.boneDataDic);
+            if (skinList.length > 0) {
+                this.changeNodeSkin(armature, skinList, 0, true);
+            }
+
             node.addChildToCenter(armature);
             node.armature = armature;
             node.ui = null;
@@ -116,16 +130,23 @@ var MainLayer = cc.Layer.extend({
             NodeList[Tool_Select_Type].push(node);
 
             this._addToJsonListMenu(name, node);
+
+            SlotLoader.armatureIDs = {};
+            SlotLoader.armatureFrames = {};
+            SlotLoader.uiURL = {};
+            SlotLoader.cocosStudioURL = {};
+            SlotLoader.uiTextures = {};
+            SlotLoader.loadSymbol();
         }, this);
     },
 
-    refreshCanvasNode: function(){
-        if(Tool_Select_Type === type_tab.type_hierarchy){
+    refreshCanvasNode: function () {
+        if (Tool_Select_Type === type_tab.type_hierarchy) {
             let parent1 = this.getChildByTag(type_tab.type_hierarchy);
             parent1.setVisible(true);
             let parent2 = this.getChildByTag(type_tab.type_symbol);
             parent2.setVisible(false);
-        }else {
+        } else {
             let parent1 = this.getChildByTag(type_tab.type_hierarchy);
             parent1.setVisible(false);
             let parent2 = this.getChildByTag(type_tab.type_symbol);
@@ -134,6 +155,11 @@ var MainLayer = cc.Layer.extend({
     },
 
     onLoadUI: function (url) {
+        if(Tool_Select_Type === type_tab.type_symbol){
+            cc.log('Hiearchy addSymbols - AR files only')
+            return;
+        }
+
         var children = this.getChildren();
 
         var self = this;
@@ -151,7 +177,9 @@ var MainLayer = cc.Layer.extend({
         var node = new DraggableNode(ui.getContentSize());
         node.setAnchorPoint(0.5, 0.5);
         node.setPosition(this.CX, this.CY);
-        this.addChild(node);
+
+        let parent = this.getChildByTag(Tool_Select_Type);
+        parent.addChild(node);
 
         ui.setAnchorPoint(0.5, 0.5);
         node.addChildToCenter(ui);
@@ -165,6 +193,13 @@ var MainLayer = cc.Layer.extend({
 
         NodeList[Tool_Select_Type].push(node);
         this._addToJsonListMenu(name, node);
+
+
+        SlotLoader.armatureIDs = {};
+        SlotLoader.armatureFrames = {};
+        SlotLoader.uiURL = {};
+        SlotLoader.cocosStudioURL = {};
+        SlotLoader.uiTextures = {};
     },
 
     reOrderup: function (nodeName, orderPlus) {
@@ -204,7 +239,7 @@ var MainLayer = cc.Layer.extend({
                         this.updateMenu(name, index);
                         break;
                     case ItemListClickType.DELETE:
-                        this.deleteItem(name);
+                        this.deleteItem();
                         break;
                     case ItemListClickType.UP:
                         this.reOrderup(name, true);
@@ -217,32 +252,46 @@ var MainLayer = cc.Layer.extend({
             }.bind(this));
     },
 
+    refreshNodeSkin: function () {
+        let skinNode = getSkinData();
+        if (skinNode === null) return;
+
+        let selectNode = getSelectNode();
+        if (!selectNode) return;
+
+        let skinList = getSkinList(selectNode.armature.armatureData.boneDataDic);
+        if (skinList.length > 0) {
+            this.changeNodeSkin(selectNode.armature, skinList, skinNode.skinindex, true);
+        }
+    },
+
+    changeNodeSkin: function (node, skinList, skinIndex) {
+        SlotUtils.arUtil.changeSkin(node, skinList, skinIndex, true);
+    },
+
     updateMenu: function (name, index) {
+        selectIndex = index;
         let selectNode = null;
-        let skinNode = null;
+        let skinNode = getSkinData();
+        if (skinNode === null) return;
 
-        for (let key in SkinList[Tool_Select_Type]) {
-            let info = SkinList[Tool_Select_Type][key];
-            if (info.index === index) {
-                skinNode = info;
-            }
-        }
-
-        if (skinNode === null) {
-            return;
-        }
-        selectNode = NodeList[Tool_Select_Type][skinNode.index];
+        selectNode = getSelectNode();
+        if (!selectNode) return;
 
         toggleJSONUI(name.indexOf('(JSON)') !== -1);
-        if (!selectNode) return;
 
         selectNode.setName(name);
         if (selectNode.armature) {
             this._animationList.setVisible(true);
-            var animations = selectNode.armature.getAnimation();
-            var animNameArr = animations._animationData.movementNames;
+            let animations = selectNode.armature.getAnimation();
+            let animNameArr = animations._animationData.movementNames;
 
-            var playCb = function (animName) {
+            let skinList = getSkinList(selectNode.armature.armatureData.boneDataDic);
+            if (skinList.length > 0) {
+                this.changeNodeSkin(selectNode.armature, skinList, skinNode.skinindex, true);
+            }
+
+            let playCb = function (animName) {
                 animations.play(animName);
             };
             this._animationList.setAnimations(animNameArr, playCb);
@@ -257,25 +306,9 @@ var MainLayer = cc.Layer.extend({
         this.setDraggableItem(name);
     },
 
-    deleteItem: function (name) {
-        var selectNode = this._nodeList[name];
-        if (selectNode) {
-            if (Target === selectNode)
-                Target = null;
-            var order = selectNode.order;
-            selectNode.removeFromParent();
-            this._animationList.setVisible(false);
-            this._animationList.init([], null);
-
-            delete this._nodeList[name];
-            this._movementCtrl.init(null);
-            for (var n = order; n < this._nodeOrder.length - 1; n++) {
-                this._nodeOrder[n + 1].order = n;
-                this._nodeOrder[n] = this._nodeOrder[n + 1];
-                this._nodeOrder[n].setLocalZOrder(1000 - this._nodeOrder[n].order);
-            }
-            this._nodeOrder.pop();
-        }
+    deleteItem: function () {
+        this.initUI(true);
+        this._movementCtrl.init(null);
     },
 
     setDraggableItem: function (name) {
@@ -325,7 +358,6 @@ var MainLayer = cc.Layer.extend({
 });
 
 
-
 var MainLayerScene = cc.Scene.extend({
     onEnter: function () {
         this._super();
@@ -334,6 +366,7 @@ var MainLayerScene = cc.Scene.extend({
          * Init loader
          */
         Loader.init();
+        SlotLoader.init();
 
         if (typeof ElectronRenderer != 'undefined')
             ElectronRenderer.init();
@@ -342,6 +375,7 @@ var MainLayerScene = cc.Scene.extend({
         this.addChild(layer, 1, "MainLayer");
 
         Tool = layer;
+        Tool.initUI(false);
     },
 
 

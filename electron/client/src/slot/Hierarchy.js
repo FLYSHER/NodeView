@@ -6,13 +6,22 @@ var ItemListClickType = {
 };
 
 var Hierarchy = cc.Node.extend({
-    selectItem: null,
-    selectIndex: -1,
     defaultId: -999,
     index: 0,
     symbolIndex: 0,
     ctor: function () {
         this._super(color.backgroundColor);
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Delete') {
+                let cur = document.activeElement;
+                let selector = Tool_Select_Type === type_tab.type_hierarchy ? ".hierarchyWidget" : ".symbolWidget";
+                let parent = findParentBySelector(cur, selector);
+                if (parent !== null && selectItem !== null) {
+                    this.delBySelectItem();
+                }
+            }
+        });
 
         $(document).ready(function () {
             $('ul.hierarchyTabs li').click(function () {
@@ -28,11 +37,11 @@ var Hierarchy = cc.Node.extend({
                 } else if (tab_id === 'tab-hierarchy') {
                     Tool_Select_Type = type_tab.type_hierarchy;
                 }
-                Tool.refreshCanvasNode();
-                Tool._skins.initRefresh();
-                Tool._hierarchy.refresh();
-                Tool._hierarchy.deselectAll();
-                Tool._animationList.initRefresh();
+                // 선택된 하이라키, 심볼 노드 인덱스 초기화
+                selectIndex = -1;
+                selectItem = null;
+
+                Tool.initUI(false);
             })
         })
 
@@ -87,11 +96,11 @@ var Hierarchy = cc.Node.extend({
             if (!!data.node === false)
                 return;
 
-            if(self.selectItem === self.itemCallbacks[data.node.original.index])
+            if (selectItem === self.itemCallbacks[data.node.original.index])
                 return;
 
-            self.selectItem = self.itemCallbacks[data.node.original.index];
-            self.selectItem && self.selectItem.cb(ItemListClickType.SELECT, self.selectItem.index);
+            selectItem = self.itemCallbacks[data.node.original.index];
+            selectItem && selectItem.cb(ItemListClickType.SELECT, selectItem.index);
         });
     },
 
@@ -104,16 +113,8 @@ var Hierarchy = cc.Node.extend({
                 'data': [],
                 "check_callback": true
             },
-            // "types": {
-            //     "default": {
-            //         "icon": "fa fa-folder text-success"
-            //     },
-            //     "file": {
-            //         "icon": "fa fa-file  text-success"
-            //     }
-            // },
             "state": {"key": "demo2"},
-            "plugins": ["dnd", "state"]//, "types"]
+            "plugins": ["state"]//, "types"]
         });
         $("#symbolTree").bind("refresh.jstree", function (e, data) {
             $("#symbolTree").jstree("open_all");
@@ -133,18 +134,16 @@ var Hierarchy = cc.Node.extend({
         })
         $("#symbolTree").bind("move_node.jstree", function (e, data) {
         })
-        $("#symbolTree").bind("dnd_stop.vakata", function (e, data) {
-        })
         var self = this;
         $('#symbolTree').on("changed.jstree", function (e, data) {
             if (!!data.node === false)
                 return;
 
-            if(self.selectItem === self.symbolCallbacks[data.node.original.index])
+            if (selectItem === self.symbolCallbacks[data.node.original.index])
                 return;
 
-            self.selectItem = self.symbolCallbacks[data.node.original.index];
-            self.selectItem && self.selectItem.cb(ItemListClickType.SELECT, self.selectItem.index);
+            selectItem = self.symbolCallbacks[data.node.original.index];
+            selectItem && selectItem.cb(ItemListClickType.SELECT, selectItem.index);
         });
     },
 
@@ -201,6 +200,23 @@ var Hierarchy = cc.Node.extend({
             "animationinfo": [],
         }
 
+        let skinindex = 0;
+        let id = 0;
+        if(symbolLoadData.length){
+            let index = symbolLoadIndex - 1;
+            id = symbolLoadData[index].id;
+            if (symbolLoadData[index].animationinfo.length > 0){
+                if(symbolLoadData[index].animationinfo[0].skininfo.length > 0){
+                    skinindex = symbolLoadData[index].animationinfo[0].skininfo[0].skinindex;
+                }
+            }
+
+            symbolObj.id = id;
+            symbolObj.index = index;
+            symbolObj.skinindex = skinindex;
+        }
+
+
         let anims = node.armature.animation._animationData.movementNames;
         for (let i = 0; i < anims.length; ++i) {
             let animationInfo = {
@@ -208,11 +224,10 @@ var Hierarchy = cc.Node.extend({
                 "skininfo": [],
             }
             for (let key in node.armature.armatureData.boneDataDic) {
-                // skin
                 if (key[0] === '[') {
                     let skinInfo = {
                         "bonename": key,
-                        "skinindex": 0,
+                        "skinindex": skinindex,
                     }
                     animationInfo.skininfo.push(skinInfo);
                 }
@@ -236,25 +251,65 @@ var Hierarchy = cc.Node.extend({
         this.symbolIndex++;
     },
 
-    deselectAll: function(){
+    deselectAll: function () {
         $('#hierarchTree').jstree("deselect_all");
         $('#symbolTree').jstree("deselect_all");
     },
 
     refresh: function () {
-        if (Tool_Select_Type === type_tab.type_hierarchy) {
-            $('#hierarchTree').jstree("refresh");
-        } else if (Tool_Select_Type === type_tab.type_symbol) {
-            $('#symbolTree').jstree("refresh");
-        }
+        let tree = this.getCurTree();
+        tree && tree.jstree("refresh");
     },
 
     getSelectedName: function () {
         return this.selectItem.itemName;
     },
 
+    getCurTree: function () {
+        if (Tool_Select_Type === type_tab.type_hierarchy) {
+            return $("#hierarchTree");
+        } else if (Tool_Select_Type === type_tab.type_symbol) {
+            return $("#symbolTree");
+        }
+        return null;
+    },
 
-    insertValue: function( id, name ){
+    delBySelectItem: function () {
+        let tree = this.getCurTree();
+        if (tree !== null) {
+            let callback = null;
+            let dataArr = tree.jstree(true).settings.core.data;
+            if (Tool_Select_Type === type_tab.type_hierarchy) {
+                callback = this.itemCallbacks;
+                dataArr = tree.jstree(true).settings.core.data[0].children;
+            } else if (Tool_Select_Type === type_tab.type_symbol) {
+                callback = this.symbolCallbacks;
+                dataArr = tree.jstree(true).settings.core.data;
+            }
 
-    }
+            for (let i = 0; i < dataArr.length; ++i) {
+                let data = dataArr[i];
+                if (data.index === selectIndex) {
+                    dataArr.splice(i, 1);
+                    removeSkin();
+                }
+            }
+
+            if (!!callback[selectIndex]) {
+                callback[selectIndex] = null;
+            }
+
+
+            if (Tool_Select_Type === type_tab.type_hierarchy) {
+                tree.jstree(true).settings.core.data[0].children = dataArr;
+            } else if (Tool_Select_Type === type_tab.type_symbol) {
+                tree.jstree(true).settings.core.data = dataArr;
+            }
+            this.refresh();
+
+
+            selectItem && selectItem.cb(ItemListClickType.DELETE);
+            selectItem = null;
+        }
+    },
 });

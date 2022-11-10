@@ -1,9 +1,7 @@
 var Skins = cc.Node.extend({
-    selectIndex: -1,
     index: 0,
     dic: null,
     info: null,
-    changed: false,
     ctor: function () {
         this._super(color.backgroundColor);
         this.initSkins();
@@ -11,21 +9,23 @@ var Skins = cc.Node.extend({
     },
 
     initSkins: function () {
-        $("#idInput").keydown(function(key) {
-            if(key.keyCode === 13){
-
+        $("#idInput").keydown(function (key) {
+            if (key.keyCode === 13) {
+                setSymbolId(this.value);
+                Tool.refreshNodeSkin();
             }
         });
-        $("#valueInput").keydown(function(key) {
-           if(key.keyCode === 13){
-
-           }
+        $("#valueInput").keydown(function (key) {
+            if (key.keyCode === 13) {
+                setSkinData(this.value);
+                Tool.refreshNodeSkin();
+            }
         });
-        let t = document.getElementById('idInput');
-        t.onfocus = function(e){
-        }
-        t.onblur = function(e){
-        }
+        // let t = document.getElementById('idInput');
+        // t.onfocus = function (e) {
+        // }
+        // t.onblur = function (e) {
+        // }
 
 
         $("#skinTree").jstree({
@@ -68,35 +68,28 @@ var Skins = cc.Node.extend({
     },
 
     show: function (dic, info) {
-        if(info){
-            // if (this.selectIndex === info.index) {
-            //     if(this.changed === true){
-            //         $("#skinTree").jstree(true).settings.core.data = [];
-            //         this.refresh();
-            //     }else{
-            //         return;
-            //     }
-            // }
-        }
-        this.selectIndex = info.index;
+        this.initRefresh();
+
         this.dic = dic;
         this.info = info;
 
+        let skinList = getSkinList(dic);
         let isSkins = false;
-        for (let key in dic) {
-            if (key[0] === '[') {
-                this.addSkins(key);
-                isSkins = true;
-            }
+        for (let key in skinList) {
+            this.addSkins(skinList[key]);
+            isSkins = true;
         }
+
+        let objInput = document.getElementById('valueInput');
+        objInput.disabled = !isSkins;
 
         if (isSkins === false) {
             $("#skinTree").jstree(true).settings.core.data = [];
             this.refresh();
         }
 
-        $("#idInput").attr('value', info.id);
-        $("#valueInput").attr('value', info.skinindex);
+        document.getElementById("idInput").value = info.id;
+        document.getElementById("valueInput").value = info.skinindex;
     },
 
     addSkins: function (itemName) {
@@ -110,8 +103,18 @@ var Skins = cc.Node.extend({
         this.refresh();
     },
 
-    initRefresh: function(){
+    initRefresh: function (checkDelete) {
         $("#skinTree").jstree(true).settings.core.data = [];
+
+        let objInput = document.getElementById('idInput');
+        let valueInput = document.getElementById("valueInput");
+        let disable = Tool_Select_Type === type_tab.type_hierarchy ? true : false;
+        objInput.disabled = disable;
+        valueInput.disabled = checkDelete;
+
+        objInput.value = 0;
+        valueInput.value = 0;
+
         this.refresh();
     },
 
