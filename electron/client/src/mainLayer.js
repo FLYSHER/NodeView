@@ -70,9 +70,21 @@ var MainLayer = cc.Layer.extend({
         let canvasNode2 = new cc.Node();
         this.addChild(canvasNode2, 0, type_tab.type_symbol);
 
+
+        this.onResize();
+        ScreenUtil.addResizeListener( this.onResize, this );
+
         return true;
     },
-
+    onResize: function () {
+        let sx = cc.winSize.width / 1920;
+        let sy = cc.winSize.height / 977;
+        // this._animationList.setScale(sx, sy);
+        // this._movementCtrl.setScale(sx, sy);
+        // this._resourceList.setScale(sx, sy);
+        // this._hierarchy.setScale(sx, sy);
+        // this._skins.setScale(sx, sy);
+    },
     initUI: function (checkDelete) {
         Tool.refreshCanvasNode();
         Tool._skins.initRefresh(checkDelete);
