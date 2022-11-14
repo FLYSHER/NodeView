@@ -33,8 +33,6 @@ var MainLayer = cc.Layer.extend({
             self.onLoadUI(event.getUserData());
         });
 
-        //this._nodeList = {};
-        this._nodeList = [];
         this._nodeOrder = [];
 
         this._animationList = new UIListViewTest();
@@ -202,35 +200,6 @@ var MainLayer = cc.Layer.extend({
         SlotLoader.uiTextures = {};
     },
 
-    reOrderup: function (nodeName, orderPlus) {
-        nodeName = this._hierarchy.getSelectedName();
-
-        var node = this._nodeList[nodeName];
-        if (!node)
-            return;
-
-        var index = node.order;
-        var changeIndex = index
-        if (orderPlus) {
-            changeIndex = index + 1;
-        } else {
-            changeIndex = index - 1;
-        }
-
-        if (changeIndex >= 0 && changeIndex < this._nodeOrder.length) {
-            var changeNode = this._nodeOrder[changeIndex];
-            var temp = changeNode.order;
-            changeNode.order = node.order;
-            node.order = temp;
-
-            this._nodeOrder[changeNode.order] = changeNode;
-            this._nodeOrder[node.order] = node;
-            changeNode.setLocalZOrder(10 + changeNode.order);
-            node.setLocalZOrder(10 + node.order);
-        }
-        cc.log("[REORDER] : ", index, " <=> ", changeIndex, " [ " + node.order);
-    },
-
     _addToJsonListMenu: function (name, node) {
         this._hierarchy.add(name, node,
             function (type, index) {
@@ -241,11 +210,7 @@ var MainLayer = cc.Layer.extend({
                     case ItemListClickType.DELETE:
                         this.deleteItem();
                         break;
-                    case ItemListClickType.UP:
-                        this.reOrderup(name, true);
-                        break;
-                    case ItemListClickType.DOWN:
-                        this.reOrderup(name, false);
+                    default:
                         break;
 
                 }
@@ -303,7 +268,7 @@ var MainLayer = cc.Layer.extend({
         }
 
         this._movementCtrl.init(selectNode);
-        this.setDraggableItem(name);
+        this.setDraggableItem();
     },
 
     deleteItem: function () {
@@ -311,17 +276,19 @@ var MainLayer = cc.Layer.extend({
         this._movementCtrl.init(null);
     },
 
-    setDraggableItem: function (name) {
-        for (var nodeName in NodeList[Tool_Select_Type]) {
-            if (typeof NodeList[Tool_Select_Type][nodeName].setDraggable === 'function') {
-                NodeList[Tool_Select_Type][nodeName].setDraggable(false);
-                if (Target === NodeList[Tool_Select_Type][nodeName])
+    setDraggableItem: function () {
+        for (var index in NodeList[Tool_Select_Type]) {
+            if (typeof NodeList[Tool_Select_Type][index].setDraggable === 'function') {
+                NodeList[Tool_Select_Type][index].setDraggable(false);
+                if (Target === NodeList[Tool_Select_Type][index])
                     Target = null;
             }
         }
-        if (NodeList[Tool_Select_Type].hasOwnProperty(name)) {
-            NodeList[Tool_Select_Type][name].setDraggable(true);
-            Target = NodeList[Tool_Select_Type][name];
+
+        let realIndex = getRealIndex();
+        if (NodeList[Tool_Select_Type].hasOwnProperty(realIndex)) {
+            NodeList[Tool_Select_Type][realIndex].setDraggable(true);
+            Target = NodeList[Tool_Select_Type][realIndex];
         }
     },
 
@@ -334,27 +301,8 @@ var MainLayer = cc.Layer.extend({
     /////////////////////////
 
     setSlotResource: function (name) {
-        this._resourceList.add(name,
-            function (type) {
-                switch (type) {
-                    case ItemListClickType.SELECT:
-                        this.updateMenu(name);
-                        break;
-                    case ItemListClickType.DELETE:
-                        //this.deleteItem(name);
-                        break;
-                    case ItemListClickType.UP:
-                        //this.reOrderup(name, true);
-                        break;
-                    case ItemListClickType.DOWN:
-                        //this.reOrderup(name, false);
-                        break;
-
-                }
-            }.bind(this));
-
-        // this.setDraggableItem( name );
-    },
+        this._resourceList.add(name);
+    }
 });
 
 

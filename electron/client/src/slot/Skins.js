@@ -1,3 +1,11 @@
+var SYMBOL_OBJECT_TYPE = {
+    NORMAL:0,
+    LABEL:1,
+    OVERLAY:2,
+    SPRITE:3
+};
+
+
 var Skins = cc.Node.extend({
     index: 0,
     dic: null,
@@ -11,14 +19,20 @@ var Skins = cc.Node.extend({
     initSkins: function () {
         $("#idInput").keydown(function (key) {
             if (key.keyCode === 13) {
-                setSymbolId(this.value);
-                Tool.refreshNodeSkin();
+                let id = parseInt(this.value)
+                if (id > -1) {
+                    setSymbolId(parseInt(id));
+                    Tool.refreshNodeSkin();
+                }
             }
         });
         $("#valueInput").keydown(function (key) {
             if (key.keyCode === 13) {
-                setSkinData(this.value);
-                Tool.refreshNodeSkin();
+                let id = parseInt(this.value)
+                if (id > -1) {
+                    setSkinData(id);
+                    Tool.refreshNodeSkin();
+                }
             }
         });
         // let t = document.getElementById('idInput');

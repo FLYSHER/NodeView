@@ -113,7 +113,8 @@
 
         <div id="tab-save" class="tab-saveContent current">
             <div class = "saveWidget">
-                <button onclick="saveSymbolData()">그냥 버튼</button>
+                <button onclick="saveSymbolData()">save symbol</button>
+                <button onclick="saveResourceData()">save resource</button>
             </div>
         </div>
 
@@ -248,18 +249,12 @@
                 <table style="background-color: #353535;" style="table-layout: fixed">
                     <tr>
                         <td>
-                            <label class="styleLabel">id : </label>
+                            <label class="styleLabel">id</label>
+                            <label class="styleLabel">skin</label>
                         </td>
                         <td>
-                            <input type="text" id="idInput" value="" name="name" required minlength="1" maxlength="5" size="4">
-                        </td>
-                        <td>
-                            <label class="styleLabel">skin : </label>
-                        </td>
-                        <td>
-                            <input type="text" id="valueInput" value="" name="name" required minlength="1" maxlength="2"
-                                   size="2">
-                            <!--                            <label for="valueInput"> (~10) </label>-->
+                            <input type="number" id="idInput" value="" name="name" minlength="1" maxlength="5">
+                            <input type="number" id="valueInput" value="" name="name" minlength="1" maxlength="2">
                         </td>
                     </tr>
                 </table>

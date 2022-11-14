@@ -3,6 +3,11 @@ var type_tab = {
     type_symbol: 1999,
 }
 
+var SLOT_NUMBER = 187;
+var SLOT_NAME = "WickedBoosFamily"
+var SLOT_ENTRY = "slotEntry";
+var SLOT_LOADINGIMG = "sl_loadingImg";
+
 var Tool = null;                // mainLayer
 var Tool_Select_Type = type_tab.type_hierarchy; // current tool type
 
@@ -20,6 +25,17 @@ NodeList[type_tab.type_symbol] = SymbolNodeList;
 
 var selectIndex = -1;
 var selectItem = null;          // selected item
+
+function getRealIndex() {
+    // 하이라키, 심볼 위젯에 노드가 추가되고 삭제될때 실제로 선택된 위치의 인덱스를 가져온다
+    for (let key in SkinList[Tool_Select_Type]) {
+        let info = SkinList[Tool_Select_Type][key];
+        if (info.index === selectIndex) {
+            return key;
+        }
+    }
+    return -1;
+}
 
 function removeSkin() {
     for (let key in SkinList[Tool_Select_Type]) {
@@ -108,6 +124,49 @@ function findParentBySelector(elm, selector) {
         cur = cur.parentNode; //go up
     }
     return cur; //will return null if not found
+}
+
+function saveResourceData(){
+    console.save = function () {
+        let filename = "resources" + ".js";
+        let result = "// region " + SLOT_NUMBER + "\n" + "var resSlot" + SLOT_NUMBER + " = {\n";
+        for (let index in slotResourceData) {
+            let data = slotResourceData[index];
+            let path = data.webkitRelativePath.substr(7);
+            var str = data.name.split('.');
+
+            let info = "";
+            let nick = str[0].substr(3);
+
+            if (str[1] === 'ExportJson') {
+                info = nick + " : " + "\"" +  path + "\"" + ",\n";
+            } else if (str[1] === 'png') {
+                info = nick + "_png" + " : " + "\"" +  path + "\"" + ",\n";
+            } else if (str[1] === 'fnt') {
+                info = nick + " : " + "\"" +  path + "\"" + ",\n";
+            } else if (str[1] === 'plist') {
+                info = nick + " : " + "\"" +  path + "\"" + ",\n";
+            }
+            result += info;
+        }
+
+        result += "};\n";
+
+        let paytable = "var g_res" + SLOT_NAME + " = convertObjToArr( res" + SLOT_NAME + " ).concat( g_resCommonEffect, g_resSlotMenu, g_resNewCashRace, g_resCommonSlotMenu );";
+        result += paytable;
+
+        let blob = new Blob([result], {type: 'text/json'}),
+            e = document.createEvent('MouseEvents'),
+            a = document.createElement('a')
+
+        a.download = filename
+        a.href = window.URL.createObjectURL(blob)
+        a.dataset.downloadurl = ['text/json', a.download, a.href].join(':')
+        e.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null)
+        a.dispatchEvent(e)
+    }
+
+    console.save();
 }
 
 function saveSymbolData() {

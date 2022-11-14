@@ -94,11 +94,20 @@ SlotLoader.showTextFile = function () {
 
     for (const file of selectedFiles) {
         //summary.textContent = file.webkitRelativePath;
-        let str = file.name.split('.');
-        if (str[1] === 'ExportJson') {
-            Tool.setSlotResource(str[0]);
+
+        if (file.name.includes(SLOT_NUMBER)) {
+            if(file.name.includes(SLOT_ENTRY) || file.name.includes(SLOT_LOADINGIMG))
+                continue;
+
+            let str = file.name.split('.');
+            if (str[1] === 'ExportJson') {
+                Tool.setSlotResource(str[0]);
+            }
+
+            if (str.length > 1) {
+                slotResourceData[file.name] = file;
+            }
         }
-        slotResourceData[file.name] = file;
     }
 
 

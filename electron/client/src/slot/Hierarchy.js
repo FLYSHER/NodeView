@@ -1,8 +1,6 @@
 var ItemListClickType = {
     SELECT: 0,
     DELETE: 1,
-    UP: 2,
-    DOWN: 3
 };
 
 var Hierarchy = cc.Node.extend({
