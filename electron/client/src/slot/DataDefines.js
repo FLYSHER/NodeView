@@ -126,7 +126,7 @@ function findParentBySelector(elm, selector) {
     return cur; //will return null if not found
 }
 
-function saveResourceData(){
+function saveResourceData() {
     console.save = function () {
         let filename = "resources" + ".js";
         let result = "// region " + SLOT_NUMBER + "\n" + "var resSlot" + SLOT_NUMBER + " = {\n";
@@ -139,13 +139,13 @@ function saveResourceData(){
             let nick = str[0].substr(3);
 
             if (str[1] === 'ExportJson') {
-                info = nick + " : " + "\"" +  path + "\"" + ",\n";
+                info = nick + " : " + "\"" + path + "\"" + ",\n";
             } else if (str[1] === 'png') {
-                info = nick + "_png" + " : " + "\"" +  path + "\"" + ",\n";
+                info = nick + "_png" + " : " + "\"" + path + "\"" + ",\n";
             } else if (str[1] === 'fnt') {
-                info = nick + " : " + "\"" +  path + "\"" + ",\n";
+                info = nick + " : " + "\"" + path + "\"" + ",\n";
             } else if (str[1] === 'plist') {
-                info = nick + " : " + "\"" +  path + "\"" + ",\n";
+                info = nick + " : " + "\"" + path + "\"" + ",\n";
             }
             result += info;
         }
@@ -183,6 +183,8 @@ function saveSymbolData() {
 
         let SymbolProperty = {
             "DefaultSymbolPoolsize:": 3,
+            "LabelType": 0,
+            "LabelMaxDigit": 3,
             "SymbolProperty": parseSlotDefines
         }
         let SymbolInfo = {

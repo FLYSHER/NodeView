@@ -86,7 +86,7 @@ var MainLayer = cc.Layer.extend({
         // this._skins.setScale(sx, sy);
     },
     initUI: function (checkDelete) {
-        Tool.refreshCanvasNode();
+        Tool.refreshCanvasNode()
         Tool._skins.initRefresh(checkDelete);
         Tool._hierarchy.refresh();
         Tool._hierarchy.deselectAll();
