@@ -3,8 +3,17 @@ var Properties = cc.Node.extend({
         this._super(color.backgroundColor);
         return true;
     },
-
-    init: function (localPosition, worldPosition, contentsSize, scale, anchor) {
+    initRefresh: function () {
+        this.init(
+            {x: 0, y: 0},
+            {x: 0, y: 0},
+            {width: 0, height: 0},
+            {x: 0, y: 0},
+            {x: 0, y: 0},
+            false
+        );
+    },
+    init: function (localPosition, worldPosition, contentsSize, scale, anchor, disable) {
         // local Position
         $("input[name=lPosX]").val(localPosition.x.toFixed(2));
         $("input[name=lPosY]").val(localPosition.y.toFixed(2));
@@ -24,5 +33,18 @@ var Properties = cc.Node.extend({
         // anchore
         $("input[name=anchorX]").val(anchor.x.toFixed(2));
         $("input[name=anchorY]").val(anchor.y.toFixed(2));
+
+        if (Tool_Select_Type === type_tab.type_symbol) {
+            disable = true;
+        }
+
+        document.getElementById('lPosX').disabled = disable;
+        document.getElementById('lPosY').disabled = disable;
+        document.getElementById('wPosX').disabled = disable;
+        document.getElementById('wPosY').disabled = disable;
+        document.getElementById('scaleX').disabled = disable;
+        document.getElementById('scaleY').disabled = disable;
+        document.getElementById('anchorX').disabled = disable;
+        document.getElementById('anchorY').disabled = disable;
     },
 });

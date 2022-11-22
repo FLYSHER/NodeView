@@ -161,13 +161,12 @@ var Hierarchy = cc.Node.extend({
 
     addHierarchy: function (itemName, node, cb) {
         let treeNodeObj = {
+            "addPosX": 0,
+            "addPosY": 0,
             "skinindex": 0,
             "index": this.index,
             "id": this.index,
             "text": itemName,
-            "state": {
-                "opened": true
-            },
             "children": []
         }
 
@@ -201,11 +200,11 @@ var Hierarchy = cc.Node.extend({
 
         let skinindex = 0;
         let id = 0;
-        if(symbolLoadData.length){
+        if (symbolLoadData.length) {
             let index = symbolLoadIndex - 1;
             id = symbolLoadData[index].id;
-            if (symbolLoadData[index].animationinfo.length > 0){
-                if(symbolLoadData[index].animationinfo[0].skininfo.length > 0){
+            if (symbolLoadData[index].animationinfo.length > 0) {
+                if (symbolLoadData[index].animationinfo[0].skininfo.length > 0) {
                     skinindex = symbolLoadData[index].animationinfo[0].skininfo[0].skinindex;
                 }
             }

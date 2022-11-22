@@ -3,6 +3,11 @@ var type_tab = {
     type_symbol: 1999,
 }
 
+var DEFAULT_SCREEN_SIZE = {
+    x: 1920,
+    y: 977,
+}
+
 var SLOT_NUMBER = 187;
 var SLOT_NAME = "WickedBoosFamily"
 var SLOT_ENTRY = "slotEntry";
@@ -71,6 +76,26 @@ function setSkinData(value) {
                     result.skinindex = value;
                 }
             }
+            break;
+        }
+    }
+}
+
+function setMoveXData(value) {
+    for (let key in SkinList[Tool_Select_Type]) {
+        let info = SkinList[Tool_Select_Type][key];
+        if (info.index === selectIndex) {
+            info.addPosX = value;
+            break;
+        }
+    }
+}
+
+function setMoveYData(value) {
+    for (let key in SkinList[Tool_Select_Type]) {
+        let info = SkinList[Tool_Select_Type][key];
+        if (info.index === selectIndex) {
+            info.addPosY = value;
             break;
         }
     }

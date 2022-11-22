@@ -13,8 +13,6 @@ var MainLayer = cc.Layer.extend({
     DESC_TAG: 99,
     NODE_MENU_TAG: 100,
     JSON_LIST_MENU_TAG: 101,
-
-    _animationList: null,
     ctor: function () {
         this._super();
 
@@ -22,7 +20,6 @@ var MainLayer = cc.Layer.extend({
         this.CX = size.width / 2;
         this.CY = size.height / 2;
         this.ViewScale = {x: 1, y: 1};
-        this._nodeProperties = {};
 
         var self = this;
         this._loadArmatureListener = cc.eventManager.addCustomListener('loadArmature', function (event) {
@@ -40,6 +37,12 @@ var MainLayer = cc.Layer.extend({
         this._animationList.setVisible(false);
         this.addChild(this._animationList, -128);
         this._animationList.setLocalZOrder(100000);
+
+        this._uiList = new UIScrollTreeViewCtrl(this.showProperties.bind(this));
+        this._uiList.setContentSize(cc.size(150, 200));
+        this._uiList.setVisible(false);
+        this.addChild(this._uiList, -128);
+        this._uiList.setLocalZOrder(100000);
 
         this._resourceList = new uiList();
         this.addChild(this._resourceList, -128);
@@ -75,17 +78,34 @@ var MainLayer = cc.Layer.extend({
         this.onResize();
         ScreenUtil.addResizeListener(this.onResize, this);
 
+        var lineH = new cc.DrawNode();
+        lineH.drawSegment(
+            cc.p(-DEFAULT_SCREEN_SIZE.x, DEFAULT_SCREEN_SIZE.y / 2),
+            cc.p(DEFAULT_SCREEN_SIZE.x, DEFAULT_SCREEN_SIZE.y / 2),
+            0.5,
+            cc.Color(255, 0, 0, 255)
+        );
+        this.addChild(lineH);
+        lineH.setLocalZOrder(-1);
+
+        var lineV = new cc.DrawNode();
+        lineV.drawSegment(
+            cc.p(DEFAULT_SCREEN_SIZE.x / 2, -DEFAULT_SCREEN_SIZE.y),
+            cc.p(DEFAULT_SCREEN_SIZE.x / 2, DEFAULT_SCREEN_SIZE.y),
+            0.5,
+            cc.Color(255, 0, 0, 255)
+        );
+        this.addChild(lineV);
+        lineV.setLocalZOrder(-1);
+
         return true;
     },
     onResize: function () {
-        let sx = cc.winSize.width / 1920;
-        let sy = cc.winSize.height / 977;
-
+        let sx = cc.winSize.width / DEFAULT_SCREEN_SIZE.x;
+        let sy = cc.winSize.height / DEFAULT_SCREEN_SIZE.y;
         this.ViewScale = {x: sx, y: sy};
-
-        this.CX = 1920  / 2;//* sx / 2;
-        this.CY = 977 / 2;//* sy / 2;
-
+        this.CX = DEFAULT_SCREEN_SIZE.x / 2;
+        this.CY = DEFAULT_SCREEN_SIZE.y / 2;
         //this.getChildByTag(Tool_Select_Type).setScale(sx, sx);
 
         // this._animationList.setScale(sx, sy);
@@ -99,6 +119,7 @@ var MainLayer = cc.Layer.extend({
         Tool._hierarchy.refresh();
         Tool._hierarchy.deselectAll();
         Tool._animationList.initRefresh();
+        Tool._properties.initRefresh();
     },
 
     /*
@@ -173,7 +194,7 @@ var MainLayer = cc.Layer.extend({
     },
 
     onLoadUI: function (url) {
-        if(Tool_Select_Type === type_tab.type_symbol){
+        if (Tool_Select_Type === type_tab.type_symbol) {
             cc.log('Hiearchy addSymbols - AR files only')
             return;
         }
@@ -202,14 +223,6 @@ var MainLayer = cc.Layer.extend({
 
         //ui.setAnchorPoint(0.5, 0.5);
         node.addChildToCenter(ui);
-
-
-
-        let worldPos = {x:0, y:0};
-        let localPos = {x:0, y:0};
-        let scale = {x: ui.getScaleX(), y: ui.getScaleY()};
-        this._properties.init(localPos, worldPos, ui.getContentSize(), scale, ui.getAnchorPoint());
-
 
         node.armature = null;
         node.ui = ui;
@@ -253,6 +266,18 @@ var MainLayer = cc.Layer.extend({
         let selectNode = getSelectNode();
         if (!selectNode) return;
 
+        let defaultPos = {
+            x: this.CX - (selectNode.getContentSize().width * 0.5),
+            y: this.CY - (selectNode.getContentSize().height * 0.5)
+        };
+
+        let pos = {
+            x: defaultPos.x + skinNode.addPosX,
+            y: defaultPos.y + skinNode.addPosY,
+        };
+
+        selectNode.setPosition(pos);
+
         let skinList = getSkinList(selectNode.armature.armatureData.boneDataDic);
         if (skinList.length > 0) {
             this.changeNodeSkin(selectNode.armature, skinList, skinNode.skinindex, true);
@@ -276,6 +301,8 @@ var MainLayer = cc.Layer.extend({
 
         selectNode.setName(name);
         if (selectNode.armature) {
+            this._uiList.setVisible(false);
+
             this._animationList.setVisible(true);
             let animations = selectNode.armature.getAnimation();
             let animNameArr = animations._animationData.movementNames;
@@ -290,16 +317,31 @@ var MainLayer = cc.Layer.extend({
             };
             this._animationList.setAnimations(animNameArr, playCb);
             this._skins.show(selectNode.armature.armatureData.boneDataDic, skinNode);
-
-            let worldPos = {x: 0, y: 0};
-            let localPos = {x: 0, y: 0};
-            let scale = {x: selectNode.armature.getScaleX(), y: selectNode.armature.getScaleY()};
-            this._properties.init(localPos, worldPos, selectNode.armature.getContentSize(), scale, selectNode.armature.getAnchorPoint());
+            this.showProperties(selectNode.armature, false);
         } else {
             this._animationList.setVisible(false);
             this._animationList.setAnimations([], null);
+            this._uiList.setNode(selectNode);
+            this.showProperties(selectNode.ui, false);
         }
         this.setDraggableItem();
+    },
+
+    showProperties: function (node, disable) {
+        let worldPos = {x: 0, y: 0};
+        let contentSize = node.getContentSize();
+        let skinInfo = getSkinData();
+        let addPos = {
+            x: skinInfo.addPosX !== undefined ? skinInfo.addPosX : 0,
+            y: skinInfo.addPosY !== undefined ? skinInfo.addPosY : 0
+        };
+        let localPos = {
+            x: node.getPosition().x - (contentSize.width / 2) + addPos.x,
+            y: node.getPosition().y - (contentSize.height / 2) + addPos.y,
+        }
+        let scale = {x: node.getScaleX(), y: node.getScaleY()};
+        let anchor = node.getAnchorPoint();
+        this._properties.init(localPos, worldPos, contentSize, scale, anchor, disable);
     },
 
     deleteItem: function () {

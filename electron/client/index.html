@@ -119,24 +119,6 @@
         </div>
 
     </div>
-
-    <!-- Widget -->
-<!--    <div id="uiAnimationContainer" class="uiAnimationContainer">-->
-<!--        <ul class="tabs">-->
-<!--            <li class="tab-link current">-->
-<!--                &lt;!&ndash; UI Animation Label 및 가운데 정렬 &ndash;&gt;-->
-<!--                <div class="alignCenter">-->
-<!--                    <label id = "animationTreeLabel" class="styleLabel">UI Animation</label>-->
-<!--                </div>-->
-<!--            </li>-->
-<!--        </ul>-->
-<!--        <div id="tab-3" class="tab-uiAnimContent current">-->
-<!--            &lt;!&ndash; UI Animation Widget &ndash;&gt;-->
-<!--            <div class = "actionWidget">-->
-<!--                <div id="actionTree"></div>-->
-<!--            </div>-->
-<!--        </div>-->
-<!--    </div>-->
 </div>
 <!-- 인스펙터 -->
 <div id="inspector_nav" class="inspector_nav">
@@ -168,8 +150,10 @@
                         <label class="styleLabel">WorldPos : </label>
                     </td>
                     <td>
-                        <input type="text" class="positionInput" name="wPosX" value="">
-                        <input type="text" class="positionInput" name="wPosY" value="">
+                        <div id = "worldPosition">
+                            <input type="text" class="positionInput" id="wPosX" name="wPosX" value="">
+                            <input type="text" class="positionInput" id="wPosY" name="wPosY" value="">
+                        </div>
                     </td>
                 </tr>
                 <tr>
