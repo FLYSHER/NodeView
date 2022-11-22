@@ -4,7 +4,6 @@ var ItemListClickType = {
 };
 
 var Hierarchy = cc.Node.extend({
-    defaultId: -999,
     index: 0,
     symbolIndex: 0,
     ctor: function () {
@@ -86,6 +85,8 @@ var Hierarchy = cc.Node.extend({
         $("#hierarchTree").bind("create_node.jstree", function (e, data) {
         })
         $("#hierarchTree").bind("move_node.jstree", function (e, data) {
+            let a = 0;
+            a++;
         })
         $("#hierarchTree").bind("dnd_stop.vakata", function (e, data) {
         })

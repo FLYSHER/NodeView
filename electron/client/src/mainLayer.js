@@ -22,6 +22,8 @@ var MainLayer = cc.Layer.extend({
         this.CX = size.width / 2;
         this.CY = size.height / 2;
 
+        this.ViewScale = {x: 1, y: 1};
+
         this._nodeProperties = {};
 
         var self = this;
@@ -40,11 +42,6 @@ var MainLayer = cc.Layer.extend({
         this._animationList.setVisible(false);
         this.addChild(this._animationList, -128);
         this._animationList.setLocalZOrder(100000);
-
-        this._movementCtrl = new UiPositionCtrl();
-        this.addChild(this._movementCtrl, -128);
-        this._movementCtrl.setLocalZOrder(100000);
-
 
         this._resourceList = new uiList();
         this.addChild(this._resourceList, -128);
@@ -72,15 +69,20 @@ var MainLayer = cc.Layer.extend({
 
 
         this.onResize();
-        ScreenUtil.addResizeListener( this.onResize, this );
+        ScreenUtil.addResizeListener(this.onResize, this);
 
         return true;
     },
     onResize: function () {
         let sx = cc.winSize.width / 1920;
         let sy = cc.winSize.height / 977;
+
+        this.ViewScale = {x: sx, y: sy};
+
+        this.CX = 1920 * sx / 2;
+        this.CY = 977 * sy / 2;
+
         // this._animationList.setScale(sx, sy);
-        // this._movementCtrl.setScale(sx, sy);
         // this._resourceList.setScale(sx, sy);
         // this._hierarchy.setScale(sx, sy);
         // this._skins.setScale(sx, sy);
@@ -273,19 +275,16 @@ var MainLayer = cc.Layer.extend({
             };
             this._animationList.setAnimations(animNameArr, playCb);
             this._skins.show(selectNode.armature.armatureData.boneDataDic, skinNode);
-            $('#LocalSize').html("(" + selectNode.armature.getContentSize().width.toFixed(2) + " , " + selectNode.armature.getContentSize().height.toFixed(2) + ")");
+            $('#ContentsSize').html("(" + selectNode.armature.getContentSize().width.toFixed(2) + " , " + selectNode.armature.getContentSize().height.toFixed(2) + ")");
         } else {
             this._animationList.setVisible(false);
             this._animationList.setAnimations([], null);
         }
-
-        this._movementCtrl.init(selectNode);
         this.setDraggableItem();
     },
 
     deleteItem: function () {
         this.initUI(true);
-        this._movementCtrl.init(null);
     },
 
     setDraggableItem: function () {
