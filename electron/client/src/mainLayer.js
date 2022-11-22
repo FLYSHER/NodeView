@@ -21,9 +21,7 @@ var MainLayer = cc.Layer.extend({
         var size = cc.winSize;
         this.CX = size.width / 2;
         this.CY = size.height / 2;
-
         this.ViewScale = {x: 1, y: 1};
-
         this._nodeProperties = {};
 
         var self = this;
@@ -61,6 +59,12 @@ var MainLayer = cc.Layer.extend({
         this._skins.setContentSize(cc.size(150, 300));
         this._skins.setVisible(false);
 
+        this._properties = new Properties();
+        this.addChild(this._properties, -128);
+        this._properties.setLocalZOrder(100000);
+        this._properties.setContentSize(cc.size(150, 300));
+        this._properties.setVisible(false);
+
         let canvasNode1 = new cc.Node();
         this.addChild(canvasNode1, 0, type_tab.type_hierarchy);
 
@@ -79,8 +83,10 @@ var MainLayer = cc.Layer.extend({
 
         this.ViewScale = {x: sx, y: sy};
 
-        this.CX = 1920 * sx / 2;
-        this.CY = 977 * sy / 2;
+        this.CX = 1920  / 2;//* sx / 2;
+        this.CY = 977 / 2;//* sy / 2;
+
+        //this.getChildByTag(Tool_Select_Type).setScale(sx, sx);
 
         // this._animationList.setScale(sx, sy);
         // this._resourceList.setScale(sx, sy);
@@ -183,8 +189,9 @@ var MainLayer = cc.Layer.extend({
 
         var name = cc.path.mainFileName(url);
 
+
         var json = ccs.load(url);
-        var ui = json.node;
+        var ui = ccs.uiReader.widgetFromJsonFile(url);//json.node;
 
         var node = new DraggableNode(ui.getContentSize());
         node.setAnchorPoint(0.5, 0.5);
@@ -193,8 +200,16 @@ var MainLayer = cc.Layer.extend({
         let parent = this.getChildByTag(Tool_Select_Type);
         parent.addChild(node);
 
-        ui.setAnchorPoint(0.5, 0.5);
+        //ui.setAnchorPoint(0.5, 0.5);
         node.addChildToCenter(ui);
+
+
+
+        let worldPos = {x:0, y:0};
+        let localPos = {x:0, y:0};
+        let scale = {x: ui.getScaleX(), y: ui.getScaleY()};
+        this._properties.init(localPos, worldPos, ui.getContentSize(), scale, ui.getAnchorPoint());
+
 
         node.armature = null;
         node.ui = ui;
@@ -275,7 +290,11 @@ var MainLayer = cc.Layer.extend({
             };
             this._animationList.setAnimations(animNameArr, playCb);
             this._skins.show(selectNode.armature.armatureData.boneDataDic, skinNode);
-            $('#ContentsSize').html("(" + selectNode.armature.getContentSize().width.toFixed(2) + " , " + selectNode.armature.getContentSize().height.toFixed(2) + ")");
+
+            let worldPos = {x: 0, y: 0};
+            let localPos = {x: 0, y: 0};
+            let scale = {x: selectNode.armature.getScaleX(), y: selectNode.armature.getScaleY()};
+            this._properties.init(localPos, worldPos, selectNode.armature.getContentSize(), scale, selectNode.armature.getAnchorPoint());
         } else {
             this._animationList.setVisible(false);
             this._animationList.setAnimations([], null);

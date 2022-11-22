@@ -33,6 +33,7 @@
         "src/slot/Hierarchy.js",
         "src/slot/Skins.js",
         "src/slot/DataDefines.js",
-        "src/slot/SlotUtils.js"
+        "src/slot/SlotUtils.js",
+        "src/slot/Properties.js"
     ]
 }

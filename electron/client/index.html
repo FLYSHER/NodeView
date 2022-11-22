@@ -157,19 +157,10 @@
                         <label class="styleLabel">LocalPos : </label>
                     </td>
                     <td>
-                        <label id = "localPos" class="styleLabel">(0, 0) </label>
-                        <div id = "localPosition"  style="display: none;">
-                            <input type="text" class="positionInput" id ="lPosX" name="lPosX" value="">
-                            <input type="text" class="positionInput" id ="lPosY" name="lPosY" value="">
+                        <div id = "localPosition">
+                            <input type="text" class="positionInput" id="lPosX" name="lPosX" value="">
+                            <input type="text" class="positionInput" id="lPosY" name="lPosY" value="">
                         </div>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <label class="styleLabel">ContentsSize : </label>
-                    </td>
-                    <td>
-                        <label id = "ContentsSize" class="styleLabel">(0, 0) </label>
                     </td>
                 </tr>
                 <tr>
@@ -183,11 +174,19 @@
                 </tr>
                 <tr>
                     <td>
+                        <label class="styleLabel">ContentsSize : </label>
+                    </td>
+                    <td>
+                        <label id="ContentsSize" class="styleLabel">(0, 0) </label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
                         <label class="styleLabel">Opacity : </label>
                     </td>
                     <td>
                         <input type="range" id="opacity" name="opacity" value="10" min="0" max="255" style="width:50%">
-                        <label id = "opacityValue" class="styleLabel" style="font-size: 14px">0</label>
+                        <label id="opacityValue" class="styleLabel" style="font-size: 14px">0</label>
                     </td>
                 </tr>
                 <tr>
@@ -195,7 +194,10 @@
                         <label class="styleLabel">Scale : </label>
                     </td>
                     <td>
-                        <label id = "scaleValue" class="styleLabel">(0, 0) </label>
+                        <div id="scaleProperty">
+                            <input type="text" class="positionInput" id="scaleX" name="scaleX" value="">
+                            <input type="text" class="positionInput" id="scaleY" name="scaleY" value="">
+                        </div>
                     </td>
                 </tr>
                 <tr>
@@ -203,7 +205,10 @@
                         <label class="styleLabel">Anchor : </label>
                     </td>
                     <td>
-                        <label id = "anchorValue" class="styleLabel">(0, 0) </label>
+                        <div id="anchorProperty">
+                            <input type="text" class="positionInput" id="anchorX" name="anchorX" value="">
+                            <input type="text" class="positionInput" id="anchorY" name="anchorY" value="">
+                        </div>
                     </td>
                 </tr>
             </table>

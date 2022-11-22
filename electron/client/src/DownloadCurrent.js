@@ -99,13 +99,4 @@ function changePosition( obj, name, position){
 }
 
 function toggleJSONUI( isJson){
-    if ( isJson ){
-        document.getElementById( "localPos" ).style.display = "none";
-        document.getElementById( "localPosition" ).style.display = "block";
-    }
-    else {
-        document.getElementById( "localPos" ).style.display = "block";
-        document.getElementById( "localPosition" ).style.display = "none";
-    }
-
 }
