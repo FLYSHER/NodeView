@@ -35,22 +35,6 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
                 self._selectCallBack(selectedObj.obj, true);
             }
         });
-
-        $("#lPosX").keydown(function (key) {
-            if (key.keyCode === 13) {
-                let pos = parseInt(this.value)
-                setMoveXData(parseInt(pos));
-                Tool.refreshNodeSkin();
-            }
-        });
-
-        $("#lPosY").keydown(function (key) {
-            if (key.keyCode === 13) {
-                let pos = parseInt(this.value)
-                setMoveYData(parseInt(pos));
-                Tool.refreshNodeSkin();
-            }
-        });
     },
 
     setNode: function (node) {

@@ -1,6 +1,31 @@
 var Properties = cc.Node.extend({
     ctor: function () {
         this._super(color.backgroundColor);
+
+        $("#lPosX").keydown(function (key) {
+            if (key.keyCode === 13) {
+                let pos = parseInt(this.value)
+                setMoveXData(parseInt(pos));
+                Tool.refreshNodeSkin();
+            }
+        });
+        $("#lPosY").keydown(function (key) {
+            if (key.keyCode === 13) {
+                let pos = parseInt(this.value)
+                setMoveYData(parseInt(pos));
+                Tool.refreshNodeSkin();
+            }
+        });
+
+
+        this.lPsX = document.getElementById('lPosX');
+        this.lPosY = document.getElementById('lPosY');
+        this.wPosX = document.getElementById('wPosX');
+        this.wPosY = document.getElementById('wPosY');
+        this.scaleX = document.getElementById('scaleX');
+        this.scaleY = document.getElementById('scaleY');
+        this.anchorX = document.getElementById('anchorX');
+        this.anchorY = document.getElementById('anchorY');
         return true;
     },
     initRefresh: function () {
@@ -12,6 +37,21 @@ var Properties = cc.Node.extend({
             {x: 0, y: 0},
             false
         );
+        this.setDisable();
+    },
+    setDisable: function () {
+        let disable = false;
+        if (Tool_Select_Type === type_tab.type_symbol) {
+            disable = true;
+        }
+        this.lPsX = disable;
+        this.lPosY = disable;
+        this.wPosX = disable;
+        this.wPosY = disable;
+        this.scaleX = disable;
+        this.scaleY = disable;
+        this.anchorX = disable;
+        this.anchorY = disable;
     },
     init: function (localPosition, worldPosition, contentsSize, scale, anchor, disable) {
         // local Position
@@ -33,18 +73,5 @@ var Properties = cc.Node.extend({
         // anchore
         $("input[name=anchorX]").val(anchor.x.toFixed(2));
         $("input[name=anchorY]").val(anchor.y.toFixed(2));
-
-        if (Tool_Select_Type === type_tab.type_symbol) {
-            disable = true;
-        }
-
-        document.getElementById('lPosX').disabled = disable;
-        document.getElementById('lPosY').disabled = disable;
-        document.getElementById('wPosX').disabled = disable;
-        document.getElementById('wPosY').disabled = disable;
-        document.getElementById('scaleX').disabled = disable;
-        document.getElementById('scaleY').disabled = disable;
-        document.getElementById('anchorX').disabled = disable;
-        document.getElementById('anchorY').disabled = disable;
     },
 });

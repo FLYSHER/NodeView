@@ -16,12 +16,12 @@ var MainLayer = cc.Layer.extend({
     ctor: function () {
         this._super();
 
-        var size = cc.winSize;
+        let size = cc.winSize;
         this.CX = size.width / 2;
         this.CY = size.height / 2;
         this.ViewScale = {x: 1, y: 1};
 
-        var self = this;
+        let self = this;
         this._loadArmatureListener = cc.eventManager.addCustomListener('loadArmature', function (event) {
             self.onLoadArmature(JSON.parse(event.getUserData()));
         });
@@ -78,7 +78,7 @@ var MainLayer = cc.Layer.extend({
         this.onResize();
         ScreenUtil.addResizeListener(this.onResize, this);
 
-        var lineH = new cc.DrawNode();
+        let lineH = new cc.DrawNode();
         lineH.drawSegment(
             cc.p(-DEFAULT_SCREEN_SIZE.x, DEFAULT_SCREEN_SIZE.y / 2),
             cc.p(DEFAULT_SCREEN_SIZE.x, DEFAULT_SCREEN_SIZE.y / 2),
@@ -88,7 +88,7 @@ var MainLayer = cc.Layer.extend({
         this.addChild(lineH);
         lineH.setLocalZOrder(-1);
 
-        var lineV = new cc.DrawNode();
+        let lineV = new cc.DrawNode();
         lineV.drawSegment(
             cc.p(DEFAULT_SCREEN_SIZE.x / 2, -DEFAULT_SCREEN_SIZE.y),
             cc.p(DEFAULT_SCREEN_SIZE.x / 2, DEFAULT_SCREEN_SIZE.y),
@@ -131,9 +131,9 @@ var MainLayer = cc.Layer.extend({
           position 를 AR와 같이간다.
      */
     onLoadArmature: function (ids) {
-        var children = this.getChildren();
+        let children = this.getChildren();
 
-        var self = this;
+        let self = this;
         children.forEach(function (c) {
             if (c.getTag() === self.DESC_TAG) {
                 c.removeFromParent();
@@ -141,9 +141,9 @@ var MainLayer = cc.Layer.extend({
         });
 
         cc.each(ids, function (name, index) {
-            var armature = new ccs.Armature(name);
+            let armature = new ccs.Armature(name);
 
-            var node = new DraggableNode(armature.getContentSize());
+            let node = new DraggableNode(armature.getContentSize());
             //node.setAnchorPoint( 0.5, 0.5 );
             node.setPosition(this.CX - armature.getContentSize().width * 0.5, this.CY - armature.getContentSize().height * 0.5);
 
@@ -199,22 +199,22 @@ var MainLayer = cc.Layer.extend({
             return;
         }
 
-        var children = this.getChildren();
+        let children = this.getChildren();
 
-        var self = this;
+        let self = this;
         children.forEach(function (c) {
             if (c.getTag() === self.DESC_TAG) {
                 c.removeFromParent();
             }
         });
 
-        var name = cc.path.mainFileName(url);
+        let name = cc.path.mainFileName(url);
 
 
-        var json = ccs.load(url);
-        var ui = ccs.uiReader.widgetFromJsonFile(url);//json.node;
+        let json = ccs.load(url);
+        let ui = ccs.uiReader.widgetFromJsonFile(url);//json.node;
 
-        var node = new DraggableNode(ui.getContentSize());
+        let node = new DraggableNode(ui.getContentSize());
         node.setAnchorPoint(0.5, 0.5);
         node.setPosition(this.CX, this.CY);
 
@@ -327,6 +327,28 @@ var MainLayer = cc.Layer.extend({
         this.setDraggableItem();
     },
 
+    Test: function (node, pos) {
+        let contentSize = null;
+        if (!!node.armature) {
+            contentSize = node.armature.getContentSize();
+        } else if (!!node.ui) {
+            contentSize = node.ui.getContentSize();
+        }
+
+        let addX = pos.x - this.CX + contentSize.width * 0.5;
+        setMoveXData(addX);
+        let addY = pos.y - this.CY + contentSize.height * 0.5;
+        setMoveYData(addY);
+
+        if (!!node.armature) {
+            node.setPosition(pos.x, pos.y);
+            this.showProperties(node.armature, false);
+        } else if (!!node.ui) {
+            node.setPosition(pos.x, pos.y);
+            this.showProperties(node.ui, false);
+        }
+    },
+
     showProperties: function (node, disable) {
         let worldPos = {x: 0, y: 0};
         let contentSize = node.getContentSize();
@@ -349,7 +371,7 @@ var MainLayer = cc.Layer.extend({
     },
 
     setDraggableItem: function () {
-        for (var index in NodeList[Tool_Select_Type]) {
+        for (let index in NodeList[Tool_Select_Type]) {
             if (typeof NodeList[Tool_Select_Type][index].setDraggable === 'function') {
                 NodeList[Tool_Select_Type][index].setDraggable(false);
                 if (Target === NodeList[Tool_Select_Type][index])
@@ -378,7 +400,7 @@ var MainLayer = cc.Layer.extend({
 });
 
 
-var MainLayerScene = cc.Scene.extend({
+let MainLayerScene = cc.Scene.extend({
     onEnter: function () {
         this._super();
 
@@ -391,7 +413,7 @@ var MainLayerScene = cc.Scene.extend({
         if (typeof ElectronRenderer != 'undefined')
             ElectronRenderer.init();
 
-        var layer = new MainLayer();
+        let layer = new MainLayer();
         this.addChild(layer, 1, "MainLayer");
 
         Tool = layer;
@@ -400,11 +422,11 @@ var MainLayerScene = cc.Scene.extend({
 
 
     recursiveCheckNode: function (node, touchpos) {
-        var flag = false;
+        let flag = false;
 
         if (!node || !node.children) return node;
 
-        for (var idx = 0; idx < node.children.length; idx++) {
+        for (let idx = 0; idx < node.children.length; idx++) {
             if (cc.rectContainsPoint(node.children[idx].getBoundingBoxToWorld(), touchpos)) {
                 return this.recursiveCheckNode(node.children[idx], touchpos);
             }
