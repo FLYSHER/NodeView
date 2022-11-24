@@ -22,7 +22,7 @@ var Hierarchy = cc.Node.extend({
 
         $(document).ready(function () {
             $('ul.hierarchyTabs li').click(function () {
-                var tab_id = $(this).attr('data-tab');
+                let tab_id = $(this).attr('data-tab');
 
                 $('ul.hierarchyTabs li').removeClass('current');
                 $('.tab-hierarchyContent').removeClass('current');
@@ -50,6 +50,7 @@ var Hierarchy = cc.Node.extend({
     },
 
     initHiearachy: function () {
+        let self = this;
         $("#hierarchTree").jstree({
             "core": {
                 "themes": {
@@ -72,6 +73,7 @@ var Hierarchy = cc.Node.extend({
             $("#hierarchTree").jstree("open_all");
         })
         $("#hierarchTree").bind("load_node.jstree", function (e, data) {
+            self.selectNode();
         })
         $("#hierarchTree").bind("load_all.jstree", function (e, data) {
         })
@@ -82,15 +84,15 @@ var Hierarchy = cc.Node.extend({
         })
         $("#hierarchTree").bind("refresh_node.jstree", function (e, data) {
         })
+        $("#hierarchTree").bind("refresh.jstree", function (e, data) {
+            self.selectNode();
+        })
         $("#hierarchTree").bind("create_node.jstree", function (e, data) {
         })
         $("#hierarchTree").bind("move_node.jstree", function (e, data) {
-            let a = 0;
-            a++;
         })
         $("#hierarchTree").bind("dnd_stop.vakata", function (e, data) {
         })
-        var self = this;
         $('#hierarchTree').on("changed.jstree", function (e, data) {
             if (!!data.node === false)
                 return;
@@ -133,7 +135,7 @@ var Hierarchy = cc.Node.extend({
         })
         $("#symbolTree").bind("move_node.jstree", function (e, data) {
         })
-        var self = this;
+        let self = this;
         $('#symbolTree').on("changed.jstree", function (e, data) {
             if (!!data.node === false)
                 return;
@@ -180,12 +182,20 @@ var Hierarchy = cc.Node.extend({
             cb: cb,
             index: this.index
         };
+
         this.index++;
     },
 
+    selectNode: function(){
+        $("#hierarchTree").jstree("deselect_all");
+        $("#hierarchTree").jstree(true).select_node(this.index - 1);
+    },
+
     addSymbols: function (itemName, node, cb) {
-        var createName = itemName;
+        let createName = itemName;
         let symbolObj = {
+            "addPosX": 0,
+            "addPosY": 0,
             "index": this.symbolIndex,
             "skinindex": 0,
             "id": 0,
@@ -245,6 +255,10 @@ var Hierarchy = cc.Node.extend({
             id: symbolObj.id,
             index: this.symbolIndex
         };
+
+
+        $("#symbolTree").jstree("deselect_all");
+        $("#symbolTree").jstree(true).select_node(this.symbolIndex);
 
         this.symbolIndex++;
     },

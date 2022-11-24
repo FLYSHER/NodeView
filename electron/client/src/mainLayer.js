@@ -1,14 +1,4 @@
-//http://cocos.sonarlearning.co.uk/docs/action-animations-aka-easing
-//http://cocos2d-x.org/js-tests/
-//  Target.runAction(
-//                cc.sequence(
-//                    cc.delayTime(0.1),
-//                    cc.moveTo(0.25, x, y).easing(cc.easeBackOut()),
-//                    cc.callFunc(function () {  }
-//                    ))
-
 var Target = null;
-
 var MainLayer = cc.Layer.extend({
     DESC_TAG: 99,
     NODE_MENU_TAG: 100,
@@ -38,7 +28,7 @@ var MainLayer = cc.Layer.extend({
         this.addChild(this._animationList, -128);
         this._animationList.setLocalZOrder(100000);
 
-        this._uiList = new UIScrollTreeViewCtrl(this.showProperties.bind(this));
+        this._uiList = new UIScrollTreeViewCtrl(this.refreshProperties.bind(this));
         this._uiList.setContentSize(cc.size(150, 200));
         this._uiList.setVisible(false);
         this.addChild(this._uiList, -128);
@@ -97,8 +87,12 @@ var MainLayer = cc.Layer.extend({
         );
         this.addChild(lineV);
         lineV.setLocalZOrder(-1);
+        this.scheduleUpdate();
 
+        this.defaultPos = {};
         return true;
+    },
+    update: function (dt) {
     },
     onResize: function () {
         let sx = cc.winSize.width / DEFAULT_SCREEN_SIZE.x;
@@ -266,14 +260,9 @@ var MainLayer = cc.Layer.extend({
         let selectNode = getSelectNode();
         if (!selectNode) return;
 
-        let defaultPos = {
-            x: this.CX - (selectNode.getContentSize().width * 0.5),
-            y: this.CY - (selectNode.getContentSize().height * 0.5)
-        };
-
         let pos = {
-            x: defaultPos.x + skinNode.addPosX,
-            y: defaultPos.y + skinNode.addPosY,
+            x: this.defaultPos.x + skinNode.addPosX,
+            y: this.defaultPos.y + skinNode.addPosY,
         };
 
         selectNode.setPosition(pos);
@@ -317,53 +306,41 @@ var MainLayer = cc.Layer.extend({
             };
             this._animationList.setAnimations(animNameArr, playCb);
             this._skins.show(selectNode.armature.armatureData.boneDataDic, skinNode);
-            this.showProperties(selectNode.armature, false);
+            this.refreshProperties(selectNode.armature);
         } else {
             this._animationList.setVisible(false);
             this._animationList.setAnimations([], null);
             this._uiList.setNode(selectNode);
-            this.showProperties(selectNode.ui, false);
+            this.refreshProperties(selectNode.ui);
         }
+
+        this.defaultPos = {
+            x: this.CX - (selectNode.getContentSize().width * 0.5),
+            y: this.CY - (selectNode.getContentSize().height * 0.5)
+        };
+
         this.setDraggableItem();
     },
-
-    Test: function (node, pos) {
-        let contentSize = null;
-        if (!!node.armature) {
-            contentSize = node.armature.getContentSize();
-        } else if (!!node.ui) {
-            contentSize = node.ui.getContentSize();
-        }
-
-        let addX = pos.x - this.CX + contentSize.width * 0.5;
+    Test: function (node) {
+        let addX = node.getPosition().x - this.defaultPos.x;
         setMoveXData(addX);
-        let addY = pos.y - this.CY + contentSize.height * 0.5;
+        let addY = node.getPosition().y - this.defaultPos.y;
         setMoveYData(addY);
 
         if (!!node.armature) {
-            node.setPosition(pos.x, pos.y);
-            this.showProperties(node.armature, false);
+            this.refreshProperties(node.armature);
         } else if (!!node.ui) {
-            node.setPosition(pos.x, pos.y);
-            this.showProperties(node.ui, false);
+            this.refreshProperties(node.ui);
         }
     },
 
-    showProperties: function (node, disable) {
+    refreshProperties: function (node) {
         let worldPos = {x: 0, y: 0};
         let contentSize = node.getContentSize();
         let skinInfo = getSkinData();
-        let addPos = {
-            x: skinInfo.addPosX !== undefined ? skinInfo.addPosX : 0,
-            y: skinInfo.addPosY !== undefined ? skinInfo.addPosY : 0
-        };
-        let localPos = {
-            x: node.getPosition().x - (contentSize.width / 2) + addPos.x,
-            y: node.getPosition().y - (contentSize.height / 2) + addPos.y,
-        }
         let scale = {x: node.getScaleX(), y: node.getScaleY()};
         let anchor = node.getAnchorPoint();
-        this._properties.init(localPos, worldPos, contentSize, scale, anchor, disable);
+        this._properties.init(skinInfo, worldPos, contentSize, scale, anchor);
     },
 
     deleteItem: function () {

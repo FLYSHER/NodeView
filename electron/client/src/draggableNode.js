@@ -2,15 +2,7 @@ var DraggableNode = cc.Node.extend({
     selectMark: null,
     ctor: function (contentSize) {
         this._super();
-
         this.setContentSize(contentSize);
-
-
-        // var rect = this.getBoundingBox();
-        // var node = new cc.DrawNode();
-        // node.drawRect( cc.p(rect.x, rect.y), cc.p(rect.x + rect.width, rect.y + rect.height), cc.color( 0, 0, 0, 0 ), 1, cc.color( 255, 0, 0 ) );
-        // this.addChild( node );
-
         var self = this;
         var isOver = false;
         var touchStart = false;
@@ -23,12 +15,14 @@ var DraggableNode = cc.Node.extend({
         var destination = cc.p(self._draggableRect.x + self._draggableRect.width, self._draggableRect.y + self._draggableRect.height);
         this.selectMark.drawRect(origin, destination, cc.color(128, 0, 255, 100), 1, cc.color(255, 255, 255, 255));
 
-
         this.setDraggable(false);
 
         cc.eventManager.addListener({
             event: cc.EventListener.MOUSE,
             onMouseUp: function (event) {
+                if(touchStart === true){
+                    Tool.Test(event.getCurrentTarget());
+                }
             },
             onMouseMove: function (event) {
                 if (!self._draggable) {
@@ -52,11 +46,8 @@ var DraggableNode = cc.Node.extend({
                             cc.p(pos.x - (self._draggableRect.x + self._draggableRect.width * anchor.x),
                                 pos.y - (self._draggableRect.y + self._draggableRect.height * anchor.y));
                     }
-
-                    // var nodePoint = self.getParent().convertToNodeSpace(cc.p(pos.x - centerPointDiff.x, pos.y - centerPointDiff.y));
-                    // event.getCurrentTarget().setPosition(nodePoint);
-
-                    Tool.Test(event.getCurrentTarget(), cc.p(pos.x - centerPointDiff.x, pos.y - centerPointDiff.y));
+                    var nodePoint = self.getParent().convertToNodeSpace(cc.p(pos.x - centerPointDiff.x, pos.y - centerPointDiff.y));
+                    event.getCurrentTarget().setPosition(nodePoint);
                 } else {
                     touchStart = false;
                 }

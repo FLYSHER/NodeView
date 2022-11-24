@@ -7,6 +7,8 @@ var Properties = cc.Node.extend({
                 let pos = parseInt(this.value)
                 setMoveXData(parseInt(pos));
                 Tool.refreshNodeSkin();
+
+                $("input[name=lPosX]").val(pos.toFixed(2));
             }
         });
         $("#lPosY").keydown(function (key) {
@@ -14,11 +16,12 @@ var Properties = cc.Node.extend({
                 let pos = parseInt(this.value)
                 setMoveYData(parseInt(pos));
                 Tool.refreshNodeSkin();
+
+                $("input[name=lPosY]").val(pos.toFixed(2));
             }
         });
 
-
-        this.lPsX = document.getElementById('lPosX');
+        this.lPosX = document.getElementById('lPosX');
         this.lPosY = document.getElementById('lPosY');
         this.wPosX = document.getElementById('wPosX');
         this.wPosY = document.getElementById('wPosY');
@@ -30,7 +33,7 @@ var Properties = cc.Node.extend({
     },
     initRefresh: function () {
         this.init(
-            {x: 0, y: 0},
+            {addPosX: 0, addPosY: 0},
             {x: 0, y: 0},
             {width: 0, height: 0},
             {x: 0, y: 0},
@@ -44,19 +47,19 @@ var Properties = cc.Node.extend({
         if (Tool_Select_Type === type_tab.type_symbol) {
             disable = true;
         }
-        this.lPsX = disable;
-        this.lPosY = disable;
-        this.wPosX = disable;
-        this.wPosY = disable;
-        this.scaleX = disable;
-        this.scaleY = disable;
-        this.anchorX = disable;
-        this.anchorY = disable;
+        this.lPosX.disabled = disable;
+        this.lPosY.disabled = disable;
+        this.wPosX.disabled = disable;
+        this.wPosY.disabled = disable;
+        this.scaleX.disabled = disable;
+        this.scaleY.disabled = disable;
+        this.anchorX.disabled = disable;
+        this.anchorY.disabled = disable;
     },
-    init: function (localPosition, worldPosition, contentsSize, scale, anchor, disable) {
+    init: function (localPosition, worldPosition, contentsSize, scale, anchor) {
         // local Position
-        $("input[name=lPosX]").val(localPosition.x.toFixed(2));
-        $("input[name=lPosY]").val(localPosition.y.toFixed(2));
+        $("input[name=lPosX]").val(localPosition.addPosX.toFixed(2));
+        $("input[name=lPosY]").val(localPosition.addPosY.toFixed(2));
 
         // world Position
         $("input[name=wPosX]").val(worldPosition.x.toFixed(2));
