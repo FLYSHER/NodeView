@@ -102,7 +102,7 @@ var Skins = cc.Node.extend({
             this.refresh();
         }
 
-        document.getElementById("idInput").value = info.id;
+        document.getElementById("idInput").value = info.uiID;
         document.getElementById("valueInput").value = info.skinindex;
     },
 

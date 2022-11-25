@@ -226,10 +226,6 @@ var UIItemList = cc.Node.extend({
         return -1;
     },
 
-    getSelectedName : function(){
-        return this.selectItem.itemName;
-    },
-
     selectedItemEvent: function(sender, type) {
         var targetListView = sender;
         var button = null;

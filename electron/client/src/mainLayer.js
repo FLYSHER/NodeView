@@ -110,7 +110,6 @@ var MainLayer = cc.Layer.extend({
     initUI: function (checkDelete) {
         Tool.refreshCanvasNode()
         Tool._skins.initRefresh(checkDelete);
-        Tool._hierarchy.refresh();
         Tool._hierarchy.deselectAll();
         Tool._animationList.initRefresh();
         Tool._properties.initRefresh();

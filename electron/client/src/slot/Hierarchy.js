@@ -4,8 +4,8 @@ var ItemListClickType = {
 };
 
 var Hierarchy = cc.Node.extend({
-    index: 0,
-    symbolIndex: 0,
+    index: 1,
+    symbolIndex: 1,
     ctor: function () {
         this._super(color.backgroundColor);
 
@@ -14,7 +14,7 @@ var Hierarchy = cc.Node.extend({
                 let cur = document.activeElement;
                 let selector = Tool_Select_Type === type_tab.type_hierarchy ? ".hierarchyWidget" : ".symbolWidget";
                 let parent = findParentBySelector(cur, selector);
-                if (parent !== null && selectItem !== null) {
+                if (parent !== null && selectItem !== null && selectItem !== undefined) {
                     this.delBySelectItem();
                 }
             }
@@ -51,45 +51,45 @@ var Hierarchy = cc.Node.extend({
 
     initHiearachy: function () {
         let self = this;
+        let data = {
+            "addPosX": 0,
+            "addPosY": 0,
+            "skinindex": -1,
+            "index": -1,
+            "id": -1,
+            "text": "root",
+            "children": []
+        }
         $("#hierarchTree").jstree({
             "core": {
                 "themes": {
                     "responsive": false
                 },
-                'data': [{
-                    "id": 0,
-                    "text": "root",
-                    "state": {
-                        "opened": true
-                    },
-                    "children": []
-                }],
+                'data': data,
                 "check_callback": true
             },
             "state": {"key": "demo2"},
             "plugins": ["dnd", "state"]
         });
         $("#hierarchTree").bind("refresh.jstree", function (e, data) {
-            $("#hierarchTree").jstree("open_all");
         })
         $("#hierarchTree").bind("load_node.jstree", function (e, data) {
-            self.selectNode();
         })
         $("#hierarchTree").bind("load_all.jstree", function (e, data) {
         })
         $("#hierarchTree").bind("redraw.jstree", function (e, data) {
-            $("#hierarchTree").jstree("open_all");
         })
         $("#hierarchTree").bind("active_node.jstree", function (e, data) {
         })
         $("#hierarchTree").bind("refresh_node.jstree", function (e, data) {
         })
         $("#hierarchTree").bind("refresh.jstree", function (e, data) {
-            self.selectNode();
         })
         $("#hierarchTree").bind("create_node.jstree", function (e, data) {
+            $("#hierarchTree").jstree("open_all");
         })
         $("#hierarchTree").bind("move_node.jstree", function (e, data) {
+            $("#hierarchTree").jstree("open_all");
         })
         $("#hierarchTree").bind("dnd_stop.vakata", function (e, data) {
         })
@@ -100,42 +100,57 @@ var Hierarchy = cc.Node.extend({
             if (selectItem === self.itemCallbacks[data.node.original.index])
                 return;
 
+            selectIndex = data.node.original.index;
             selectItem = self.itemCallbacks[data.node.original.index];
             selectItem && selectItem.cb(ItemListClickType.SELECT, selectItem.index);
         });
     },
 
     initSymbols: function () {
+        let self = this;
+        let data = {
+            "addPosX": 0,
+            "addPosY": 0,
+            "index": -1,
+            "skinindex": 0,
+            "id": -1,
+            "name": 0,//id랑동일하게 사용
+            "text": 'root',
+            "type": 0,
+            "typifyName": 'root',
+            "effectName": [],
+            "effectStartZOder": 1,
+            "animationinfo": [],
+        }
         $("#symbolTree").jstree({
             "core": {
                 "themes": {
                     "responsive": false
                 },
-                'data': [],
+                'data': data,
                 "check_callback": true
             },
             "state": {"key": "demo2"},
             "plugins": ["state"]//, "types"]
         });
         $("#symbolTree").bind("refresh.jstree", function (e, data) {
-            $("#symbolTree").jstree("open_all");
         })
         $("#symbolTree").bind("load_node.jstree", function (e, data) {
         })
         $("#symbolTree").bind("load_all.jstree", function (e, data) {
         })
         $("#symbolTree").bind("redraw.jstree", function (e, data) {
-            $("#symbolTree").jstree("open_all");
         })
         $("#symbolTree").bind("active_node.jstree", function (e, data) {
         })
         $("#symbolTree").bind("refresh_node.jstree", function (e, data) {
         })
         $("#symbolTree").bind("create_node.jstree", function (e, data) {
+            $("#symbolTree").jstree("open_all");
         })
         $("#symbolTree").bind("move_node.jstree", function (e, data) {
+            $("#symbolTree").jstree("open_all");
         })
-        let self = this;
         $('#symbolTree').on("changed.jstree", function (e, data) {
             if (!!data.node === false)
                 return;
@@ -143,6 +158,7 @@ var Hierarchy = cc.Node.extend({
             if (selectItem === self.symbolCallbacks[data.node.original.index])
                 return;
 
+            selectIndex = data.node.original.index;
             selectItem = self.symbolCallbacks[data.node.original.index];
             selectItem && selectItem.cb(ItemListClickType.SELECT, selectItem.index);
         });
@@ -163,20 +179,32 @@ var Hierarchy = cc.Node.extend({
 
     addHierarchy: function (itemName, node, cb) {
         let treeNodeObj = {
+            "id": this.index,
+            "index": this.index,
+            "text": itemName,
+            "state": {
+                "opened": true
+            },
+        };
+
+        let skin = {
             "addPosX": 0,
             "addPosY": 0,
             "skinindex": 0,
             "index": this.index,
-            "id": this.index,
+            "uiID": this.index,
             "text": itemName,
-            "children": []
-        }
+        };
 
-        SkinList[Tool_Select_Type].push(treeNodeObj);
-
-        $("#hierarchTree").jstree(true).settings.core.data[0].children.push(treeNodeObj);
-        this.refresh();
-
+        SkinList[Tool_Select_Type].push(skin);
+        $('#hierarchTree').jstree(true).create_node(
+            -1,
+            treeNodeObj,
+            "last",
+            function (id) {
+                $('#hierarchTree').jstree("toggle_node", id);
+            }.bind(this, this.index)
+        );
         this.itemCallbacks[this.index] = {
             itemName: itemName,
             cb: cb,
@@ -186,20 +214,24 @@ var Hierarchy = cc.Node.extend({
         this.index++;
     },
 
-    selectNode: function(){
-        $("#hierarchTree").jstree("deselect_all");
-        $("#hierarchTree").jstree(true).select_node(this.index - 1);
-    },
-
     addSymbols: function (itemName, node, cb) {
         let createName = itemName;
+        let treeNodeObj = {
+            "id": this.index,
+            "index": this.symbolIndex,
+            "text": createName,
+            "state": {
+                "opened": true
+            },
+        };
+
         let symbolObj = {
             "addPosX": 0,
             "addPosY": 0,
-            "index": this.symbolIndex,
             "skinindex": 0,
-            "id": 0,
-            "name": 0,//id랑동일하게 사용
+            "index": this.symbolIndex,
+            "uiID": this.symbolIndex,
+            "name": 0,
             "text": createName,
             "type": 0,
             "typifyName": itemName,
@@ -209,7 +241,8 @@ var Hierarchy = cc.Node.extend({
         }
 
         let skinindex = 0;
-        let id = 0;
+        let index = this.symbolIndex;
+        let id = this.symbolIndex;
         if (symbolLoadData.length) {
             let index = symbolLoadIndex - 1;
             id = symbolLoadData[index].id;
@@ -218,12 +251,13 @@ var Hierarchy = cc.Node.extend({
                     skinindex = symbolLoadData[index].animationinfo[0].skininfo[0].skinindex;
                 }
             }
-
-            symbolObj.id = id;
-            symbolObj.index = index;
-            symbolObj.skinindex = skinindex;
         }
 
+        treeNodeObj.id = id;
+
+        symbolObj.uiID = id;
+        symbolObj.index = index;
+        symbolObj.skinindex = skinindex;
 
         let anims = node.armature.animation._animationData.movementNames;
         for (let i = 0; i < anims.length; ++i) {
@@ -244,21 +278,21 @@ var Hierarchy = cc.Node.extend({
         }
 
         SkinList[Tool_Select_Type].push(symbolObj);
-
-
-        $("#symbolTree").jstree(true).settings.core.data.push(symbolObj);
-        this.refresh();
+        $('#symbolTree').jstree(true).create_node(
+            '-1',
+            treeNodeObj,
+            "last",
+            function () {
+                //$('#symbolTree').jstree("open_node", $('#symbolTree').jstree("get_selected"));
+            }
+        );
 
         this.symbolCallbacks[this.symbolIndex] = {
             itemName: createName,
             cb: cb,
-            id: symbolObj.id,
+            id: symbolObj.uiID,
             index: this.symbolIndex
         };
-
-
-        $("#symbolTree").jstree("deselect_all");
-        $("#symbolTree").jstree(true).select_node(this.symbolIndex);
 
         this.symbolIndex++;
     },
@@ -266,15 +300,6 @@ var Hierarchy = cc.Node.extend({
     deselectAll: function () {
         $('#hierarchTree').jstree("deselect_all");
         $('#symbolTree').jstree("deselect_all");
-    },
-
-    refresh: function () {
-        let tree = this.getCurTree();
-        tree && tree.jstree("refresh");
-    },
-
-    getSelectedName: function () {
-        return this.selectItem.itemName;
     },
 
     getCurTree: function () {
@@ -290,36 +315,23 @@ var Hierarchy = cc.Node.extend({
         let tree = this.getCurTree();
         if (tree !== null) {
             let callback = null;
-            let dataArr = tree.jstree(true).settings.core.data;
+
+            let skinData = getSkinData();
+            let uiID = skinData.uiID;
+
+            let id = tree.jstree(true).get_selected();
+            tree.jstree(true).delete_node(id);
+
             if (Tool_Select_Type === type_tab.type_hierarchy) {
                 callback = this.itemCallbacks;
-                dataArr = tree.jstree(true).settings.core.data[0].children;
             } else if (Tool_Select_Type === type_tab.type_symbol) {
                 callback = this.symbolCallbacks;
-                dataArr = tree.jstree(true).settings.core.data;
             }
-
-            for (let i = 0; i < dataArr.length; ++i) {
-                let data = dataArr[i];
-                if (data.index === selectIndex) {
-                    dataArr.splice(i, 1);
-                    removeSkin();
-                }
-            }
+            removeSkin();
 
             if (!!callback[selectIndex]) {
                 callback[selectIndex] = null;
             }
-
-
-            if (Tool_Select_Type === type_tab.type_hierarchy) {
-                tree.jstree(true).settings.core.data[0].children = dataArr;
-            } else if (Tool_Select_Type === type_tab.type_symbol) {
-                tree.jstree(true).settings.core.data = dataArr;
-            }
-            this.refresh();
-
-
             selectItem && selectItem.cb(ItemListClickType.DELETE);
             selectItem = null;
         }

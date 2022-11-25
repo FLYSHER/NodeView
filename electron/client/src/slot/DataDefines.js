@@ -112,6 +112,14 @@ function getSkinData() {
     return skinNode;
 }
 
+function getSKinDataLast(){
+    let index = SkinList[Tool_Select_Type].length - 1;
+    if(index >= 0){
+        return SkinList[Tool_Select_Type][index];
+    }
+    return null;
+}
+
 function getSelectNode() {
     let node = null;
     for (let key in SkinList[Tool_Select_Type]) {
@@ -202,6 +210,8 @@ function saveSymbolData() {
         const parseSlotDefines = JSON.parse(JSON.stringify(SkinList[Tool_Select_Type]));
 
         for (let key in parseSlotDefines) {
+            delete parseSlotDefines[key].addPosX;
+            delete parseSlotDefines[key].addPosY;
             delete parseSlotDefines[key].index;
             delete parseSlotDefines[key].skinindex;
         }
