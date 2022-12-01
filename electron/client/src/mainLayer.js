@@ -20,8 +20,6 @@ var MainLayer = cc.Layer.extend({
             self.onLoadUI(event.getUserData());
         });
 
-        this._nodeOrder = [];
-
         this._animationList = new UIListViewTest();
         this._animationList.setContentSize(cc.size(150, 200));
         this._animationList.setVisible(false);
@@ -60,9 +58,11 @@ var MainLayer = cc.Layer.extend({
 
         let canvasNode1 = new cc.Node();
         this.addChild(canvasNode1, 0, type_tab.type_hierarchy);
+        canvasNode1.setPosition(this.CX, this.CY);
 
         let canvasNode2 = new cc.Node();
         this.addChild(canvasNode2, 0, type_tab.type_symbol);
+        canvasNode2.setPosition(this.CX, this.CY);
 
 
         this.onResize();
@@ -88,8 +88,6 @@ var MainLayer = cc.Layer.extend({
         this.addChild(lineV);
         lineV.setLocalZOrder(-1);
         this.scheduleUpdate();
-
-        this.defaultPos = {};
         return true;
     },
     update: function (dt) {
@@ -137,12 +135,8 @@ var MainLayer = cc.Layer.extend({
             let armature = new ccs.Armature(name);
 
             let node = new DraggableNode(armature.getContentSize());
-            //node.setAnchorPoint( 0.5, 0.5 );
-            node.setPosition(this.CX - armature.getContentSize().width * 0.5, this.CY - armature.getContentSize().height * 0.5);
-
-            // addChild 순서 중요!
-            // armature가 draggableNode에 addChild되면 contentSize가 바뀜
-            //this.addChild(node);
+            node.setAnchorPoint(0.5, 0.5);
+            node.setPosition(0, 0);
 
             let parent = this.getChildByTag(Tool_Select_Type);
             parent.addChild(node);
@@ -155,12 +149,8 @@ var MainLayer = cc.Layer.extend({
             node.addChildToCenter(armature);
             node.armature = armature;
             node.ui = null;
-            node.order = this._nodeOrder.length;
-            node.setLocalZOrder(10 + node.order);
-            this._nodeOrder[node.order] = node;
-
+            node.setLocalZOrder(0);
             NodeList[Tool_Select_Type].push(node);
-
             this._addToJsonListMenu(name, node);
 
             SlotLoader.armatureIDs = {};
@@ -205,28 +195,20 @@ var MainLayer = cc.Layer.extend({
 
 
         let json = ccs.load(url);
-        let ui = ccs.uiReader.widgetFromJsonFile(url);//json.node;
-
+        let ui = ccs.uiReader.widgetFromJsonFile(url);
         let node = new DraggableNode(ui.getContentSize());
         node.setAnchorPoint(0.5, 0.5);
-        node.setPosition(this.CX, this.CY);
+        node.setPosition(0, 0);
 
         let parent = this.getChildByTag(Tool_Select_Type);
         parent.addChild(node);
 
-        //ui.setAnchorPoint(0.5, 0.5);
         node.addChildToCenter(ui);
-
         node.armature = null;
         node.ui = ui;
-
-        node.order = this._nodeOrder.length;
-        node.setLocalZOrder(10 + node.order);
-        this._nodeOrder[node.order] = node;
-
+        node.setLocalZOrder(0);
         NodeList[Tool_Select_Type].push(node);
         this._addToJsonListMenu(name, node);
-
 
         SlotLoader.armatureIDs = {};
         SlotLoader.armatureFrames = {};
@@ -253,22 +235,31 @@ var MainLayer = cc.Layer.extend({
     },
 
     refreshNodeSkin: function () {
-        let skinNode = getSkinData();
-        if (skinNode === null) return;
+        let skinInfo = getSkinData();
+        if (skinInfo === null) return;
 
         let selectNode = getSelectNode();
         if (!selectNode) return;
+        //
+        // let pos = selectNode.getParent().convertToNodeSpace({x: skinInfo.posX, y: skinInfo.posY});
+        // pos.x += this.CX
+        // pos.y += this.CY
 
-        let pos = {
-            x: this.defaultPos.x + skinNode.addPosX,
-            y: this.defaultPos.y + skinNode.addPosY,
-        };
+        let pos = {x: skinInfo.posX + skinInfo.offsetX, y: skinInfo.posY + skinInfo.offsetY};
 
         selectNode.setPosition(pos);
+        selectNode.setScale(skinInfo.scaleX, skinInfo.scaleY);
+        //selectNode.setAnchorPoint(skinInfo.anchorX, skinInfo.anchorY);
 
         let skinList = getSkinList(selectNode.armature.armatureData.boneDataDic);
         if (skinList.length > 0) {
-            this.changeNodeSkin(selectNode.armature, skinList, skinNode.skinindex, true);
+            this.changeNodeSkin(selectNode.armature, skinList, skinInfo.skinindex, true);
+        }
+
+        if (!!selectNode.armature) {
+            this.refreshProperties(selectNode.armature);
+        } else if (!!selectNode.ui) {
+            this.refreshProperties(selectNode.ui);
         }
     },
 
@@ -312,18 +303,12 @@ var MainLayer = cc.Layer.extend({
             this._uiList.setNode(selectNode);
             this.refreshProperties(selectNode.ui);
         }
-
-        this.defaultPos = {
-            x: this.CX - (selectNode.getContentSize().width * 0.5),
-            y: this.CY - (selectNode.getContentSize().height * 0.5)
-        };
-
         this.setDraggableItem();
     },
     Test: function (node) {
-        let addX = node.getPosition().x - this.defaultPos.x;
+        let addX = node.getPosition().x;
         setMoveXData(addX);
-        let addY = node.getPosition().y - this.defaultPos.y;
+        let addY = node.getPosition().y;
         setMoveYData(addY);
 
         if (!!node.armature) {
@@ -332,14 +317,19 @@ var MainLayer = cc.Layer.extend({
             this.refreshProperties(node.ui);
         }
     },
-
     refreshProperties: function (node) {
-        let worldPos = {x: 0, y: 0};
-        let contentSize = node.getContentSize();
         let skinInfo = getSkinData();
+
+        let localPosition = {x: skinInfo.posX, y: skinInfo.posY};
+        let pos = {
+            x: node.getParent().getPosition().x,// + skinInfo.offsetX,
+            y: node.getParent().getPosition().y// + skinInfo.offsetY
+        };
+        let worldPosition = this.getChildByTag(type_tab.type_hierarchy).convertToWorldSpace(pos);
+        let contentSize = node.getContentSize();
         let scale = {x: node.getScaleX(), y: node.getScaleY()};
-        let anchor = node.getAnchorPoint();
-        this._properties.init(skinInfo, worldPos, contentSize, scale, anchor);
+        let anchor = node.getParent().getAnchorPoint();
+        this._properties.init(skinInfo, localPosition, worldPosition, contentSize, scale, anchor);
     },
 
     deleteItem: function () {

@@ -29,7 +29,19 @@ NodeList[type_tab.type_hierarchy] = UINodeList;
 NodeList[type_tab.type_symbol] = SymbolNodeList;
 
 var selectIndex = -1;
-var selectItem = null;          // selected item
+var selectItem = null;          // selected item ( callback 등... )
+var selectSkin = null;          // selected skin 실제 선택된 스킨 데이터
+var selectNode = null;          // selected node 실제 선택된 노드
+
+function setSelectItem() {
+    for (let key in SkinList[Tool_Select_Type]) {
+        let info = SkinList[Tool_Select_Type][key];
+        if (info.index === selectIndex) {
+            selectSkin = info;
+            selectNode = NodeList[Tool_Select_Type][key];
+        }
+    }
+}
 
 function getRealIndex() {
     // 하이라키, 심볼 위젯에 노드가 추가되고 삭제될때 실제로 선택된 위치의 인덱스를 가져온다
@@ -55,80 +67,77 @@ function removeSkin() {
 }
 
 function setSymbolId(value) {
-    for (let key in SkinList[Tool_Select_Type]) {
-        let info = SkinList[Tool_Select_Type][key];
-        if (info.index === selectIndex) {
-            info.id = value;
-            break;
-        }
-    }
+    selectSkin.id = value;
 }
 
 function setSkinData(value) {
-    for (let key in SkinList[Tool_Select_Type]) {
-        let info = SkinList[Tool_Select_Type][key];
-        if (info.index === selectIndex) {
-            info.skinindex = value;
-
-            for (let anim in info.animationinfo) {
-                for (let skin in info.animationinfo[anim].skininfo) {
-                    let result = info.animationinfo[anim].skininfo[skin];
-                    result.skinindex = value;
-                }
-            }
-            break;
-        }
-    }
-}
-
-function setMoveXData(value) {
-    for (let key in SkinList[Tool_Select_Type]) {
-        let info = SkinList[Tool_Select_Type][key];
-        if (info.index === selectIndex) {
-            info.addPosX = value;
-            break;
-        }
-    }
-}
-
-function setMoveYData(value) {
-    for (let key in SkinList[Tool_Select_Type]) {
-        let info = SkinList[Tool_Select_Type][key];
-        if (info.index === selectIndex) {
-            info.addPosY = value;
-            break;
+    for (let anim in selectSkin.animationinfo) {
+        for (let skin in selectSkin.animationinfo[anim].skininfo) {
+            let result = selectSkin.animationinfo[anim].skininfo[skin];
+            result.skinindex = value;
         }
     }
 }
 
 function getSkinData() {
-    let skinNode = null;
-    for (let key in SkinList[Tool_Select_Type]) {
-        let info = SkinList[Tool_Select_Type][key];
-        if (info.index === selectIndex) {
-            skinNode = info;
-        }
-    }
-    return skinNode;
+    return selectSkin;
 }
 
-function getSKinDataLast(){
-    let index = SkinList[Tool_Select_Type].length - 1;
-    if(index >= 0){
-        return SkinList[Tool_Select_Type][index];
+function setMoveXData(value) {
+    selectSkin.posX = value;
+}
+
+function setMoveYData(value) {
+    selectSkin.posY = value;
+}
+
+function setScaleXData(value) {
+    selectSkin.scaleX = value;
+}
+
+function setScaleYData(value) {
+    selectSkin.scaleY = value;
+}
+
+function setAnchorXData(value) {
+    selectSkin.anchorX = value;
+}
+
+function setAnchorYData(value) {
+    selectSkin.anchorY = value;
+}
+
+function setOffsetData(x, y) {
+    selectSkin.offsetX = x;
+    selectSkin.offsetY = y;
+}
+
+function setTagData(value) {
+    selectSkin.tag = value;
+}
+
+function getSelectNode() {
+    return selectNode;
+}
+
+function getNode(id) {
+    for (let key in SkinList[Tool_Select_Type]) {
+        let info = SkinList[Tool_Select_Type][key];
+        if (info.uiID === id) {
+            return NodeList[Tool_Select_Type][key];
+        }
     }
     return null;
 }
 
-function getSelectNode() {
-    let node = null;
+function getSkin(id) {
     for (let key in SkinList[Tool_Select_Type]) {
         let info = SkinList[Tool_Select_Type][key];
-        if (info.index === selectIndex) {
-            node = NodeList[Tool_Select_Type][key];
+        if (info.uiID === id) {
+            return SkinList[Tool_Select_Type][key];
         }
     }
-    return node;
+    return null;
 }
 
 function getSkinList(dic) {
@@ -202,6 +211,46 @@ function saveResourceData() {
     console.save();
 }
 
+function saveSceneData() {
+    // let j = JSON.parse('{"1":{"id":"1","text":"187SymEachWinAR","icon":true,"parent":"-1","parents":["-1","#"],"children":["2"],"children_d":["2"],"data":null,"state":{"loaded":true,"opened":true,"selected":false,"disabled":false},"li_attr":{"id":"1"},"a_attr":{"href":"#","id":"1_anchor"},"original":{"id":1,"index":1,"text":"187SymEachWinAR","state":{"opened":true}}},"2":{"id":"2","text":"187SymJackpotAR","icon":true,"parent":"1","parents":["1","-1","#"],"children":[],"children_d":[],"data":null,"state":{"loaded":true,"opened":false,"selected":false,"disabled":false},"li_attr":{"id":"2"},"a_attr":{"href":"#","id":"2_anchor"},"original":{"id":2,"index":2,"text":"187SymJackpotAR","state":{"opened":true}}},"#":{"id":"#","parent":null,"parents":[],"children":["-1"],"children_d":["-1","1","2"],"state":{"loaded":true,"failed":false,"loading":false}},"-1":{"id":"-1","text":"root","icon":true,"parent":"#","parents":["#"],"children":["1"],"children_d":["1","2"],"data":null,"state":{"loaded":true,"opened":true,"selected":false,"disabled":false},"li_attr":{"id":"-1"},"a_attr":{"href":"#","id":"-1_anchor"},"original":{"tag":"","posX":0,"posY":0,"scaleX":1,"scaleY":1,"anchorX":0.5,"anchorY":0.5,"offsetX":0,"offsetY":0,"skinindex":-1,"index":-1,"id":-1,"text":"root"}}}');
+    // $("#hierarchTree").jstree(true)._model.data = j;
+    // Tool._hierarchy.index = 100;
+
+
+    console.save = function () {
+        let filename = "Scene" + ".js";
+        let data = '';
+
+        const parseSkinData = JSON.parse(JSON.stringify(SkinList[Tool_Select_Type]));
+        const parseHierarchyData = $("#hierarchTree").jstree(true)._model.data;
+
+        let HierarchyProperty = {
+            "Hierarchy": parseHierarchyData,
+            "UI": parseSkinData,
+        }
+
+        let Scene = {
+            "Scene": HierarchyProperty
+        }
+
+        data = JSON.stringify(Scene);
+
+        let blob = new Blob([data], {type: 'text/json'}),
+            e = document.createEvent('MouseEvents'),
+            a = document.createElement('a')
+
+        a.download = filename
+        a.href = window.URL.createObjectURL(blob)
+        a.dataset.downloadurl = ['text/json', a.download, a.href].join(':')
+        e.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null)
+        a.dispatchEvent(e)
+    }
+
+    if (SkinList[type_tab.type_hierarchy].length > 0) {
+        console.save();
+    }
+}
+
 function saveSymbolData() {
     console.save = function () {
         let filename = "slotDefines" + ".js";
@@ -210,8 +259,14 @@ function saveSymbolData() {
         const parseSlotDefines = JSON.parse(JSON.stringify(SkinList[Tool_Select_Type]));
 
         for (let key in parseSlotDefines) {
-            delete parseSlotDefines[key].addPosX;
-            delete parseSlotDefines[key].addPosY;
+            delete parseSlotDefines[key].posX;
+            delete parseSlotDefines[key].posY;
+            delete parseSlotDefines[key].scaleX;
+            delete parseSlotDefines[key].scaleY;
+            delete parseSlotDefines[key].anchorX;
+            delete parseSlotDefines[key].anchorY;
+            delete parseSlotDefines[key].offsetX;
+            delete parseSlotDefines[key].offsetY;
             delete parseSlotDefines[key].index;
             delete parseSlotDefines[key].skinindex;
         }
@@ -225,7 +280,7 @@ function saveSymbolData() {
         let SymbolInfo = {
             "SymbolInfo": SymbolProperty
         }
-        data = JSON.stringify(SymbolInfo)
+        data = JSON.stringify(SymbolInfo);
 
         // for (let key in SkinList[Tool_Select_Type]) {
         //     delete SkinList[type_tab.type_symbol][key].index;

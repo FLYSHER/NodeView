@@ -115,6 +115,7 @@
             <div class = "saveWidget">
                 <button onclick="saveSymbolData()">save symbol</button>
                 <button onclick="saveResourceData()">save resource</button>
+                <button onclick="saveSceneData()">save scene</button>
             </div>
         </div>
 
@@ -134,6 +135,16 @@
         </ul>
         <div id="tab-properties" class="tab-propertiesContent current">
             <table style="width:100%; height:87%; background-color: #353535;" style="table-layout: fixed">
+                <tr>
+                    <td>
+                        <label class="styleLabel">Tag : </label>
+                    </td>
+                    <td>
+                        <div id="tag">
+                            <input type="text" class="positionInput" id="lTag" name="lTag" value="">
+                        </div>
+                    </td>
+                </tr>
                 <tr>
                     <td>
                         <label class="styleLabel">LocalPos : </label>

@@ -52,8 +52,15 @@ var Hierarchy = cc.Node.extend({
     initHiearachy: function () {
         let self = this;
         let data = {
-            "addPosX": 0,
-            "addPosY": 0,
+            "tag": "",
+            "posX": 0,
+            "posY": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "anchorX": 0.5,
+            "anchorY": 0.5,
+            "offsetX": 0,
+            "offsetY": 0,
             "skinindex": -1,
             "index": -1,
             "id": -1,
@@ -90,6 +97,100 @@ var Hierarchy = cc.Node.extend({
         })
         $("#hierarchTree").bind("move_node.jstree", function (e, data) {
             $("#hierarchTree").jstree("open_all");
+
+            let currentID = parseInt(data.node.id);
+            let parentID = parseInt(data.node.parent);
+            if (parentID === -1) {
+                // root
+                let currentNode = getNode(currentID);
+                let currentSkin = getSkin(currentID);
+                currentNode.removeFromParent(false);
+                let parent = Tool.getChildByTag(Tool_Select_Type);
+                parent.addChild(currentNode);
+
+                let pos = {
+                    x: Tool.CX + currentSkin.posX,
+                    y: Tool.CY + currentSkin.posY,
+                }
+                setOffsetData(0, 0);
+                currentNode.setPosition(pos);
+                Tool.refreshNodeSkin();
+            } else {
+
+                selectIndex = data.node.original.index;
+                selectItem = self.itemCallbacks[data.node.original.index];
+                setSelectItem();
+                selectItem && selectItem.cb(ItemListClickType.SELECT, selectItem.index);
+
+                let currentNode = getNode(currentID);
+                let parentNode = getNode(parentID);
+                let currentSkin = getSkin(currentID);
+                let parentSkin = getSkin(parentID);
+
+                currentNode.removeFromParent(false);
+                parentNode.addChild(currentNode);
+                let pos = {
+                    x: parentNode.getContentSize().width / 2 + currentSkin.posX,
+                    y: parentNode.getContentSize().height / 2 + currentSkin.posY,
+                }
+
+                setOffsetData(
+                    parentNode.getContentSize().width / 2,//+ parentSkin.offsetX,
+                    parentNode.getContentSize().height / 2 // + parentSkin.offsetY
+                );
+                currentNode.setPosition(pos);
+
+
+                let selfNode = currentNode;
+                let isOver = false;
+                let touchStart = false;
+                let centerPointDiff = cc.p(0, 0);
+
+                cc.eventManager.addListener({
+                    event: cc.EventListener.MOUSE,
+                    onMouseUp: function (event) {
+                        if (touchStart === true) {
+                            Tool.Test(event.getCurrentTarget());
+                        }
+                    },
+                    onMouseMove: function (event) {
+                        if (!selfNode._draggable) {
+                            return;
+                        }
+
+                        let pos = event.getLocation();
+                        let centerPos = selfNode.convertToWorldSpace();
+                        let anchor = selfNode.getAnchorPoint();
+                        let prevOver = isOver;
+                        selfNode._draggableRect.x = centerPos.x;
+                        selfNode._draggableRect.y = centerPos.y;
+
+                        if (event.getButton() !== cc.EventMouse.BUTTON_LEFT) {
+                            isOver = cc.rectContainsPoint(selfNode._draggableRect, pos);
+                            touchStart = false;
+                        } else if (event.getButton() === cc.EventMouse.BUTTON_LEFT && isOver) {
+                            if (!touchStart) {
+                                touchStart = true;
+                                centerPointDiff =
+                                    cc.p(pos.x - (selfNode._draggableRect.x + selfNode._draggableRect.width * anchor.x),
+                                        pos.y - (selfNode._draggableRect.y + selfNode._draggableRect.height * anchor.y));
+                            }
+                            let nodePoint = selfNode.getParent().convertToNodeSpace(cc.p(pos.x - centerPointDiff.x, pos.y - centerPointDiff.y));
+                            event.getCurrentTarget().setPosition(nodePoint);
+                        } else {
+                            touchStart = false;
+                        }
+
+                        if (!prevOver && isOver) {
+                            cc._canvas.style.cursor = "pointer"
+                        } else if (prevOver && !isOver) {
+                            cc._canvas.style.cursor = "default"
+                        }
+                    },
+                    swallowTouches: false
+                }, currentNode);
+                Tool.refreshNodeSkin();
+            }
         })
         $("#hierarchTree").bind("dnd_stop.vakata", function (e, data) {
         })
@@ -102,6 +203,7 @@ var Hierarchy = cc.Node.extend({
 
             selectIndex = data.node.original.index;
             selectItem = self.itemCallbacks[data.node.original.index];
+            setSelectItem();
             selectItem && selectItem.cb(ItemListClickType.SELECT, selectItem.index);
         });
     },
@@ -109,8 +211,6 @@ var Hierarchy = cc.Node.extend({
     initSymbols: function () {
         let self = this;
         let data = {
-            "addPosX": 0,
-            "addPosY": 0,
             "index": -1,
             "skinindex": 0,
             "id": -1,
@@ -160,6 +260,7 @@ var Hierarchy = cc.Node.extend({
 
             selectIndex = data.node.original.index;
             selectItem = self.symbolCallbacks[data.node.original.index];
+            setSelectItem();
             selectItem && selectItem.cb(ItemListClickType.SELECT, selectItem.index);
         });
     },
@@ -188,8 +289,15 @@ var Hierarchy = cc.Node.extend({
         };
 
         let skin = {
-            "addPosX": 0,
-            "addPosY": 0,
+            "tag": "tag_" + this.index,
+            "posX": 0,
+            "posY": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "anchorX": 0.5,
+            "anchorY": 0.5,
+            "offsetX": 0,
+            "offsetY": 0,
             "skinindex": 0,
             "index": this.index,
             "uiID": this.index,
@@ -225,10 +333,10 @@ var Hierarchy = cc.Node.extend({
             },
         };
 
-        let symbolObj = {
-            "addPosX": 0,
-            "addPosY": 0,
+        let skin = {
             "skinindex": 0,
+            "posX": 0,
+            "posY": 0,
             "index": this.symbolIndex,
             "uiID": this.symbolIndex,
             "name": 0,
@@ -255,9 +363,9 @@ var Hierarchy = cc.Node.extend({
 
         treeNodeObj.id = id;
 
-        symbolObj.uiID = id;
-        symbolObj.index = index;
-        symbolObj.skinindex = skinindex;
+        skin.uiID = id;
+        skin.index = index;
+        skin.skinindex = skinindex;
 
         let anims = node.armature.animation._animationData.movementNames;
         for (let i = 0; i < anims.length; ++i) {
@@ -274,10 +382,10 @@ var Hierarchy = cc.Node.extend({
                     animationInfo.skininfo.push(skinInfo);
                 }
             }
-            symbolObj.animationinfo.push(animationInfo);
+            skin.animationinfo.push(animationInfo);
         }
 
-        SkinList[Tool_Select_Type].push(symbolObj);
+        SkinList[Tool_Select_Type].push(skin);
         $('#symbolTree').jstree(true).create_node(
             '-1',
             treeNodeObj,
@@ -290,7 +398,7 @@ var Hierarchy = cc.Node.extend({
         this.symbolCallbacks[this.symbolIndex] = {
             itemName: createName,
             cb: cb,
-            id: symbolObj.uiID,
+            id: skin.uiID,
             index: this.symbolIndex
         };
 
