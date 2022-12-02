@@ -92,6 +92,8 @@ SlotLoader.loadScene = function () {
 
         if (info.id != '#' && info.id != -1) {
             info.original.index = sceneLoadTempIndex;
+            info.state.opened = true;
+            info.state.selected = false;
             let ar = info.text;
             SlotLoader.readFile(ar + ".ExportJson");
             let id = parseInt(info.id);

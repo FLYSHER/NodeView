@@ -392,7 +392,6 @@ var MainLayer = cc.Layer.extend({
                 }
             }
             currentNode.setDraggable(false);
-
         }
     }
 });
