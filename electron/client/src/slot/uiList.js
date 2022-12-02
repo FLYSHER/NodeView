@@ -4,6 +4,17 @@ var uiList = cc.Node.extend({
     index: 0,
     ctor: function () {
         this._super(color.backgroundColor);
+
+
+        let self = this;
+        this.lTag = document.getElementById('lSlotNumber');
+        $("#lSlotNumber").keydown(function (key) {
+            if (key.keyCode === 13) {
+                SLOT_NUMBER = parseInt(this.value);
+                self.lTag.disabled = true;
+            }
+        });
+
         return true;
     },
 

@@ -67,6 +67,10 @@ SlotLoader.showSceneFile = function () {
 }
 
 SlotLoader.loadScene = function () {
+    if(loaded === false){
+        cc.log("error loadScene");
+        return;
+    }
     if (sceneLoadData.Hierarchy === undefined)
         return;
 
@@ -129,6 +133,11 @@ SlotLoader.showSymbolFile = function () {
 }
 
 SlotLoader.loadSymbol = function () {
+    if(loaded === false){
+        cc.log("error loadScene");
+        return;
+    }
+
     if (symbolLoadIndex < symbolLoadData.length) {
         if (symbolLoadIndex === 0) {
             var tab_id = "tab-symbols";
@@ -156,6 +165,10 @@ SlotLoader.loadSymbol = function () {
 }
 
 SlotLoader.showTextFile = function () {
+    if(SLOT_NUMBER === -1){
+        cc.log("error saveResourceData - slot_number -1");
+        return;
+    }
     if (loaded === true)
         return;
 

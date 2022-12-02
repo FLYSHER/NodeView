@@ -8,7 +8,7 @@ var DEFAULT_SCREEN_SIZE = {
     y: 977,
 }
 
-var SLOT_NUMBER = 187;
+var SLOT_NUMBER = -1;
 var SLOT_NAME = "WickedBoosFamily"
 var SLOT_ENTRY = "slotEntry";
 var SLOT_LOADINGIMG = "sl_loadingImg";

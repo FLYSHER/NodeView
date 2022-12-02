@@ -6,9 +6,11 @@ var MainLayer = cc.Layer.extend({
     ctor: function () {
         this._super();
 
-        let size = cc.winSize;
-        this.CX = size.width / 2;
-        this.CY = size.height / 2;
+        this.CX = DEFAULT_SCREEN_SIZE.x / 2;
+        this.CY = DEFAULT_SCREEN_SIZE.y / 2;
+        // let size = cc.winSize;
+        // this.CX = size.width / 2;
+        // this.CY = size.height / 2;
         this.ViewScale = {x: 1, y: 1};
 
         let self = this;
