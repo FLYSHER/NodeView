@@ -88,6 +88,9 @@ var MainLayer = cc.Layer.extend({
         this.addChild(lineV);
         lineV.setLocalZOrder(-1);
         this.scheduleUpdate();
+
+        this.SceneNodeIndex = 1;
+        this.SymbolNodeIndex = 1;
         return true;
     },
     update: function (dt) {
@@ -113,14 +116,6 @@ var MainLayer = cc.Layer.extend({
         Tool._properties.initRefresh();
     },
 
-    /*
-    -리소스 컨트롤 방식 (기존거 잊어버리고)
-     AR : anchor 는 만지지않는다. (Tool에서 컨트롤)
-          position으로 배치를 한다.
-
-     UI : anchor를  0.5 ,0.5 로 배치를 하고
-          position 를 AR와 같이간다.
-     */
     onLoadArmature: function (ids) {
         let children = this.getChildren();
 
@@ -159,6 +154,7 @@ var MainLayer = cc.Layer.extend({
             SlotLoader.cocosStudioURL = {};
             SlotLoader.uiTextures = {};
             SlotLoader.loadSymbol();
+            SlotLoader.loadScene();
         }, this);
     },
 
@@ -215,6 +211,7 @@ var MainLayer = cc.Layer.extend({
         SlotLoader.uiURL = {};
         SlotLoader.cocosStudioURL = {};
         SlotLoader.uiTextures = {};
+        SlotLoader.loadScene();
     },
 
     _addToJsonListMenu: function (name, node) {
@@ -251,12 +248,11 @@ var MainLayer = cc.Layer.extend({
         selectNode.setScale(skinInfo.scaleX, skinInfo.scaleY);
         //selectNode.setAnchorPoint(skinInfo.anchorX, skinInfo.anchorY);
 
-        let skinList = getSkinList(selectNode.armature.armatureData.boneDataDic);
-        if (skinList.length > 0) {
-            this.changeNodeSkin(selectNode.armature, skinList, skinInfo.skinindex, true);
-        }
-
         if (!!selectNode.armature) {
+            let skinList = getSkinList(selectNode.armature.armatureData.boneDataDic);
+            if (skinList.length > 0) {
+                this.changeNodeSkin(selectNode.armature, skinList, skinInfo.skinindex, true);
+            }
             this.refreshProperties(selectNode.armature);
         } else if (!!selectNode.ui) {
             this.refreshProperties(selectNode.ui);
@@ -362,6 +358,42 @@ var MainLayer = cc.Layer.extend({
 
     setSlotResource: function (name) {
         this._resourceList.add(name);
+    },
+
+    setSceneLoaded: function () {
+        // this.SceneNodeIndex = 1;
+        // this.SymbolNodeIndex = 1;
+
+        for (let key in SkinList[Tool_Select_Type]) {
+            let currentSkin = SkinList[Tool_Select_Type][key];
+            let currentNode = NodeList[Tool_Select_Type][key];
+            let uiID = currentSkin.uiID;
+
+            let info = sceneLoadData.Hierarchy[uiID.toString()];
+            if (info != undefined) {
+                let parentID = parseInt(info.parent);
+                if (parentID != -1) {
+                    let parentNode = getNode(parentID);
+                    currentNode.removeFromParent(false);
+                    parentNode.addChild(currentNode);
+
+                    let pos = {
+                        x: parentNode.getContentSize().width / 2 + currentSkin.posX,
+                        y: parentNode.getContentSize().height / 2 + currentSkin.posY,
+                    }
+                    currentNode.setPosition(pos);
+                } else {
+
+                    let pos = {
+                        x: currentSkin.posX,
+                        y: currentSkin.posY,
+                    }
+                    currentNode.setPosition(pos);
+                }
+            }
+            currentNode.setDraggable(false);
+
+        }
     }
 });
 

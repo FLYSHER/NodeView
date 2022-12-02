@@ -9,6 +9,7 @@ var DraggableNode = cc.Node.extend({
         let centerPointDiff = cc.p(0, 0);
         this.selectMark = null;
         this.setDraggable(false);
+        this.NodeIndex = -1;
 
         cc.eventManager.addListener({
             event: cc.EventListener.MOUSE,

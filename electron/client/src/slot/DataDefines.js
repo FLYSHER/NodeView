@@ -212,11 +212,6 @@ function saveResourceData() {
 }
 
 function saveSceneData() {
-    // let j = JSON.parse('{"1":{"id":"1","text":"187SymEachWinAR","icon":true,"parent":"-1","parents":["-1","#"],"children":["2"],"children_d":["2"],"data":null,"state":{"loaded":true,"opened":true,"selected":false,"disabled":false},"li_attr":{"id":"1"},"a_attr":{"href":"#","id":"1_anchor"},"original":{"id":1,"index":1,"text":"187SymEachWinAR","state":{"opened":true}}},"2":{"id":"2","text":"187SymJackpotAR","icon":true,"parent":"1","parents":["1","-1","#"],"children":[],"children_d":[],"data":null,"state":{"loaded":true,"opened":false,"selected":false,"disabled":false},"li_attr":{"id":"2"},"a_attr":{"href":"#","id":"2_anchor"},"original":{"id":2,"index":2,"text":"187SymJackpotAR","state":{"opened":true}}},"#":{"id":"#","parent":null,"parents":[],"children":["-1"],"children_d":["-1","1","2"],"state":{"loaded":true,"failed":false,"loading":false}},"-1":{"id":"-1","text":"root","icon":true,"parent":"#","parents":["#"],"children":["1"],"children_d":["1","2"],"data":null,"state":{"loaded":true,"opened":true,"selected":false,"disabled":false},"li_attr":{"id":"-1"},"a_attr":{"href":"#","id":"-1_anchor"},"original":{"tag":"","posX":0,"posY":0,"scaleX":1,"scaleY":1,"anchorX":0.5,"anchorY":0.5,"offsetX":0,"offsetY":0,"skinindex":-1,"index":-1,"id":-1,"text":"root"}}}');
-    // $("#hierarchTree").jstree(true)._model.data = j;
-    // Tool._hierarchy.index = 100;
-
-
     console.save = function () {
         let filename = "Scene" + ".js";
         let data = '';

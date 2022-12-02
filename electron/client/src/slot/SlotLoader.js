@@ -5,12 +5,19 @@ var preview = null;///= document.getElementById('file_list');
 //loader.addEventListener('change', SlotLoader.showTextFile);
 
 var symbolLoader = null;//= document.getElementById('DefinesLoad');
+var sceneLoader = null;
 //symbolLoader.addEventListener('change', SlotLoader.showSymbolFile);
 var symbolLoadData = "";
 var symbolLoadIndex = 0;
 
+var sceneLoadData = "";
+var sceneLoadIndex = -1;         // 실제 마지막 사용한 인덱스
+var sceneLoadCurrentID = -1;     // 각 ar, ui 로드시 id
+var sceneLoadTempIndex = 0;      // 로드할때만 임시로 사용할 인덱스
+
 var loaded = false;
 var symbolLoaded = false;
+var sceneLoaded = false;
 
 
 SlotLoader.loadedFileNames = [];
@@ -34,7 +41,70 @@ SlotLoader.init = function () {
     loader.addEventListener('change', SlotLoader.showTextFile);
 
     symbolLoader = document.getElementById('DefinesLoad');
-    symbolLoader.addEventListener('change', SlotLoader.showSymbolFile);
+    symbolLoader.addEventListener('change', SlotLoader.showSymbolFile)
+
+    sceneLoader = document.getElementById('SceneLoad');
+    sceneLoader.addEventListener('change', SlotLoader.showSceneFile);
+}
+
+SlotLoader.showSceneFile = function () {
+    if (sceneLoaded === true)
+        return;
+
+    sceneLoaded = true;
+
+    const selectedFiles = sceneLoader.files;
+    let reader = new FileReader();
+    reader.readAsText(selectedFiles[0]);
+    reader.onload = (function (f) {
+        return function (e) {
+            let fileContents = e.target.result;
+            sceneLoadData = JSON.parse(fileContents).Scene;
+            Tool.initUI(false);
+            SlotLoader.loadScene();
+        };
+    })(selectedFiles[0]);
+}
+
+SlotLoader.loadScene = function () {
+    if (sceneLoadData.Hierarchy === undefined)
+        return;
+
+    let hierarchyArr = Object.values(sceneLoadData.Hierarchy);
+    if (sceneLoadTempIndex < hierarchyArr.length) {
+        let info = hierarchyArr[sceneLoadTempIndex];
+        if (sceneLoadTempIndex === 0) {
+            var tab_id = "tab-hierarchy";
+            $('ul.hierarchyTabs li').removeClass('current');
+            $('.tab-hierarchyContent').removeClass('current');
+
+            $("#" + tab_id).addClass('current');
+            if (tab_id === 'tab-symbols') {
+                Tool_Select_Type = type_tab.type_symbol;
+            } else if (tab_id === 'tab-hierarchy') {
+                Tool_Select_Type = type_tab.type_hierarchy;
+            }
+            // 선택된 하이라키, 심볼 노드 인덱스 초기화
+            selectIndex = -1;
+            selectItem = null;
+        }
+        sceneLoadTempIndex++;
+
+        if (info.id != '#' && info.id != -1) {
+            info.original.index = sceneLoadTempIndex;
+            let ar = info.text;
+            SlotLoader.readFile(ar + ".ExportJson");
+            let id = parseInt(info.id);
+            sceneLoadIndex = Math.max(sceneLoadIndex, id);
+            sceneLoadCurrentID = id;
+        } else {
+            this.loadScene();
+        }
+    } else {
+        Tool._hierarchy.setHierarchy();
+        Tool.setSceneLoaded();
+        sceneLoadData = "";
+    }
 }
 
 SlotLoader.showSymbolFile = function () {
@@ -50,6 +120,7 @@ SlotLoader.showSymbolFile = function () {
         return function (e) {
             let fileContents = e.target.result;
             symbolLoadData = JSON.parse(fileContents).SymbolInfo.SymbolProperty;
+            Tool.initUI(false);
             SlotLoader.loadSymbol();
         };
     })(selectedFiles[0]);
@@ -57,7 +128,6 @@ SlotLoader.showSymbolFile = function () {
 
 SlotLoader.loadSymbol = function () {
     if (symbolLoadIndex < symbolLoadData.length) {
-
         if (symbolLoadIndex === 0) {
             var tab_id = "tab-symbols";
             $('ul.hierarchyTabs li').removeClass('current');
@@ -72,13 +142,14 @@ SlotLoader.loadSymbol = function () {
             // 선택된 하이라키, 심볼 노드 인덱스 초기화
             selectIndex = -1;
             selectItem = null;
-            Tool.initUI(false);
         }
 
-        let info = symbolLoadData[symbolLoadIndex]
+        let info = symbolLoadData[symbolLoadIndex];
         let ar = info.text;
         SlotLoader.readFile(ar + ".ExportJson");
         symbolLoadIndex++;
+    } else {
+        symbolLoadData = "";
     }
 }
 
@@ -96,7 +167,7 @@ SlotLoader.showTextFile = function () {
         //summary.textContent = file.webkitRelativePath;
 
         if (file.name.includes(SLOT_NUMBER)) {
-            if(file.name.includes(SLOT_ENTRY) || file.name.includes(SLOT_LOADINGIMG))
+            if (file.name.includes(SLOT_ENTRY) || file.name.includes(SLOT_LOADINGIMG))
                 continue;
 
             let str = file.name.split('.');

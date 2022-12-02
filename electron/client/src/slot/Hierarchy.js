@@ -4,8 +4,6 @@ var ItemListClickType = {
 };
 
 var Hierarchy = cc.Node.extend({
-    index: 1,
-    symbolIndex: 1,
     ctor: function () {
         this._super(color.backgroundColor);
 
@@ -78,7 +76,7 @@ var Hierarchy = cc.Node.extend({
             "state": {"key": "demo2"},
             "plugins": ["dnd", "state"]
         });
-        $("#hierarchTree").bind("refresh.jstree", function (e, data) {
+        $("#hierarchTree").bind("model.jstree", function (e, data) {
         })
         $("#hierarchTree").bind("load_node.jstree", function (e, data) {
         })
@@ -280,8 +278,8 @@ var Hierarchy = cc.Node.extend({
 
     addHierarchy: function (itemName, node, cb) {
         let treeNodeObj = {
-            "id": this.index,
-            "index": this.index,
+            "id": Tool.SceneNodeIndex,
+            "index": Tool.SceneNodeIndex,
             "text": itemName,
             "state": {
                 "opened": true
@@ -289,7 +287,7 @@ var Hierarchy = cc.Node.extend({
         };
 
         let skin = {
-            "tag": "tag_" + this.index,
+            "tag": "tag_" + Tool.SceneNodeIndex,
             "posX": 0,
             "posY": 0,
             "scaleX": 1,
@@ -299,34 +297,47 @@ var Hierarchy = cc.Node.extend({
             "offsetX": 0,
             "offsetY": 0,
             "skinindex": 0,
-            "index": this.index,
-            "uiID": this.index,
+            "index": Tool.SceneNodeIndex,
+            "uiID": Tool.SceneNodeIndex,
             "text": itemName,
         };
 
+
+        if (sceneLoadData.UI != undefined && sceneLoadData.UI.length > 0) {
+            let uiIndex = sceneLoadCurrentID;
+            for (let key in sceneLoadData.UI) {
+                let info = sceneLoadData.UI[key];
+                if (info.uiID === uiIndex) {
+                    skin = info;
+                    skin.index = Tool.SceneNodeIndex;
+                }
+            }
+        }
+
+        node.setTag(skin.tag);
         SkinList[Tool_Select_Type].push(skin);
         $('#hierarchTree').jstree(true).create_node(
             -1,
             treeNodeObj,
             "last",
             function (id) {
-                $('#hierarchTree').jstree("toggle_node", id);
-            }.bind(this, this.index)
+                // $('#hierarchTree').jstree("toggle_node", id);
+            }.bind(this, Tool.SceneNodeIndex)
         );
-        this.itemCallbacks[this.index] = {
+        this.itemCallbacks[Tool.SceneNodeIndex] = {
             itemName: itemName,
             cb: cb,
-            index: this.index
+            index: Tool.SceneNodeIndex
         };
 
-        this.index++;
+        Tool.SceneNodeIndex++;
     },
 
     addSymbols: function (itemName, node, cb) {
         let createName = itemName;
         let treeNodeObj = {
-            "id": this.index,
-            "index": this.symbolIndex,
+            "id": Tool.SceneNodeIndex,
+            "index": Tool.SymbolNodeIndex,
             "text": createName,
             "state": {
                 "opened": true
@@ -337,8 +348,8 @@ var Hierarchy = cc.Node.extend({
             "skinindex": 0,
             "posX": 0,
             "posY": 0,
-            "index": this.symbolIndex,
-            "uiID": this.symbolIndex,
+            "index": Tool.SymbolNodeIndex,
+            "uiID": Tool.SymbolNodeIndex,
             "name": 0,
             "text": createName,
             "type": 0,
@@ -349,8 +360,8 @@ var Hierarchy = cc.Node.extend({
         }
 
         let skinindex = 0;
-        let index = this.symbolIndex;
-        let id = this.symbolIndex;
+        let index = Tool.SymbolNodeIndex;
+        let id = Tool.SymbolNodeIndex;
         if (symbolLoadData.length) {
             let index = symbolLoadIndex - 1;
             id = symbolLoadData[index].id;
@@ -395,14 +406,14 @@ var Hierarchy = cc.Node.extend({
             }
         );
 
-        this.symbolCallbacks[this.symbolIndex] = {
+        this.symbolCallbacks[Tool.SymbolNodeIndex] = {
             itemName: createName,
             cb: cb,
             id: skin.uiID,
-            index: this.symbolIndex
+            index: Tool.SymbolNodeIndex
         };
 
-        this.symbolIndex++;
+        Tool.SymbolNodeIndex++;
     },
 
     deselectAll: function () {
@@ -444,4 +455,15 @@ var Hierarchy = cc.Node.extend({
             selectItem = null;
         }
     },
+
+    setHierarchy: function () {
+        // $("#hierarchTree").jstree(true)._model.data = [];
+        // $("#hierarchTree").jstree(true).settings.core.data = [];
+        // $("#hierarchTree").jstree(true).refresh();
+
+        $("#hierarchTree").jstree(true)._model.data = sceneLoadData.Hierarchy;
+        $("#hierarchTree").jstree(true).show_all();
+        Tool.SceneNodeIndex = sceneLoadIndex;
+        Tool.SceneNodeIndex++;
+    }
 });
