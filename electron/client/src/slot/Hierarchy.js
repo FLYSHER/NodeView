@@ -300,6 +300,7 @@ var Hierarchy = cc.Node.extend({
             "index": Tool.SceneNodeIndex,
             "uiID": Tool.SceneNodeIndex,
             "text": itemName,
+            "animationinfo": [],
         };
 
 
@@ -313,6 +314,26 @@ var Hierarchy = cc.Node.extend({
                 }
             }
         }
+
+        let skinindex = 0;
+        let anims = node.armature.animation._animationData.movementNames;
+        for (let i = 0; i < anims.length; ++i) {
+            let animationInfo = {
+                "trackname": anims[i],
+                "skininfo": [],
+            }
+            for (let key in node.armature.armatureData.boneDataDic) {
+                if (key[0] === '[') {
+                    let skinInfo = {
+                        "bonename": key,
+                        "skinindex": skinindex,
+                    }
+                    animationInfo.skininfo.push(skinInfo);
+                }
+            }
+            skin.animationinfo.push(animationInfo);
+        }
+
 
         node.setTag(skin.tag);
         SkinList[Tool_Select_Type].push(skin);
@@ -344,10 +365,17 @@ var Hierarchy = cc.Node.extend({
             },
         };
 
+
         let skin = {
-            "skinindex": 0,
             "posX": 0,
             "posY": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "anchorX": 0.5,
+            "anchorY": 0.5,
+            "offsetX": 0,
+            "offsetY": 0,
+            "skinindex": 0,
             "index": Tool.SymbolNodeIndex,
             "uiID": Tool.SymbolNodeIndex,
             "name": 0,

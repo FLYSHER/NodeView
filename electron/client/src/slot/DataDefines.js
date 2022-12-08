@@ -77,6 +77,8 @@ function setSkinData(value) {
             result.skinindex = value;
         }
     }
+
+    selectSkin.skinindex = value;
 }
 
 function getSkinData() {
