@@ -119,6 +119,10 @@ canvas {
 .positionInput {
     width: 50px;
 }
+.slotNumberInput {
+    width: 30px;
+    height: 30px;
+}
 
 .side_hr { width:5px; height:100%; position: fixed; margin-left: 300px; z-index: 2; background-color:#888888; }
 .inspector_hr { width:5px; height:100%; position: fixed; margin-left: 1600px; z-index: 2; background-color:#888888; }
@@ -243,6 +247,41 @@ ul.hierarchyTabs li{
 }
 
 ul.hierarchyTabs li.current{
+    background: #555555;
+    color: #222;
+    border-top: 1px solid #A6A6A6;
+    border-right: 1px solid #A6A6A6;
+    border-left: 1px solid #A6A6A6;
+    border-bottom: 1px solid #555555;
+    border-radius: 5px 5px 0px 0px / 5px 5px 0px 0px;
+}
+
+ul.tabsResources{
+    margin: 0px;
+    padding: 0px;
+    list-style: none;
+}
+ul.tabsResources li{
+    z-index: 1;
+    width:40px;
+    background: none;
+    color: #222;
+    display: inline-block;
+    padding: 5px 1px;
+    float: left;
+}
+ul.tabsResources li2{
+    z-index: 1;
+    width:70px;
+    background: none;
+    color: #222;
+    display: inline-block;
+    padding: 5px 1px;
+    float: left;
+}
+
+ul.tabsResources li.current{
+    width:100px;
     background: #555555;
     color: #222;
     border-top: 1px solid #A6A6A6;
@@ -381,8 +420,9 @@ ul.tabs li.current{
 }
 
 .filebox label {
+    width: 50px;
     display: inline-block;
-    padding: .5em .75em;
+    padding: .5em .5em;
     color: #fff;
     font-size: inherit;
     line-height: normal;
@@ -413,4 +453,10 @@ ul.tabs li.current{
     overflow: hidden;
     clip: rect(0, 0, 0, 0);
     border: 0;
+}
+
+.iframe {
+    zoom: 0.99;
+    -moz-transform: scale(0.99);
+    -webkit-transform: scale(0.99);
 }

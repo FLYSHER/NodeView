@@ -13,6 +13,7 @@ var MainLayer = cc.Layer.extend({
         // this.CY = size.height / 2;
         this.ViewScale = {x: 1, y: 1};
 
+
         let self = this;
         this._loadArmatureListener = cc.eventManager.addCustomListener('loadArmature', function (event) {
             self.onLoadArmature(JSON.parse(event.getUserData()));

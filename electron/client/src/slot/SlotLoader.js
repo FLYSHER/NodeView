@@ -37,6 +37,10 @@ var slotResourceData = {};
 
 SlotLoader.init = function () {
     loader = document.getElementById('SlotLoader');
+
+    let resourceLoadDiv = document.getElementById('resourceLoadDiv');
+    resourceLoadDiv.style.display = "none";
+
     preview = document.getElementById('file_list');
     loader.addEventListener('change', SlotLoader.showTextFile);
 
@@ -45,9 +49,25 @@ SlotLoader.init = function () {
 
     sceneLoader = document.getElementById('SceneLoad');
     sceneLoader.addEventListener('change', SlotLoader.showSceneFile);
+
+
+    let self = this;
+    this.lTag = document.getElementById('lSlotNumber');
+    $("#lSlotNumber").keydown(function (key) {
+        if (key.keyCode === 13) {
+            SLOT_NUMBER = parseInt(this.value);
+            self.lTag.disabled = true;
+            document.getElementById('SlotLoader').click();
+        }
+    });
 }
 
 SlotLoader.showSceneFile = function () {
+    if (SLOT_NUMBER === -1) {
+        cc.log("error saveResourceData - slot_number -1");
+        return;
+    }
+
     if (sceneLoaded === true)
         return;
 
@@ -67,7 +87,7 @@ SlotLoader.showSceneFile = function () {
 }
 
 SlotLoader.loadScene = function () {
-    if(loaded === false){
+    if (loaded === false) {
         cc.log("error loadScene");
         return;
     }
@@ -114,6 +134,11 @@ SlotLoader.loadScene = function () {
 }
 
 SlotLoader.showSymbolFile = function () {
+    if (SLOT_NUMBER === -1) {
+        cc.log("error saveResourceData - slot_number -1");
+        return;
+    }
+
     if (symbolLoaded === true)
         return;
 
@@ -133,7 +158,7 @@ SlotLoader.showSymbolFile = function () {
 }
 
 SlotLoader.loadSymbol = function () {
-    if(loaded === false){
+    if (loaded === false) {
         cc.log("error loadScene");
         return;
     }
@@ -165,7 +190,7 @@ SlotLoader.loadSymbol = function () {
 }
 
 SlotLoader.showTextFile = function () {
-    if(SLOT_NUMBER === -1){
+    if (SLOT_NUMBER === -1) {
         cc.log("error saveResourceData - slot_number -1");
         return;
     }

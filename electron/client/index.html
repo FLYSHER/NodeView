@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html>
 <head>
-
     <link href="style.css" rel="stylesheet" type="text/css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
     <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
@@ -45,23 +44,29 @@
 </head>
 <body>
 
+<div id="playDiv" class="iframe">
+<!--    <iframe width=1300, height="977" src="https://localhost:8000" id="gameView" aligh="middle"-->
+<!--            stype="position:relative;"></iframe>-->
+</div>
 <!-- 사이드 메뉴 -->
 <div id="sidenav" class="sidenav">
     <!-- File -->
     <div id="resourceContainer" class="fileContainer">
-        <ul class="tabs">
+        <ul class="tabsResources">
             <li class="tab-link current">
                 <!-- File Label 및 가운데 정렬 -->
                 <div class="labelAlign">
                     <label id="slotResource" class="styleLabel">Resources</label>
                 </div>
 
-                <div id="SlotNumber">
-                    <input type="text" class="positionInput" id="lSlotNumber" name="lSlotNumber" value="">
-                </div>
             </li>
             <li>
-                <div class="filebox">
+                <div id="SlotNumber">
+                    <input type="text" class="slotNumberInput" id="lSlotNumber" name="lSlotNumber" value="">
+                </div>
+            </li>
+            <li2>
+                <div id="resourceLoadDiv" class="filebox">
                     <label for='SlotLoader'>load</label>
                     <input type='file' id="SlotLoader" webkitdirectory/>
                     <script src='src/slot/SlotLoader.js'></script>
@@ -74,12 +79,14 @@
                     <input type='file' accept=".js" id="DefinesLoad"/>
                     <script src='src/slot/SlotLoader.js'></script>
                 </div>
+            </li2>
+            <li2>
                 <div class="filebox">
                     <label for='SceneLoad'>scene</label>
                     <input type='file' accept=".js" id="SceneLoad"/>
                     <script src='src/slot/SlotLoader.js'></script>
                 </div>
-            </li>
+            </li2>
         </ul>
         <div id="tab-0" class="tab-fileContent current">
             <!-- File Tree -->
@@ -125,6 +132,8 @@
                 <button onclick="saveSymbolData()">save symbol</button>
                 <button onclick="saveResourceData()">save resource</button>
                 <button onclick="saveSceneData()">save scene</button>
+                <button onclick="playScene()">play</button>
+                <button onclick="endScene()">end</button>
             </div>
         </div>
 

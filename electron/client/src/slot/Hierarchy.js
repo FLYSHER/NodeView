@@ -315,23 +315,25 @@ var Hierarchy = cc.Node.extend({
             }
         }
 
-        let skinindex = 0;
-        let anims = node.armature.animation._animationData.movementNames;
-        for (let i = 0; i < anims.length; ++i) {
-            let animationInfo = {
-                "trackname": anims[i],
-                "skininfo": [],
-            }
-            for (let key in node.armature.armatureData.boneDataDic) {
-                if (key[0] === '[') {
-                    let skinInfo = {
-                        "bonename": key,
-                        "skinindex": skinindex,
-                    }
-                    animationInfo.skininfo.push(skinInfo);
+        if(!!node.armature){
+            let skinindex = 0;
+            let anims = node.armature.animation._animationData.movementNames;
+            for (let i = 0; i < anims.length; ++i) {
+                let animationInfo = {
+                    "trackname": anims[i],
+                    "skininfo": [],
                 }
+                for (let key in node.armature.armatureData.boneDataDic) {
+                    if (key[0] === '[') {
+                        let skinInfo = {
+                            "bonename": key,
+                            "skinindex": skinindex,
+                        }
+                        animationInfo.skininfo.push(skinInfo);
+                    }
+                }
+                skin.animationinfo.push(animationInfo);
             }
-            skin.animationinfo.push(animationInfo);
         }
 
 

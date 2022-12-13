@@ -304,3 +304,16 @@ function saveSymbolData() {
     }
 }
 
+function playScene (){
+    let Iframe = document.createElement("iframe");
+    Iframe.setAttribute("id","gameView");
+    Iframe.setAttribute("width","1300px");
+    Iframe.setAttribute("height","977");
+    Iframe.src = "https://localhost:8000";
+    document.getElementById("playdddDiv").appendChild(Iframe);
+}
+
+function endScene(){
+    $('#gameView').remove();
+}
+
