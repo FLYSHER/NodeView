@@ -215,7 +215,7 @@ function saveResourceData() {
 
 function saveSceneData() {
     console.save = function () {
-        let filename = "Scene" + ".js";
+        let filename = "Slot200" + ".json";
         let data = '';
 
         const parseSkinData = JSON.parse(JSON.stringify(SkinList[Tool_Select_Type]));
@@ -321,4 +321,7 @@ function playScene() {
 function endScene(){
     $('#gameView').remove();
 }
+
+
+
 
