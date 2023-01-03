@@ -1,4 +1,4 @@
-var UIScrollTreeViewCtrl = cc.Node.extend({
+var uiTreeView = cc.Node.extend({
     _scrolling: false,
     _selectNode: [],
     _masterNode: null,

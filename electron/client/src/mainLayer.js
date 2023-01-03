@@ -23,13 +23,13 @@ var MainLayer = cc.Layer.extend({
             self.onLoadUI(event.getUserData());
         });
 
-        this._animationList = new UIListViewTest();
+        this._animationList = new uiAnimationTreeView();
         this._animationList.setContentSize(cc.size(150, 200));
         this._animationList.setVisible(false);
         this.addChild(this._animationList, -128);
         this._animationList.setLocalZOrder(100000);
 
-        this._uiList = new UIScrollTreeViewCtrl(this.refreshProperties.bind(this));
+        this._uiList = new uiTreeView(this.refreshProperties.bind(this));
         this._uiList.setContentSize(cc.size(150, 200));
         this._uiList.setVisible(false);
         this.addChild(this._uiList, -128);

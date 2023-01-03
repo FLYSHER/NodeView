@@ -4,7 +4,7 @@ var color = {
     seletTextColor: cc.color(255, 0, 0)
 };
 
-var UIListViewTest = cc.Node.extend({
+var uiAnimationTreeView = cc.Node.extend({
     totalListItemCount: 100,
     totalListViewHeight: 0,
     listItemHeight: 50,
