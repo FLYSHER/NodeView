@@ -74,18 +74,14 @@
                         <p></p>
                     </div>
                 </div>
-                <div class="filebox">
-                    <label for='DefinesLoad'>symbol</label>
-                    <input type='file' accept=".js" id="DefinesLoad"/>
+
+                <div id="resourceLoadDiv2" class="filebox">
+                    <label for='ResourceLoad'>res</label>
+                    <input type='file' id="ResourceLoad" webkitdirectory/>
                     <script src='src/slot/SlotLoader.js'></script>
                 </div>
             </li2>
             <li2>
-                <div class="filebox">
-                    <label for='SceneLoad'>scene</label>
-                    <input type='file' accept=".json" id="SceneLoad"/>
-                    <script src='src/slot/SlotLoader.js'></script>
-                </div>
             </li2>
         </ul>
         <div id="tab-0" class="tab-fileContent current">
@@ -126,7 +122,6 @@
 
     <!-- Save -->
     <div id="saveContainer" class="saveContainer">
-
         <div id="tab-save" class="tab-saveContent current">
             <div class = "saveWidget">
                 <button onclick="saveSymbolData()">save symbol</button>
@@ -134,6 +129,16 @@
                 <button onclick="saveSceneData()">save scene</button>
                 <button onclick="playScene()">play</button>
                 <button onclick="endScene()">end</button>
+                <div class="filebox">
+                    <label for='DefinesLoad'>symbol</label>
+                    <input type='file' accept=".js" id="DefinesLoad"/>
+                    <script src='src/slot/SlotLoader.js'></script>
+                </div>
+                <div class="filebox">
+                    <label for='SceneLoad'>scene</label>
+                    <input type='file' accept=".json" id="SceneLoad"/>
+                    <script src='src/slot/SlotLoader.js'></script>
+                </div>
             </div>
         </div>
 

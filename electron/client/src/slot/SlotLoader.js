@@ -1,11 +1,11 @@
 var SlotLoader = SlotLoader || {};
 
-var loader = null;//= document.getElementById('SlotLoader');
-var preview = null;///= document.getElementById('file_list');
-//loader.addEventListener('change', SlotLoader.showTextFile);
+var loader = null;
+var preview = null;
 
 var symbolLoader = null;//= document.getElementById('DefinesLoad');
 var sceneLoader = null;
+var resourceLoader = null;
 //symbolLoader.addEventListener('change', SlotLoader.showSymbolFile);
 var symbolLoadData = "";
 var symbolLoadIndex = 0;
@@ -15,6 +15,7 @@ var sceneLoadIndex = -1;         // 실제 마지막 사용한 인덱스
 var sceneLoadCurrentID = -1;     // 각 ar, ui 로드시 id
 var sceneLoadTempIndex = 0;      // 로드할때만 임시로 사용할 인덱스
 
+var resourceLoaded = false;
 var loaded = false;
 var symbolLoaded = false;
 var sceneLoaded = false;
@@ -36,12 +37,11 @@ SlotLoader.currentSelectResourceName = "";
 var slotResourceData = {};
 
 SlotLoader.init = function () {
-    loader = document.getElementById('SlotLoader');
-
     let resourceLoadDiv = document.getElementById('resourceLoadDiv');
     resourceLoadDiv.style.display = "none";
 
     preview = document.getElementById('file_list');
+    loader = document.getElementById('SlotLoader');
     loader.addEventListener('change', SlotLoader.showTextFile);
 
     symbolLoader = document.getElementById('DefinesLoad');
@@ -50,13 +50,15 @@ SlotLoader.init = function () {
     sceneLoader = document.getElementById('SceneLoad');
     sceneLoader.addEventListener('change', SlotLoader.showSceneFile);
 
+    resourceLoader = document.getElementById('ResourceLoad');
+    resourceLoader.addEventListener('change', SlotLoader.showResourceFile);
 
-    let self = this;
-    this.lTag = document.getElementById('lSlotNumber');
+
     $("#lSlotNumber").keydown(function (key) {
         if (key.keyCode === 13) {
             SLOT_NUMBER = parseInt(this.value);
-            self.lTag.disabled = true;
+            let lTag = document.getElementById('lSlotNumber');
+            lTag.disabled = true;
             document.getElementById('SlotLoader').click();
         }
     });
@@ -84,6 +86,20 @@ SlotLoader.showSceneFile = function () {
             SlotLoader.loadScene();
         };
     })(selectedFiles[0]);
+}
+
+SlotLoader.showResourceFile = function () {
+    resourceLoaded = true;
+
+    const selectedFiles = resourceLoader.files;
+    for (const file of selectedFiles) {
+        let str = file.name.split('.');
+        if (str.length > 1) {
+            slotResourceData[file.name] = file;
+        }
+    }
+
+    resourceLoader.disabled = 'disabled';
 }
 
 SlotLoader.loadScene = function () {
@@ -191,9 +207,17 @@ SlotLoader.loadSymbol = function () {
 
 SlotLoader.showTextFile = function () {
     if (SLOT_NUMBER === -1) {
-        cc.log("error saveResourceData - slot_number -1");
+        cc.log("error showTextFile - slot_number -1");
         return;
     }
+
+    if(resourceLoaded === false){
+        cc.log("error no resource");
+        let lTag = document.getElementById('lSlotNumber');
+        lTag.disabled = false;
+        return;
+    }
+
     if (loaded === true)
         return;
 

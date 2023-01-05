@@ -315,7 +315,7 @@ var Hierarchy = cc.Node.extend({
             }
         }
 
-        if(!!node.armature){
+        if (!!node.armature) {
             let skinindex = 0;
             let anims = node.armature.animation._animationData.movementNames;
             for (let i = 0; i < anims.length; ++i) {
@@ -344,7 +344,6 @@ var Hierarchy = cc.Node.extend({
             treeNodeObj,
             "last",
             function (id) {
-                // $('#hierarchTree').jstree("toggle_node", id);
             }.bind(this, Tool.SceneNodeIndex)
         );
         this.itemCallbacks[Tool.SceneNodeIndex] = {
@@ -352,6 +351,14 @@ var Hierarchy = cc.Node.extend({
             cb: cb,
             index: Tool.SceneNodeIndex
         };
+
+
+        // 추가되는 노드 선택되도록 작업
+        selectIndex = Tool.SceneNodeIndex;
+        selectItem = this.itemCallbacks[Tool.SceneNodeIndex];
+        setSelectItem();
+        selectItem && selectItem.cb(ItemListClickType.SELECT, selectItem.index);
+
 
         Tool.SceneNodeIndex++;
     },
@@ -432,7 +439,6 @@ var Hierarchy = cc.Node.extend({
             treeNodeObj,
             "last",
             function () {
-                //$('#symbolTree').jstree("open_node", $('#symbolTree').jstree("get_selected"));
             }
         );
 
