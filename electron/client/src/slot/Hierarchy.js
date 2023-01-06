@@ -74,7 +74,16 @@ var Hierarchy = cc.Node.extend({
                 "check_callback": true
             },
             "state": {"key": "demo2"},
-            "plugins": ["dnd", "state"]
+            "plugins": ["dnd", "state"],
+            "dnd": {
+                "is_draggable": function (node) {
+                    let id = parseInt(node[0].id);
+                    if (id < 1000)          // UI의 하위 노드는 드래그 안되도록 처리
+                        return true;
+
+                    return false;
+                }
+            },
         });
         $("#hierarchTree").bind("model.jstree", function (e, data) {
         })
@@ -97,6 +106,11 @@ var Hierarchy = cc.Node.extend({
             $("#hierarchTree").jstree("open_all");
 
             let currentID = parseInt(data.node.id);
+
+            if (currentID >= 1000) {
+                return;
+            }
+
             let parentID = parseInt(data.node.parent);
             if (parentID === -1) {
                 // root
@@ -315,6 +329,7 @@ var Hierarchy = cc.Node.extend({
             }
         }
 
+        let uiChilds = null;
         if (!!node.armature) {
             let skinindex = 0;
             let anims = node.armature.animation._animationData.movementNames;
@@ -334,6 +349,8 @@ var Hierarchy = cc.Node.extend({
                 }
                 skin.animationinfo.push(animationInfo);
             }
+        } else if (!!node.ui) {
+            uiChilds = Tool.createUIChildList(node.ui);
         }
 
 
@@ -352,13 +369,19 @@ var Hierarchy = cc.Node.extend({
             index: Tool.SceneNodeIndex
         };
 
-
         // 추가되는 노드 선택되도록 작업
         selectIndex = Tool.SceneNodeIndex;
         selectItem = this.itemCallbacks[Tool.SceneNodeIndex];
         setSelectItem();
         selectItem && selectItem.cb(ItemListClickType.SELECT, selectItem.index);
 
+
+        // ui child 추가
+        if (uiChilds !== null) {
+            let parentID = Tool.SceneNodeIndex;//.toString();
+            this.addUIChildList(node.ui, parentID, uiChilds);
+            $("#hierarchTree").jstree(true).show_all();
+        }
 
         Tool.SceneNodeIndex++;
     },
@@ -501,5 +524,53 @@ var Hierarchy = cc.Node.extend({
         $("#hierarchTree").jstree(true).show_all();
         Tool.SceneNodeIndex = sceneLoadIndex;
         Tool.SceneNodeIndex++;
-    }
+    },
+
+    addUIChildList: function (ui, parentID, uiChilds) {
+        for (let i = 0; i < uiChilds.length; ++i) {
+            let child = uiChilds[i];
+            let childID = parentID + i + 1000;
+            let treeNodeObj = {
+                "id": childID,
+                "index": childID,
+                "text": child.info.name,
+                "state": {
+                    "opened": true
+                },
+            };
+
+            let childNode = ccui.helper.seekWidgetByName(ui, child.info.name);
+            NodeList[Tool_Select_Type].push(childNode);
+
+            let skin = {
+                "tag": "tag_" + childID,
+                "posX": 0,
+                "posY": 0,
+                "scaleX": 1,
+                "scaleY": 1,
+                "anchorX": 0.5,
+                "anchorY": 0.5,
+                "offsetX": 0,
+                "offsetY": 0,
+                "skinindex": 0,
+                "index": childID,
+                "uiID": childID,
+                "text": child.info.name,
+                "animationinfo": [],
+            };
+            SkinList[Tool_Select_Type].push(skin);
+
+            $('#hierarchTree').jstree(true).create_node(
+                parentID,
+                treeNodeObj,
+                "last",
+                function (id) {
+                }.bind(this, Tool.SceneNodeIndex)
+            );
+
+            if (child.childList.length > 0) {
+                this.addUIChildList(ui, childID, child.childList);
+            }
+        }
+    },
 });

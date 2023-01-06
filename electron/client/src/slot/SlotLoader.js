@@ -135,10 +135,16 @@ SlotLoader.loadScene = function () {
             info.state.opened = true;
             info.state.selected = false;
             let ar = info.text;
-            SlotLoader.readFile(ar + ".ExportJson");
+            let type = ar.substr(ar.length - 2, 2);
             let id = parseInt(info.id);
             sceneLoadIndex = Math.max(sceneLoadIndex, id);
             sceneLoadCurrentID = id;
+
+            if (type === 'UI' || type === 'AR') {
+                SlotLoader.readFile(ar + ".ExportJson");
+            } else {
+                this.loadScene();
+            }
         } else {
             this.loadScene();
         }

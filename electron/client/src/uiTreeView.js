@@ -48,7 +48,7 @@ var uiTreeView = cc.Node.extend({
         let actionObj = [];
 
         if (node && node.ui) {
-            let childTree = this.createUIChildList(node.ui);
+            let childTree = Tool.createUIChildList(node.ui);
 
             this.treeInfo = [{
                 info: {
@@ -84,25 +84,6 @@ var uiTreeView = cc.Node.extend({
 
         $('#animationTree').jstree(true).settings.core.data = treeObj;
         $('#animationTree').jstree("refresh");
-    },
-
-    createUIChildList: function (node) {
-        if (!node)
-            return null;
-        let childList = [];
-        let children = node.getChildren();
-        for (let i = 0; i < children.length; i++) {
-            childList[i] = {};
-            childList[i].info = {};
-            childList[i].info.obj = children[i];
-            childList[i].info.name = children[i].getName();
-            childList[i].info.initScale = children[i].getScale();
-            childList[i].info.initScaleX = children[i].getScaleX();
-            childList[i].info.initScaleY = children[i].getScaleY();
-            childList[i].info.id = children[i].__instanceId;
-            childList[i].childList = this.createUIChildList(children[i]);
-        }
-        return childList;
     },
 
     drawTree: function (treeInfo, depth, line, dataObj) {

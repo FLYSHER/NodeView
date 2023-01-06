@@ -299,7 +299,7 @@ var MainLayer = cc.Layer.extend({
         } else {
             this._animationList.setVisible(false);
             this._animationList.setAnimations([], null);
-            this._uiList.setNode(selectNode);
+            //this._uiList.setNode(selectNode);
             this.refreshProperties(selectNode.ui);
         }
         this.setDraggableItem();
@@ -373,7 +373,7 @@ var MainLayer = cc.Layer.extend({
             let uiID = currentSkin.uiID;
 
             let info = sceneLoadData.Hierarchy[uiID.toString()];
-            if (info != undefined) {
+            if (info != undefined && currentSkin.uiID < 1000) {
                 let parentID = parseInt(info.parent);
                 if (parentID != -1) {
                     let parentNode = getNode(parentID);
@@ -394,9 +394,28 @@ var MainLayer = cc.Layer.extend({
                     currentNode.setPosition(pos);
                 }
             }
-            currentNode.setDraggable(false);
+            !!currentNode.setDraggable && currentNode.setDraggable(false);
         }
-    }
+    },
+
+    createUIChildList: function (node) {
+        if (!node)
+            return null;
+        let childList = [];
+        let children = node.getChildren();
+        for (let i = 0; i < children.length; i++) {
+            childList[i] = {};
+            childList[i].info = {};
+            childList[i].info.obj = children[i];
+            childList[i].info.name = children[i].getName();
+            childList[i].info.initScale = children[i].getScale();
+            childList[i].info.initScaleX = children[i].getScaleX();
+            childList[i].info.initScaleY = children[i].getScaleY();
+            childList[i].info.id = children[i].__instanceId;
+            childList[i].childList = this.createUIChildList(children[i]);
+        }
+        return childList;
+    },
 });
 
 
