@@ -416,6 +416,20 @@ var MainLayer = cc.Layer.extend({
         }
         return childList;
     },
+
+    clear: function () {
+        SkinList[type_tab.type_hierarchy] = [];
+        SkinList[type_tab.type_symbol] = [];
+
+        for (let i = 0; i < NodeList[type_tab.type_hierarchy].length; ++i) {
+            NodeList[type_tab.type_hierarchy][i].removeFromParent(true);
+        }
+        for (let i = 0; i < NodeList[type_tab.type_symbol].length; ++i) {
+            NodeList[type_tab.type_symbol][i].removeFromParent(true);
+        }
+        NodeList[type_tab.type_hierarchy] = [];
+        NodeList[type_tab.type_symbol] = [];
+    }
 });
 
 

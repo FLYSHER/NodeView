@@ -54,13 +54,46 @@ function getRealIndex() {
     return -1;
 }
 
-function removeSkin() {
+function removeChilds(parentID) {
+    let dataList = Object.values($("#hierarchTree").jstree(true)._model.data);
+    let length = dataList.length;
+    for (let i = 0; i < length; ++i) {
+        let data = dataList[i];
+        if (data.parent === parentID) {
+            removeSkinChild('tag_' + data.id);
+            removeNodeChild('tag_' + data.id);
+
+            removeChilds(data.id);
+        }
+    }
+}
+
+function removeSkin(parentID) {
+    for (let key in NodeList[Tool_Select_Type]) {
+        let info = NodeList[Tool_Select_Type][key];
+        if (info.tag === 'tag_' + parentID) {
+            NodeList[Tool_Select_Type][key].removeFromParent(true);
+        }
+    }
+
+    removeSkinChild('tag_' + parentID);
+    removeNodeChild('tag_' + parentID);
+    removeChilds(parentID);
+}
+
+function removeSkinChild(tag){
     for (let key in SkinList[Tool_Select_Type]) {
         let info = SkinList[Tool_Select_Type][key];
-        if (info.index === selectIndex) {
+        if (info.tag === tag) {
             SkinList[Tool_Select_Type].splice(key, 1);
+        }
+    }
+}
 
-            NodeList[Tool_Select_Type][key].removeFromParent(true);
+function removeNodeChild(tag){
+    for (let key in NodeList[Tool_Select_Type]) {
+        let info = NodeList[Tool_Select_Type][key];
+        if (info.tag === tag) {
             NodeList[Tool_Select_Type].splice(key, 1);
         }
     }

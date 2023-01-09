@@ -320,6 +320,7 @@ var Hierarchy = cc.Node.extend({
 
         if (sceneLoadData.UI != undefined && sceneLoadData.UI.length > 0) {
             let uiIndex = sceneLoadCurrentID;
+            Tool.SceneNodeIndex = sceneLoadCurrentID;
             for (let key in sceneLoadData.UI) {
                 let info = sceneLoadData.UI[key];
                 if (info.uiID === uiIndex) {
@@ -497,19 +498,21 @@ var Hierarchy = cc.Node.extend({
             let skinData = getSkinData();
             let uiID = skinData.uiID;
 
-            let id = tree.jstree(true).get_selected();
-            tree.jstree(true).delete_node(id);
-
             if (Tool_Select_Type === type_tab.type_hierarchy) {
                 callback = this.itemCallbacks;
             } else if (Tool_Select_Type === type_tab.type_symbol) {
                 callback = this.symbolCallbacks;
             }
-            removeSkin();
+
+            removeSkin(uiID.toString());
 
             if (!!callback[selectIndex]) {
                 callback[selectIndex] = null;
             }
+
+            let id = tree.jstree(true).get_selected();
+            tree.jstree(true).delete_node(id);
+
             selectItem && selectItem.cb(ItemListClickType.DELETE);
             selectItem = null;
         }
@@ -522,8 +525,10 @@ var Hierarchy = cc.Node.extend({
 
         $("#hierarchTree").jstree(true)._model.data = sceneLoadData.Hierarchy;
         $("#hierarchTree").jstree(true).show_all();
-        Tool.SceneNodeIndex = sceneLoadIndex;
-        Tool.SceneNodeIndex++;
+        // Tool.SceneNodeIndex = sceneLoadIndex;
+        // Tool.SceneNodeIndex++;
+
+        Tool.SceneNodeIndex = 1;
     },
 
     addUIChildList: function (ui, parentID, uiChilds) {
@@ -539,8 +544,14 @@ var Hierarchy = cc.Node.extend({
                 },
             };
 
-            let childNode = ccui.helper.seekWidgetByName(ui, child.info.name);
-            NodeList[Tool_Select_Type].push(childNode);
+            // let childNode = ccui.helper.seekWidgetByName(ui, child.info.name);
+            // childNode.setTag("tag_" + childID);
+
+            let childNode2 = new cc.Node();
+            ui.parent.addChild(childNode2);
+            childNode2.setTag("tag_" + childID);
+
+            NodeList[Tool_Select_Type].push(childNode2);
 
             let skin = {
                 "tag": "tag_" + childID,

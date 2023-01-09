@@ -70,9 +70,7 @@ SlotLoader.showSceneFile = function () {
         return;
     }
 
-    if (sceneLoaded === true)
-        return;
-
+    sceneLoadTempIndex = 0;
     sceneLoaded = true;
 
     const selectedFiles = sceneLoader.files;
@@ -80,6 +78,7 @@ SlotLoader.showSceneFile = function () {
     reader.readAsText(selectedFiles[0]);
     reader.onload = (function (f) {
         return function (e) {
+            Tool.clear();
             let fileContents = e.target.result;
             sceneLoadData = JSON.parse(fileContents).Scene;
             Tool.initUI(false);
@@ -137,7 +136,9 @@ SlotLoader.loadScene = function () {
             let ar = info.text;
             let type = ar.substr(ar.length - 2, 2);
             let id = parseInt(info.id);
-            sceneLoadIndex = Math.max(sceneLoadIndex, id);
+            if(id < 1000){
+                sceneLoadIndex = Math.max(sceneLoadIndex, id);
+            }
             sceneLoadCurrentID = id;
 
             if (type === 'UI' || type === 'AR') {
@@ -161,9 +162,6 @@ SlotLoader.showSymbolFile = function () {
         return;
     }
 
-    if (symbolLoaded === true)
-        return;
-
     symbolLoaded = true;
 
     const selectedFiles = symbolLoader.files;
@@ -171,6 +169,7 @@ SlotLoader.showSymbolFile = function () {
     reader.readAsText(selectedFiles[0]);
     reader.onload = (function (f) {
         return function (e) {
+            Tool.clear();
             let fileContents = e.target.result;
             symbolLoadData = JSON.parse(fileContents).SymbolInfo.SymbolProperty;
             Tool.initUI(false);
