@@ -46,3 +46,29 @@ var slotUtils = function () {
 };
 
 var SlotUtils = IslotUtils.getInstance();
+
+
+
+scheduleTest = function( target, cb, interval, repeat, delay ) {
+    if( !!target ) {
+        var len = arguments.length;
+        if( 2 === len ) {
+            interval = 0;
+            repeat   = cc.REPEAT_FOREVER;
+            delay    = 0;
+        }
+        else if( 3 === len ) {
+            repeat = cc.REPEAT_FOREVER;
+            delay  = 0;
+        }
+        else if( 4 === len ) {
+            if( "function" === typeof repeat ) {
+                repeat = cc.REPEAT_FOREVER;
+            }
+            delay = 0;
+        }
+        target.schedule( cb, interval, repeat, delay, target.__instanceId );
+    }
+    else {
+    }
+};

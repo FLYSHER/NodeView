@@ -6,7 +6,6 @@ var ItemListClickType = {
 var Hierarchy = cc.Node.extend({
     ctor: function () {
         this._super(color.backgroundColor);
-
         document.addEventListener('keydown', (event) => {
             if (event.key === 'Delete') {
                 let cur = document.activeElement;
@@ -46,6 +45,45 @@ var Hierarchy = cc.Node.extend({
         this.initSymbols();
         return true;
     },
+
+    updateTest: function () {
+        //scheduleTest(NodeList[Tool_Select_Type][1].ui, this._updateLabel.bind(this), 0, cc.REPEAT_FOREVER, 0);
+        let component = new TestComponent.LabelAnimation(
+            "LabelAnimation",
+            this._updateLabel.bind(this),
+            NodeList[Tool_Select_Type][0].armature,
+            NodeList[Tool_Select_Type][1].ui);
+
+        let tempNode = new cc.Node();
+        tempNode.addComponent(component);
+        NodeList[999][0].armature.getBone(component.boneName).addChild(tempNode);
+        NodeList[999][0].componentNode = tempNode;
+
+        //NodeList[Tool_Select_Type][0].addComponent(component);
+    },
+
+    _updateLabel: function (ui, armature, bone) {
+        var locTweenData = armature.getBone(bone)._tweenData;
+        if (armature.getBone(bone)._dataVersion >= ccs.CONST_VERSION_COMBINED) {
+            ccs.TransformHelp.nodeConcat(locTweenData, armature.getBone(bone)._boneData);
+            locTweenData.scaleX -= 1;
+            locTweenData.scaleY -= 1;
+        }
+
+        let locWorldInfo = armature.getBone(bone)._worldInfo;
+        locWorldInfo.copy(locTweenData);
+        locWorldInfo.x = locTweenData.x + armature.getBone(bone)._position.x;
+        locWorldInfo.y = locTweenData.y + armature.getBone(bone)._position.y;
+        locWorldInfo.scaleX = locTweenData.scaleX * armature.getBone(bone)._scaleX;
+        locWorldInfo.scaleY = locTweenData.scaleY * armature.getBone(bone)._scaleY;
+        locWorldInfo.skewX = locTweenData.skewX + armature.getBone(bone)._skewX + cc.degreesToRadians(armature.getBone(bone)._rotationX);
+        locWorldInfo.skewY = locTweenData.skewY + armature.getBone(bone)._skewY - cc.degreesToRadians(armature.getBone(bone)._rotationY);
+
+        ccs.TransformHelp.nodeToMatrix(locWorldInfo, ui._renderCmd._worldTransform);
+        ui.setAdditionalTransform(ui._renderCmd._worldTransform);
+    },
+
+
 
     initHiearachy: function () {
         let self = this;
@@ -207,16 +245,23 @@ var Hierarchy = cc.Node.extend({
         $("#hierarchTree").bind("dnd_stop.vakata", function (e, data) {
         })
         $('#hierarchTree').on("changed.jstree", function (e, data) {
-            if (!!data.node === false)
-                return;
-
-            if (selectItem === self.itemCallbacks[data.node.original.index])
-                return;
-
-            selectIndex = data.node.original.index;
-            selectItem = self.itemCallbacks[data.node.original.index];
-            setSelectItem();
-            selectItem && selectItem.cb(ItemListClickType.SELECT, selectItem.index);
+            let show = false;
+            if (!!data.node) {
+                if (data.node.original.index !== -1) {
+                    if (!!self.itemCallbacks[data.node.original.index] && selectItem !== self.itemCallbacks[data.node.original.index]) {
+                        show = true;
+                        selectIndex = data.node.original.index;
+                        selectItem = self.itemCallbacks[data.node.original.index];
+                        setSelectItem();
+                        selectItem && selectItem.cb(ItemListClickType.SELECT, selectItem.index);
+                    }
+                }
+            }
+            if (show === false) {
+                Tool._uiList.setVisible(false);
+                Tool._animationList.setAnimations([], null);
+                selectItem = null;
+            }
         });
     },
 
@@ -265,6 +310,9 @@ var Hierarchy = cc.Node.extend({
         })
         $('#symbolTree').on("changed.jstree", function (e, data) {
             if (!!data.node === false)
+                return;
+
+            if(data.node.original.index === -1)
                 return;
 
             if (selectItem === self.symbolCallbacks[data.node.original.index])
@@ -528,13 +576,18 @@ var Hierarchy = cc.Node.extend({
         // Tool.SceneNodeIndex = sceneLoadIndex;
         // Tool.SceneNodeIndex++;
 
-        Tool.SceneNodeIndex = 1;
+        //Tool.SceneNodeIndex = 1;
+    },
+
+    clear: function () {
+        this.itemCallbacks = {};
+        this.symbolCallbacks = {};
     },
 
     addUIChildList: function (ui, parentID, uiChilds) {
         for (let i = 0; i < uiChilds.length; ++i) {
             let child = uiChilds[i];
-            let childID = parentID + i + 1000;
+            let childID = parentID + i + (parentID * 1000);         // tag, index, uiID 가 parentID 이고 구분하기위해 1000 곱한거로 사용 (자식들)
             let treeNodeObj = {
                 "id": childID,
                 "index": childID,
@@ -544,19 +597,19 @@ var Hierarchy = cc.Node.extend({
                 },
             };
 
-            // let childNode = ccui.helper.seekWidgetByName(ui, child.info.name);
-            // childNode.setTag("tag_" + childID);
+            let currChild = ccui.helper.seekWidgetByName(ui, child.info.name);
 
             let childNode2 = new cc.Node();
-            ui.parent.addChild(childNode2);
+            currChild.addChild(childNode2);
+            childNode2.setContentSize(currChild.getContentSize());
             childNode2.setTag("tag_" + childID);
 
             NodeList[Tool_Select_Type].push(childNode2);
 
             let skin = {
                 "tag": "tag_" + childID,
-                "posX": 0,
-                "posY": 0,
+                "posX": currChild.getPosition().x,
+                "posY": currChild.getPosition().y,
                 "scaleX": 1,
                 "scaleY": 1,
                 "anchorX": 0.5,

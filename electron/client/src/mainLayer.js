@@ -292,6 +292,10 @@ var MainLayer = cc.Layer.extend({
 
             let playCb = function (animName) {
                 animations.play(animName);
+                let component = selectNode.componentNode.getComponent("LabelAnimation");
+                if (!!component) {
+                    component.play();
+                }
             };
             this._animationList.setAnimations(animNameArr, playCb);
             this._skins.show(selectNode.armature.armatureData.boneDataDic, skinNode);
@@ -429,6 +433,8 @@ var MainLayer = cc.Layer.extend({
         }
         NodeList[type_tab.type_hierarchy] = [];
         NodeList[type_tab.type_symbol] = [];
+
+        this._hierarchy.clear();
     }
 });
 
