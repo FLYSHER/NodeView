@@ -101,6 +101,7 @@ function removeNodeChild(tag){
 
 function setSymbolId(value) {
     selectSkin.id = value;
+    selectSkin.uiID = value;
 }
 
 function setSkinData(value) {
@@ -229,7 +230,7 @@ function saveResourceData() {
 
         result += "};\n";
 
-        let paytable = "var g_res" + SLOT_NAME + " = convertObjToArr( res" + SLOT_NAME + " ).concat( g_resCommonEffect, g_resSlotMenu, g_resNewCashRace, g_resCommonSlotMenu );";
+        let paytable = "var g_res" + SLOT_NAME + " = convertObjToArr( res" + SLOT_NAME + " ).concat( g_resCommonEffect, g_resSlotMenu, g_resNewCashRace, g_resCommonSlotMenu, g_resSlotCube);";
         result += paytable;
 
         let blob = new Blob([result], {type: 'text/json'}),
@@ -302,7 +303,7 @@ function saveSymbolData() {
         }
 
         let SymbolProperty = {
-            "DefaultSymbolPoolsize:": 3,
+            "DefaultSymbolPoolSize": 3,
             "LabelType": 0,
             "LabelMaxDigit": 3,
             "SymbolProperty": parseSlotDefines

@@ -292,9 +292,13 @@ var MainLayer = cc.Layer.extend({
 
             let playCb = function (animName) {
                 animations.play(animName);
-                let component = selectNode.componentNode.getComponent("LabelAnimation");
-                if (!!component) {
-                    component.play();
+                if(!!selectNode){       // test ar 파일의 자식 label 부모 따라가게
+                    if(!!selectNode.componentNode) {
+                        let component = selectNode.componentNode.getComponent("LabelAnimation");
+                        if (!!component) {
+                            component.play();
+                        }
+                    }
                 }
             };
             this._animationList.setAnimations(animNameArr, playCb);
