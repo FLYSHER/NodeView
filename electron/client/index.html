@@ -41,6 +41,8 @@
     <meta name="x5-page-mode" content="app">
 
     <!-- for electron-->
+    <script src="../renderer_inspector.js"></script>
+    <script src="../renderer_assets.js"></script>
     <script src="../renderer.js"></script>
 </head>
 <body>
@@ -208,8 +210,21 @@
     </div>
     <div class="subView"> subView</div>
     <div class="hierarchy"> hierarchy </div>
-    <div class="assets"> assets </div>
-    <div class="inspector"> inspector </div>
+    <div class="assets"></div>
+    <div class="inspector"> inspector
+<!--        <div class="transformation"> transformation-->
+<!--            <div>-->
+<!--                <form>-->
+<!--                    <label>position</label>-->
+<!--                    <label>x</label>-->
+<!--                    <input type="text" value="0">-->
+<!--                    <label>y</label>-->
+<!--                    <input type="text" value="0">-->
+<!--                </form>-->
+<!--            </div>-->
+<!--        </div>-->
+    </div>
+
 </div>
 
 <script src="frameworks/cocos2d-html5/CCBoot.js"></script>

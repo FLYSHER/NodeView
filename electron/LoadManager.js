@@ -132,6 +132,8 @@ var LoadManager  = {
                             }
                         }
                     });
+
+                    console.log("*** LoadManager **** ", fileFinder );
                 }
 
                 if (jsonObj['textures'] != null)
@@ -147,6 +149,8 @@ var LoadManager  = {
                         }
 
                     });
+
+                    console.log("*** LoadManager **** ", fileFinder );
                 }
 
 

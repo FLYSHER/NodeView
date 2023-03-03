@@ -992,6 +992,8 @@ cc.loader = (function () {
                 else
                     realUrl += "?_t=" + (new Date() - 0);
             }
+            cc.log("*** load **** ");
+            cc.log( realUrl, url, item );
             loader.load(realUrl, url, item, function (err, data) {
                 if (err) {
                     cc.log(err);
