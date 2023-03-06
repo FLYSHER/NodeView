@@ -113,8 +113,7 @@ var ElectronRenderer = {
             p = p.then( function () {
                     return loadResource(file);
                 })
-                .then( ()=> console.log( "load texture complete : ", file.name  ) )
-                .then( ()=> console.log(  cc.loader  ) );
+                .then( ()=> console.log( "load texture complete : ", file.name  ) );
         }
 
         p.then( function() {
@@ -131,8 +130,7 @@ var ElectronRenderer = {
             p = p.then( function() {
                     return loadResource( file );
                 })
-                .then( ()=> console.log( "load other complete : ", file.name  ))
-                .then( ()=> console.log(  cc.loader  ) );
+                .then( ()=> console.log( "load other complete : ", file.name  ));
         }
 
         p.then( function() {
@@ -145,8 +143,7 @@ var ElectronRenderer = {
             p = p.then( function() {
                     return loadResource( file );
                 })
-                .then( ()=> console.log( "load complete : ", file.name  ))
-                .then( ()=> console.log(  cc.loader  ) );
+                .then( ()=> console.log( "load complete : ", file.name  ));
         }
 
         p.then( function() {
