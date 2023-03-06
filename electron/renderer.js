@@ -46,7 +46,6 @@ var ElectronRenderer = {
 
                 console.log( "*** Renderer >> on drop ***", arrFilePaths );
                 ipcRenderer.send('fileDropEvent', arrFilePaths);
-                // AssetRenderer.addAssets( arrFilePaths );
                 // Loader.readFile( evt.dataTransfer.files );
             }, false);
 

@@ -13,7 +13,7 @@ GST.ToolFileType = {
 GST.ResourceLoader = {
 
     cacheResource : function( fileEntry, resolve, reject ) {
-        // cc.log( " *** cacheResource *** ", fileEntry.name, fileEntry.content );
+        cc.log( " *** cacheResource *** ", fileEntry.name );
         if( !fileEntry || !fileEntry.name ) {
             return;
         }
@@ -25,11 +25,13 @@ GST.ResourceLoader = {
             case '.exportjson':
                 key = fileEntry.name;
                 cc.loader.cache[ fileEntry.name ] = JSON.parse( fileEntry.content );
+                AssetRenderer.addAsset( key );
                 resolve();
                 break;
             case '.fnt':
                 key = 'image/' + fileEntry.name;
                 cc.loader.cache[ key ] = _fntLoader.parseFnt( fileEntry.content, key );
+                AssetRenderer.addAsset( key );
                 resolve();
                 break;
             case '.plist':
@@ -37,21 +39,12 @@ GST.ResourceLoader = {
                 key = 'image/' + fileEntry.name;
                 cc.loader.cache[ key ] = plist_data;
                 cc.spriteFrameCache.addSpriteFrames( key );
+                AssetRenderer.addAsset( key );
                 resolve();
                 break;
             case '.png':
                 // 이미지 파일 로딩 후 텍스쳐캐시매니저에 캐싱
                 key = 'image/' + fileEntry.name;
-                // cc.loader.loadImg( fileEntry.fullPath, function( err, img ){
-                //     if( err ) {
-                //         cb && cb( false );
-                //         return;
-                //     }
-                //     cc.loader.cache[key] = img;
-                //     cc.textureCache.handleLoadedTexture( key );
-                //     cb && cb( true );
-                // });
-
                 cc.loader.loadImg( fileEntry.content, { isCrossOrigin : false },
                     function( err, img ){
                         var tex2d = new cc.Texture2D();
@@ -60,8 +53,12 @@ GST.ResourceLoader = {
 
                         cc.loader.cache[key] = tex2d;
                         cc.textureCache.cacheImage( key, tex2d );
+                        AssetRenderer.addAsset( key );
                         resolve();
                     });
+                break;
+            default:
+
                 break;
         }
     },

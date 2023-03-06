@@ -1,13 +1,10 @@
 var AssetRenderer = {
     assetElement : null,
-
-    assetRoot         : null,
+    assetRoot    : null,
     imageRoot    : null,
 
     init : function() {
-        this.assetElement = $(".assets");
-        this.assetRoot = this.assetElement.append("<ol>assets</ol>");
-        this.assetRoot.id = "assetRoot";
+        $(".assets").append("<ol></ol>");
     },
 
     addAssets : function( path ) {
@@ -22,10 +19,19 @@ var AssetRenderer = {
     },
 
     addAsset : function( path ) {
+        var dirName  = cc.path.dirname( path);
         var basename =  cc.path.basename( path );
-        var item = this.assetRoot.append("<li>" + basename + "</li>");
-        item.id = basename;
+
+        if( dirName === "" ) {
+            basename = path;
+        }
+        var li = $(`<li class="asset"></li>`).text( basename );
+        $(".assets ol").append(li);
+        $(`.asset:contains("${basename}")`).click( function(){
+            alert($(this).text());
+        } )
     },
+
 
     removeAsset : function( path ) {
 
