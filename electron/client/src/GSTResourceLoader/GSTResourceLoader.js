@@ -81,12 +81,7 @@ GST.ResourceLoader = {
         console.log(" *** create node *** : ", fileEntry );
         var toolFileType = this.getToolFileType( fileEntry );
         if( toolFileType === GST.ToolFileType.UIFile ) {
-            var uiRoot = ccs.uiReader.widgetFromJsonFile( fileEntry.name );
-            console.log(" *** 1 *** : " );
-            uiRoot.setAnchorPoint( 0.5, 0.5 );
-            uiRoot.setPosition( cc.winSize.width/2, cc.winSize.height/2 );
-            cc.director.getRunningScene().addChild( uiRoot );
-            console.log(" *** 2 *** : " );
+            cc.eventManager.dispatchCustomEvent( "createUIFile", { uiFileName :  fileEntry.name} );
         }
         else if( toolFileType === GST.ToolFileType.ARMATURE ) {
             var arfileName = fileEntry.name;

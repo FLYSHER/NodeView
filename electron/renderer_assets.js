@@ -5,7 +5,7 @@ var AssetRenderer = {
 
     init : function() {
         //1. asset root node 생성
-        var rootNode = $(`<input type="checkbox" id="rootNode"> 
+        var rootNode = $(`<input type="checkbox" id="rootNode">
                           <label for="rootNode"> assets </label>
                           <ul id="dir_root"></ul>
                          `);
@@ -77,9 +77,9 @@ var AssetRenderer = {
                 console.log("frame > ", key );
                 var li = $(`<li class="asset"></li>`).text( key );
                 $(`#${parentID}`).append(li);
-                $(`.asset:contains("${key}")`).click( function(){
-                    alert($(this).text());
-                });
+                $(`.asset:contains("${key}")`).click( function( frameName ){
+                    cc.eventManager.dispatchCustomEvent( 'setPreviewSprite', { name : frameName } );
+                }.bind( this, key ));
             }
 
         }

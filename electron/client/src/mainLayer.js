@@ -45,7 +45,6 @@ var ResetAction = function () {
     }
 };
 
-
 var MainLayer = cc.Layer.extend({
     DESC_TAG: 99,
     NODE_MENU_TAG: 100,
@@ -126,6 +125,23 @@ var MainLayer = cc.Layer.extend({
         ScreenUtil.addResizeListener( this.onResize, this );
 
         return true;
+    },
+
+    onEnter : function() {
+        this._super();
+
+        cc.eventManager.addCustomListener("createUIFile", this.onCreateUIFile.bind(this) );
+
+    },
+
+    onCreateUIFile : function( event ) {
+        var userData    = event.getUserData();
+        var uiFileName  = userData.uiFileName;
+
+        var uiRoot = ccs.uiReader.widgetFromJsonFile( uiFileName);
+        uiRoot.setAnchorPoint( 0.5, 0.5 );
+        uiRoot.setPosition( cc.winSize.width/2, cc.winSize.height/2 );
+        this.addChild( uiRoot );
     },
 
     onResize : function () {
@@ -431,6 +447,54 @@ var MainLayer = cc.Layer.extend({
 
 });
 
+var PreviewLayer = cc.LayerColor.extend({
+    ctor : function() {
+        this._layerSize = cc.size( 300, 300 );
+        this._super( cc.color( 100, 100, 100, 200 ), this._layerSize.width, this._layerSize.height );
+        this.setPosition(cc.winSize.width - this._layerSize.width, 0);
+
+        this.initPreview();
+
+        this.onResize();
+        ScreenUtil.addResizeListener( this.onResize, this );
+    },
+
+    onEnter : function() {
+        this._super();
+
+        cc.eventManager.addCustomListener( "setPreviewSprite", this.setRTSprite.bind(this) );
+    },
+
+    onResize : function() {
+        this.setPosition(cc.winSize.width - this._layerSize.width, 0);
+        // this._rtt.setPosition( 0,0 );
+    },
+
+    initPreview : function() {
+        this._rtt_size = cc.size( 200, 200 );
+        this._rtt = new cc.RenderTexture( this._rtt_size.width, this._rtt_size.height );
+        this._rtt.setAnchorPoint( 0.5, 0.5 );
+        this._rtt.setPosition( this._layerSize.width/2, this._layerSize.height/2 );
+
+        this._rtt.sprite.setAnchorPoint( 0.5, 0.5 );
+
+        this.addChild( this._rtt, 100 );
+    },
+
+    setRTSprite : function( event ) {
+        cc.log("*** onEvent **** setSprite ", event );
+        var userData = event.getUserData();
+        var sprName = userData.name;
+        var spriteFrame = cc.spriteFrameCache.getSpriteFrame( sprName );
+        if( spriteFrame ) {
+            var sprite = new cc.Sprite();
+            sprite.setSpriteFrame( spriteFrame );
+            this._rtt.setSprite(sprite);
+        }
+    },
+
+});
+
 
 
 var ManiLayerScene = cc.Scene.extend({
@@ -454,6 +518,10 @@ var ManiLayerScene = cc.Scene.extend({
 
         var layer = new MainLayer();
         this.addChild( layer, 1, "MainLayer" );
+
+        layer = new PreviewLayer();
+        // layer.setPosition( 200, 200);
+        this.addChild( layer, 2, "PreviewLayer" );
 
         var self = this;
         cc.eventManager.addListener( {
