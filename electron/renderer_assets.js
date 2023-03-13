@@ -1,15 +1,14 @@
 var AssetRenderer = {
-    assetElement : null,
-    assetRoot    : null,
-    imageRoot    : null,
+    treeDataArr : [],
 
     init : function() {
-        //1. asset root node 생성
-        var rootNode = $(`<input type="checkbox" id="rootNode">
-                          <label for="rootNode"> assets </label>
-                          <ul id="dir_root"></ul>
-                         `);
-        $(".assets").append(rootNode);
+        $("#assets").jstree();
+        $('#assets').on("changed.jstree", function (e, data) {
+            console.log( e, data );setPreviewSprite
+
+            var selectedFileName = data.selected[0];
+            cc.eventManager.dispatchCustomEvent( 'setPreviewSprite', { name : selectedFileName } );
+        });
     },
 
     addAssets : function( path ) {
@@ -24,44 +23,45 @@ var AssetRenderer = {
     },
 
     addDirectory : function( parentID, folderID ) {
-        var folder = $(`<input type="checkbox" id="${folderID}">   
-                        <label for="${folderID}"> ${folderID} </label>
-                        <ul id="dir_${folderID}"></ul>` );
+        if( this.isExistDirectory( parentID, folderID ) ) {
+            console.log("**** directory already exist *** : ", parentID, folderID );
+            return;
+        }
 
-        $(`#${parentID}`).append( folder );
-        console.log("*** add directory **** ", parentID, "dir_" + folderID );
+        this.treeDataArr.push( {
+            "id"        : folderID,
+            "parent"    : parentID,
+            "text"      : folderID
+        } )
     },
 
-    isExistDirectory : function( dirName ) {
-        var dirID = "dir_" + dirName;
-        var dir = $(`#${dirID}`);
-        console.log( "dirID, dir : ", dirID, dir );
-        return ( dir.length > 0 );
+    isExistDirectory : function( parentID, dirName ) {
+        var findOjb = this.treeDataArr.find( function (item){
+            return ( item.parent === parentID && item.id === dirName );
+        })
+
+        return !!findOjb;
     },
 
     addAsset : function( path ) {
         var dirName  = cc.path.dirname( path);
         var basename =  cc.path.basename( path );
 
-        console.log( " *** addAsset **** : ", path );
-        console.log( "*** dirName : *** ", dirName );
         var parentID;
 
         // 폴더 생성 및 부모 폴더 찾기
         if( dirName === "" ) {
             basename = path;
-            parentID = 'dir_root';
+            parentID = '#';
         }
         else {
             var arrDir = dirName.split("/"); /** aaa/bbb/cccc ==> [aaa, bbb, ccc] */
 
             for( var i = 0; i < arrDir.length; ++i ) {
-                if( !this.isExistDirectory( arrDir[i] ) ) {
-                    parentID = ( i === 0 ) ? 'dir_root' : arrDir[ i - 1];
-                    this.addDirectory( parentID, arrDir[i] );
-                }
+                parentID = ( i === 0 ) ? '#' : arrDir[ i - 1];
+                this.addDirectory( parentID, arrDir[i] );
             }
-            parentID = "dir_" + arrDir[i-1];
+            parentID = arrDir[i-1];
         }
 
         // 부모 폴더에 에셋 추가
@@ -69,29 +69,31 @@ var AssetRenderer = {
             var dirID = cc.path.mainFileName( basename );
             this.addDirectory( parentID, dirID );
 
-            parentID = "dir_" + dirID;
+            parentID = dirID;
             var frameConfig = cc.spriteFrameCache._frameConfigCache[path];
             var frames = frameConfig.frames;
 
             for( var key in frames ) {
-                console.log("frame > ", key );
-                var li = $(`<li class="asset"></li>`).text( key );
-                $(`#${parentID}`).append(li);
-                $(`.asset:contains("${key}")`).click( function( frameName ){
-                    cc.eventManager.dispatchCustomEvent( 'setPreviewSprite', { name : frameName } );
-                }.bind( this, key ));
+                this.treeDataArr.push({
+                    "id"        : key,
+                    "parent"    : parentID,
+                    "text"      : key
+                });
             }
 
         }
         else {
-            var li = $(`<li class="asset"></li>`).text( basename );
-            $(`#${parentID}`).append(li);
-            $(`.asset:contains("${basename}")`).click( function(){
-                alert($(this).text());
+            this.treeDataArr.push({
+                "id"        : basename,
+                "parent"    : parentID,
+                "text"      : basename
             });
+
         }
 
-
+        console.log(this.treeDataArr);
+        $("#assets").jstree(true).settings.core.data = this.treeDataArr;
+        $(`#assets`).jstree("refresh");
     },
 
     removeAsset : function( path ) {

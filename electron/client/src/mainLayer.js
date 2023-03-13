@@ -491,6 +491,9 @@ var PreviewLayer = cc.LayerColor.extend({
             sprite.setSpriteFrame( spriteFrame );
             this._rtt.setSprite(sprite);
         }
+        else {
+
+        }
     },
 
 });

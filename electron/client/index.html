@@ -40,6 +40,10 @@
     <meta name="browsermode" content="application">
     <meta name="x5-page-mode" content="app">
 
+    <!-- for property grid-->
+    <script src="../jqPropertyGrid.js"></script>
+    <link rel='stylesheet' href='jqPropertyGrid.css' />
+
     <!-- for electron-->
     <script src="../renderer_inspector.js"></script>
     <script src="../renderer_assets.js"></script>
@@ -210,19 +214,14 @@
     </div>
     <div class="subView"> subView</div>
     <div class="hierarchy"> hierarchy </div>
-    <div class="assets"></div>
-    <div class="inspector"> inspector
-<!--        <div class="transformation"> transformation-->
-<!--            <div>-->
-<!--                <form>-->
-<!--                    <label>position</label>-->
-<!--                    <label>x</label>-->
-<!--                    <input type="text" value="0">-->
-<!--                    <label>y</label>-->
-<!--                    <input type="text" value="0">-->
-<!--                </form>-->
-<!--            </div>-->
-<!--        </div>-->
+    <div id="assets">
+        <ul id="ul_asset_root"> assets
+            <li> a </li>
+            <li> b </li>
+        </ul>
+    </div>
+
+    <div id="inspector"> inspector
     </div>
 
 </div>
