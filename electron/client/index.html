@@ -41,10 +41,18 @@
     <meta name="x5-page-mode" content="app">
 
     <!-- for property grid-->
+    <link rel='stylesheet' href='../jqPropertyGrid.css' />
+    <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/themes/smoothness/jquery-ui.css" />
+    <link rel='stylesheet' href='http://bgrins.github.com/spectrum/spectrum.css' />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="http://bgrins.github.com/spectrum/spectrum.js" ></script>
     <script src="../jqPropertyGrid.js"></script>
-    <link rel='stylesheet' href='jqPropertyGrid.css' />
 
     <!-- for electron-->
+    <script src="../renderer_hierarchy.js"></script>
     <script src="../renderer_inspector.js"></script>
     <script src="../renderer_assets.js"></script>
     <script src="../renderer.js"></script>
@@ -212,17 +220,18 @@
     <div class="cocosView"> cocosView
         <canvas id="gameCanvas" width="400" height="300"></canvas>
     </div>
+
     <div class="subView"> subView</div>
-    <div class="hierarchy"> hierarchy </div>
-    <div id="assets">
-        <ul id="ul_asset_root"> assets
-            <li> a </li>
-            <li> b </li>
-        </ul>
+
+    <div id="hierarchy"> hierarchy
+        <ul id="ul_hierarchy_root"></ul>
     </div>
 
-    <div id="inspector"> inspector
+    <div id="assets">
+        <ul id="ul_asset_root"> assets </ul>
     </div>
+
+    <div id="inspector"> inspector </div>
 
 </div>
 

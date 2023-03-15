@@ -51,8 +51,10 @@ var MainLayer = cc.Layer.extend({
     JSON_LIST_MENU_TAG: 101,
 
     _animationList : null,
+    currNode        : null,
     ctor: function () {
         this._super();
+        this.setName("mainLayer");
 
         var size = cc.winSize;
         this.CX = size.width / 2;
@@ -132,6 +134,8 @@ var MainLayer = cc.Layer.extend({
 
         cc.eventManager.addCustomListener("createUIFile", this.onCreateUIFile.bind(this) );
 
+        cc.eventManager.addCustomListener("onChangeProperty", this.setNodeProperty.bind(this) );
+
     },
 
     onCreateUIFile : function( event ) {
@@ -142,6 +146,20 @@ var MainLayer = cc.Layer.extend({
         uiRoot.setAnchorPoint( 0.5, 0.5 );
         uiRoot.setPosition( cc.winSize.width/2, cc.winSize.height/2 );
         this.addChild( uiRoot );
+        this.currNode = uiRoot;
+
+        cc.eventManager.dispatchCustomEvent( "refreshInspector", { node : uiRoot });
+        cc.eventManager.dispatchCustomEvent( "onRefreshHierarchy");
+
+    },
+
+    setNodeProperty : function( event ) {
+        var userData    = event.getUserData();
+        var property    = userData.property;
+        var value       = userData.value;
+        if( this.currNode ) {
+            this.currNode[property] = value;
+        }
     },
 
     onResize : function () {
@@ -509,22 +527,33 @@ var ManiLayerScene = cc.Scene.extend({
          */
         Loader.init();
 
+        this.mainLayer = new MainLayer();
+        this.addChild( this.mainLayer, 1, "MainLayer" );
+
+        layer = new PreviewLayer();
+        // layer.setPosition( 200, 200);
+        this.addChild( layer, 2, "PreviewLayer" );
+
+
         if (typeof ElectronRenderer != 'undefined')
             ElectronRenderer.init();
 
         if (typeof AssetRenderer != 'undefined')
             AssetRenderer.init();
 
-        if (typeof InspectorRenderer != 'undefined')
-            InspectorRenderer.init();
+        // if (typeof InspectorRenderer != 'undefined')
+        //     InspectorRenderer.init();
+
+        if (typeof HierarchyRenderer != 'undefined')
+            HierarchyRenderer.init(this.mainLayer);
 
 
-        var layer = new MainLayer();
-        this.addChild( layer, 1, "MainLayer" );
-
-        layer = new PreviewLayer();
-        // layer.setPosition( 200, 200);
-        this.addChild( layer, 2, "PreviewLayer" );
+        // var layer = new MainLayer();
+        // this.addChild( layer, 1, "MainLayer" );
+        //
+        // layer = new PreviewLayer();
+        // // layer.setPosition( 200, 200);
+        // this.addChild( layer, 2, "PreviewLayer" );
 
         var self = this;
         cc.eventManager.addListener( {

@@ -4,7 +4,7 @@ var AssetRenderer = {
     init : function() {
         $("#assets").jstree();
         $('#assets').on("changed.jstree", function (e, data) {
-            console.log( e, data );setPreviewSprite
+            console.log( e, data );
 
             var selectedFileName = data.selected[0];
             cc.eventManager.dispatchCustomEvent( 'setPreviewSprite', { name : selectedFileName } );
