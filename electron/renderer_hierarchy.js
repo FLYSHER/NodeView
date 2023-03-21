@@ -69,8 +69,6 @@ var HierarchyRenderer = {
                 this.refreshTree( child, parentID );
             }
         }
-
-
     },
 
     isExistNode : function( parentID, id ) {
