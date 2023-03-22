@@ -28,9 +28,10 @@ var InspectorRenderer = {
             anchorX     : { group : 'transform', type : "number", name : "anchorX" },
             anchorY     : { group : 'transform', type : "number", name : "anchorY" },
 
+            name        : { group : 'property', type : "label",   name : "name" },
             visible     : { group : 'property', type : "boolean", name : "visible" },
-            sizeW       : { group : 'property', type : "number", name : "width" },
-            sizeH       : { group : 'property', type : "number", name : "height" },
+            sizeW       : { group : 'property', type : "number",  name : "width" },
+            sizeH       : { group : 'property', type : "number",  name : "height" },
         }
         this.formMeta = loc_meta;
 
@@ -62,15 +63,22 @@ var InspectorRenderer = {
 
     },
 
+    // 다른 창에서 선택된 노드의 정보를 리프레시
     refreshFormData : function( event ) {
         var userData = event.getUserData();
         var node = userData.node;
         console.log("** inspector.refreshFormData ** ", node );
         this.formData['positionX'] = node.getPositionX();
         this.formData['positionY'] = node.getPositionY();
+        this.formData['name']      = node.getName();
+        this.formData['visible']   = node.isVisible();
+        this.formData['sizeW']     = node.width;
+        this.formData['sizeH']     = node.height;
+
         $(`#inspector`).jqPropertyGrid( this.formData, this.options );
     },
 
+    // inspector 에서 속성이 바뀌면 호출
     onChangeProperty : function( grid, name, value ) {
         console.log(name + ' ' + value);
         this.formData[ name ] = value;
@@ -88,10 +96,12 @@ var InspectorRenderer = {
         this.formData['positionX'] = 0;
         this.formData['positionY'] = 0;
 
+
         $(`#inspector`).jqPropertyGrid( this.formData, this.options );
     },
 
     addProperty : function() {
+        this.formData['name'] = '';
         this.formData['visible'] = true;
         this.formData['sizeW'] = 0;
         this.formData['sizeH'] = 0;

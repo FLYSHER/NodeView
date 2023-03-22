@@ -32,7 +32,7 @@ var MainViewLayer = cc.Layer.extend({
         this.addChild( uiRoot );
         this.currNode = uiRoot;
 
-        cc.eventManager.dispatchCustomEvent( "refreshInspector", { node : uiRoot });
+        // cc.eventManager.dispatchCustomEvent( "refreshInspector", { node : uiRoot });
         cc.eventManager.dispatchCustomEvent( "onRefreshHierarchy" );
     },
 
