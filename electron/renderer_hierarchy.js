@@ -16,7 +16,43 @@ var HierarchyRenderer = {
                 'data' : [
                 ]
             },
-            "plugins": ["search"],
+            "contextmenu" : {
+                "items" : {
+                    "add" : {
+                        "label" : "add",
+                        "action" : function( obj ){
+                            console.log("add > ", obj );
+                        },
+                        "submenu" : {
+                            "node" : {
+                                "label"     : "node",
+                                "action"    : function( obj ) {
+                                    console.log("add node > ", obj );
+                                },
+                            },
+
+                            "component" : {
+                                "label"     : "component",
+                                "action"    : function( obj ) {
+                                    console.log("add component > ", obj );
+                                },
+                            }
+                        }
+                    },
+                    "delete" : {
+                        "label" : "delete",
+                        "action" : function( obj ){
+                            if( !obj.hasOwnProperty( 'reference') ) {
+                                console.log("check! : ", obj );
+                            }
+
+                            cc.eventManager.dispatchCustomEvent('onDeleteNode', { selectedID : obj.reference.prevObject[0].id })
+                        },
+                    }
+                }
+
+            },
+            "plugins": ["search", "contextmenu"],
             "search": {
                 "case_sensitive": false,
                 "show_only_matches": true

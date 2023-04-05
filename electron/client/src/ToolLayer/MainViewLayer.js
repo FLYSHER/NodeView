@@ -17,7 +17,7 @@ var MainViewLayer = cc.Layer.extend({
         this._super();
 
         cc.eventManager.addCustomListener("createUIFile", this.onCreateUIFile.bind(this) );
-
+        cc.eventManager.addCustomListener( "onDeleteNode", this.onDeleteNode.bind(this));
         cc.eventManager.addCustomListener("onChangeProperty", this.setNodeProperty.bind(this) );
 
     },
@@ -34,6 +34,12 @@ var MainViewLayer = cc.Layer.extend({
 
         // cc.eventManager.dispatchCustomEvent( "refreshInspector", { node : uiRoot });
         cc.eventManager.dispatchCustomEvent( "onRefreshHierarchy" );
+    },
+
+    onDeleteNode : function( event ) {
+        var userData    = event.getUserData();
+        var selectedID = userData.selectedID;
+        cc.log("[event] onDeleteNode >  ", selectedID );
     },
 
     setNodeProperty : function( event ) {

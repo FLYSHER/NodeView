@@ -49,7 +49,7 @@ if( !cc.sys.isNative ) {
             // var w = cc.container.clientWidth,
             //     h = cc.container.clientHeight;
 
-            var cocosView = document.getElementsByClassName("cocosView")[0];
+            var cocosView = document.getElementById("cocosView_gridItem");
             var w = cocosView.clientWidth,
                 h = cocosView.clientHeight;
 

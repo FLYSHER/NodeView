@@ -22,12 +22,13 @@ var InspectorRenderer = {
     initFormMeta : function() {
         var loc_meta = {
             positionX   : { group : 'transform', type : "number", name : "positionX", options: { min: -3000, max: 3000, step: 1.0 } },
-            positionY   : { group : 'transform', type : "number", name : "positionY" },
-            scaleX      : { group : 'transform', type : "number", name : "scaleX" },
-            scaleY      : { group : 'transform', type : "number", name : "scaleY" },
-            anchorX     : { group : 'transform', type : "number", name : "anchorX" },
-            anchorY     : { group : 'transform', type : "number", name : "anchorY" },
+            positionY   : { group : 'transform', type : "number", name : "positionY", options: { min: -3000, max: 3000, step: 1.0 }  },
+            scaleX      : { group : 'transform', type : "number", name : "scaleX" , options: { min: 0, max: 10.0, step: 0.01 }},
+            scaleY      : { group : 'transform', type : "number", name : "scaleY" , options: { min: 0, max: 10.0, step: 0.01 }},
+            anchorX     : { group : 'transform', type : "number", name : "anchorX", options: { min: 0, max: 1.0, step: 0.1 }  },
+            anchorY     : { group : 'transform', type : "number", name : "anchorY", options: { min: 0, max: 1.0, step: 0.1 }  },
 
+            className   : { group : 'property', type : "label",   name : "className" },
             name        : { group : 'property', type : "label",   name : "name" },
             visible     : { group : 'property', type : "boolean", name : "visible" },
             sizeW       : { group : 'property', type : "number",  name : "width" },
@@ -70,7 +71,12 @@ var InspectorRenderer = {
         console.log("** inspector.refreshFormData ** ", node );
         this.formData['positionX'] = node.getPositionX();
         this.formData['positionY'] = node.getPositionY();
+        this.formData['anchorX']   = node.anchorX;
+        this.formData['anchorY']   = node.anchorY;
+        this.formData['scaleX']    = node.scaleX;
+        this.formData['scaleY']    = node.scaleY;
         this.formData['name']      = node.getName();
+        this.formData['className'] = node._className;
         this.formData['visible']   = node.isVisible();
         this.formData['sizeW']     = node.width;
         this.formData['sizeH']     = node.height;
@@ -95,13 +101,17 @@ var InspectorRenderer = {
     addTransform : function() {
         this.formData['positionX'] = 0;
         this.formData['positionY'] = 0;
-
+        this.formData['anchorX']   = 0;
+        this.formData['anchorY']   = 0;
+        this.formData['scaleX']    = 0;
+        this.formData['scaleY']    = 0;
 
         $(`#inspector`).jqPropertyGrid( this.formData, this.options );
     },
 
     addProperty : function() {
         this.formData['name'] = '';
+        this.formData['className'] = '';
         this.formData['visible'] = true;
         this.formData['sizeW'] = 0;
         this.formData['sizeH'] = 0;

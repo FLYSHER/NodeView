@@ -218,23 +218,29 @@
 <!--<div id="side_hr" class="side_hr"></div>-->
 <!--<script src="res/loading.js"></script>-->
 <div class="grid_container" >
-    <div class="cocosView">
+    <div id="cocosView_gridItem">
         <button id="mainLayer"> mainView </button>
         <button id="previewLayer"> preview </button>
         <canvas id="gameCanvas" width="400" height="300"></canvas>
     </div>
 
-    <div class="subView"> subView</div>
+    <div id="subView_gridItem"> subView</div>
 
-    <div id="hierarchy"> hierarchy
-        <ul id="ul_hierarchy_root"></ul>
+    <div id="hierarchy_gridItem"> hierarchy
+        <div id="hierarchy">
+            <ul id="ul_hierarchy_root"></ul>
+        </div>
     </div>
 
-    <div id="assets">
-        <ul id="ul_asset_root"> assets </ul>
+    <div id="assets_gridItem">
+        <div id="assets">
+            <ul id="ul_asset_root"> assets </ul>
+        </div>
     </div>
 
-    <div id="inspector"> inspector </div>
+    <div id="inspector_gridItem">
+        <div id="inspector"> </div>
+    </div>
 
 </div>
 
