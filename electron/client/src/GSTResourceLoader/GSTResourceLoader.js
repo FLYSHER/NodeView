@@ -12,6 +12,9 @@ GST.ToolFileType = {
 
 GST.ResourceLoader = {
 
+    /** 리소스 캐싱
+     * cc.loader.cache 에 리소스 캐싱
+     */
     cacheResource : function( fileEntry, resolve, reject ) {
         cc.log( " *** cacheResource *** ", fileEntry.name );
         if( !fileEntry || !fileEntry.name ) {

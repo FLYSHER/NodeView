@@ -65,8 +65,16 @@ var CocosRenderer = {
         ipcRenderer.on('fileDropEventReply', this.onFileDropReply.bind(this) )
     },
 
+    /**
+     * main process 에서 타겟 파일과 디펜던시 리스트를 가지고 와서 renderer process 에서 리소스 로드.
+     *
+     * payload
+     *   ㄴ dependentFiles ex) [ ***.plist , ***.png ]
+     *   ㄴ targetFiles [ ***.ExportJson ]
+     */
     onFileDropReply : function( evt, payload ) {
         console.log("[EVT] >> fileDropEventReply complete : ", evt, payload);
+
         var p = this.loadResources( payload );
 
         var createNode = function ( fileEntry ) {
@@ -85,8 +93,6 @@ var CocosRenderer = {
                 .then( ()=> console.log(  cc.loader  ) );
         }
     },
-
-
 
     // 리소스 캐싱 및 로드
     // 마지막 프로미스를 리턴한다.
@@ -148,38 +154,4 @@ var CocosRenderer = {
 
         return p;
     },
-
-    // readFile : function( fileEntry , cb) {
-    //     var self = this;
-    //     if( !fileEntry ) {
-    //         cb && cb();
-    //         return;
-    //     }
-    //
-    //     let url = fileEntry.name;
-    //     let fileContents = fileEntry.content;
-    //
-    //     var ext = cc.path.extname(url).toLowerCase();
-    //     if ( ext === ".json" ){
-    //         let exportjson = convertToExportJson( fileContents );
-    //         url = url.replace( '.json', ' (JSON).ExportJson');
-    //         ext = '.exportjson';
-    //         self._processFileData(url, exportjson, ext, cb);
-    //         toggleJSONUI( true );
-    //     }
-    //     else {
-    //         self._processFileData(url, fileContents, ext, cb);
-    //     }
-    //
-    //     if ( ext === ".exportjson" ){
-    //         toggleJSONUI( false );
-    //     }
-    //
-    //     if (ext === ".json" || ext === ".exportjson") {
-    //         //  console.log( ext , "processed ");
-    //         g_fileName =  url;
-    //         g_fileContext = fileContents;
-    //     }
-    //
-    // }
 };

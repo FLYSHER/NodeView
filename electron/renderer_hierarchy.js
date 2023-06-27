@@ -1,4 +1,5 @@
 var HierarchyRenderer = {
+    Tag                 : "[ HierarchyRenderer ] ",
     hierarchyData       : [],
     nodeInstanceIDMap   : {},
     rootLayer           : null,
@@ -34,7 +35,9 @@ var HierarchyRenderer = {
                             "component" : {
                                 "label"     : "component",
                                 "action"    : function( obj ) {
-                                    console.log("add component > ", obj );
+                                    var instanceID = obj.reference.prevObject[0].id;
+                                    var realNode = HierarchyRenderer.nodeInstanceIDMap[ instanceID ];
+
                                 },
                             }
                         }
@@ -45,8 +48,9 @@ var HierarchyRenderer = {
                             if( !obj.hasOwnProperty( 'reference') ) {
                                 console.log("check! : ", obj );
                             }
-
-                            cc.eventManager.dispatchCustomEvent('onDeleteNode', { selectedID : obj.reference.prevObject[0].id })
+                            var instanceID = obj.reference.prevObject[0].id;
+                            var realNode = HierarchyRenderer.nodeInstanceIDMap[ instanceID ];
+                            cc.eventManager.dispatchCustomEvent('onDeleteNode', { cocosNode : realNode })
                         },
                     }
                 }
@@ -58,6 +62,8 @@ var HierarchyRenderer = {
                 "show_only_matches": true
             }
         });
+
+        // 트리 노드 선택 시 이벤트
         $('#hierarchy').on("changed.jstree", function (e, data) {
             console.log( e, data );
             var selectedFileName = data.selected[0];
@@ -77,12 +83,15 @@ var HierarchyRenderer = {
         cc.eventManager.addCustomListener('onRefreshHierarchy', this.onRefreshTree.bind(this));
     },
 
+    // jstree를 데이터 대로 재구성
     onRefreshTree : function() {
         this.rootLayer && this.refreshTree( this.rootLayer, "#" );
+
         $("#hierarchy").jstree(true).settings.core.data = this.hierarchyData;
         $(`#hierarchy`).jstree("refresh");
     },
 
+    // 최상위 노드부터 다시 트리 데이터 세팅
     refreshTree : function( cocosNode, parentID ) {
         var id       = cocosNode.__instanceId;
         this.addTreeNode( id, parentID, cocosNode.getName(), cocosNode );
@@ -96,10 +105,18 @@ var HierarchyRenderer = {
                 this.refreshTree( children[i], loc_parentID, cocosNode  );
             }
         }
-
     },
 
+    /** 계층 패널에 노드 추가
+     *   ㄴ 실제로 jstree에 추가할 트리 데이터 세팅
+     * @param id        추가할 노드 인스턴스 아이디
+     * @param parentID  부모 노드 인스턴스 아이디
+     * @param text      계층 패널에 보일 노드명 ( 실제 코코스 노드와 같은 이름 )
+     * @param realNode  실제 코코스 노드
+     */
     addTreeNode : function( id, parentID, text, realNode  ) {
+        cc.log( HierarchyRenderer.Tag, " ** addTreeNode ** ", id, parentID, text, realNode );
+
         if( this.isExistNode( id, parentID ) ) {
             return;
         }

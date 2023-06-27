@@ -44,7 +44,7 @@ canvas {
     grid-template-columns: repeat(6, 1fr);
     /*grid-template-columns: auto 200px 200px 200px;*/
     /*grid-template-rows: repeat(6, 1fr);*/
-    grid-auto-rows: minmax(100px, 150px);
+    grid-auto-rows: minmax(100px, 20% );
 
     grid-template-areas:
         "main main main main hierarchy inspector"

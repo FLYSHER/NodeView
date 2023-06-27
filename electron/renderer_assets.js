@@ -1,3 +1,6 @@
+/**
+ * Assset 패널 관리
+ */
 var AssetRenderer = {
     treeDataArr : [],
 
@@ -19,6 +22,9 @@ var AssetRenderer = {
         return !!findOjb;
     },
 
+    /**
+     *
+     */
     addAsset : function( path ) {
         console.log("*** add addAsset  **** ", path );
         var dirName  = cc.path.dirname( path);
@@ -40,8 +46,6 @@ var AssetRenderer = {
                 this.addAssetToHierarchy( id, parentID );
             }
         }
-
-
 
         // step2. 바로 위 폴더 구하기
         if( dirName.length === 0 ) {

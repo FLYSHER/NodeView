@@ -19,7 +19,6 @@ var MainViewLayer = cc.Layer.extend({
         cc.eventManager.addCustomListener("createUIFile", this.onCreateUIFile.bind(this) );
         cc.eventManager.addCustomListener( "onDeleteNode", this.onDeleteNode.bind(this));
         cc.eventManager.addCustomListener("onChangeProperty", this.setNodeProperty.bind(this) );
-
     },
 
     onCreateUIFile : function( event ) {
@@ -38,8 +37,8 @@ var MainViewLayer = cc.Layer.extend({
 
     onDeleteNode : function( event ) {
         var userData    = event.getUserData();
-        var selectedID = userData.selectedID;
-        cc.log("[event] onDeleteNode >  ", selectedID );
+        var node        = userData.cocosNode;
+        cc.log("[event] onDeleteNode >  ", node );
     },
 
     setNodeProperty : function( event ) {
@@ -55,11 +54,9 @@ var MainViewLayer = cc.Layer.extend({
         var size = cc.winSize;
         this.CX = size.width / 2;
         this.CY = size.height / 2;
-
     },
 
     onExit: function() {
-
         this._super();
     },
 

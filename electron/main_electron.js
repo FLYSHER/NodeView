@@ -23,7 +23,7 @@ function createWindow () {
   //mainWindow.setMenu()
   //mainWindow.setMenu(null);
   // Open the DevTools.
-  // mainWindow.webContents.openDevTools();
+  mainWindow.webContents.openDevTools();
   return mainWindow;
 }
 
@@ -37,7 +37,7 @@ const template = [
 
           dialog.showOpenDialog().then((result)=>{
             if(result.canceled === false){
-              var files=result.filePaths;
+              const files = result.filePaths;
               //console.log("selectedPaths = "+ files);
               loadManager.loadFiles(files);
             }
