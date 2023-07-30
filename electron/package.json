@@ -5,6 +5,7 @@
   "main": "main_electron.js",
   "scripts": {
     "start": "electron .",
+    "dev": "nodemon --exec electron  .",
     "deploy:win": "electron-builder --windows nsis:ia32",
     "deploy:mac": "electron-builder --mac"
   },

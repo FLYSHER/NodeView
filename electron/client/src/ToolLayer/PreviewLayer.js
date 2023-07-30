@@ -18,6 +18,7 @@ var PreviewLayer = cc.Layer.extend({
 
     initPreview : function() {
         this._spr = new cc.Sprite();
+        this._spr.setPosition( 200, 200 );
         this.addChild( this._spr );
         // this._rtt_size = cc.size( 200, 200 );
         // this._rtt = new cc.RenderTexture( this._rtt_size.width, this._rtt_size.height );
