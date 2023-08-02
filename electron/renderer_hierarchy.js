@@ -96,14 +96,27 @@ var HierarchyRenderer = {
 
     // 최상위 노드부터 다시 트리 데이터 세팅
     refreshTree : function( cocosNode, parentID ) {
+        console.log("** refreshTree ** ");
+        console.log("   > ", cocosNode.getName(), cocosNode.__instanceId, cocosNode._className );
         var id       = cocosNode.__instanceId;
         this.addTreeNode( id, parentID, cocosNode.getName(), cocosNode );
 
         if( !!cocosNode && cocosNode.getChildren ) {
-            var i, loc_parentID,
+
+            var i, loc_parentID, child,
                 children = cocosNode.getChildren();
 
+
             for( i = 0; i < children.length; ++i ) {
+                child = children[i];
+
+                // armature 의 자식들 본 중에 부모가 없는거만 처리
+                if( cocosNode._className === "Armature" ) {
+                    if( child._className === "Bone" && child._parentBone ) {
+                        continue;
+                    }
+                }
+                console.log("       > ", child.getName(), child.__instanceId, child._className );
                 loc_parentID = cocosNode.__instanceId;
                 this.refreshTree( children[i], loc_parentID, cocosNode  );
             }
@@ -118,7 +131,7 @@ var HierarchyRenderer = {
      * @param realNode  실제 코코스 노드
      */
     addTreeNode : function( id, parentID, text, realNode  ) {
-        cc.log( HierarchyRenderer.Tag, " ** addTreeNode ** ", id, parentID, text, realNode );
+        // cc.log( HierarchyRenderer.Tag, " ** addTreeNode ** ", id, parentID, text, realNode );
 
         if( this.isExistNode( id, parentID ) ) {
             return;

@@ -85,16 +85,10 @@ GST.ResourceLoader = {
         console.log(" *** create node *** : ", fileEntry );
         var toolFileType = this.getToolFileType( fileEntry );
         if( toolFileType === GST.ToolFileType.UIFile ) {
-            cc.eventManager.dispatchCustomEvent( "createUIFile", { uiFileName :  fileEntry.name} );
+            cc.eventManager.dispatchCustomEvent( EVT.MAIN_VIEW.CREATE_UI_NODE, { fileName :  fileEntry.name} );
         }
         else if( toolFileType === GST.ToolFileType.ARMATURE ) {
-            var arfileName = fileEntry.name;
-            var arName     = cc.path.mainFileName( fileEntry.name );
-            ccs.armatureDataManager.addArmatureFileInfo( arfileName );
-            var ar = new ccs.Armature( arName );
-            ar.setPosition( cc.winSize.width/2, cc.winSize.height/2 );
-            cc.director.getRunningScene().addChild( ar );
-            ar.getAnimation().playWithIndex(0);
+            cc.eventManager.dispatchCustomEvent( EVT.MAIN_VIEW.CREATE_AR_NODE, { fileName : fileEntry.name } );
         }
         else {
 

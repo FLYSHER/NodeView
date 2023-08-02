@@ -16,7 +16,8 @@ var MainViewLayer = cc.Layer.extend({
     onEnter : function() {
         this._super();
 
-        cc.eventManager.addCustomListener("createUIFile", this.onCreateUIFile.bind(this) );
+        cc.eventManager.addCustomListener( EVT.MAIN_VIEW.CREATE_UI_NODE, this.onCreateUIFile.bind(this) );
+        cc.eventManager.addCustomListener( EVT.MAIN_VIEW.CREATE_AR_NODE, this.onCreateARFile.bind(this) );
         cc.eventManager.addCustomListener( "onDeleteNode", this.onDeleteNode.bind(this));
         cc.eventManager.addCustomListener("onChangeProperty", this.setNodeProperty.bind(this) );
         cc.eventManager.addCustomListener("onChangeNodeInHierarchy", this.setCurrNode.bind(this));
@@ -24,9 +25,9 @@ var MainViewLayer = cc.Layer.extend({
 
     onCreateUIFile : function( event ) {
         var userData    = event.getUserData();
-        var uiFileName  = userData.uiFileName;
+        var fileName  = userData.fileName;
 
-        var uiRoot = ccs.uiReader.widgetFromJsonFile( uiFileName);
+        var uiRoot = ccs.uiReader.widgetFromJsonFile( fileName);
         uiRoot.setAnchorPoint( 0.5, 0.5 );
         uiRoot.setPosition( cc.winSize.width/2, cc.winSize.height/2 );
         this.addChild( uiRoot );
@@ -35,6 +36,26 @@ var MainViewLayer = cc.Layer.extend({
         // cc.eventManager.dispatchCustomEvent( "refreshInspector", { node : uiRoot });
         cc.eventManager.dispatchCustomEvent( "onRefreshHierarchy" );
     },
+
+    onCreateARFile : function( event ) {
+        var userData    = event.getUserData();
+        var fileName  = userData.fileName;
+
+        var arName     = cc.path.mainFileName( fileName );
+        ccs.armatureDataManager.addArmatureFileInfo( fileName );
+
+        var ar = new ccs.Armature( arName );
+        ar.setName( arName );
+        ar.setPosition( cc.winSize.width/2, cc.winSize.height/2 );
+        this.addChild( ar );
+
+        ar.getAnimation().playWithIndex(0);
+        this.currNode = ar;
+
+        // cc.eventManager.dispatchCustomEvent( "refreshInspector", { node : uiRoot });
+        cc.eventManager.dispatchCustomEvent( "onRefreshHierarchy" );
+    },
+
 
     onDeleteNode : function( event ) {
         var userData    = event.getUserData();
