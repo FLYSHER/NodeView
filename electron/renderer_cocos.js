@@ -75,6 +75,7 @@ var CocosRenderer = {
     onFileDropReply : function( evt, payload ) {
         console.log("[EVT] >> fileDropEventReply complete : ", evt, payload);
 
+        // 디펜던시 리소스 캐싱 및 로드
         var p = this.loadResources( payload );
 
         var createNode = function ( fileEntry ) {

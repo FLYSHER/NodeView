@@ -80,6 +80,7 @@ GST.ResourceLoader = {
         return toolFileType;
     },
 
+    // 코코스
     createToolFileNode : function( fileEntry ) {
         console.log(" *** create node *** : ", fileEntry );
         var toolFileType = this.getToolFileType( fileEntry );
@@ -88,9 +89,9 @@ GST.ResourceLoader = {
         }
         else if( toolFileType === GST.ToolFileType.ARMATURE ) {
             var arfileName = fileEntry.name;
-            var arName     = cc.path.basename( fileEntry.name );
+            var arName     = cc.path.mainFileName( fileEntry.name );
             ccs.armatureDataManager.addArmatureFileInfo( arfileName );
-            var ar = new cc.Armature( arName );
+            var ar = new ccs.Armature( arName );
             ar.setPosition( cc.winSize.width/2, cc.winSize.height/2 );
             cc.director.getRunningScene().addChild( ar );
             ar.getAnimation().playWithIndex(0);
