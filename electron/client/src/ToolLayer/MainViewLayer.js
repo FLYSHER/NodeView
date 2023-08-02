@@ -19,6 +19,7 @@ var MainViewLayer = cc.Layer.extend({
         cc.eventManager.addCustomListener("createUIFile", this.onCreateUIFile.bind(this) );
         cc.eventManager.addCustomListener( "onDeleteNode", this.onDeleteNode.bind(this));
         cc.eventManager.addCustomListener("onChangeProperty", this.setNodeProperty.bind(this) );
+        cc.eventManager.addCustomListener("onChangeNodeInHierarchy", this.setCurrNode.bind(this));
     },
 
     onCreateUIFile : function( event ) {
@@ -48,6 +49,16 @@ var MainViewLayer = cc.Layer.extend({
         if( this.currNode ) {
             this.currNode[property] = value;
         }
+    },
+
+    setCurrNode : function( event ) {
+        var userData  = event.getUserData();
+        if( !userData || !userData.node ) {
+            cc.error( "invalid userData : ", userData );
+            return;
+        }
+
+        this.currNode = userData.node;
     },
 
     onResize : function () {

@@ -21,8 +21,8 @@ var InspectorRenderer = {
 
     initFormMeta : function() {
         var loc_meta = {
-            positionX   : { group : 'transform', type : "number", name : "positionX", options: { min: -3000, max: 3000, step: 1.0 } },
-            positionY   : { group : 'transform', type : "number", name : "positionY", options: { min: -3000, max: 3000, step: 1.0 }  },
+            x   : { group : 'transform', type : "number", name : "x", options: { min: -3000, max: 3000, step: 1.0 } },
+            y   : { group : 'transform', type : "number", name : "y", options: { min: -3000, max: 3000, step: 1.0 }  },
             scaleX      : { group : 'transform', type : "number", name : "scaleX" , options: { min: 0, max: 10.0, step: 0.01 }},
             scaleY      : { group : 'transform', type : "number", name : "scaleY" , options: { min: 0, max: 10.0, step: 0.01 }},
             anchorX     : { group : 'transform', type : "number", name : "anchorX", options: { min: 0, max: 1.0, step: 0.1 }  },
@@ -69,13 +69,13 @@ var InspectorRenderer = {
         var userData = event.getUserData();
         var node = userData.node;
         console.log("** inspector.refreshFormData ** ", node );
-        this.formData['positionX'] = node.getPositionX();
-        this.formData['positionY'] = node.getPositionY();
+        this.formData['x'] = node.x;
+        this.formData['y'] = node.y;
         this.formData['anchorX']   = node.anchorX;
         this.formData['anchorY']   = node.anchorY;
         this.formData['scaleX']    = node.scaleX;
         this.formData['scaleY']    = node.scaleY;
-        this.formData['name']      = node.getName();
+        this.formData['name']      = node.name;
         this.formData['className'] = node._className;
         this.formData['visible']   = node.isVisible();
         this.formData['sizeW']     = node.width;
@@ -89,7 +89,7 @@ var InspectorRenderer = {
         console.log(name + ' ' + value);
         this.formData[ name ] = value;
         cc.eventManager.dispatchCustomEvent( "onChangeProperty", {
-            property : 'x',
+            property : name,
             value    : value
         })
     },
@@ -99,8 +99,8 @@ var InspectorRenderer = {
     },
 
     addTransform : function() {
-        this.formData['positionX'] = 0;
-        this.formData['positionY'] = 0;
+        this.formData['x'] = 0;
+        this.formData['y'] = 0;
         this.formData['anchorX']   = 0;
         this.formData['anchorY']   = 0;
         this.formData['scaleX']    = 0;

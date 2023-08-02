@@ -67,11 +67,14 @@ var HierarchyRenderer = {
         $('#hierarchy').on("changed.jstree", function (e, data) {
             console.log( e, data );
             var selectedFileName = data.selected[0];
+            cc.log("selectedFileName > ", selectedFileName );
 
             if( data.node && data.node.id ) {
                 var realNode = this.nodeInstanceIDMap[data.node.id];
                 if( realNode ) {
+                    cc.eventManager.dispatchCustomEvent( "onChangeNodeInHierarchy", { node : realNode } );
                     cc.eventManager.dispatchCustomEvent( "refreshInspector", { node : realNode });
+
                 }
                 else {
                     console.log( "not exist node in nodeInstanceIDMap : ", data.node.id );
