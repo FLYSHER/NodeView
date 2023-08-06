@@ -205,6 +205,9 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
         this._realColor = cc.color(255, 255, 255, 255);
 
         this._renderCmd = this._createRenderCmd();
+
+        // 기본 컴포넌트 추가
+        this.addComponent( new GST.Component.NodePropertyView() );
     },
 
     /**

@@ -80,7 +80,6 @@ GST.ResourceLoader = {
         return toolFileType;
     },
 
-    // 코코스
     createToolFileNode : function( fileEntry ) {
         console.log(" *** create node *** : ", fileEntry );
         var toolFileType = this.getToolFileType( fileEntry );

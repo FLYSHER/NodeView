@@ -9,79 +9,28 @@ var InspectorRenderer = {
     formData : {},
     formMeta : {},
     options  : {},
+    currCocosNode : null,
 
     init : function() {
-        this.initFormMeta();
-
-        this.addTransform();
-        this.addProperty();
-
-        cc.eventManager.addCustomListener( 'refreshInspector', this.refreshFormData.bind(this) );
+        cc.eventManager.addCustomListener( 'refreshInspector', this.onChangeCurrentNode.bind(this) );
     },
 
-    initFormMeta : function() {
-        var loc_meta = {
-            x   : { group : 'transform', type : "number", name : "x", options: { min: -3000, max: 3000, step: 1.0 } },
-            y   : { group : 'transform', type : "number", name : "y", options: { min: -3000, max: 3000, step: 1.0 }  },
-            scaleX      : { group : 'transform', type : "number", name : "scaleX" , options: { min: 0, max: 10.0, step: 0.01 }},
-            scaleY      : { group : 'transform', type : "number", name : "scaleY" , options: { min: 0, max: 10.0, step: 0.01 }},
-            anchorX     : { group : 'transform', type : "number", name : "anchorX", options: { min: 0, max: 1.0, step: 0.1 }  },
-            anchorY     : { group : 'transform', type : "number", name : "anchorY", options: { min: 0, max: 1.0, step: 0.1 }  },
-
-            className   : { group : 'property', type : "label",   name : "className" },
-            name        : { group : 'property', type : "label",   name : "name" },
-            visible     : { group : 'property', type : "boolean", name : "visible" },
-            sizeW       : { group : 'property', type : "number",  name : "width" },
-            sizeH       : { group : 'property', type : "number",  name : "height" },
-        }
-        this.formMeta = loc_meta;
-
-        var theCustomTypes = {
-            ref: { // name of custom type
-                html: function(elemId, name, value, meta) { // custom renderer for type (required)
-                    var onclick = '';
-                    valueHTML = value + ' <i class="fa fa-external-link" onclick="selectRef(\'' + value + '\')"></i>';
-                    return valueHTML;
-                },
-                valueFn: true // value-return function (optional). If unset, default will be "function() { return $('#' + elemId).val(); }", set to false to disable it
-                // You can also put a makeValueFn function (taking elemId, name, value, meta parameters) to create value-return function on the fly (it will override valuefn setting), returning non-function will disable getting value for this property
-            }
-        };
-
-        function propertyChangedCallback(grid, name, value) {
-            // handle callback
-            console.log(name + ' ' + value);
-        }
-
-        this.options = {
-            meta        : loc_meta,
-            customTypes : theCustomTypes,
-            helpHtml    : '[?]', // default help "icon" is text in brackets, can also provide FontAwesome HTML for an icon (see examples)
-            callback    :  this.onChangeProperty.bind(this),//propertyChangedCallback,
-            isCollapsible: false,    // Allow collapsing property group. default to false.
-            sort        : true,             // Sort properties, accept boolean or a sort function. default to false.
-        }
-
-    },
-
-    // 다른 창에서 선택된 노드의 정보를 리프레시
-    refreshFormData : function( event ) {
+    // 메인뷰 나 hierarchy 뷰에서 현재 노드를 바꿨을 때 호출
+    onChangeCurrentNode : function( event ) {
         var userData = event.getUserData();
         var node = userData.node;
-        console.log("** inspector.refreshFormData ** ", node );
-        this.formData['x'] = node.x;
-        this.formData['y'] = node.y;
-        this.formData['anchorX']   = node.anchorX;
-        this.formData['anchorY']   = node.anchorY;
-        this.formData['scaleX']    = node.scaleX;
-        this.formData['scaleY']    = node.scaleY;
-        this.formData['name']      = node.name;
-        this.formData['className'] = node._className;
-        this.formData['visible']   = node.isVisible();
-        this.formData['sizeW']     = node.width;
-        this.formData['sizeH']     = node.height;
+        if( !node || node === this.currCocosNode ) {
+            return;
+        }
 
-        $(`#inspector`).jqPropertyGrid( this.formData, this.options );
+        this.currCocosNode = node;
+
+        this.clear();
+        GST.Utils.drawAllComponentInspector( node );
+    },
+
+    clear : function() {
+        $(`#inspector`).empty();
     },
 
     // inspector 에서 속성이 바뀌면 호출
@@ -93,31 +42,6 @@ var InspectorRenderer = {
             value    : value
         })
     },
-
-    resetFormData : function() {
-        this.formData = {};
-    },
-
-    addTransform : function() {
-        this.formData['x'] = 0;
-        this.formData['y'] = 0;
-        this.formData['anchorX']   = 0;
-        this.formData['anchorY']   = 0;
-        this.formData['scaleX']    = 0;
-        this.formData['scaleY']    = 0;
-
-        $(`#inspector`).jqPropertyGrid( this.formData, this.options );
-    },
-
-    addProperty : function() {
-        this.formData['name'] = '';
-        this.formData['className'] = '';
-        this.formData['visible'] = true;
-        this.formData['sizeW'] = 0;
-        this.formData['sizeH'] = 0;
-
-        $(`#inspector`).jqPropertyGrid( this.formData, this.options );
-    }
 
 //region [ sample ]
     //     var theObj = {
@@ -182,3 +106,6 @@ var InspectorRenderer = {
 //endregion
 
 }
+
+
+

@@ -17,6 +17,7 @@
         "src/arPool.js",
         "src/app.js",
         "src/Defines/eventDefines.js",
+        "src/Utils/GSTUtils.js",
         "src/uiListViewTest.js",
         "src/uiItemList.js",
         "src/uiPositionCtrl.js",

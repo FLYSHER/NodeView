@@ -106,6 +106,15 @@ body {
     /*grid-area: inspector;*/
 }
 
+.component_root {
+
+}
+
+.component_title {
+    display: block;
+    background-color: #95B8E7;
+}
+
 
 .sidenav {
     height: 100%;

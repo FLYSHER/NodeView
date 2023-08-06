@@ -25,12 +25,16 @@ var MainViewLayer = cc.Layer.extend({
 
     onCreateUIFile : function( event ) {
         var userData    = event.getUserData();
-        var fileName  = userData.fileName;
+        var fileName    = userData.fileName;
+        var basename    = cc.path.mainFileName( fileName );
 
         var uiRoot = ccs.uiReader.widgetFromJsonFile( fileName);
         uiRoot.setAnchorPoint( 0.5, 0.5 );
         uiRoot.setPosition( cc.winSize.width/2, cc.winSize.height/2 );
+        uiRoot.setName( basename );
+        uiRoot.addComponent(  new GST.Component.UIActionView( "uiActionViewer", fileName ) );
         this.addChild( uiRoot );
+
         this.currNode = uiRoot;
 
         // cc.eventManager.dispatchCustomEvent( "refreshInspector", { node : uiRoot });
@@ -38,7 +42,7 @@ var MainViewLayer = cc.Layer.extend({
     },
 
     onCreateARFile : function( event ) {
-        var userData    = event.getUserData();
+        var userData  = event.getUserData();
         var fileName  = userData.fileName;
 
         var arName     = cc.path.mainFileName( fileName );
