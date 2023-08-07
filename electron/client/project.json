@@ -27,7 +27,14 @@
         "src/loader.js",
         "src/draggableNode.js",
         "src/eventDispatcher.js",
+
+        "src/Components/GSTComponent.js",
+        "src/Components/InputComponent.js",
         "src/Components/ContentSizeView.js",
+        "src/Components/NodePropertyComponent.js",
+        "src/Components/UIActionComponent.js",
+
+        "src/ToolLayer/Gizmo.js",
         "src/ToolLayer/MainScene.js",
         "src/ToolLayer/MainViewLayer.js",
         "src/ToolLayer/PreviewLayer.js",
