@@ -33,6 +33,7 @@
         "src/Components/ContentSizeView.js",
         "src/Components/NodePropertyComponent.js",
         "src/Components/UIActionComponent.js",
+        "src/Components/ArmatureComponent.js",
 
         "src/ToolLayer/Gizmo.js",
         "src/ToolLayer/MainScene.js",

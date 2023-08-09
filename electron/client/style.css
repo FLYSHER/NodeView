@@ -61,6 +61,11 @@ body {
     /*    "sub sub sub sub assets inspector";*/
 }
 
+button:active {
+    box-shadow: inset -.3rem -.1rem 1.4rem  #FBFBFB, inset .3rem .4rem .8rem #BEC5D0;
+    cursor: pointer;
+}
+
 .grid_container > div {
     background-color: #95B8E7;
 }
@@ -115,6 +120,9 @@ body {
     background-color: #95B8E7;
 }
 
+.no_dot {
+    list-style: none;
+}
 
 .sidenav {
     height: 100%;

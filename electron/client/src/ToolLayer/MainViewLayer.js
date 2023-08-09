@@ -52,8 +52,7 @@ var MainViewLayer = cc.Layer.extend({
         ar.setName( arName );
         ar.setPosition( cc.winSize.width/2, cc.winSize.height/2 );
         this.addChild( ar );
-
-        ar.getAnimation().playWithIndex(0);
+        ar.addComponent(  new GST.Component.Armature("GST.Component.Armature") );
         this.currNode = ar;
 
         // cc.eventManager.dispatchCustomEvent( "refreshInspector", { node : uiRoot });
