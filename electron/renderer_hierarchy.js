@@ -14,6 +14,11 @@ var HierarchyRenderer = {
 
         $('#hierarchy').jstree({
             'core' : {
+                'themes' : {
+                    "name": "default-dark",
+                    "dots": false,
+                    "icons": false
+                },
                 'data' : [
                 ]
             },

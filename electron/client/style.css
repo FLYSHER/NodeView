@@ -34,12 +34,64 @@ html {
 /*    flex-direction: column;*/
 /*}*/
 
+:root {
+    --background: #fff;
+    --text: #363636;
+    --heading-text: #000;
+    --heading-background : #fff;
+    --anchor-text: #0076d1;
+    --code-background: #efefef;
+    --code-text: #000;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --background: #202b38;
+        --text: #dbdbdb;
+        --heading-text: #fff;
+        --heading-background : #444242;
+        --anchor-text: #0076d1;
+        --code-background: #161f27;
+        --code-text: #ffbe85;
+    }
+}
+
 canvas {
     background-color: rgba(255, 0, 0, 0);
 }
 
 body {
+    background: var(--background);
     height: 100vh;
+}
+
+h1,
+h2,
+h3 {
+    color: var(--heading-text);
+}
+
+p,
+dl {
+    color: var(--text);
+}
+
+.title_p {
+    color: var(--text);
+    background: var(--heading-background);
+    margin: 2px;
+}
+
+a {
+    color: var(--anchor-text);
+    text-decoration: none;
+}
+
+code {
+    color: var(--code-text);
+    background: var(--code-background);
+    border-radius: 6px;
+    padding: 2.5px 5px;
 }
 
 .grid_container {
@@ -67,23 +119,23 @@ button:active {
 }
 
 .grid_container > div {
-    background-color: #95B8E7;
+    /*background-color: #95B8E7;*/
 }
 
 #cocosView_gridItem, #subView_gridItem, #hierarchy_gridItem, #assets_gridItem, #inspector_gridItem {
-    border: 5px solid #FFFF00;
+    /*border: 5px solid #FFFF00;*/
 }
 
 #cocosView_gridItem {
-    background: #00F0F0;
+    /*background: #00F0F0;*/
     /*grid-area: main;*/
 }
 #subView_gridItem {
-    background: #444444;
+    /*background: #444444;*/
     /*grid-area: sub;*/
 }
 #hierarchy_gridItem {
-    background: #FF00FF;
+    /*background: #FF00FF;*/
     height: 50%;
     /*grid-area: hierarchy;*/
     overflow: scroll;
@@ -94,7 +146,7 @@ button:active {
 }
 
 #assets_gridItem {
-    background: #FF0000;
+    /*background: #FF0000;*/
     height : 50%;
     /*grid-area: assets;*/
     overflow: scroll;

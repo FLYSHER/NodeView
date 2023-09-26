@@ -5,7 +5,7 @@
  * License: MIT
  */
 .pgTable {
-    border: solid 1px #95B8E7;
+    border: solid  1px #95B8E7;
     border-spacing: 0;
 }
 
@@ -26,6 +26,7 @@
 }
 
 .pgCell {
+    color: #bbbbbb;
     border: dotted 1px #ccc;
     padding: 5px;
 }

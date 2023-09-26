@@ -5,7 +5,17 @@ var AssetRenderer = {
     treeDataArr : [],
 
     init : function() {
-        $("#assets").jstree();
+        $("#assets").jstree({
+            'core' : {
+                'themes' : {
+                    "name": "default-dark",
+                    "dots": false,
+                    "icons": false
+                },
+                'data' : [
+                ]
+            }
+        });
         $('#assets').on("changed.jstree", function (e, data) {
             console.log( e, data );
 
