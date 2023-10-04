@@ -1,6 +1,7 @@
-var MainViewLayer = cc.Layer.extend({
+var MainViewLayer = cc.LayerColor.extend({
     ctor: function () {
-        this._super();
+        // this._super();
+        this._super( cc.color( 0, 255, 0, 50 ));
         this.setName("mainLayer");
 
         var size = cc.winSize;
@@ -89,6 +90,8 @@ var MainViewLayer = cc.Layer.extend({
         var size = cc.winSize;
         this.CX = size.width / 2;
         this.CY = size.height / 2;
+
+        this.setContentSize( size.width, size.height );
     },
 
     onExit: function() {

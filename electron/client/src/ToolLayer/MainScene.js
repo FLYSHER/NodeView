@@ -4,10 +4,11 @@ Genie.LayerType = {
     PREVIEW : 1
 }
 
+Genie.gizmoLayer = null;
+
 var MainScene = cc.Scene.extend({
     ctor : function() {
         this._super();
-
     },
 
     onEnter:function () {
@@ -72,16 +73,17 @@ var MainScene = cc.Scene.extend({
         this._previewLayer = new PreviewLayer();
         this.addChild( this._previewLayer, 0 );
 
+        this._gizmoLayer   = new GizmoLayer();
+        this.addChild( this._gizmoLayer, 1 );
+
         this._mainViewLayer.setPosition( 0, 0 );
         this._previewLayer.setPosition( 0, 0 );
+        this._gizmoLayer.setPosition( 0, 0 );
 
         this._currLayerType = -1;
         this.setCurrentLayer( Genie.LayerType.MAIN );
 
-        var gizmo = new Gizmo();
-        gizmo.setPosition( 100, 100 )
-        this.addChild( gizmo, 100 );
-
+        Genie.gizmoLayer = this._gizmoLayer;
     },
 
     setCurrentLayer : function( layerType ) {

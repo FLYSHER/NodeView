@@ -30,14 +30,13 @@
 
         "src/Components/GSTComponent.js",
         "src/Components/InputComponent.js",
-        "src/Components/ContentSizeView.js",
         "src/Components/NodePropertyComponent.js",
         "src/Components/UIActionComponent.js",
         "src/Components/ArmatureComponent.js",
 
-        "src/ToolLayer/Gizmo.js",
         "src/ToolLayer/MainScene.js",
         "src/ToolLayer/MainViewLayer.js",
+        "src/ToolLayer/GizmoLayer.js",
         "src/ToolLayer/PreviewLayer.js",
         "src/uiErrorLog.js"
     ]
