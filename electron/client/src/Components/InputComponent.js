@@ -61,6 +61,7 @@ GST.Component.Touch = GST.Component.Base.extend({
             this._drawHitRect(this._owner);
         }
     },
+
     //부모에다 그리기
     drawDebugingHitRectOnParent: function() {
 
@@ -272,18 +273,15 @@ GST.Component.Touch = GST.Component.Base.extend({
     },
 
     //이벤트 리스너 생성
-    _createEvent : function (){
-
+    _createEvent : function (  ){
         var self = this;
-
-
         var isTouchEnabled = this.isEnabled() && this._touchEnabled;
         if( 'mouse' in cc.sys.capabilities  && this._mouseListener == null ) {
             // var targetNode = this.getOwner();
             // cc.log("RockN.Component.Touch MouseEvent Listener Created : "+ targetNode.getName());
             this._mouseListener =   cc.EventListener.create({
                 event: cc.EventListener.MOUSE,
-                swallowTouches: true,
+                swallowTouches: false,
                 // hitSuccess: false,
                 // overState: false,
                 lastMoveState : false,
@@ -339,7 +337,7 @@ GST.Component.Touch = GST.Component.Base.extend({
             cc.eventManager.addListener( this._mouseListener , this.getTouchPriority());
             this._mouseListener.setEnabled(isTouchEnabled);
         }
-        // else  //else제거
+
         if( this._touchListener == null) {
 
             // cc.log("RockN.Component.Touch TouchEvent Listener Created : "+ targetNode.getName());

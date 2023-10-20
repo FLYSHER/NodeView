@@ -53,8 +53,18 @@ var MainViewLayer = cc.LayerColor.extend({
         ar.setName( arName );
         ar.setPosition( cc.winSize.width/2, cc.winSize.height/2 );
         this.addChild( ar );
+
         ar.addComponent(  new GST.Component.Armature("GST.Component.Armature") );
+
+        var boneDic = ar.getBoneDic();
+        var key, bone;
+        for( key in boneDic ) {
+            bone = ar.getBone( key );
+            bone.addComponent( new GST.Component.Bone("GST.Component.Bone") );
+        }
+
         this.currNode = ar;
+
 
         // cc.eventManager.dispatchCustomEvent( "refreshInspector", { node : uiRoot });
         cc.eventManager.dispatchCustomEvent( "onRefreshHierarchy" );

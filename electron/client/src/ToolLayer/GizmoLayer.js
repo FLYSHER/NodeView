@@ -3,12 +3,16 @@
  */
 var Gizmo = cc.Node.extend({
     ctor : function() {
+        this.initProperty();
         this._super();
         this.initGizmo();
     },
 
     initProperty : function() {
-        this._isDrag = false;
+        this._isDrag        = false;
+        this._dragStartPt   = cc.p( 0, 0 );
+        this._targetNodePtAtDragStart = cc.p( 0, 0 );
+        this._touchComp     = null;
     },
 
     initGizmo : function () {
@@ -64,7 +68,9 @@ var Gizmo = cc.Node.extend({
                 }break;
                 case "down": {
                     self.setDrag(true);
-                    cc.log("down");
+                    self.setActiveTouchComp( false );
+                    self._dragStartPt = pt;
+
                 }break;
                 case "click": {
                     cc.log("click");
@@ -74,12 +80,14 @@ var Gizmo = cc.Node.extend({
                 }break;
             }
         }
+
+        this._touchComp = touchComp;
     },
 
     refreshContentSize : function( node ) {
         this._drawCSizeNode.clear();
 
-        var c_size  = node.getContentSize(); // node.getBoundingBox();
+        var c_size  = node.getContentSize();
         var apps    = node.getAnchorPointInPoints();
         var origin  = cc.p( 0, 0 );
         var dest    = cc.p( c_size.width, c_size.height );
@@ -90,9 +98,20 @@ var Gizmo = cc.Node.extend({
     },
 
     setTargetNode : function( node ) {
-        var worldPos = node.getWorldPosition();
+        var worldPos;
+        if( node instanceof ccui.Widget ) {
+            worldPos = node.getWorldPosition();
+        }
+        else {
+            var parent = node.getParent();
+            parent = !!parent ? parent : node;
+            worldPos = parent.convertToWorldSpace( node.getPosition() );
+        }
+
         this.setPosition( worldPos );
         this.refreshContentSize( node );
+
+        this._targetNodePtAtDragStart = worldPos;
     },
 
     setDrag : function( drag ) {
@@ -101,7 +120,24 @@ var Gizmo = cc.Node.extend({
 
     isDrag : function() {
         return this._isDrag;
-    }
+    },
+
+    getDragStartPt : function() {
+        return this._dragStartPt;
+    },
+
+    getDiffPt : function() {
+        return
+    },
+
+    setActiveTouchComp : function( active ) {
+        this._touchComp && this._touchComp.setEnabled( active );
+    },
+
+    followTarget : function( targetNode ) {
+        var worldPos = targetNode.getWorldPosition();
+        this.setPosition( worldPos );
+    },
 
 });
 
@@ -140,12 +176,14 @@ var GizmoLayer = cc.LayerColor.extend({
             {
                 case "normal": {
                     self._targetNode && self._gizmoNode.setDrag( false );
+                    self._gizmoNode.setActiveTouchComp( true );
                 }break;
                 case "over": {
 
                 }break;
                 case "up": {
                     self._targetNode && self._gizmoNode.setDrag( false );
+                    self._gizmoNode.setActiveTouchComp( true );
                     cc.log("up");
                 }break;
                 case "down": {
@@ -156,7 +194,15 @@ var GizmoLayer = cc.LayerColor.extend({
                 }break;
                 case "move": {
                     if( self._targetNode && self._gizmoNode.isDrag() ) {
-                        cc.log("aaaa");
+                        var targetWorldPos  = self._targetNode.getWorldPosition();
+                        var dragStartPt     = self._gizmoNode.getDragStartPt();
+                        var diffPos         = cc.pSub( dragStartPt, targetWorldPos );
+
+                        var pt2 = cc.pSub( pt, diffPos );
+                        var localPos = self._targetNode.getParent().convertToNodeSpace( pt2 );
+
+                        self._targetNode.setPosition( localPos );
+                        self._gizmoNode.followTarget( self._targetNode );
                     }
                 }break;
             }

@@ -33,6 +33,7 @@
         "src/Components/NodePropertyComponent.js",
         "src/Components/UIActionComponent.js",
         "src/Components/ArmatureComponent.js",
+        "src/Components/BoneComponent.js",
 
         "src/ToolLayer/MainScene.js",
         "src/ToolLayer/MainViewLayer.js",
