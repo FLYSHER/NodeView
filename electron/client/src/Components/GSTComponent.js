@@ -13,4 +13,6 @@ GST.Component.Base = cc.Component.extend({
     drawInspector : function() {
         throw Error('Do Override ');
     },
+
+
 });

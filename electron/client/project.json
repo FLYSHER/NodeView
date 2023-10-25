@@ -16,6 +16,7 @@
         "src/resource.js",
         "src/arPool.js",
         "src/app.js",
+        "src/HtmlHelper.js",
         "src/Defines/eventDefines.js",
         "src/Utils/GSTUtils.js",
         "src/uiListViewTest.js",

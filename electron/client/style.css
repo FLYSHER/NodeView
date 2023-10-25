@@ -124,6 +124,8 @@ button:active {
 
 #cocosView_gridItem, #subView_gridItem, #hierarchy_gridItem, #assets_gridItem, #inspector_gridItem {
     /*border: 5px solid #FFFF00;*/
+    border-radius: 3px;
+    border: solid 1px #a8a5a5;
 }
 
 #cocosView_gridItem {
@@ -164,12 +166,16 @@ button:active {
 }
 
 .component_root {
-
 }
 
 .component_title {
     display: block;
     background-color: #95B8E7;
+}
+
+.component_attribName {
+    display: block;
+    color: #bbbbbb;
 }
 
 .no_dot {
@@ -375,5 +381,5 @@ ul.tabs li.current{
 }
 
 *{
-    border: solid 1px #fd7777;
+    /*border: solid 1px #fd7777;*/
 }

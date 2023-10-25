@@ -19,15 +19,17 @@ GST.Component.UIActionView = GST.Component.Base.extend({
 
     //override
     drawInspector : function() {
-        var rootDiv = document.createElement('div');
-        rootDiv.className = 'component_root';
-        $(`#inspector`).append( rootDiv );
+        // var rootDiv = document.createElement('div');
+        // rootDiv.className = 'component_root';
+        // $(`#inspector`).append( rootDiv );
+        //
+        // // title
+        // var title = document.createElement('p');
+        // title.className = 'component_title';
+        // title.innerText = this._jsonName;
+        // rootDiv.append( title );
 
-        // title
-        var title = document.createElement('p');
-        title.className = 'component_title';
-        title.innerText = this._jsonName;
-        rootDiv.append( title );
+        var rootDiv =  HtmlHelper.createComponentRootDiv("UI Action");
 
         var actionList = ccs.actionManager.getActionList( this._jsonName );
         if( !actionList ||  actionList.length <= 0 ) {
