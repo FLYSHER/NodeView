@@ -3,6 +3,7 @@ GST.Component.Armature = GST.Component.Base.extend({
     ctor : function( name ) {
         this._super();
         this.setName( name );
+        this._currTrackIdx = 0;
     },
 
     onEnter : function() {
@@ -25,32 +26,64 @@ GST.Component.Armature = GST.Component.Base.extend({
         var movementDataDic = animationData.movementDataDic;
         var movementNames   = animationData.movementNames;
 
-        var i, movementData,
-            dl, // duration
-            sc; // scale
-
-        var el_div, el_p;
+        var i,
+            arrOption = [];
 
         for( i = 0; i < movementNames.length; ++i ) {
-            el_div = document.createElement('div');
-            el_p   = document.createElement('p');
-            el_p.style.margin = '3px';
-            el_p.style.padding = '3px';
-            el_p.innerText = movementNames[i];
-
-            el_div.appendChild( el_p );
-            rootDiv.appendChild( el_div );
-
-            movementData = movementDataDic[movementNames[i]];
-            dl = movementData.duration;
-            sc = movementData.scale;
-
-            HtmlHelper.createTextField( el_div, "dl", dl, true );
-            HtmlHelper.createTextField( el_div, "sc", sc, false, function(event){
-                cc.log(event.target.value);
-            } );
+            arrOption.push( movementNames[i] );
         }
 
+        var self = this;
+        HtmlHelper.createSelectMenu( rootDiv, "TrackName", movementNames[0], arrOption, function(event){
+
+            var currIdx = event.target.value;
+            var movementData = movementDataDic[movementNames[currIdx]];
+            var dl = movementData.duration; // duration
+            var sc = movementData.scale;    // scale
+
+            el_dlInput.value = dl;
+            el_scInput.value = sc;
+
+            self._currTrackIdx = currIdx;
+        });
+
+        HtmlHelper.createButton( rootDiv, "play", function(){
+            var movementData = movementDataDic[movementNames[self._currTrackIdx]];
+            var loop = el_loopInput.checked;    // movementData.loop;
+            // var sc   = movementData.scale;      //el_scInput.value;
+            // armature.getAnimation().setSpeedScale( sc );
+            armature.getAnimation().playWithIndex( self._currTrackIdx, -1, loop );
+        });
+
+        var dl = movementDataDic[movementNames[0]].duration;
+        var sc = movementDataDic[movementNames[0]].scale;
+        var loop = movementDataDic[movementNames[0]].loop;
+
+        var el_loopInput = HtmlHelper.createCheckbox( rootDiv, "loop", loop );
+        var el_dlInput = HtmlHelper.createTextField( rootDiv, "dl", dl, true );
+        var el_scInput = HtmlHelper.createTextField( rootDiv, "sc", sc, false, function(event){
+            cc.log(event.target.value);
+        } );
+
+        // var el_div, el_p;
+        // el_div = document.createElement('div');
+        // el_div.style.border = "solid 1px #fd7777";
+        // el_p   = document.createElement('p');
+        // el_p.style.margin = '3px';
+        // el_p.style.padding = '3px';
+        // el_p.innerText = movementNames[i];
+        //
+        // el_div.appendChild( el_p );
+        // rootDiv.appendChild( el_div );
+        //
+        // movementData = movementDataDic[movementNames[i]];
+        // dl = movementData.duration;
+        // sc = movementData.scale;
+        //
+        // HtmlHelper.createTextField( el_div, "dl", dl, true );
+        // HtmlHelper.createTextField( el_div, "sc", sc, false, function(event){
+        //     cc.log(event.target.value);
+        // } );
 
         // if( !movementNames ||  movementNames.length <= 0 ) {
         //     var p = document.createElement('div');

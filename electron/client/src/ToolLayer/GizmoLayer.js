@@ -27,16 +27,18 @@ var Gizmo = cc.Node.extend({
 
         var LINE_LENGTH = 80;
         var LINE_WIDTH  = 2;
+        var LINE_OPACITY = 100;
         var ARROW_LENGTH = 10;
 
-        // 기즈모
-        this._drawNode.drawSegment( cc.p( 0,0 ), cc.p( LINE_LENGTH, 0 ), LINE_WIDTH, cc.color( 255, 0,0,255) );
-        this._drawNode.drawSegment( cc.p( LINE_LENGTH,0 ), cc.p( LINE_LENGTH - ARROW_LENGTH, ARROW_LENGTH ), LINE_WIDTH, cc.color( 255, 0,0,255) );
-        this._drawNode.drawSegment( cc.p( LINE_LENGTH,0 ), cc.p( LINE_LENGTH - ARROW_LENGTH, -ARROW_LENGTH ), LINE_WIDTH, cc.color( 255, 0,0,255) );
 
-        this._drawNode.drawSegment( cc.p( 0,0 ), cc.p( 0, LINE_LENGTH ), LINE_WIDTH, cc.color( 0, 255,0,255) );
-        this._drawNode.drawSegment( cc.p( 0,LINE_LENGTH ), cc.p( ARROW_LENGTH, LINE_LENGTH - ARROW_LENGTH ), LINE_WIDTH, cc.color( 0, 255,0,255) );
-        this._drawNode.drawSegment( cc.p( 0,LINE_LENGTH ), cc.p( -ARROW_LENGTH, LINE_LENGTH - ARROW_LENGTH ), LINE_WIDTH, cc.color( 0, 255,0,255) );
+        // 기즈모
+        this._drawNode.drawSegment( cc.p( 0,0 ), cc.p( LINE_LENGTH, 0 ), LINE_WIDTH, cc.color( 255, 0,0,LINE_OPACITY) );
+        this._drawNode.drawSegment( cc.p( LINE_LENGTH,0 ), cc.p( LINE_LENGTH - ARROW_LENGTH, ARROW_LENGTH ), LINE_WIDTH, cc.color( 255, 0,0,LINE_OPACITY) );
+        this._drawNode.drawSegment( cc.p( LINE_LENGTH,0 ), cc.p( LINE_LENGTH - ARROW_LENGTH, -ARROW_LENGTH ), LINE_WIDTH, cc.color( 255, 0,0,LINE_OPACITY) );
+
+        this._drawNode.drawSegment( cc.p( 0,0 ), cc.p( 0, LINE_LENGTH ), LINE_WIDTH, cc.color( 0, 255,0,LINE_OPACITY) );
+        this._drawNode.drawSegment( cc.p( 0,LINE_LENGTH ), cc.p( ARROW_LENGTH, LINE_LENGTH - ARROW_LENGTH ), LINE_WIDTH, cc.color( 0, 255,0,LINE_OPACITY) );
+        this._drawNode.drawSegment( cc.p( 0,LINE_LENGTH ), cc.p( -ARROW_LENGTH, LINE_LENGTH - ARROW_LENGTH ), LINE_WIDTH, cc.color( 0, 255,0,LINE_OPACITY) );
 
         this._drawNode.drawDot( cc.p( 0, 0), 2, cc.color( 200, 200, 200, 200) );
 
@@ -70,7 +72,7 @@ var Gizmo = cc.Node.extend({
                     self.setDrag(true);
                     self.setActiveTouchComp( false );
                     self._dragStartPt = pt;
-
+                    self._targetNodePtAtDragStart = self.getPosition();
                 }break;
                 case "click": {
                     cc.log("click");
@@ -127,7 +129,7 @@ var Gizmo = cc.Node.extend({
     },
 
     getDiffPt : function() {
-        return
+        return cc.pSub( this._dragStartPt, this._targetNodePtAtDragStart );
     },
 
     setActiveTouchComp : function( active ) {
@@ -194,12 +196,14 @@ var GizmoLayer = cc.LayerColor.extend({
                 }break;
                 case "move": {
                     if( self._targetNode && self._gizmoNode.isDrag() ) {
-                        var targetWorldPos  = self._targetNode.getWorldPosition();
-                        var dragStartPt     = self._gizmoNode.getDragStartPt();
-                        var diffPos         = cc.pSub( dragStartPt, targetWorldPos );
-
+                        // var targetWorldPos  = self._targetNode.getWorldPosition();
+                        // var dragStartPt     = self._gizmoNode.getDragStartPt();
+                        // var diffPos         = cc.pSub( dragStartPt, targetWorldPos );
+                        var diffPos = self._gizmoNode.getDiffPt();
                         var pt2 = cc.pSub( pt, diffPos );
                         var localPos = self._targetNode.getParent().convertToNodeSpace( pt2 );
+
+                        cc.log(" pt , diffPos, pt2 ", pt, diffPos, pt2 );
 
                         self._targetNode.setPosition( localPos );
                         self._gizmoNode.followTarget( self._targetNode );

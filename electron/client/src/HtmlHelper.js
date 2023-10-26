@@ -1,5 +1,24 @@
 var HtmlHelper = {
 
+    createButton : function( parent, innerText, onclick ) {
+        var el_button = document.createElement( 'button' );
+        el_button.innerText = innerText;
+        el_button.addEventListener( "click", onclick );
+        parent.appendChild( el_button );
+        return el_button;
+    },
+
+    createCheckbox : function( parent, name, checked, onchange ) {
+        var el_checkbox = document.createElement('input');
+        el_checkbox.type = "checkbox";
+        el_checkbox.name = name;
+        el_checkbox.checked = checked;
+        el_checkbox.addEventListener( "change", onchange );
+        parent.appendChild( el_checkbox );
+
+        return el_checkbox;
+    },
+
     createTextField : function( parent, label, inputPlaceHolder, readOnly, onchange ) {
         var el_label = document.createElement('label');
         el_label.className = "component_attribName"
@@ -20,6 +39,7 @@ var HtmlHelper = {
         }
 
         parent.appendChild(el_input);
+        return el_input;
     },
 
     createComponentRootDiv : function( component_title ) {
