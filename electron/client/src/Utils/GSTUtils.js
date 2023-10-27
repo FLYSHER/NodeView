@@ -10,4 +10,15 @@ GST.Utils = {
             comp.drawInspector && comp.drawInspector();
         }
     },
+
+    getNodeWorldPosition : function( node ) {
+        if( node instanceof ccui.Widget ) {
+            return node.getWorldPosition();
+        }
+        else {
+            var parent = node.getParent();
+            parent = !!parent ? parent : node;
+            return parent.convertToWorldSpace( node.getPosition() );
+        }
+    },
 }

@@ -79,7 +79,7 @@ var Gizmo = cc.Node.extend({
                 }break;
                 case "move": {
                     cc.log("move");
-                }break;
+                }break;``
             }
         }
 
@@ -137,7 +137,7 @@ var Gizmo = cc.Node.extend({
     },
 
     followTarget : function( targetNode ) {
-        var worldPos = targetNode.getWorldPosition();
+        var worldPos = GST.Utils.getNodeWorldPosition( targetNode );
         this.setPosition( worldPos );
     },
 
