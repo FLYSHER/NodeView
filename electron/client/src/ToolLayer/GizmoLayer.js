@@ -29,16 +29,18 @@ var Gizmo = cc.Node.extend({
         var LINE_WIDTH  = 2;
         var LINE_OPACITY = 100;
         var ARROW_LENGTH = 10;
+        var ARROW_COLOR_X = cc.color( 255, 0, 0, LINE_OPACITY );
+        var ARROW_COLOR_Y = cc.color( 0, 255, 0, LINE_OPACITY );
 
 
         // 기즈모
-        this._drawNode.drawSegment( cc.p( 0,0 ), cc.p( LINE_LENGTH, 0 ), LINE_WIDTH, cc.color( 255, 0,0,LINE_OPACITY) );
-        this._drawNode.drawSegment( cc.p( LINE_LENGTH,0 ), cc.p( LINE_LENGTH - ARROW_LENGTH, ARROW_LENGTH ), LINE_WIDTH, cc.color( 255, 0,0,LINE_OPACITY) );
-        this._drawNode.drawSegment( cc.p( LINE_LENGTH,0 ), cc.p( LINE_LENGTH - ARROW_LENGTH, -ARROW_LENGTH ), LINE_WIDTH, cc.color( 255, 0,0,LINE_OPACITY) );
+        this._drawNode.drawSegment( cc.p( 0,0 ), cc.p( LINE_LENGTH, 0 ), LINE_WIDTH, ARROW_COLOR_X );
+        this._drawNode.drawSegment( cc.p( LINE_LENGTH,0 ), cc.p( LINE_LENGTH - ARROW_LENGTH, ARROW_LENGTH ), LINE_WIDTH, ARROW_COLOR_X );
+        this._drawNode.drawSegment( cc.p( LINE_LENGTH,0 ), cc.p( LINE_LENGTH - ARROW_LENGTH, -ARROW_LENGTH ), LINE_WIDTH, ARROW_COLOR_X );
 
         this._drawNode.drawSegment( cc.p( 0,0 ), cc.p( 0, LINE_LENGTH ), LINE_WIDTH, cc.color( 0, 255,0,LINE_OPACITY) );
-        this._drawNode.drawSegment( cc.p( 0,LINE_LENGTH ), cc.p( ARROW_LENGTH, LINE_LENGTH - ARROW_LENGTH ), LINE_WIDTH, cc.color( 0, 255,0,LINE_OPACITY) );
-        this._drawNode.drawSegment( cc.p( 0,LINE_LENGTH ), cc.p( -ARROW_LENGTH, LINE_LENGTH - ARROW_LENGTH ), LINE_WIDTH, cc.color( 0, 255,0,LINE_OPACITY) );
+        this._drawNode.drawSegment( cc.p( 0,LINE_LENGTH ), cc.p( ARROW_LENGTH, LINE_LENGTH - ARROW_LENGTH ), LINE_WIDTH, ARROW_COLOR_Y );
+        this._drawNode.drawSegment( cc.p( 0,LINE_LENGTH ), cc.p( -ARROW_LENGTH, LINE_LENGTH - ARROW_LENGTH ), LINE_WIDTH, ARROW_COLOR_Y );
 
         this._drawNode.drawDot( cc.p( 0, 0), 2, cc.color( 200, 200, 200, 200) );
 

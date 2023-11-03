@@ -1,3 +1,4 @@
+
 var HtmlHelper = {
 
     createButton : function( parent, innerText, onclick ) {
@@ -30,8 +31,10 @@ var HtmlHelper = {
         el_input.type = "text";
         el_input.style.width = '50px';
 
-        el_input.style.marginRight   = '10px';
-        el_input.style.marginLeft   = '5px';
+        el_input.style.marginRight = '10px';
+        el_input.style.marginLeft  = '5px';
+        el_input.style.background  = '#222222';
+        el_input.style.color      = '#dbdbdb';
         el_input.value = inputPlaceHolder;
         el_input.readOnly = !!readOnly;
         if( !readOnly && onchange ) {
@@ -93,5 +96,36 @@ var HtmlHelper = {
         }
 
         return label_name; // select 의 최상위 요소 리턴.
+    },
+
+    // inspector
+    createComponentRootDiv2 : function() {
+        var div_comp = document.createElement('div');
+        div_comp.className = "inspector_component";
+        div_comp.style = "background-color: #363636;";
+        $(`#inspector`).append( div_comp );
+
+        return div_comp;
+    },
+
+    createComponentBar : function( componentName, iconObj ) {
+        var div_comp = document.createElement('div');
+        div_comp.style.display = 'block';
+        div_comp.style.backgroundColor = "#555555";
+        div_comp.style.border   = 'solid 2px #151515FF';
+        // div_comp.style.padding  = '5px';
+
+
+        var icon = document.createElement( 'i' );
+        icon.className  = iconObj.className;
+        icon.style      = iconObj.style;
+        div_comp.appendChild( icon );
+
+        var label = document.createElement('span');
+        label.style.color = '#dbdbdb';
+        label.innerText =  componentName;
+        div_comp.appendChild( label );
+
+        return div_comp;
     },
 }

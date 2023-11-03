@@ -13,13 +13,64 @@ GST.Component.NodePropertyView = GST.Component.Base.extend({
 
     // do overried
     drawInspector : function() {
+        var rootDiv = HtmlHelper.createComponentRootDiv2();
 
-        this.refreshNodeAllProperty();
-        // $('#inspector').jqPropertyGrid( this.formData, this.options );
+        var iconObj = {
+            className : "fa-sharp fa-solid fa-arrows-up-down-left-right",
+            style : "color: #d0b8f4;"
+        }
+        var titleBar = HtmlHelper.createComponentBar("Transform", iconObj);
+        rootDiv.appendChild( titleBar );
 
-        // In order to get back the modified values:
-        var theNewObj = $('#node_property').jqPropertyGrid('get');
-        console.log( "theNewObj > ", theNewObj );
+
+        // position
+        var div_pos = document.createElement('div');
+        rootDiv.appendChild( div_pos );
+
+        var label_title = document.createElement('label');
+        label_title.innerText       = "Position";
+        label_title.style.width     = '80px';
+        label_title.style.paddingLeft = '10px';
+        label_title.style.display   = 'inline-block';
+        label_title.style.color     = '#DEDEDEFF';
+        div_pos.appendChild( label_title );
+
+        var label_x = HtmlHelper.createTextField( div_pos, "X", 0, false, function(){ cc.log("x changed")});
+        var label_y = HtmlHelper.createTextField( div_pos, "Y", 0, false, function(){ cc.log("y changed")});
+
+        // rotation
+        var div_rot = document.createElement('div');
+        rootDiv.appendChild( div_rot );
+
+        var label_rotation = div_rot.appendChild( document.createElement('label') );
+        label_rotation.innerText        = "Rotation";
+        label_rotation.style.display    = 'inline-block';
+        label_rotation.style.width      = '80px';
+        label_rotation.style.paddingLeft = '10px';
+        label_rotation.style.color     = '#DEDEDEFF';
+        var label_rotZ = HtmlHelper.createTextField( div_rot, "Z", 0, false, function(){ cc.log("rot changed")});
+
+        // scale
+        var div_sc = document.createElement('div');
+        rootDiv.appendChild( div_sc );
+
+        var label_scale = div_sc.appendChild( document.createElement('label') );
+        label_scale.innerText       = "Scale";
+        label_scale.style.width     = '80px';
+        label_scale.style.display   = 'inline-block';
+        label_scale.style.paddingLeft = '10px';
+        label_scale.style.color     = '#DEDEDEFF';
+        var label_scaleX = HtmlHelper.createTextField( div_sc, "X", 0, false, function(){ cc.log("sx changed")});
+        var label_scaleY = HtmlHelper.createTextField( div_sc, "Y", 0, false, function(){ cc.log("sy changed")});
+
+
+
+
+        // this.refreshNodeAllProperty();
+        // // $('#inspector').jqPropertyGrid( this.formData, this.options );
+        // // In order to get back the modified values:
+        // var theNewObj = $('#node_property').jqPropertyGrid('get');
+        // console.log( "theNewObj > ", theNewObj );
     },
 
     // 프로퍼티 그리드 폼 세팅.

@@ -128,7 +128,9 @@
     var parser = new Parser();
 
     parser.generalAttributes = function (widget, options) {
-        widget._ignoreSize = options["ignoreSize"] || true;
+        var ignoreSizeExist = options["ignoreSize"] !== undefined;
+        widget._ignoreSize = ignoreSizeExist ? options["ignoreSize"] : true;
+        // widget._ignoreSize = options["ignoreSize"] || true;
         widget._sizeType = options["sizeType"] || 0;
         widget._positionType = options["positionType"] || 0;
 
