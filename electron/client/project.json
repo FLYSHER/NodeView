@@ -29,12 +29,22 @@
         "src/draggableNode.js",
         "src/eventDispatcher.js",
 
+
         "src/Components/GSTComponent.js",
         "src/Components/InputComponent.js",
         "src/Components/NodePropertyComponent.js",
         "src/Components/UIActionComponent.js",
         "src/Components/ArmatureComponent.js",
         "src/Components/BoneComponent.js",
+
+        "src/Components/GenieComponent.js",
+        "src/Components/InspectorComponent/InspectorComponent.js",
+        "src/Components/InspectorComponent/TransformComponent.js",
+        "src/Components/InspectorComponent/BaseNodeComponent.js",
+
+        "src/Command/Command.js",
+        "src/Command/PositionCommand.js",
+        "src/Command/ToolController.js",
 
         "src/ToolLayer/MainScene.js",
         "src/ToolLayer/MainViewLayer.js",

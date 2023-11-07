@@ -1,6 +1,13 @@
 
 var HtmlHelper = {
 
+    createDiv : function( parent, className ) {
+        var el_div = document.createElement( 'div' );
+        el_div.className = className;
+        parent.appendChild( el_div );
+        return el_div;
+    },
+
     createButton : function( parent, innerText, onclick ) {
         var el_button = document.createElement( 'button' );
         el_button.innerText = innerText;
@@ -9,28 +16,55 @@ var HtmlHelper = {
         return el_button;
     },
 
-    createCheckbox : function( parent, name, checked, onchange ) {
+    createCheckbox : function( parent, name, checked, readOnly, onchange ) {
         var el_checkbox = document.createElement('input');
         el_checkbox.type = "checkbox";
-        el_checkbox.name = name;
+        name && ( el_checkbox.name = name );
         el_checkbox.checked = checked;
-        el_checkbox.addEventListener( "change", onchange );
+        el_checkbox.readOnly = !!readOnly;
+
+        if( !!readOnly ) {
+            el_checkbox.addEventListener( "change", onchange );
+        }
+
         parent.appendChild( el_checkbox );
 
         return el_checkbox;
     },
 
-    createTextField : function( parent, label, inputPlaceHolder, readOnly, onchange ) {
+    createLabel : function( parent, label_text, label_className ) {
         var el_label = document.createElement('label');
-        el_label.className = "component_attribName"
-        el_label.innerText = label;
-        el_label.style = "display: inline; padding : 0px, margin : 2px ";
+        el_label.className = label_className;
+        el_label.innerText = label_text;
+        parent.appendChild(el_label);
+        return el_label;
+    },
+
+    createTextInput : function( parent, placeHolder, className, readOnly, onchange ) {
+        var el_input = document.createElement('input');
+        el_input.type = "text";
+        el_input.value = placeHolder;
+        el_input.readOnly = !!readOnly;
+        el_input.className = className;
+
+        if( !readOnly && onchange ) {
+            el_input.addEventListener( "change", onchange );
+        }
+
+        parent.appendChild(el_input);
+        return el_input;
+    },
+
+    createTextField : function( parent, label_text, label_className, inputPlaceHolder, readOnly, strDisplay, onchange ) {
+        var el_label = document.createElement('label');
+        el_label.className = label_className;
+        el_label.innerText = label_text;
         parent.appendChild(el_label);
 
         var el_input = document.createElement('input');
         el_input.type = "text";
+        cc.isString( strDisplay ) && ( el_input.display = strDisplay );
         el_input.style.width = '50px';
-
         el_input.style.marginRight = '10px';
         el_input.style.marginLeft  = '5px';
         el_input.style.background  = '#222222';
@@ -102,7 +136,9 @@ var HtmlHelper = {
     createComponentRootDiv2 : function() {
         var div_comp = document.createElement('div');
         div_comp.className = "inspector_component";
-        div_comp.style = "background-color: #363636;";
+        div_comp.style.backgroundColor = '#363636';
+        div_comp.style.padding = "2px";
+        div_comp.style.marginTop = "5px";
         $(`#inspector`).append( div_comp );
 
         return div_comp;

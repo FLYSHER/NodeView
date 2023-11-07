@@ -62,7 +62,10 @@ var CocosRenderer = {
         // });
         // Loader.readFile = this.readFile;
 
-        ipcRenderer.on('fileDropEventReply', this.onFileDropReply.bind(this) )
+        ipcRenderer.on('fileDropEventReply', this.onFileDropReply.bind(this) );
+        ipcRenderer.on('undo', function(){
+            Genie.ToolController.undo();
+        })
     },
 
     /**

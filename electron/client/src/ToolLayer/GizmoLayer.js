@@ -186,8 +186,24 @@ var GizmoLayer = cc.LayerColor.extend({
 
                 }break;
                 case "up": {
+                    if( self._targetNode ) {
+                        if( self._gizmoNode.isDrag() ) {
+                            var diffPos = self._gizmoNode.getDiffPt();
+                            var pt2 = cc.pSub( pt, diffPos );
+                            var localPos = self._targetNode.getParent().convertToNodeSpace( pt2 );
+                            var startPt = self._gizmoNode.getDragStartPt();
+                            var srcPos = self._targetNode.getParent().convertToNodeSpace( startPt );
+
+                            Genie.ToolController.execute( new Genie.Command.Position( self._targetNode, {
+                                srcPos : srcPos,
+                                destPos: localPos
+                            } ) );
+                        }
+                    }
+
                     self._targetNode && self._gizmoNode.setDrag( false );
                     self._gizmoNode.setActiveTouchComp( true );
+
                     cc.log("up");
                 }break;
                 case "down": {
@@ -198,16 +214,14 @@ var GizmoLayer = cc.LayerColor.extend({
                 }break;
                 case "move": {
                     if( self._targetNode && self._gizmoNode.isDrag() ) {
-                        // var targetWorldPos  = self._targetNode.getWorldPosition();
-                        // var dragStartPt     = self._gizmoNode.getDragStartPt();
-                        // var diffPos         = cc.pSub( dragStartPt, targetWorldPos );
+
                         var diffPos = self._gizmoNode.getDiffPt();
                         var pt2 = cc.pSub( pt, diffPos );
                         var localPos = self._targetNode.getParent().convertToNodeSpace( pt2 );
 
-                        cc.log(" pt , diffPos, pt2 ", pt, diffPos, pt2 );
+                        Genie.ToolController.moveNode( self._targetNode, localPos );
 
-                        self._targetNode.setPosition( localPos );
+                        // self._targetNode.setPosition( localPos );
                         self._gizmoNode.followTarget( self._targetNode );
                     }
                 }break;

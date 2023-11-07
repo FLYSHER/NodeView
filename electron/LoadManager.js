@@ -259,7 +259,6 @@ var LoadManager  = {
         // onInputValue 이벤트 수신
         ipcMain.on('fileDropEvent', (evt, payload) => {
             LoadManager.loadFiles(payload);
-
         })
     }
 

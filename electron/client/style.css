@@ -173,9 +173,40 @@ button:active {
     background-color: #95B8E7;
 }
 
-.component_attribName {
-    display: block;
-    color: #bbbbbb;
+.component_oneAttribInput {
+    display: inline;
+    width: 150px;
+    margin-right: 10px;
+    margin-left: 20px;
+    background: #222222;
+    color: #dbdbdb;
+}
+
+.component_twoAttribInput {
+    width: 50px;
+    margin-right: 5px;
+    margin-left: 5px;
+    background: #222222;
+    color: #dbdbdb;
+}
+
+.component_lineDiv {
+
+}
+
+.component_attribLabel {
+    display: inline;
+    width : 20px;
+    margin: 5px;
+    color: #DEDEDEFF;
+    padding-left: 5px;
+}
+
+.component_lineLabel {
+    display: inline-block;
+    width: 70px;
+    padding-left: 10px;
+    color: #DEDEDEFF;
 }
 
 .no_dot {
