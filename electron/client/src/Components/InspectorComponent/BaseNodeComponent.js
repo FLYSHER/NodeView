@@ -57,7 +57,6 @@ Genie.Component.NodeProperty = Genie.Component.InspectorBase.extend({
         // visible
         var div_visible = HtmlHelper.createDiv( rootDiv, 'component_lineDiv' );
         HtmlHelper.createLabel( div_visible, "visible", "component_lineLabel");
-
         this.cb_visible = HtmlHelper.createCheckbox( div_visible, null, owner.isVisible(), function(){ cc.log("visible changed") } )
 
     },

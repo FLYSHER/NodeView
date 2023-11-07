@@ -33,7 +33,7 @@ var MainViewLayer = cc.LayerColor.extend({
         uiRoot.setAnchorPoint( 0.5, 0.5 );
         uiRoot.setPosition( cc.winSize.width/2, cc.winSize.height/2 );
         uiRoot.setName( basename );
-        uiRoot.addComponent(  new GST.Component.UIActionView( "uiActionViewer", fileName ) );
+        uiRoot.addComponent(  new Genie.Component.UIActionView( fileName ) );
         this.addChild( uiRoot );
 
         this.currNode = uiRoot;
@@ -54,7 +54,7 @@ var MainViewLayer = cc.LayerColor.extend({
         ar.setPosition( cc.winSize.width/2, cc.winSize.height/2 );
         this.addChild( ar );
 
-        ar.addComponent(  new GST.Component.Armature("GST.Component.Armature") );
+        ar.addComponent(  new Genie.Component.ArmatureView() );
 
         var boneDic = ar.getBoneDic();
         var key, bone;

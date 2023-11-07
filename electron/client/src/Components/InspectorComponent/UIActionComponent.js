@@ -1,0 +1,67 @@
+// 소유자의 타입이 uiWidget 이어야 함.
+Genie.Component.UIActionView = Genie.Component.InspectorBase.extend({
+    ctor : function( jsonName ) {
+        this._super();
+        this.setName( "UIAction" );
+
+        this._jsonName = jsonName;
+    },
+
+    onEnter : function() {
+        this._super();
+    },
+
+    checkValid : function() {
+        var ok = this._owner;
+        ok &&= this._owner instanceof  ccui.Widget;
+        ok &&= cc.isString( this._jsonName );
+        return ok;
+    },
+
+    //override
+    drawInspector : function() {
+        var owner = this.getOwner();
+
+        var rootDiv = HtmlHelper.createComponentRootDiv2();
+        var iconObj = {
+            className : "fa-solid fa-bezier-curve",
+            style : "color: #d0b8f4;"
+        }
+        var titleBar = HtmlHelper.createComponentBar(this.getName(), iconObj);
+        rootDiv.appendChild( titleBar );
+
+        var actionList = ccs.actionManager.getActionList( this._jsonName );
+
+        var div_uiAction = HtmlHelper.createDiv( rootDiv, 'component_lineDiv');
+
+        if( !actionList ||  actionList.length <= 0 ) {
+            HtmlHelper.createLabel( div_uiAction, "UIAction is Empty", "component_lineLabel" );
+        }
+        else {
+
+            var i,
+                arrOption = [];
+
+            for( i = 0; i < actionList.length; ++i ) {
+                arrOption.push( actionList[i].getName() );
+            }
+
+            var div_select = HtmlHelper.createDiv( rootDiv, 'component_lineDiv' );
+            HtmlHelper.createLabel( div_uiAction, "track", "component_lineLabel");
+
+            var self = this;
+            this._selectedIdx = 0;
+            HtmlHelper.createSelectMenu( div_uiAction, actionList[0].getName(), arrOption, function(event){
+                self._selectedIdx = event.target.value;
+            });
+
+            HtmlHelper.createButton( div_uiAction, "play", function (){
+                var actionName = actionList[self._selectedIdx].getName();
+                ccs.actionManager.playActionByName( self._jsonName, actionName, cc.callFunc( function(){
+                    // todo 종료
+                }, this));
+            });
+
+        }
+    },
+});

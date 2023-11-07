@@ -11,6 +11,7 @@ var HtmlHelper = {
     createButton : function( parent, innerText, onclick ) {
         var el_button = document.createElement( 'button' );
         el_button.innerText = innerText;
+        el_button.style.margin = '5px';
         el_button.addEventListener( "click", onclick );
         parent.appendChild( el_button );
         return el_button;
@@ -101,15 +102,16 @@ var HtmlHelper = {
      * @param arrOption
      * @param onchange
      */
-    createSelectMenu : function( parent, attribName, strPlaceHolder, arrOption, onchange ) {
-        var label_name = document.createElement( 'label' );
-        label_name.className = "component_attribName";
-        label_name.innerText = attribName;
-        parent.appendChild( label_name );
+    createSelectMenu : function( parent, strPlaceHolder, arrOption, onchange ) {
+        // var label_name = document.createElement( 'label' );
+        // label_name.className = "component_lineLabel";
+        // label_name.innerText = attribName;
+        // parent.appendChild( label_name );
 
         var select = document.createElement('select');
         select.addEventListener( "change", onchange );
-        label_name.appendChild( select );
+        select.display = "inline";
+        parent.appendChild( select );
 
         var i, option;
 
@@ -129,7 +131,7 @@ var HtmlHelper = {
             select.appendChild( option );
         }
 
-        return label_name; // select 의 최상위 요소 리턴.
+        return select; // select 의 최상위 요소 리턴.
     },
 
     // inspector
