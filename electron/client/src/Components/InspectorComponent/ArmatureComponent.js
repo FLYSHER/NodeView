@@ -20,7 +20,7 @@ Genie.Component.ArmatureView = Genie.Component.InspectorBase.extend({
     drawInspector : function() {
         var owner = this.getOwner();
 
-        var rootDiv = HtmlHelper.createComponentRootDiv2();
+        var rootDiv = HtmlHelper.createComponentRootDiv();
         var iconObj = {
             className : "fa-solid fa-bezier-curve",
             style : "color: #d0b8f4;"

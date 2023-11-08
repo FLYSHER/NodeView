@@ -76,6 +76,8 @@ ccui.Text = ccui.Widget.extend(/** @lends ccui.Text# */{
         } else {
             this.setFontName(this._fontName);
         }
+
+        this.addComponent( new Genie.Component.UITextView() );
     },
 
     _initRenderer: function () {

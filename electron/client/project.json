@@ -29,9 +29,8 @@
         "src/draggableNode.js",
         "src/eventDispatcher.js",
 
-        "src/Components/GSTComponent.js",
-        "src/Components/InputComponent.js",
         "src/Components/GenieComponent.js",
+        "src/Components/InputComponent.js",
 
         "src/Components/InspectorComponent/InspectorComponent.js",
         "src/Components/InspectorComponent/TransformComponent.js",
@@ -39,6 +38,7 @@
         "src/Components/InspectorComponent/UIActionComponent.js",
         "src/Components/InspectorComponent/ArmatureComponent.js",
         "src/Components/InspectorComponent/BoneComponent.js",
+        "src/Components/InspectorComponent/UITextComponent.js",
         "src/Components/InspectorComponent/UILabelBMFontComponent.js",
 
         "src/Command/Command.js",

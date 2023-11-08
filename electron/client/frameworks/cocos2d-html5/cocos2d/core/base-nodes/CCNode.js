@@ -208,7 +208,7 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
 
         // 기본 컴포넌트 추가
         this.addComponent( new Genie.Component.Transform() );
-        this.addComponent( new Genie.Component.NodeProperty() )
+        this.addComponent( new Genie.Component.NodeProperty() );
     },
 
     /**

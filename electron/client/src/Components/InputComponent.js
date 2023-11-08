@@ -1,11 +1,11 @@
 
 
-GST.Component.Touch = GST.Component.Base.extend({
+Genie.Component.Touch = Genie.Component.Base.extend({
     SHOW_DEBUG_DRAW_HITRECT : false,
 
     ctor: function () {
         this._super();
-        this.setName("GST.Component.Touch");
+        this.setName("Genie.Component.Touch");
         this.initProperties();
     },
 

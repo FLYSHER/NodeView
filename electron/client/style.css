@@ -194,6 +194,12 @@ button:active {
     /*color: #4b4b4b;*/
 }
 
+.component_groupDiv {
+    border: 1px solid #95B8E7;
+    border-radius: 5px;
+    margin: 5px;
+}
+
 .component_attribLabel {
     display: inline;
     width : 20px;

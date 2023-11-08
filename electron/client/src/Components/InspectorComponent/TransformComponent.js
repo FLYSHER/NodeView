@@ -14,7 +14,7 @@ Genie.Component.Transform = Genie.Component.InspectorBase.extend({
     drawInspector : function() {
         var owner = this.getOwner();
 
-        var rootDiv = HtmlHelper.createComponentRootDiv2();
+        var rootDiv = HtmlHelper.createComponentRootDiv();
 
         var iconObj = {
             className : "fa-sharp fa-solid fa-arrows-up-down-left-right",

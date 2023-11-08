@@ -51,7 +51,7 @@ var Gizmo = cc.Node.extend({
         this._drawNode.setContentSize( cc.size( RECT_SIZE.x, RECT_SIZE.y ) );
 
 
-        var touchComp = new GST.Component.Touch();
+        var touchComp = new Genie.Component.Touch();
         this._drawNode.addComponent( touchComp );
 
         var self = this;
@@ -173,7 +173,7 @@ var GizmoLayer = cc.LayerColor.extend({
     },
 
     initTouchComponent : function() {
-        var touchComp = new GST.Component.Touch();
+        var touchComp = new Genie.Component.Touch();
         this.addComponent( touchComp );
 
         var self = this;

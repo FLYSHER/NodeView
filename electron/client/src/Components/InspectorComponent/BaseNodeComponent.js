@@ -12,7 +12,7 @@ Genie.Component.NodeProperty = Genie.Component.InspectorBase.extend({
     // do overried
     drawInspector : function() {
         var owner = this.getOwner();
-        var rootDiv = HtmlHelper.createComponentRootDiv2();
+        var rootDiv = HtmlHelper.createComponentRootDiv();
 
         var iconObj = {
             className : "fa-brands fa-codepen",

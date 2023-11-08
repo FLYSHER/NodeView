@@ -85,20 +85,6 @@ var HtmlHelper = {
         return el_input;
     },
 
-    createComponentRootDiv : function( component_title ) {
-        var rootDiv = document.createElement('div');
-        rootDiv.className = 'component_root';
-        $(`#inspector`).append( rootDiv );
-
-
-        var title = document.createElement('p');
-        title.className = 'component_title';
-        title.innerText = component_title;
-        rootDiv.append( title );
-
-        return rootDiv;
-    },
-
     /**
      *
      * @param parent
@@ -140,7 +126,7 @@ var HtmlHelper = {
     },
 
     // inspector
-    createComponentRootDiv2 : function() {
+    createComponentRootDiv : function() {
         var div_comp = document.createElement('div');
         div_comp.className = "inspector_component";
         div_comp.style.backgroundColor = '#363636';
@@ -170,5 +156,29 @@ var HtmlHelper = {
         div_comp.appendChild( label );
 
         return div_comp;
+    },
+
+    // component view
+    createOneAttribTextInput : function( parent, attribName, placeholder, readonly, onchange ) {
+        var div = HtmlHelper.createDiv( parent, 'component_lineDiv' );
+        HtmlHelper.createLabel( div, attribName, "component_lineLabel");
+        var input =  HtmlHelper.createTextInput( div, placeholder, "component_oneAttribInput", readonly, onchange );
+        return input;
+    },
+
+    //
+    createTwoAttribTextInput : function( parent, titleName, arrAttribName, arrPlaceholder, arrReadOnly, onchange ) {
+        var resultObj = {};
+        var div = HtmlHelper.createDiv( parent, 'component_lineDiv' );
+
+        HtmlHelper.createLabel( div, titleName, "component_lineLabel");
+
+        HtmlHelper.createLabel( div, arrAttribName[0], "component_attribLabel");
+        resultObj.attrib1 = HtmlHelper.createTextInput( div, arrPlaceholder[0], "component_twoAttribInput", arrReadOnly[0], onchange );
+
+        HtmlHelper.createLabel( div, arrAttribName[1], "component_attribLabel");
+        resultObj.attrib2 = HtmlHelper.createTextInput( div, arrPlaceholder[1], "component_twoAttribInput", arrReadOnly[1], onchange );
+
+        return resultObj;
     },
 }
