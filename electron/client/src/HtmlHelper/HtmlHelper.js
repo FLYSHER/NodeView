@@ -24,7 +24,7 @@ var HtmlHelper = {
         el_checkbox.checked = checked;
         el_checkbox.readOnly = !!readOnly;
 
-        if( !!readOnly ) {
+        if( !readOnly ) {
             el_checkbox.addEventListener( "change", onchange );
         }
 
