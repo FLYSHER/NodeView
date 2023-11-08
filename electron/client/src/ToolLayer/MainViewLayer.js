@@ -60,7 +60,7 @@ var MainViewLayer = cc.LayerColor.extend({
         var key, bone;
         for( key in boneDic ) {
             bone = ar.getBone( key );
-            bone.addComponent( new GST.Component.Bone("GST.Component.Bone") );
+            bone.addComponent( new Genie.Component.BoneView() );
         }
 
         this.currNode = ar;

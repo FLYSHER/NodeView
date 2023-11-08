@@ -1,7 +1,7 @@
 
-Genie.Command.Position = Genie.Command.Base.extend({
+Genie.Command.Scale = Genie.Command.Base.extend({
     ctor : function( targetNode, args ) {
-        this._super( 'position', targetNode, args );
+        this._super( 'scale', targetNode, args );
 
         this._dest = args.dest;
         this._src  = args.src;
@@ -15,18 +15,18 @@ Genie.Command.Position = Genie.Command.Base.extend({
     },
 
     execute : function( ) {
-        this._targetNode.setPosition( this._dest );
+        this._targetNode.setScale( this._dest.x, this._dest.y );
         Genie.gizmoNode.followTarget( this._targetNode );
 
         var trComp = this._targetNode.getComponent( 'Transform' );
-        trComp.setInspectorPosition( this._dest );
+        trComp.setInspectorScale( this._dest.x, this._dest.y );
     },
 
     undo : function() {
-        this._targetNode.setPosition( this._src );
+        this._targetNode.setScale( this._src.x, this._src.y );
         Genie.gizmoNode.followTarget( this._targetNode );
 
         var trComp = this._targetNode.getComponent( 'Transform' );
-        trComp.setInspectorPosition( this._src );
+        trComp.setInspectorScale( this._src.x, this._src.y );
     },
 });

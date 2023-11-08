@@ -35,7 +35,7 @@ Genie.Component.UIActionView = Genie.Component.InspectorBase.extend({
         var div_uiAction = HtmlHelper.createDiv( rootDiv, 'component_lineDiv');
 
         if( !actionList ||  actionList.length <= 0 ) {
-            HtmlHelper.createLabel( div_uiAction, "UIAction is Empty", "component_lineLabel" );
+            // HtmlHelper.createLabel( div_uiAction, "UIAction is Empty", "component_lineLabel" );
         }
         else {
 

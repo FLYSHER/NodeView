@@ -130,6 +130,10 @@ var Gizmo = cc.Node.extend({
         return this._dragStartPt;
     },
 
+    getTargetNodePosAtDragStart : function() {
+        return this._targetNodePtAtDragStart;
+    },
+
     getDiffPt : function() {
         return cc.pSub( this._dragStartPt, this._targetNodePtAtDragStart );
     },
@@ -161,6 +165,7 @@ var GizmoLayer = cc.LayerColor.extend({
         this._gizmoNode.setPosition( 0, 0 );
         this.addChild( this._gizmoNode);
         this._gizmoNode.setVisible( false );
+        Genie.gizmoNode = this._gizmoNode;
     },
 
     initProperty : function() {
@@ -191,12 +196,11 @@ var GizmoLayer = cc.LayerColor.extend({
                             var diffPos = self._gizmoNode.getDiffPt();
                             var pt2 = cc.pSub( pt, diffPos );
                             var localPos = self._targetNode.getParent().convertToNodeSpace( pt2 );
-                            var startPt = self._gizmoNode.getDragStartPt();
-                            var srcPos = self._targetNode.getParent().convertToNodeSpace( startPt );
+                            var startPos = self._gizmoNode.getTargetNodePosAtDragStart();
 
                             Genie.ToolController.execute( new Genie.Command.Position( self._targetNode, {
-                                srcPos : srcPos,
-                                destPos: localPos
+                                src : startPos,
+                                dest: localPos
                             } ) );
                         }
                     }

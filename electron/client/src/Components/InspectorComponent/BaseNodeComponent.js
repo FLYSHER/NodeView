@@ -54,6 +54,11 @@ Genie.Component.NodeProperty = Genie.Component.InspectorBase.extend({
         HtmlHelper.createLabel( div_size, "h", "component_attribLabel");
         this.input_height = HtmlHelper.createTextInput( div_size, owner.height, "component_twoAttribInput", false, function(){ cc.log("anchorY changed") });
 
+        // zorder
+        var div_zorder   = HtmlHelper.createDiv( rootDiv, 'component_lineDiv' );
+        HtmlHelper.createLabel( div_zorder, "zorder", "component_lineLabel");
+        this.input_zorder = HtmlHelper.createTextInput( div_zorder, owner.getLocalZOrder(), "component_oneAttribInput", true, function(){ cc.log("zorder changed"); } );
+
         // visible
         var div_visible = HtmlHelper.createDiv( rootDiv, 'component_lineDiv' );
         HtmlHelper.createLabel( div_visible, "visible", "component_lineLabel");

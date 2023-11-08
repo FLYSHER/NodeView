@@ -48,8 +48,13 @@ var HtmlHelper = {
         el_input.readOnly = !!readOnly;
         el_input.className = className;
 
-        if( !readOnly && onchange ) {
-            el_input.addEventListener( "change", onchange );
+        if( !readOnly  ) {
+            if( onchange ) {
+                el_input.addEventListener( "change", onchange );
+            }
+        }
+        else {
+            el_input.style.backgroundColor = "#4B4B4BFF";
         }
 
         parent.appendChild(el_input);
