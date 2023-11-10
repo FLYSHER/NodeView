@@ -6,4 +6,8 @@ Genie.Component.InspectorBase = Genie.Component.Base.extend({
     drawInspector : function() {
         throw Error('Do Override ');
     },
+
+    setInspectorValue : function() {
+        throw Error('Do Override ');
+    }
 });

@@ -29,4 +29,6 @@ Genie.Component.UILabelBMFontView = Genie.Component.InspectorBase.extend({
         rootDiv.appendChild( titleBar );
 
     },
+
+    setInspectorValue : function( paramObj ) {}
 });

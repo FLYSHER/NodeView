@@ -64,4 +64,6 @@ Genie.Component.UIActionView = Genie.Component.InspectorBase.extend({
 
         }
     },
+
+    setInspectorValue : function( paramObj ) {}
 });

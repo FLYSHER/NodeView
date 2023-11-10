@@ -24,9 +24,7 @@ var HtmlHelper = {
         el_checkbox.checked = checked;
         el_checkbox.readOnly = !!readOnly;
 
-        if( !readOnly ) {
-            el_checkbox.addEventListener( "change", onchange );
-        }
+        onchange && el_checkbox.addEventListener( "change", onchange );
 
         parent.appendChild( el_checkbox );
 
@@ -48,13 +46,21 @@ var HtmlHelper = {
         el_input.readOnly = !!readOnly;
         el_input.className = className;
 
-        if( !readOnly  ) {
-            if( onchange ) {
-                el_input.addEventListener( "change", onchange );
-            }
-        }
-        else {
-            el_input.style.backgroundColor = "#4B4B4BFF";
+        onchange && el_input.addEventListener( "change", onchange );
+        parent.appendChild(el_input);
+        return el_input;
+    },
+
+    createColorInput : function( parent, placeholder, className, onchange ) {
+        // <label htmlFor="colorpicker">Color Picker:</label>
+        // <input type="color" id="colorpicker" value="#0000ff">
+        var el_input    = document.createElement( 'input' );
+        el_input.type   = 'color';
+        el_input.value  = placeholder;
+        el_input.className = className;
+
+        if( onchange ) {
+            el_input.addEventListener( "change", onchange );
         }
 
         parent.appendChild(el_input);
@@ -159,26 +165,53 @@ var HtmlHelper = {
     },
 
     // component view
-    createOneAttribTextInput : function( parent, attribName, placeholder, readonly, onchange ) {
+    createOnePropertyTextInput : function( parent, propertyName, placeholder, readonly, onchange  ) {
         var div = HtmlHelper.createDiv( parent, 'component_lineDiv' );
-        HtmlHelper.createLabel( div, attribName, "component_lineLabel");
-        var input =  HtmlHelper.createTextInput( div, placeholder, "component_oneAttribInput", readonly, onchange );
-        return input;
+        HtmlHelper.createLabel( div, propertyName, 'component_onePropertyLabel');
+        return HtmlHelper.createTextInput( div, placeholder, 'component_longTextInput', readonly, onchange );
     },
 
-    //
-    createTwoAttribTextInput : function( parent, titleName, arrAttribName, arrPlaceholder, arrReadOnly, onchange ) {
+    createPointAttrib : function( parent, titleName, arrPlaceholder, arrReadOnly, onchange ) {
         var resultObj = {};
         var div = HtmlHelper.createDiv( parent, 'component_lineDiv' );
+        HtmlHelper.createLabel( div, titleName, "component_twoPropertyLabel");
 
-        HtmlHelper.createLabel( div, titleName, "component_lineLabel");
+        HtmlHelper.createLabel( div, "X", "component_attribPointLabel");
+        resultObj.x = HtmlHelper.createTextInput( div, arrPlaceholder[0], "component_shortTextInput", arrReadOnly[0], onchange );
 
-        HtmlHelper.createLabel( div, arrAttribName[0], "component_attribLabel");
-        resultObj.attrib1 = HtmlHelper.createTextInput( div, arrPlaceholder[0], "component_twoAttribInput", arrReadOnly[0], onchange );
-
-        HtmlHelper.createLabel( div, arrAttribName[1], "component_attribLabel");
-        resultObj.attrib2 = HtmlHelper.createTextInput( div, arrPlaceholder[1], "component_twoAttribInput", arrReadOnly[1], onchange );
+        HtmlHelper.createLabel( div, "Y", "component_attribPointLabel");
+        resultObj.y = HtmlHelper.createTextInput( div, arrPlaceholder[1], "component_shortTextInput", arrReadOnly[1], onchange );
 
         return resultObj;
+    },
+
+    createSizeAttrib : function( parent, titleName, arrPlaceholder, arrReadOnly, onchange ) {
+        var resultObj = {};
+        var div = HtmlHelper.createDiv( parent, 'component_lineDiv' );
+        HtmlHelper.createLabel( div, titleName, "component_twoPropertyLabel");
+
+        HtmlHelper.createLabel( div, "width", "component_attribLabel");
+        resultObj.width = HtmlHelper.createTextInput( div, arrPlaceholder[0], "component_shortTextInput", arrReadOnly[0], onchange );
+
+        HtmlHelper.createLabel( div, "height", "component_attribLabel");
+        resultObj.height = HtmlHelper.createTextInput( div, arrPlaceholder[1], "component_shortTextInput", arrReadOnly[1], onchange );
+
+        return resultObj;
+    },
+
+    createCheckboxAttrib : function( parent, propertyName, checked, readyonly, onchange ) {
+        var div = HtmlHelper.createDiv( parent, 'component_lineDiv' );
+        HtmlHelper.createLabel( div, propertyName, "component_onePropertyLabel" );
+        return HtmlHelper.createCheckbox( div, "", checked, readyonly, onchange );
+    },
+
+    createColorAttrib : function( parent, propertyName, placeholder, onchange) {
+        var div = HtmlHelper.createDiv( parent, 'component_lineDiv' );
+        HtmlHelper.createLabel( div, propertyName, 'component_onePropertyLabel');
+        return HtmlHelper.createColorInput( div, placeholder, 'component_longTextInput',  onchange );
+    },
+
+    createSelectMenuAttrib : function() {
+
     },
 }

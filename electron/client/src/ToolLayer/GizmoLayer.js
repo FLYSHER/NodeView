@@ -143,7 +143,7 @@ var Gizmo = cc.Node.extend({
     },
 
     followTarget : function( targetNode ) {
-        var worldPos = GST.Utils.getNodeWorldPosition( targetNode );
+        var worldPos = Genie.Utils.getNodeWorldPosition( targetNode );
         this.setPosition( worldPos );
     },
 
@@ -198,7 +198,8 @@ var GizmoLayer = cc.LayerColor.extend({
                             var localPos = self._targetNode.getParent().convertToNodeSpace( pt2 );
                             var startPos = self._gizmoNode.getTargetNodePosAtDragStart();
 
-                            Genie.ToolController.execute( new Genie.Command.Position( self._targetNode, {
+                            Genie.ToolController.execute( new Genie.Command.Transform( self._targetNode, {
+                                strProp : 'position',
                                 src : startPos,
                                 dest: localPos
                             } ) );

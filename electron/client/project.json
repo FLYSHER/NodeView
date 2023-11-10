@@ -18,7 +18,7 @@
         "src/app.js",
         "src/HtmlHelper/HtmlHelper.js",
         "src/Defines/eventDefines.js",
-        "src/Utils/GSTUtils.js",
+        "src/Utils/GenieUtils.js",
         "src/uiListViewTest.js",
         "src/uiItemList.js",
         "src/uiPositionCtrl.js",
@@ -42,9 +42,8 @@
         "src/Components/InspectorComponent/UILabelBMFontComponent.js",
 
         "src/Command/Command.js",
-        "src/Command/PositionCommand.js",
-        "src/Command/RotationCommand.js",
-        "src/Command/ScaleCommand.js",
+        "src/Command/TransformCommand.js",
+        "src/Command/UITextCommand.js",
         "src/Command/NodePropertyCommand.js",
         "src/Command/ToolController.js",
 

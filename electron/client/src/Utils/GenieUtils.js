@@ -1,6 +1,6 @@
-var GST = GST || {};
+var Genie = Genie || {};
 
-GST.Utils = {
+Genie.Utils = {
     drawAllComponentInspector : function( node ) {
         var components = node._componentContainer._components;
         var comp;
@@ -21,4 +21,20 @@ GST.Utils = {
             return parent.convertToWorldSpace( node.getPosition() );
         }
     },
+
+    componentToHex : function(c) {
+        var hex = c.toString(16);
+        return hex.length === 1 ? "0" + hex : hex;
+    },
+
+    rgbToHex : function(colorOrR, g, b) {
+        if( arguments.length === 1 ) {
+            g = colorOrR.g;
+            b = colorOrR.b;
+            colorOrR = colorOrR.r;
+        }
+        return "#" + Genie.Utils.componentToHex(colorOrR) + Genie.Utils.componentToHex(g) + Genie.Utils.componentToHex(b);
+    },
+
+
 }

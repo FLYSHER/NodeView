@@ -1,5 +1,11 @@
 Genie.Command = Genie.Command || {};
 
+Genie.CommandType = {
+    EXECUTE : 0,
+    UNDO    : 1,
+    REDO    : 2
+}
+
 Genie.Command.Base = cc.Class.extend({
     ctor : function( name, targetNode, args ) {
         this.initProperty();
@@ -33,6 +39,18 @@ Genie.Command.Base = cc.Class.extend({
     undo : function() {
         throw Error('Do Override ');
     },
+
+    setInspectorView : function ( componentName, value ) {
+        var comp = this._targetNode.getComponent( componentName);
+        if( !comp ) {
+            return;
+        }
+
+        comp.setInspectorValue( {
+            args    : this._args,
+            value   : value,
+        });
+    }
 
 
 });

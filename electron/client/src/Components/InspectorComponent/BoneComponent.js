@@ -51,4 +51,6 @@ Genie.Component.BoneView = Genie.Component.InspectorBase.extend({
         }
 
     },
+
+    setInspectorValue : function( paramObj ) {}
 });

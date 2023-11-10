@@ -138,9 +138,9 @@ Genie.Component.NodeProperty = Genie.Component.InspectorBase.extend({
         }
     },
 
-    setInspectorValue : function( args ) {
-        var strProp = args.strProp;
-        var dest    = args.value;
+    setInspectorValue : function( paramObj ) {
+        var strProp = paramObj.args.strProp;
+        var dest    = paramObj.value;
 
         switch ( strProp ) {
             case 'anchor':

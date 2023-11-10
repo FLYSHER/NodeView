@@ -85,4 +85,6 @@ Genie.Component.ArmatureView = Genie.Component.InspectorBase.extend({
         } );
 
     },
+
+    setInspectorValue : function( paramObj ) {}
 });

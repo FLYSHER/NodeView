@@ -21,7 +21,15 @@ Genie.ToolController = {
         targetNode.setPosition( pos );
 
         // inspector
+        //     var strProp = paramObj.args.strProp;
+        //          var value   = paramObj.value;
+
         var transComp = targetNode.getComponent('Transform');
-        transComp.setInspectorPosition( pos.x, pos.y );
+        transComp.setInspectorValue( {
+            args : {
+                strProp : 'position',
+            },
+            value : pos
+        } );
     },
 };

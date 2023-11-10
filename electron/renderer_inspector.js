@@ -26,7 +26,7 @@ var InspectorRenderer = {
         this.currCocosNode = node;
 
         this.clear();
-        GST.Utils.drawAllComponentInspector( node );
+        Genie.Utils.drawAllComponentInspector( node );
     },
 
     clear : function() {
