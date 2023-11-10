@@ -69,7 +69,7 @@ Genie.Component.Transform = Genie.Component.InspectorBase.extend({
                 ) );
             }break;
             case 'scaleX' : {
-                loc_src     = cc.p( owner.getScaleX(), owner.getScaleY() );
+                loc_src  = cc.p( owner.getScaleX(), owner.getScaleY() );
                 loc_dest = cc.p( value, loc_src.y );
                 Genie.ToolController.execute( new Genie.Command.Transform( this.getOwner(), {
                         strProp : 'scale',

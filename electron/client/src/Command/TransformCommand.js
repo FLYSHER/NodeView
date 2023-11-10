@@ -15,9 +15,9 @@ Genie.Command.Transform = Genie.Command.Base.extend({
                 this.setInspectorView( componentName, value );
                 break;
             case 'scale':
-                this._targetNode.setScale( value );
+                this._targetNode.setScale( value.x, value.y );
                 Genie.gizmoNode.followTarget( this._targetNode );
-                this.setInspectorView( componentName, value );
+                this.setInspectorView( componentName, cc.p( value.x, value.y ) );
                 break;
         }
     },
@@ -29,40 +29,4 @@ Genie.Command.Transform = Genie.Command.Base.extend({
     undo : function() {
         this.setCommand( Genie.CommandType.UNDO );
     },
-
-    // execute : function( ) {
-    //     var trComp = this._targetNode.getComponent( 'Transform' );
-    //
-    //     switch ( this._strProp ) {
-    //         case 'position':
-    //             this._targetNode.setPosition( this._dest );
-    //             Genie.gizmoNode.followTarget( this._targetNode );
-    //
-    //             trComp.setInspectorPosition( this._dest );
-    //             break;
-    //         case 'scale':
-    //             this._targetNode.setScale( this._dest );
-    //             Genie.gizmoNode.followTarget( this._targetNode );
-    //             trComp.setInspectorScale( this._dest );
-    //             break;
-    //     }
-    // },
-    //
-    // undo : function() {
-    //     var trComp = this._targetNode.getComponent( 'Transform' );
-    //
-    //     switch ( this._strProp ) {
-    //         case 'position':
-    //             this._targetNode.setPosition( this._src );
-    //             Genie.gizmoNode.followTarget( this._targetNode );
-    //             trComp.setInspectorPosition( this._src );
-    //             break;
-    //         case 'scale':
-    //             this._targetNode.setScale( this._src );
-    //             Genie.gizmoNode.followTarget( this._targetNode );
-    //             trComp.setInspectorScale( this._src );
-    //             break;
-    //     }
-    //
-    // },
 });
