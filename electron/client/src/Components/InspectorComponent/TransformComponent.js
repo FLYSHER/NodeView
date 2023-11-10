@@ -1,9 +1,8 @@
 // 기본 노드 프로퍼티
 Genie.Component.Transform = Genie.Component.InspectorBase.extend({
-    ctor : function ( name ) {
+    ctor : function () {
         this._super();
-        var loc_name = name || "Transform";
-        this.setName( loc_name );
+        this.setName( 'Transform' );
     },
 
     onEnter : function () {
@@ -29,17 +28,6 @@ Genie.Component.Transform = Genie.Component.InspectorBase.extend({
         this.input_pos.x.id = "posX";
         this.input_pos.y.id = "posY";
 
-        // var div_pos = HtmlHelper.createDiv( rootDiv, 'component_lineDiv' );
-        // HtmlHelper.createLabel( div_pos, "Position", "component_lineLabel");
-        //
-        // HtmlHelper.createLabel( div_pos, "X", "component_attribLabel");
-        // this.input_posX = HtmlHelper.createTextInput( div_pos, owner.x, "component_twoAttribInput", false, this.onchange.bind(this) );
-        // this.input_posX.id = 'positionX';
-        //
-        // HtmlHelper.createLabel( div_pos, "Y", "component_attribLabel");
-        // this.input_posY = HtmlHelper.createTextInput( div_pos, owner.y, "component_twoAttribInput", false, this.onchange.bind(this) );
-        // this.input_posY.id = 'positionY';
-
         // rotation
         HtmlHelper.createOnePropertyTextInput( rootDiv, "rotation", owner.getRotation(), true );
 
@@ -48,18 +36,6 @@ Genie.Component.Transform = Genie.Component.InspectorBase.extend({
         this.input_scale = HtmlHelper.createPointAttrib( rootDiv, "scale",  [loc_scale.x, loc_scale.y], [false, false], this.onchange.bind(this) );
         this.input_scale.x.id = "scaleX";
         this.input_scale.y.id = "scaleY";
-
-        // var div_scale = HtmlHelper.createDiv( rootDiv, 'component_lineDiv' );
-        // HtmlHelper.createLabel( div_scale, "Scale", "component_lineLabel");
-        //
-        // HtmlHelper.createLabel( div_scale, "X", "component_attribLabel");
-        // this.input_scaleX = HtmlHelper.createTextInput( div_scale, owner.getScaleX(), "component_twoAttribInput", false, this.onchange.bind(this) );
-        // this.input_scaleX.id = 'scaleX';
-        //
-        // HtmlHelper.createLabel( div_scale, "Y", "component_attribLabel");
-        // this.input_scaleY = HtmlHelper.createTextInput( div_scale, owner.getScaleY(), "component_twoAttribInput", false, this.onchange.bind(this) );
-        // this.input_scaleY.id = 'scaleY';
-
     },
 
     onchange : function( event ) {
@@ -125,28 +101,6 @@ Genie.Component.Transform = Genie.Component.InspectorBase.extend({
 
         }
     },
-
-    // setInspectorPosition : function( newPosOrxValue, yValue ) {
-    //     if( yValue === undefined ) {
-    //         this.input_posX.value = newPosOrxValue.x;
-    //         this.input_posY.value = newPosOrxValue.y;
-    //     }
-    //     else {
-    //         this.input_posX.value = newPosOrxValue;
-    //         this.input_posY.value = yValue;
-    //     }
-    // },
-    //
-    // setInspectorScale   : function( newSacleOrxValue, yValue ) {
-    //     if( yValue === undefined ) {
-    //         this.input_scaleX.value = newSacleOrxValue.x;
-    //         this.input_scaleY.value = newSacleOrxValue.y;
-    //     }
-    //     else {
-    //         this.input_scaleX.value = newSacleOrxValue;
-    //         this.input_scaleY.value = yValue;
-    //     }
-    // },
 
     setInspectorValue : function( paramObj ) {
          var strProp = paramObj.args.strProp;

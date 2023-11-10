@@ -421,15 +421,17 @@ ul.tabs li.current{
 
 .component_onePropertyLabel {
     display: inline-block; /* inline-block width, height 적용 가능 */
-    width : 80px;
-    margin: 2px; /* inline-block 은 margin 좌,우만 적용, padding 은 의미 없음.*/
+    width : 70px;
+    margin-left: 2px; /* inline-block 은 margin 좌,우만 적용, padding 은 의미 없음.*/
+    margin-right: 10px;
     color: #DEDEDEFF;
 }
 
 .component_twoPropertyLabel {
     display: inline-block; /* inline-block width, height 적용 가능 */
-    width : 50px;
-    margin: 5px; /* inline-block 은 margin 좌,우만 적용, padding 은 의미 없음.*/
+    width : 70px;
+    margin-left: 2px; /* inline-block 은 margin 좌,우만 적용, padding 은 의미 없음.*/
+    margin-right : 10px;
     color: #DEDEDEFF;
 }
 
@@ -447,18 +449,26 @@ ul.tabs li.current{
     color: #DEDEDEFF;
 }
 
+.component_attribSizeLabel {
+    display: inline-block;
+    font-size: small;
+    width : 30px;
+    margin: 2px;
+    color: #DEDEDEFF;
+}
+
 .component_longTextInput {
     display: inline-block;
     width : 150px;
-    margin : 5px;
+    margin : 2px;
     background: #222222;
     color: #DEDEDEFF;
 }
 
 .component_shortTextInput {
     display : inline-block;
-    width   : 50px;
-    margin  : 5px;
+    width   : 45px;
+    margin  : 2px;
     background: #222222;
     color: #DEDEDEFF;
 }
@@ -470,6 +480,6 @@ input[readonly] {
 
 *{
     /*background-color: #dedede;*/
-    /*border: solid 1px #3d3d3d;*/
+    /*border: solid 1px #e51313;*/
 }
 

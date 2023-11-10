@@ -190,10 +190,10 @@ var HtmlHelper = {
         var div = HtmlHelper.createDiv( parent, 'component_lineDiv' );
         HtmlHelper.createLabel( div, titleName, "component_twoPropertyLabel");
 
-        HtmlHelper.createLabel( div, "width", "component_attribLabel");
+        HtmlHelper.createLabel( div, "width", "component_attribSizeLabel");
         resultObj.width = HtmlHelper.createTextInput( div, arrPlaceholder[0], "component_shortTextInput", arrReadOnly[0], onchange );
 
-        HtmlHelper.createLabel( div, "height", "component_attribLabel");
+        HtmlHelper.createLabel( div, "height", "component_attribSizeLabel");
         resultObj.height = HtmlHelper.createTextInput( div, arrPlaceholder[1], "component_shortTextInput", arrReadOnly[1], onchange );
 
         return resultObj;
@@ -208,7 +208,7 @@ var HtmlHelper = {
     createColorAttrib : function( parent, propertyName, placeholder, onchange) {
         var div = HtmlHelper.createDiv( parent, 'component_lineDiv' );
         HtmlHelper.createLabel( div, propertyName, 'component_onePropertyLabel');
-        return HtmlHelper.createColorInput( div, placeholder, 'component_longTextInput',  onchange );
+        return HtmlHelper.createColorInput( div, placeholder, 'component_shortTextInput',  onchange );
     },
 
     createSelectMenuAttrib : function() {
