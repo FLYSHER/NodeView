@@ -82,7 +82,7 @@ Genie.Component.NodeProperty = Genie.Component.InspectorBase.extend({
                 if( cc.isNumber( value ) && value > 0 ) {
                     Genie.ToolController.execute( new Genie.Command.NodeProperty( owner, {
                         strProp : 'size',
-                        src     : owner.getContentSize(),
+                        src     : cc.size( owner.width, owner.height ),
                         dest    : cc.size( value, owner.height )
                     } ) );
                 }
@@ -92,7 +92,7 @@ Genie.Component.NodeProperty = Genie.Component.InspectorBase.extend({
                 if( cc.isNumber( value ) && value > 0 ) {
                     Genie.ToolController.execute( new Genie.Command.NodeProperty( owner, {
                         strProp : 'size',
-                        src     : owner.getContentSize(),
+                        src     : cc.size( owner.width, owner.height ),
                         dest    : cc.size( owner.width, value )
                     } ) );
                 }
@@ -129,7 +129,7 @@ Genie.Component.NodeProperty = Genie.Component.InspectorBase.extend({
                 break;
             case 'size':
                 this.input_size.width.value     = dest.width;
-                this.input_size.height.value    = dest.width;
+                this.input_size.height.value    = dest.height;
                 break;
             case 'zorder':
                 this.input_order.value = dest;

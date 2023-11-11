@@ -28,7 +28,49 @@ Genie.Component.UILabelBMFontView = Genie.Component.InspectorBase.extend({
         var titleBar = HtmlHelper.createComponentBar(this.getName(), iconObj);
         rootDiv.appendChild( titleBar );
 
+        this.input_fntFileName = HtmlHelper.createOnePropertyTextInput( rootDiv, 'fontName', owner._fntFileName, true, this.onchange.bind(this)  );
+        this.input_text     = HtmlHelper.createOnePropertyTextInput( rootDiv, 'text', owner.getString(), false, this.onchange.bind(this) );
+
+        this.input_fntFileName.id = "bmf_fntFileName";
+        this.input_text.id        = "bmf_text";
+
     },
 
-    setInspectorValue : function( paramObj ) {}
+    onchange : function( event ) {
+        var owner = this.getOwner();
+        var value, strValue = event.target.value;
+
+        switch ( event.target.id ) {
+            case 'bmf_fntFileName':
+                // value = strValue;
+                // Genie.ToolController.execute( new Genie.Command.UILabelBMFont( owner, {
+                //     strProp : 'fntFileName',
+                //     src     : owner._fntFileName,
+                //     dest    : value
+                // } ) );
+                break;
+            case 'bmf_text':
+                value = strValue;
+                Genie.ToolController.execute( new Genie.Command.UILabelBMFont( owner, {
+                    strProp : 'text',
+                    src     : owner.getString(),
+                    dest    : value
+                } ) );
+                break;
+        }
+    },
+
+    setInspectorValue : function( paramObj ) {
+        var strProp = paramObj.args.strProp;
+        var value   = paramObj.value;
+
+        switch ( strProp ) {
+            // case 'fntFileName':
+            //     this.input_fntFileName.value = value;
+            //     break;
+            case 'text':
+                this.input_text.value = value;
+                break;
+        }
+    }
 });

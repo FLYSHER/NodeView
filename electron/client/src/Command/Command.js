@@ -32,12 +32,16 @@ Genie.Command.Base = cc.Class.extend({
         return this._args;
     },
 
+    setCommand : function() {
+        throw Error( 'do override' );
+    },
+
     execute : function() {
-        throw Error('Do Override ');
+        this.setCommand( Genie.CommandType.EXECUTE );
     },
 
     undo : function() {
-        throw Error('Do Override ');
+        this.setCommand( Genie.CommandType.UNDO );
     },
 
     setInspectorView : function ( componentName, value ) {

@@ -55,6 +55,8 @@ ccui.LabelBMFont = ccui.TextBMFont = ccui.Widget.extend(/** @lends ccui.TextBMFo
             this.setFntFile(filename);
             this.setString(text);
         }
+
+        this.addComponent( new Genie.Component.UILabelBMFontView() );
     },
 
     _initRenderer: function () {
