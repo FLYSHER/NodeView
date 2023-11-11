@@ -44,6 +44,7 @@
         "src/Command/Command.js",
         "src/Command/TransformCommand.js",
         "src/Command/UITextCommand.js",
+        "src/Command/UILabelBMFontCommand.js",
         "src/Command/NodePropertyCommand.js",
         "src/Command/ToolController.js",
 
