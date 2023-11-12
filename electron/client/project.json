@@ -39,12 +39,14 @@
         "src/Components/InspectorComponent/ArmatureComponent.js",
         "src/Components/InspectorComponent/BoneComponent.js",
         "src/Components/InspectorComponent/UITextComponent.js",
+        "src/Components/InspectorComponent/UIImageViewComponent.js",
         "src/Components/InspectorComponent/UILabelBMFontComponent.js",
 
         "src/Command/Command.js",
         "src/Command/TransformCommand.js",
         "src/Command/UITextCommand.js",
         "src/Command/UILabelBMFontCommand.js",
+        "src/Command/UIImageViewCommand.js",
         "src/Command/NodePropertyCommand.js",
         "src/Command/ToolController.js",
 

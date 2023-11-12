@@ -100,11 +100,6 @@ var HtmlHelper = {
      * @param onchange
      */
     createSelectMenu : function( parent, strPlaceHolder, arrOption, onchange ) {
-        // var label_name = document.createElement( 'label' );
-        // label_name.className = "component_lineLabel";
-        // label_name.innerText = attribName;
-        // parent.appendChild( label_name );
-
         var select = document.createElement('select');
         select.addEventListener( "change", onchange );
         select.display = "inline";
@@ -211,7 +206,9 @@ var HtmlHelper = {
         return HtmlHelper.createColorInput( div, placeholder, 'component_shortTextInput',  onchange );
     },
 
-    createSelectMenuAttrib : function() {
-
+    createSelectMenuAttrib : function( parent, propertyName, strPlaceHolder, arrOption, onchange  ) {
+        var div = HtmlHelper.createDiv( parent, 'component_lineDiv' );
+        HtmlHelper.createLabel( div, propertyName, 'component_onePropertyLabel');
+        HtmlHelper.createSelectMenu( div, strPlaceHolder, arrOption, onchange );
     },
 }

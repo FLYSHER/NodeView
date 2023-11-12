@@ -60,6 +60,8 @@ ccui.ImageView = ccui.Widget.extend(/** @lends ccui.ImageView# */{
         else {
             this._imageTexType = ccui.Widget.LOCAL_TEXTURE;
         }
+
+        this.addComponent( new Genie.Component.UIImageView() );
     },
 
     _initRenderer: function () {
