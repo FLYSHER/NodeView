@@ -88,7 +88,7 @@ var HierarchyRenderer = {
             }
         }.bind(this));
 
-        var findTextInputHTML = `<input id="hierarchy_findInput" class="frameBar_findInput"  type="text" value="find" >`;
+        var findTextInputHTML = `<input id="hierarchy_findInput" class="frameBar_findInput"  type="text" value="" >`;
         $('#hierarchy_bar_root').append( findTextInputHTML );
 
         $('#hierarchy_findInput').change( function( event ){

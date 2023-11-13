@@ -29,7 +29,7 @@ var AssetRenderer = {
             cc.eventManager.dispatchCustomEvent( 'setPreviewSprite', { name : selectedFileName } );
         });
 
-        var findTextInputHTML = `<input id="assets_findInput" class="frameBar_findInput"  type="text" value="find" >`;
+        var findTextInputHTML = `<input id="assets_findInput" class="frameBar_findInput"  type="text" value="" >`;
         $('#assets_bar_root').append( findTextInputHTML );
 
         $('#assets_findInput').change( function( event ){

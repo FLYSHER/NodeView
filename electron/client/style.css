@@ -83,6 +83,7 @@ dl {
 
 .frameBar_label {
     display: inline-block;
+    font-weight: bold;
     width: 70px;
     color: var(--text);
     background: var(--heading-background);

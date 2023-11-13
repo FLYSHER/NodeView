@@ -83,7 +83,7 @@ var CocosRenderer = {
 
         var createNode = function ( fileEntry ) {
             return new Promise( function( resolve, reject ){
-                GST.ResourceLoader.createToolFileNode( fileEntry );
+                Genie.ResourceLoader.createToolFileNode( fileEntry );
             });
         }
 
@@ -105,7 +105,7 @@ var CocosRenderer = {
         // 리소스 비동기 로드 및 캐싱
         var loadResource = function( fileEntry ) {
             return new Promise( function( resolve, reject ){
-                GST.ResourceLoader.cacheResource( fileEntry, resolve, reject );
+                Genie.ResourceLoader.cacheResource( fileEntry, resolve, reject );
             });
         };
 

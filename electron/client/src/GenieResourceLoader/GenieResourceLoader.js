@@ -2,15 +2,15 @@
  * Created by flysherdev11 on 2023. 3. 2..
  */
 
-var GST = GST || {};
+var Genie = Genie || {};
 
-GST.ToolFileType = {
+Genie.ToolFileType = {
     NONE        : 0,
     UIFile      : 1,
     ARMATURE    : 2
 }
 
-GST.ResourceLoader = {
+Genie.ResourceLoader = {
 
     /** 리소스 캐싱
      * cc.loader.cache 에 리소스 캐싱
@@ -54,6 +54,8 @@ GST.ResourceLoader = {
                         tex2d.initWithElement(img);
                         tex2d.handleLoadedTexture();
 
+                        // 나중에 이미지 파일 네임으로 base64 image 불러오기 위해.
+                        cc.loader.cache[ fileEntry.name ] = fileEntry.content;
                         cc.loader.cache[key] = tex2d;
                         cc.textureCache.cacheImage( key, tex2d );
                         AssetRenderer.addAsset( key );
@@ -68,13 +70,13 @@ GST.ResourceLoader = {
 
     getToolFileType : function( fileEntry ) {
         var dic = JSON.parse( fileEntry.content );
-        var toolFileType = GST.ToolFileType.NONE;
+        var toolFileType = Genie.ToolFileType.NONE;
 
         if( dic["widgetTree"] ) {
-            toolFileType = GST.ToolFileType.UIFile;
+            toolFileType = Genie.ToolFileType.UIFile;
         }
         else if( dic[ccs.CONST_ARMATURE_DATA] ) {
-            toolFileType = GST.ToolFileType.ARMATURE;
+            toolFileType = Genie.ToolFileType.ARMATURE;
         }
 
         return toolFileType;
@@ -83,10 +85,10 @@ GST.ResourceLoader = {
     createToolFileNode : function( fileEntry ) {
         console.log(" *** create node *** : ", fileEntry );
         var toolFileType = this.getToolFileType( fileEntry );
-        if( toolFileType === GST.ToolFileType.UIFile ) {
+        if( toolFileType === Genie.ToolFileType.UIFile ) {
             cc.eventManager.dispatchCustomEvent( EVT.MAIN_VIEW.CREATE_UI_NODE, { fileName :  fileEntry.name} );
         }
-        else if( toolFileType === GST.ToolFileType.ARMATURE ) {
+        else if( toolFileType === Genie.ToolFileType.ARMATURE ) {
             cc.eventManager.dispatchCustomEvent( EVT.MAIN_VIEW.CREATE_AR_NODE, { fileName : fileEntry.name } );
         }
         else {

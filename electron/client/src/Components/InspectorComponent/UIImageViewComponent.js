@@ -36,7 +36,12 @@ Genie.Component.UIImageView = Genie.Component.InspectorBase.extend({
             0 : 'LOCAL_TEXTURE',
             1 : 'PLIST_TEXTURE',
         }
-        HtmlHelper.createOnePropertyTextInput( rootDiv, 'fileName', owner._textureFile, false, null );
+        this.input_texFileName = HtmlHelper.createOnePropertyTextInput( rootDiv, 'fileName', owner._textureFile, true, null );
+
+        this.input_texFileName.onclick = function( event ) {
+            var searchString = event.target.value;
+            $('#assets').jstree('search', searchString);
+        }
         HtmlHelper.createOnePropertyTextInput( rootDiv, 'texType', imgType[owner._imageTexType], true, null );
 
 

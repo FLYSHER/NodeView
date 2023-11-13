@@ -24,7 +24,7 @@
         "src/uiPositionCtrl.js",
         "src/uiScreenCtrl.js",
         "src/uiScrollTreeViewCtrl.js",
-        "src/GSTResourceLoader/GSTResourceLoader.js",
+        "src/GenieResourceLoader/GenieResourceLoader.js",
         "src/loader.js",
         "src/draggableNode.js",
         "src/eventDispatcher.js",
