@@ -76,10 +76,24 @@ dl {
     color: var(--text);
 }
 
-.title_p {
+.frameBar_div {
     color: var(--text);
     background: var(--heading-background);
-    margin: 2px;
+}
+
+.frameBar_label {
+    display: inline-block;
+    width: 70px;
+    color: var(--text);
+    background: var(--heading-background);
+    margin: 5px;
+}
+
+.frameBar_findInput {
+    display: inline;
+    color: var(--text);
+    background: var(--heading-background);
+    border: 2px solid #bbbbbb;
 }
 
 a {
@@ -479,7 +493,6 @@ input[readonly] {
 }
 
 *{
-    /*background-color: #dedede;*/
     /*border: solid 1px #e51313;*/
 }
 

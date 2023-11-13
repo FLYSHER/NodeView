@@ -14,14 +14,29 @@ var AssetRenderer = {
                 },
                 'data' : [
                 ]
+            },
+            "plugins": ["search"],
+            "search": {
+                "case_sensitive": false,
+                "show_only_matches": true
             }
         });
+
         $('#assets').on("changed.jstree", function (e, data) {
             console.log( e, data );
 
             var selectedFileName = data.selected[0];
             cc.eventManager.dispatchCustomEvent( 'setPreviewSprite', { name : selectedFileName } );
         });
+
+        var findTextInputHTML = `<input id="assets_findInput" class="frameBar_findInput"  type="text" value="find" >`;
+        $('#assets_bar_root').append( findTextInputHTML );
+
+        $('#assets_findInput').change( function( event ){
+            console.log("find assets > ", event.target.value );
+            var searchString = event.target.value;
+            $('#assets').jstree('search', searchString);
+        } );
     },
 
     isExistAsset : function( id, parentID ) {

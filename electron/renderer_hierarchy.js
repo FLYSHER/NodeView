@@ -88,6 +88,15 @@ var HierarchyRenderer = {
             }
         }.bind(this));
 
+        var findTextInputHTML = `<input id="hierarchy_findInput" class="frameBar_findInput"  type="text" value="find" >`;
+        $('#hierarchy_bar_root').append( findTextInputHTML );
+
+        $('#hierarchy_findInput').change( function( event ){
+            console.log("find assets > ", event.target.value );
+            var searchString = event.target.value;
+            $('#hierarchy').jstree('search', searchString);
+        } );
+
         cc.eventManager.addCustomListener('onRefreshHierarchy', this.onRefreshTree.bind(this));
     },
 
