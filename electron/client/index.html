@@ -57,6 +57,7 @@
     <script src="../renderer_hierarchy.js"></script>
     <script src="../renderer_inspector.js"></script>
     <script src="../renderer_assets.js"></script>
+    <script src="../renderer_bottom.js"></script>
     <script src="../renderer_cocos.js"></script>
 <!--    <script src="../renderer.js"></script>-->
 </head>
@@ -221,9 +222,27 @@
 <!--<script src="res/loading.js"></script>-->
 <div class="grid_container" >
     <div id="cocosView_gridItem">
-        <button id="mainLayer"> mainView </button>
-        <button id="previewLayer"> preview </button>
-        <canvas id="gameCanvas" width="400" height="300"></canvas>
+        <div>
+            <button id="mainLayer"> mainView </button>
+            <button id="previewLayer"> preview </button>
+            <canvas id="gameCanvas" width="400" height="300"></canvas>
+        </div>
+        <div id="bottom_menu" >
+            <button id="tab_btn_console" > console </button>
+            <button id="tab_btn_timeline"> timeline </button>
+            <button id="tab_btn_temp" > temp </button>
+        </div>
+        <div id="bottom_console" class="bottom_content" >
+            <h2> console </h2>
+            <p> this is console </p>
+        </div>
+        <div id="bottom_timeline" class="bottom_content" style="display: none">
+            <h2> timeline </h2>
+            <p> this is timeline </p>
+        </div>
+        <div id="bottom_temp" class="bottom_content" style="display: none">
+
+        </div>
     </div>
 
     <div id="second_column">

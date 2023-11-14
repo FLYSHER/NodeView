@@ -158,8 +158,9 @@ button:active {
     /*background: #00F0F0;*/
     /*grid-area: main;*/
 }
-#subView_gridItem {
-    /*background: #444444;*/
+
+#bottom_menu {
+    background: #444444;
     /*grid-area: sub;*/
 }
 #hierarchy_gridItem {

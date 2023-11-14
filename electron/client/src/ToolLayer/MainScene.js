@@ -25,6 +25,9 @@ var MainScene = cc.Scene.extend({
         if (typeof CocosRenderer != 'undefined')
             CocosRenderer.init();
 
+        if (typeof CocosRenderer != 'undefined')
+            bottomRenderer.init();
+
         if (typeof AssetRenderer != 'undefined')
             AssetRenderer.init();
 
