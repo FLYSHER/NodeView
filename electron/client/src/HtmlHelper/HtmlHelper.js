@@ -206,9 +206,22 @@ var HtmlHelper = {
         return HtmlHelper.createColorInput( div, placeholder, 'component_shortTextInput',  onchange );
     },
 
+    createTexturePreviewAttrib : function( parent, src ) {
+        var div = HtmlHelper.createDiv( parent, 'img_preview_div' );
+        parent.appendChild( div );
+
+        var img = document.createElement( 'img' );
+        img.src = src;
+        img.className = 'img_preview';
+        div.appendChild( img );
+
+        return img;
+    },
+
     createSelectMenuAttrib : function( parent, propertyName, strPlaceHolder, arrOption, onchange  ) {
         var div = HtmlHelper.createDiv( parent, 'component_lineDiv' );
         HtmlHelper.createLabel( div, propertyName, 'component_onePropertyLabel');
         HtmlHelper.createSelectMenu( div, strPlaceHolder, arrOption, onchange );
     },
+
 }

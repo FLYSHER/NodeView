@@ -36,16 +36,24 @@ Genie.Component.UIImageView = Genie.Component.InspectorBase.extend({
             0 : 'LOCAL_TEXTURE',
             1 : 'PLIST_TEXTURE',
         }
-        this.input_texFileName = HtmlHelper.createOnePropertyTextInput( rootDiv, 'fileName', owner._textureFile, true, null );
 
+        // sprite name
+        this.input_texFileName = HtmlHelper.createOnePropertyTextInput( rootDiv, 'fileName', owner._textureFile, true, null );
         this.input_texFileName.onclick = function( event ) {
             var searchString = event.target.value;
             $('#assets').jstree('search', searchString);
         }
+
+        // texture type
         HtmlHelper.createOnePropertyTextInput( rootDiv, 'texType', imgType[owner._imageTexType], true, null );
 
+        // texture name
+        var textureName = Genie.Utils.getSpriteFrameTextureName( owner._textureFile );
+        HtmlHelper.createOnePropertyTextInput( rootDiv, 'texture', textureName, true );
 
-
+        // texture preview
+        var base64Image = cc.loader.getRes( textureName );
+        HtmlHelper.createTexturePreviewAttrib( rootDiv, base64Image );
     },
 
     onchange : function ( event ) {

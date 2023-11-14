@@ -36,5 +36,22 @@ Genie.Utils = {
         return "#" + Genie.Utils.componentToHex(colorOrR) + Genie.Utils.componentToHex(g) + Genie.Utils.componentToHex(b);
     },
 
+    //
+    getSpriteFrameTextureName : function( spriteFrameName ) {
+        var spriteFrame = cc.spriteFrameCache.getSpriteFrame( spriteFrameName );
+        if( !spriteFrame ) {
+            return null;
+        }
 
+        var meta, frames,
+            frameConfigCache = cc.spriteFrameCache._frameConfigCache;
+        for( var key in frameConfigCache ) {
+            meta    = cc.spriteFrameCache._frameConfigCache[key].meta;
+            frames  = cc.spriteFrameCache._frameConfigCache[key].frames;
+
+            if( frames.hasOwnProperty( spriteFrameName ) ) {
+                return meta.image;
+            }
+        }
+    },
 }
