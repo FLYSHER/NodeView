@@ -24,6 +24,7 @@
     "electron-builder": "~22.11.7"
   },
   "dependencies": {
+    "animation-timeline-js": "^2.3.0",
     "image-data-uri": "^2.0.1"
   },
   "build": {

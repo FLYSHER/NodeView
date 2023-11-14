@@ -54,4 +54,8 @@ Genie.Utils = {
             }
         }
     },
+
+    getScreenCenterPos : function() {
+        return cc.p( cc.winSize.width/2, cc.winSize.height/2 );
+    },
 }

@@ -1,3 +1,5 @@
+var timelineModule = require('animation-timeline-js');
+
 var HierarchyRenderer = {
     Tag                 : "[ HierarchyRenderer ] ",
     hierarchyData       : [],
@@ -96,6 +98,31 @@ var HierarchyRenderer = {
             var searchString = event.target.value;
             $('#hierarchy').jstree('search', searchString);
         } );
+
+        var rows = [
+            {
+                keyframes: [
+                    {
+                        val: 40,
+                    },
+                    {
+                        val: 3000
+                    }
+                ]
+            }];
+
+        var div = document.createElement('div')
+        div.id ="timeline";
+
+        $('#hierarchy').append( div );
+
+        var timeline = new timelineModule.Timeline( {
+            id : 'timeline'
+        } );
+
+        timeline.setModel( {
+            rows : rows
+        } )
 
         cc.eventManager.addCustomListener('onRefreshHierarchy', this.onRefreshTree.bind(this));
     },
