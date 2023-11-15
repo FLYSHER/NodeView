@@ -118,7 +118,8 @@ var HtmlHelper = {
     createSelectMenu : function( parent, strPlaceHolder, arrOption, onchange ) {
         var select = document.createElement('select');
         select.addEventListener( "change", onchange );
-        select.display = "inline";
+        select.style.display = "inline-block";
+        select.style.width = '150px'
         select.style.margin = "3px";
         parent.appendChild( select );
 
