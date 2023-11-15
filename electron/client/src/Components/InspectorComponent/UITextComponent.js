@@ -29,9 +29,9 @@ Genie.Component.UITextView = Genie.Component.InspectorBase.extend({
         rootDiv.appendChild( titleBar );
 
         // base
-        this.input_fontSize = HtmlHelper.createOnePropertyTextInput( rootDiv, 'font size', owner.getFontSize(), false, this.onchange.bind(this) );
-        this.input_fontName = HtmlHelper.createOnePropertyTextInput( rootDiv, 'font name', owner.getFontName(), true, null );
-        this.input_text     = HtmlHelper.createOnePropertyTextInput( rootDiv, 'text', owner.getString(), false, this.onchange.bind(this) );
+        this.input_fontSize = HtmlHelper.createOneLongTextInput( rootDiv, 'font size', owner.getFontSize(), false, this.onchange.bind(this) );
+        this.input_fontName = HtmlHelper.createOneLongTextInput( rootDiv, 'font name', owner.getFontName(), true, null );
+        this.input_text     = HtmlHelper.createOneLongTextInput( rootDiv, 'text', owner.getString(), false, this.onchange.bind(this) );
         this.input_textColor=  HtmlHelper.createColorAttrib( rootDiv, "color", Genie.Utils.rgbToHex( owner.getTextColor() ),  this.onchange.bind(this) );
         this.input_fontSize.id  = "ttf_fontSize";
         this.input_text.id      = "ttf_text";
@@ -44,7 +44,7 @@ Genie.Component.UITextView = Genie.Component.InspectorBase.extend({
         this.cb_shadow      = HtmlHelper.createCheckboxAttrib( div_shadow, "enable", false, false, this.onchangeShadow.bind(this) );
         this.cb_shadow.id   = "ttf_shadowEnable";
         this.input_shadowOffset = HtmlHelper.createSizeAttrib( div_shadow, "offset",  [1,1], [false, false], this.onchangeShadow.bind(this) );
-        this.input_shadowRadius = HtmlHelper.createOnePropertyTextInput( div_shadow, "blurRadius", 1.0, false, this.onchangeShadow.bind(this) )
+        this.input_shadowRadius = HtmlHelper.createOneLongTextInput( div_shadow, "blurRadius", 1.0, false, this.onchangeShadow.bind(this) )
         this.input_shadowColor  = HtmlHelper.createColorAttrib( div_shadow, "color", '#DEDEDEFF',  this.onchangeShadow.bind(this) );
 
         // outline
@@ -53,7 +53,7 @@ Genie.Component.UITextView = Genie.Component.InspectorBase.extend({
 
         this.cb_outline     = HtmlHelper.createCheckboxAttrib( div_outline, "enable", false, false, this.onchangeOutline.bind(this) );
         this.cb_outline.id  = "ttf_outlineEnable";
-        this.input_outlineSize  = HtmlHelper.createOnePropertyTextInput( div_outline, "size", 1.0, false, this.onchangeOutline.bind(this) )
+        this.input_outlineSize  = HtmlHelper.createOneLongTextInput( div_outline, "size", 1.0, false, this.onchangeOutline.bind(this) )
         this.input_outlineColor = HtmlHelper.createColorAttrib( div_outline, "color", '#DEDEDEFF',  this.onchangeOutline.bind(this) );
 
     },

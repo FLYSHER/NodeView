@@ -58,4 +58,10 @@ Genie.Utils = {
     getScreenCenterPos : function() {
         return cc.p( cc.winSize.width/2, cc.winSize.height/2 );
     },
+
+    getMovementDataByName : function( armature, movName ) {
+        var animationData   = armature.getAnimation().getAnimationData();
+        var movementDataDic = animationData.movementDataDic;
+        return movementDataDic[ movName ];
+    }
 }

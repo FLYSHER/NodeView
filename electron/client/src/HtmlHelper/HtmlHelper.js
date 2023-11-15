@@ -17,6 +17,22 @@ var HtmlHelper = {
         return el_button;
     },
 
+    creatIconButton : function( parent, iconInfoObj, onclick ) {
+        var button = document.createElement( 'button' );
+        button.style.display = "inline";
+        button.style.width = '30px';
+        button.addEventListener( "click", onclick );
+        parent.appendChild( button );
+
+        var icon = document.createElement('i');
+        icon.className  = iconInfoObj.className;
+        icon.style      = iconInfoObj.style;
+        icon.style.pointerEvents = 'none'; // 아이콘이 이벤트 먹는거 방지
+        button.appendChild( icon );
+
+        return button;
+    },
+
     createCheckbox : function( parent, name, checked, readOnly, onchange ) {
         var el_checkbox = document.createElement('input');
         el_checkbox.type = "checkbox";
@@ -103,12 +119,14 @@ var HtmlHelper = {
         var select = document.createElement('select');
         select.addEventListener( "change", onchange );
         select.display = "inline";
+        select.style.margin = "3px";
         parent.appendChild( select );
 
         var i, option;
 
         // place holder
         option = document.createElement('option');
+        option.value = 0;
         option.text  = strPlaceHolder;
         option.hidden = true;
         option.disabled = true;
@@ -126,7 +144,7 @@ var HtmlHelper = {
         return select; // select 의 최상위 요소 리턴.
     },
 
-    // inspector
+    //region [ inspector util ]
     createComponentRootDiv : function() {
         var div_comp = document.createElement('div');
         div_comp.className = "inspector_component";
@@ -138,7 +156,7 @@ var HtmlHelper = {
         return div_comp;
     },
 
-    createComponentBar : function( componentName, iconObj ) {
+    createComponentBar : function( componentName, iconInfoObj ) {
         var div_comp = document.createElement('div');
         div_comp.style.display = 'block';
         div_comp.style.backgroundColor = "#555555";
@@ -147,12 +165,14 @@ var HtmlHelper = {
 
 
         var icon = document.createElement( 'i' );
-        icon.className  = iconObj.className;
-        icon.style      = iconObj.style;
+        icon.className  = iconInfoObj.className;
+        icon.style      = iconInfoObj.style;
+        icon.style.margin = '5px';
         div_comp.appendChild( icon );
 
         var label = document.createElement('span');
         label.style.color = '#dbdbdb';
+        label.style.margin = '5px';
         label.innerText =  componentName;
         div_comp.appendChild( label );
 
@@ -160,10 +180,16 @@ var HtmlHelper = {
     },
 
     // component view
-    createOnePropertyTextInput : function( parent, propertyName, placeholder, readonly, onchange  ) {
+    createOneLongTextInput : function( parent, propertyName, placeholder, readonly, onchange  ) {
         var div = HtmlHelper.createDiv( parent, 'component_lineDiv' );
-        HtmlHelper.createLabel( div, propertyName, 'component_onePropertyLabel');
+        HtmlHelper.createLabel( div, propertyName, 'component_longPropertyLabel');
         return HtmlHelper.createTextInput( div, placeholder, 'component_longTextInput', readonly, onchange );
+    },
+
+    createOneShortTextInput : function( parent, propertyName, placeholder, readonly, onchange ) {
+        var div = HtmlHelper.createDiv( parent, 'component_lineDiv' );
+        HtmlHelper.createLabel( div, propertyName, 'component_longPropertyLabel');
+        return HtmlHelper.createTextInput( div, placeholder, 'component_shortTextInput', readonly, onchange );
     },
 
     createPointAttrib : function( parent, titleName, arrPlaceholder, arrReadOnly, onchange ) {
@@ -196,13 +222,13 @@ var HtmlHelper = {
 
     createCheckboxAttrib : function( parent, propertyName, checked, readyonly, onchange ) {
         var div = HtmlHelper.createDiv( parent, 'component_lineDiv' );
-        HtmlHelper.createLabel( div, propertyName, "component_onePropertyLabel" );
+        HtmlHelper.createLabel( div, propertyName, "component_longPropertyLabel" );
         return HtmlHelper.createCheckbox( div, "", checked, readyonly, onchange );
     },
 
     createColorAttrib : function( parent, propertyName, placeholder, onchange) {
         var div = HtmlHelper.createDiv( parent, 'component_lineDiv' );
-        HtmlHelper.createLabel( div, propertyName, 'component_onePropertyLabel');
+        HtmlHelper.createLabel( div, propertyName, 'component_longPropertyLabel');
         return HtmlHelper.createColorInput( div, placeholder, 'component_shortTextInput',  onchange );
     },
 
@@ -220,8 +246,9 @@ var HtmlHelper = {
 
     createSelectMenuAttrib : function( parent, propertyName, strPlaceHolder, arrOption, onchange  ) {
         var div = HtmlHelper.createDiv( parent, 'component_lineDiv' );
-        HtmlHelper.createLabel( div, propertyName, 'component_onePropertyLabel');
-        HtmlHelper.createSelectMenu( div, strPlaceHolder, arrOption, onchange );
+        HtmlHelper.createLabel( div, propertyName, 'component_longPropertyLabel');
+        return HtmlHelper.createSelectMenu( div, strPlaceHolder, arrOption, onchange );
     },
 
+    // endregion
 }

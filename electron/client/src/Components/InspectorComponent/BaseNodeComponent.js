@@ -23,13 +23,13 @@ Genie.Component.NodeProperty = Genie.Component.InspectorBase.extend({
         rootDiv.appendChild( titleBar );
 
         // name
-        HtmlHelper.createOnePropertyTextInput( rootDiv, "name", owner.getName(), true );
+        HtmlHelper.createOneLongTextInput( rootDiv, "name", owner.getName(), true );
 
         // class name
-        HtmlHelper.createOnePropertyTextInput( rootDiv, "className", owner._className, true );
+        HtmlHelper.createOneLongTextInput( rootDiv, "className", owner._className, true );
 
         // instance id
-        HtmlHelper.createOnePropertyTextInput( rootDiv, "instanceId", owner.__instanceId, true );
+        HtmlHelper.createOneLongTextInput( rootDiv, "instanceId", owner.__instanceId, true );
 
         // anchor
         var loc_anchor = owner.getAnchorPoint();
@@ -44,7 +44,7 @@ Genie.Component.NodeProperty = Genie.Component.InspectorBase.extend({
         this.input_size.height.id   = "height";
 
         // zorder
-        this.input_order = HtmlHelper.createOnePropertyTextInput( rootDiv, "z-order", owner.getLocalZOrder(), false, this.onchange.bind(this) );
+        this.input_order = HtmlHelper.createOneLongTextInput( rootDiv, "z-order", owner.getLocalZOrder(), false, this.onchange.bind(this) );
         this.input_order.id = "zorder";
 
         // visible

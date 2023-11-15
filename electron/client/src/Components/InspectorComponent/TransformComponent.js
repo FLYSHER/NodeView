@@ -29,7 +29,7 @@ Genie.Component.Transform = Genie.Component.InspectorBase.extend({
         this.input_pos.y.id = "posY";
 
         // rotation
-        HtmlHelper.createOnePropertyTextInput( rootDiv, "rotation", owner.getRotation(), true );
+        HtmlHelper.createOneLongTextInput( rootDiv, "rotation", owner.getRotation(), true );
 
         // scale
         var loc_scale = cc.p( owner.getScaleX(), owner.getScaleY() );

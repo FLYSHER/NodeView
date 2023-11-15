@@ -38,18 +38,18 @@ Genie.Component.UIImageView = Genie.Component.InspectorBase.extend({
         }
 
         // sprite name
-        this.input_texFileName = HtmlHelper.createOnePropertyTextInput( rootDiv, 'fileName', owner._textureFile, true, null );
+        this.input_texFileName = HtmlHelper.createOneLongTextInput( rootDiv, 'fileName', owner._textureFile, true, null );
         this.input_texFileName.onclick = function( event ) {
             var searchString = event.target.value;
             $('#assets').jstree('search', searchString);
         }
 
         // texture type
-        HtmlHelper.createOnePropertyTextInput( rootDiv, 'texType', imgType[owner._imageTexType], true, null );
+        HtmlHelper.createOneLongTextInput( rootDiv, 'texType', imgType[owner._imageTexType], true, null );
 
         // texture name
         var textureName = Genie.Utils.getSpriteFrameTextureName( owner._textureFile );
-        HtmlHelper.createOnePropertyTextInput( rootDiv, 'texture', textureName, true );
+        HtmlHelper.createOneLongTextInput( rootDiv, 'texture', textureName, true );
 
         // texture preview
         var base64Image = cc.loader.getRes( textureName );

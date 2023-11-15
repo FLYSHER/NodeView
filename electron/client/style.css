@@ -446,9 +446,17 @@ ul.tabs li.current{
     color: #95B8E7;
 }
 
-.component_onePropertyLabel {
+.component_longPropertyLabel {
     display: inline-block; /* inline-block width, height 적용 가능 */
-    width : 70px;
+    width : 100px;
+    margin-left: 2px; /* inline-block 은 margin 좌,우만 적용, padding 은 의미 없음.*/
+    margin-right: 10px;
+    color: #DEDEDEFF;
+}
+
+.component_oneShortLabel {
+    display: inline-block; /* inline-block width, height 적용 가능 */
+    width : 50px;
     margin-left: 2px; /* inline-block 은 margin 좌,우만 적용, padding 은 의미 없음.*/
     margin-right: 10px;
     color: #DEDEDEFF;
@@ -456,7 +464,7 @@ ul.tabs li.current{
 
 .component_twoPropertyLabel {
     display: inline-block; /* inline-block width, height 적용 가능 */
-    width : 70px;
+    width : 100px;
     margin-left: 2px; /* inline-block 은 margin 좌,우만 적용, padding 은 의미 없음.*/
     margin-right : 10px;
     color: #DEDEDEFF;

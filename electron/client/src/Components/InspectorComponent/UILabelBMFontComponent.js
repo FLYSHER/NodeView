@@ -28,8 +28,8 @@ Genie.Component.UILabelBMFontView = Genie.Component.InspectorBase.extend({
         var titleBar = HtmlHelper.createComponentBar(this.getName(), iconObj);
         rootDiv.appendChild( titleBar );
 
-        this.input_fntFileName = HtmlHelper.createOnePropertyTextInput( rootDiv, 'fontName', owner._fntFileName, true, this.onchange.bind(this)  );
-        this.input_text     = HtmlHelper.createOnePropertyTextInput( rootDiv, 'text', owner.getString(), false, this.onchange.bind(this) );
+        this.input_fntFileName = HtmlHelper.createOneLongTextInput( rootDiv, 'fontName', owner._fntFileName, true, this.onchange.bind(this)  );
+        this.input_text     = HtmlHelper.createOneLongTextInput( rootDiv, 'text', owner.getString(), false, this.onchange.bind(this) );
 
         this.input_fntFileName.id = "bmf_fntFileName";
         this.input_text.id        = "bmf_text";
