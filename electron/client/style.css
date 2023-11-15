@@ -448,7 +448,7 @@ ul.tabs li.current{
 
 .component_longPropertyLabel {
     display: inline-block; /* inline-block width, height 적용 가능 */
-    width : 100px;
+    width : 110px;
     margin-left: 2px; /* inline-block 은 margin 좌,우만 적용, padding 은 의미 없음.*/
     margin-right: 10px;
     color: #DEDEDEFF;

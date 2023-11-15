@@ -31,28 +31,6 @@ Genie.Component.BoneView = Genie.Component.InspectorBase.extend({
         this.drawBoneData( rootDiv );
         this.drawDisplayManager( rootDiv );
 
-        // var bone = owner;
-        // var currDisplayIndex = bone.getDisplayManager().getCurrentDisplayIndex();
-        //
-        // var decoDisplayList = bone.getDisplayManager().getDecorativeDisplayList();
-        // var i, displayData,
-        //     skinArray = [];
-        //
-        // for( i = 0; i < decoDisplayList.length; ++i ) {
-        //     displayData = decoDisplayList[i].getDisplayData();
-        //     skinArray.push( "(" + i + ") " + displayData.displayName );
-        // }
-        //
-        // if( currDisplayIndex > -1 ) {
-        //     var placeHolder = "(" + currDisplayIndex + ") " + decoDisplayList[currDisplayIndex].getDisplayData().displayName;
-        //
-        //     HtmlHelper.createLabel( rootDiv, "skinIndex", "component_lineLabel");
-        //
-        //     HtmlHelper.createSelectMenu( rootDiv, placeHolder, skinArray, function( event ) {
-        //         bone.changeDisplayWithIndex( event.target.value, true );
-        //     });
-        // }
-
     },
 
     drawBoneData : function( rootDiv ) {
@@ -61,15 +39,21 @@ Genie.Component.BoneView = Genie.Component.InspectorBase.extend({
 
         // name, parentName, bonedataTransform, displayDataList
         var boneData = this.getOwner().getBoneData();
-        HtmlHelper.createOneLongTextInput( rootDiv, 'name', boneData.name, true );
-        HtmlHelper.createOneLongTextInput( rootDiv, 'parentName', boneData.parentName, true );
+        HtmlHelper.createOneLongTextInput( div_group, 'name', boneData.name, true );
+        HtmlHelper.createOneLongTextInput( div_group, 'parentName', boneData.parentName, true );
+        HtmlHelper.createLabel( div_group, "displayManager", "component_longPropertyLabel" );
     },
 
     drawDisplayManager : function( rootDiv ) {
+        var currDisplayIndex = this.getOwner().getDisplayManager().getCurrentDisplayIndex();
+        if( currDisplayIndex < 0 ) {
+            return;
+        }
+
         var div_group = HtmlHelper.createDiv( rootDiv, 'component_groupDiv' );
         HtmlHelper.createLabel( div_group, "DisplayManager", "component_groupTitleLabel" );
 
-        var currDisplayIndex = this.getOwner().getDisplayManager().getCurrentDisplayIndex();
+
         var decoDisplayList = this.getOwner().getDisplayManager().getDecorativeDisplayList();
 
         var i, displayData, placeholder, skinArray = [];
@@ -81,13 +65,25 @@ Genie.Component.BoneView = Genie.Component.InspectorBase.extend({
             }
         }
 
-        HtmlHelper.createSelectMenuAttrib( div_group, 'decoDisplay', placeholder, skinArray, this.onchange.bind(this) );
+        HtmlHelper.createSelectMenuAttrib( div_group, 'decoDisplayList', placeholder, skinArray, this.onchange.bind(this) );
 
     },
 
-    drawDecorativeDisplay : function() {
-        // display , displayData, collider
+    drawDecorativeDisplay : function( rootDiv, decoDisplay ) {
+        if( !decoDisplay ) {
+            return;
+        }
 
+        var div_group = HtmlHelper.createDiv( rootDiv, 'component_groupDiv' );
+        HtmlHelper.createLabel( div_group, "DecorativeDisplay", "component_groupTitleLabel" );
+
+        var displayType = decoDisplay.getDisplayData().displayType;
+        var displayTypeNames = [
+            "ccs.DISPLAY_TYPE_SPRITE",
+            "ccs.DISPLAY_TYPE_ARMATURE",
+            "ccs.DISPLAY_TYPE_PARTICLE",
+        ]
+        HtmlHelper.createOneLongTextInput( div_group, "displayData.type", displayTypeNames[displayType], true );
     },
 
     setInspectorValue : function( paramObj ) {},

@@ -51,6 +51,7 @@ var HtmlHelper = {
         var el_label = document.createElement('label');
         el_label.className = label_className;
         el_label.innerText = label_text;
+        el_label.style.margin = '2px';
         parent.appendChild(el_label);
         return el_label;
     },
@@ -119,7 +120,7 @@ var HtmlHelper = {
         var select = document.createElement('select');
         select.addEventListener( "change", onchange );
         select.style.display = "inline-block";
-        select.style.width = '150px'
+        select.style.width = '170px'
         select.style.margin = "3px";
         parent.appendChild( select );
 
