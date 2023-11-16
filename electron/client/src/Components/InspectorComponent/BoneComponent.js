@@ -27,6 +27,7 @@ Genie.Component.BoneView = Genie.Component.InspectorBase.extend({
         }
         var titleBar = HtmlHelper.createComponentBar(this.getName(), iconObj);
         rootDiv.appendChild( titleBar );
+        this.div_compRoot = rootDiv;
 
         this.drawBoneData( rootDiv );
         this.drawDisplayManager( rootDiv );
@@ -44,17 +45,20 @@ Genie.Component.BoneView = Genie.Component.InspectorBase.extend({
         HtmlHelper.createLabel( div_group, "displayManager", "component_longPropertyLabel" );
     },
 
-    drawDisplayManager : function( rootDiv ) {
+    drawDisplayManager : function() {
         var currDisplayIndex = this.getOwner().getDisplayManager().getCurrentDisplayIndex();
         if( currDisplayIndex < 0 ) {
             return;
         }
 
+        var rootDiv =  this.div_compRoot;
+
         var div_group = HtmlHelper.createDiv( rootDiv, 'component_groupDiv' );
         HtmlHelper.createLabel( div_group, "DisplayManager", "component_groupTitleLabel" );
 
-
         var decoDisplayList = this.getOwner().getDisplayManager().getDecorativeDisplayList();
+
+        HtmlHelper.createOneLongTextInput( div_group, "count", decoDisplayList.length, true );
 
         var i, displayData, placeholder, skinArray = [];
         for( i = 0; i < decoDisplayList.length; ++i ) {
@@ -65,30 +69,54 @@ Genie.Component.BoneView = Genie.Component.InspectorBase.extend({
             }
         }
 
-        HtmlHelper.createSelectMenuAttrib( div_group, 'decoDisplayList', placeholder, skinArray, this.onchange.bind(this) );
-
+        this.select_decoList = HtmlHelper.createSelectMenuAttrib( div_group, 'decoDisplayList', placeholder, skinArray, this.onchange.bind(this) );
+        this.drawDecorativeDisplay();
     },
 
-    drawDecorativeDisplay : function( rootDiv, decoDisplay ) {
+    drawDecorativeDisplay : function() {
+        var decoDisplay = this.getOwner().getDisplayManager().getCurrentDecorativeDisplay();
         if( !decoDisplay ) {
             return;
         }
 
+        var rootDiv =  this.div_compRoot;
         var div_group = HtmlHelper.createDiv( rootDiv, 'component_groupDiv' );
         HtmlHelper.createLabel( div_group, "DecorativeDisplay", "component_groupTitleLabel" );
 
         var displayType = decoDisplay.getDisplayData().displayType;
         var displayTypeNames = [
-            "ccs.DISPLAY_TYPE_SPRITE",
-            "ccs.DISPLAY_TYPE_ARMATURE",
-            "ccs.DISPLAY_TYPE_PARTICLE",
+            "DISPLAY_TYPE_SPRITE",
+            "DISPLAY_TYPE_ARMATURE",
+            "DISPLAY_TYPE_PARTICLE",
         ]
         HtmlHelper.createOneLongTextInput( div_group, "displayData.type", displayTypeNames[displayType], true );
+
+        var display = decoDisplay.getDisplay();
+        HtmlHelper.createOneLongTextInput( div_group, 'display.className', display._className, true );
+        HtmlHelper.createOneLongTextInput( div_group, 'display.displayName', display._displayName, true );
+        var skinContentSize = display.getContentSize();
+        HtmlHelper.createSizeAttrib( div_group, "contentSize", [skinContentSize.width, skinContentSize.height], [true, true] );
+
+        this.div_decoDisplay = div_group;
     },
 
     setInspectorValue : function( paramObj ) {},
 
     onchange : function( event ) {
+        var owner = this.getOwner();
+        var value, strValue = event.target.value;
 
+        switch ( event.target ) {
+            case this.select_decoList:
+                value = parseInt(event.target.value); // selected index
+                owner.getDisplayManager().changeDisplayWithIndex( value, true );
+
+                this.div_decoDisplay.remove();
+                this.div_decoDisplay = null;
+
+                this.drawDecorativeDisplay();
+
+                break;
+        }
     }
 });
