@@ -98,15 +98,23 @@ dl {
 }
 
 .img_preview_div {
+    position: relative;
     width: 100%;
     height: 300px;
     border: 1px solid #BEC5D0;
 }
 
 .img_preview {
+    position: absolute;
     width: 100%;
     height: 100%;
 }
+
+/*.img_preview:first-child {*/
+/*    filter: opacity( 0.5 );*/
+/*}*/
+
+
 
 a {
     color: var(--anchor-text);
@@ -157,6 +165,9 @@ button:active {
 #cocosView_gridItem {
     /*background: #00F0F0;*/
     /*grid-area: main;*/
+    height: 95vh;
+    /*grid-area: hierarchy;*/
+    overflow: scroll;
 }
 
 #bottom_menu {
@@ -171,7 +182,7 @@ button:active {
 }
 
 #second_column {
-    height: 90vh;
+    height: 95vh;
 }
 
 #assets_gridItem {
@@ -190,6 +201,8 @@ button:active {
 
 #inspector_gridItem {
     /*grid-area: inspector;*/
+    height: 95vh;
+    overflow: scroll;
 }
 
 .component_root {
@@ -444,6 +457,14 @@ ul.tabs li.current{
     margin : 2px;
     font-weight: bold;
     color: #95B8E7;
+}
+
+.component_subGroupLabel {
+    display : block;
+    color: #BEC5D0;
+    margin-top: 3px;
+    margin-left : 2px;
+    border-bottom: 2px solid #444242;
 }
 
 .component_longPropertyLabel {

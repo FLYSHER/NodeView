@@ -49,11 +49,14 @@ Genie.Component.UIImageView = Genie.Component.InspectorBase.extend({
 
         // texture name
         var textureName = Genie.Utils.getSpriteFrameTextureName( owner._textureFile );
-        HtmlHelper.createOneLongTextInput( rootDiv, 'texture', textureName, true );
+        // HtmlHelper.createOneLongTextInput( rootDiv, 'texture', textureName, true );
 
         // texture preview
-        var base64Image = cc.loader.getRes( textureName );
-        HtmlHelper.createTexturePreviewAttrib( rootDiv, base64Image );
+        // var base64Image = cc.loader.getRes( textureName );
+        // HtmlHelper.createTexturePreviewAttrib( rootDiv, base64Image );
+
+        HtmlHelper.createSpritePreviewAttrib( rootDiv, owner._textureFile, textureName );
+
     },
 
     onchange : function ( event ) {

@@ -241,9 +241,43 @@ var HtmlHelper = {
         var img = document.createElement( 'img' );
         img.src = src;
         img.className = 'img_preview';
+
+        img.style.clipPath = 'inset( 0px 100px 200px 0px )';
         div.appendChild( img );
 
         return img;
+    },
+
+    createSpritePreviewAttrib : function( parent, spriteName, textureName ) {
+        var div = HtmlHelper.createDiv( parent, 'img_preview_div' );
+        parent.appendChild( div );
+
+        var texture     = cc.textureCache.getTextureForKey( 'image/' + textureName);
+        var spriteFrame = cc.spriteFrameCache.getSpriteFrame( spriteName );
+
+        if( texture && spriteFrame ) {
+            var img_tex   = document.createElement( 'img' );
+            img_tex.src       = cc.loader.getRes( textureName );
+            img_tex.className = 'img_preview';
+            img_tex.style.filter = 'opacity( 0.3 )';
+            div.append( img_tex );
+
+            var img_spr = document.createElement( 'img' );
+            img_spr.src             = cc.loader.getRes( textureName );
+            img_spr.className       = 'img_preview';
+
+            var texSize = texture.getContentSize();
+            var sprRect = spriteFrame.getRect();
+            img_spr.style.clipPath = 'inset(' +
+                    ( sprRect.y / texSize.height   * 100 ).toFixed(0) + "% " +
+                    ( ( texSize.width - (sprRect.x + sprRect.width) ) / texSize.width  * 100 ).toFixed(0) + "% " +
+                    ( ( texSize.height - (sprRect.y + sprRect.height) ) / texSize.height * 100 ).toFixed(0) + "% " +
+                    (sprRect.x / texSize.width * 100 ).toFixed(0) + "% " +
+                ')';
+            div.append( img_spr );
+        }
+
+        return img_spr;
     },
 
     createSelectMenuAttrib : function( parent, propertyName, strPlaceHolder, arrOption, onchange  ) {

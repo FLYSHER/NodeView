@@ -31,7 +31,6 @@ Genie.Component.BoneView = Genie.Component.InspectorBase.extend({
 
         this.drawBoneData( rootDiv );
         this.drawDisplayManager( rootDiv );
-
     },
 
     drawBoneData : function( rootDiv ) {
@@ -70,6 +69,11 @@ Genie.Component.BoneView = Genie.Component.InspectorBase.extend({
         }
 
         this.select_decoList = HtmlHelper.createSelectMenuAttrib( div_group, 'decoDisplayList', placeholder, skinArray, this.onchange.bind(this) );
+
+        if( this.div_decoDisplay) {
+            this.div_decoDisplay.remove();
+            this.div_decoDisplay = null;
+        }
         this.drawDecorativeDisplay();
     },
 
@@ -83,21 +87,54 @@ Genie.Component.BoneView = Genie.Component.InspectorBase.extend({
         var div_group = HtmlHelper.createDiv( rootDiv, 'component_groupDiv' );
         HtmlHelper.createLabel( div_group, "DecorativeDisplay", "component_groupTitleLabel" );
 
+        // displayData sub group
+        HtmlHelper.createLabel( div_group, "displayData", 'component_subGroupLabel' );
+
         var displayType = decoDisplay.getDisplayData().displayType;
         var displayTypeNames = [
             "DISPLAY_TYPE_SPRITE",
             "DISPLAY_TYPE_ARMATURE",
             "DISPLAY_TYPE_PARTICLE",
         ]
-        HtmlHelper.createOneLongTextInput( div_group, "displayData.type", displayTypeNames[displayType], true );
+        HtmlHelper.createOneLongTextInput( div_group, "   type", displayTypeNames[displayType], true );
 
         var display = decoDisplay.getDisplay();
-        HtmlHelper.createOneLongTextInput( div_group, 'display.className', display._className, true );
-        HtmlHelper.createOneLongTextInput( div_group, 'display.displayName', display._displayName, true );
-        var skinContentSize = display.getContentSize();
-        HtmlHelper.createSizeAttrib( div_group, "contentSize", [skinContentSize.width, skinContentSize.height], [true, true] );
+        HtmlHelper.createOneLongTextInput( div_group, '   displayName', display._displayName, true );
+
+        // display sub group
+        HtmlHelper.createLabel( div_group, "display", 'component_subGroupLabel' );
+        HtmlHelper.createOneLongTextInput( div_group, '   className', display._className, true );
+
+        // skin group
+        if( displayType === ccs.DISPLAY_TYPE_SPRITE ) {
+            this.drawSkinDisplay( rootDiv );
+        }
 
         this.div_decoDisplay = div_group;
+    },
+
+    drawSkinDisplay : function( rootDiv ) {
+        var decoDisplay = this.getOwner().getDisplayManager().getCurrentDecorativeDisplay();
+        if( !decoDisplay ) {
+            return;
+        }
+
+        var display = decoDisplay.getDisplay();
+
+        var div_group = HtmlHelper.createDiv( rootDiv, 'component_groupDiv' );
+        HtmlHelper.createLabel( div_group, "Skin", "component_groupTitleLabel" );
+
+        var skinContentSize = display.getContentSize();
+        HtmlHelper.createSizeAttrib( div_group, "contentSize", [skinContentSize.width, skinContentSize.height], [true, true] );
+        var spriteName = display.getDisplayName();
+        var textureName = Genie.Utils.getSpriteFrameTextureName( spriteName );
+
+        HtmlHelper.createOneLongTextInput( div_group, "textureName", textureName, true  );
+        HtmlHelper.createOneLongTextInput( div_group, "spriteFrame", spriteName, true  );
+
+        HtmlHelper.createSpritePreviewAttrib( div_group, spriteName, textureName );
+
+        this.div_groupSkin = div_group;
     },
 
     setInspectorValue : function( paramObj ) {},
@@ -111,8 +148,15 @@ Genie.Component.BoneView = Genie.Component.InspectorBase.extend({
                 value = parseInt(event.target.value); // selected index
                 owner.getDisplayManager().changeDisplayWithIndex( value, true );
 
-                this.div_decoDisplay.remove();
-                this.div_decoDisplay = null;
+                if( this.div_decoDisplay) {
+                    this.div_decoDisplay.remove();
+                    this.div_decoDisplay = null;
+                }
+
+                if( this.div_groupSkin) {
+                    this.div_groupSkin.remove();
+                    this.div_groupSkin = null;
+                }
 
                 this.drawDecorativeDisplay();
 
