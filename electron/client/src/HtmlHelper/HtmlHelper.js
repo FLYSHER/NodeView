@@ -259,12 +259,13 @@ var HtmlHelper = {
             var img_tex   = document.createElement( 'img' );
             img_tex.src       = cc.loader.getRes( textureName );
             img_tex.className = 'img_preview';
-            img_tex.style.filter = 'opacity( 0.3 )';
+            img_tex.style.filter = 'opacity( 0.3 ) grayscale( 80% )';
             div.append( img_tex );
 
             var img_spr = document.createElement( 'img' );
             img_spr.src             = cc.loader.getRes( textureName );
             img_spr.className       = 'img_preview';
+            img_spr.style.filter    = "brightness(2.0)"
 
             var texSize = texture.getContentSize();
             var sprRect = spriteFrame.getRect();

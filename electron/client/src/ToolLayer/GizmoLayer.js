@@ -98,7 +98,7 @@ var Gizmo = cc.Node.extend({
 
         origin  = cc.pSub( origin, apps );
         dest    = cc.pSub( dest, apps );
-        this._drawCSizeNode.drawRect( origin, dest, cc.color( 0, 0, 0, 0), 2, cc.color( 0, 100,100, 200 ) );
+        this._drawCSizeNode.drawRect( origin, dest, cc.color( 0, 0, 0, 0), 2, cc.color( 200, 200,0, 200 ) );
     },
 
     setTargetNode : function( node ) {
