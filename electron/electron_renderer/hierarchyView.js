@@ -1,7 +1,5 @@
-var timelineModule = require('animation-timeline-js');
-
-var HierarchyRenderer = {
-    Tag                 : "[ HierarchyRenderer ] ",
+var HierarchyView = {
+    Tag                 : "[ HierarchyView ] ",
     hierarchyData       : [],
     nodeInstanceIDMap   : {},
     rootLayer           : null,
@@ -43,7 +41,7 @@ var HierarchyRenderer = {
                                 "label"     : "component",
                                 "action"    : function( obj ) {
                                     var instanceID = obj.reference.prevObject[0].id;
-                                    var realNode = HierarchyRenderer.nodeInstanceIDMap[ instanceID ];
+                                    var realNode = HierarchyView.nodeInstanceIDMap[ instanceID ];
 
                                 },
                             }
@@ -56,7 +54,7 @@ var HierarchyRenderer = {
                                 console.log("check! : ", obj );
                             }
                             var instanceID = obj.reference.prevObject[0].id;
-                            var realNode = HierarchyRenderer.nodeInstanceIDMap[ instanceID ];
+                            var realNode = HierarchyView.nodeInstanceIDMap[ instanceID ];
                             cc.eventManager.dispatchCustomEvent('onDeleteNode', { cocosNode : realNode })
                         },
                     }
@@ -147,7 +145,7 @@ var HierarchyRenderer = {
      * @param realNode  실제 코코스 노드
      */
     addTreeNode : function( id, parentID, text, realNode  ) {
-        // cc.log( HierarchyRenderer.Tag, " ** addTreeNode ** ", id, parentID, text, realNode );
+        // cc.log( HierarchyView.Tag, " ** addTreeNode ** ", id, parentID, text, realNode );
 
         if( this.isExistNode( id, parentID ) ) {
             return;

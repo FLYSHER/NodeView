@@ -15,7 +15,7 @@ class FileEntry {
 
 }
 
-var CocosRenderer = {
+var MainView = {
     init : function() {
         var canvas = cc._canvas;
 

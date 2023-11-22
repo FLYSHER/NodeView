@@ -1,11 +1,5 @@
-class NodeInfo {
 
-    constructor( ccNode ) {
-        this._ccNode = ccNode;
-    }
-}
-
-var InspectorRenderer = {
+var InspectorView = {
     formData : {},
     formMeta : {},
     options  : {},

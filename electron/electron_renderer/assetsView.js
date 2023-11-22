@@ -1,7 +1,7 @@
 /**
  * Assset 패널 관리
  */
-var AssetRenderer = {
+var AssetsView = {
     treeDataArr : [],
 
     init : function() {

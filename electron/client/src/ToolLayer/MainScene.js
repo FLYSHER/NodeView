@@ -22,21 +22,12 @@ var MainScene = cc.Scene.extend({
 
         this.initLayers();
 
-        if (typeof CocosRenderer != 'undefined')
-            CocosRenderer.init();
-
-        if (typeof CocosRenderer != 'undefined')
-            bottomRenderer.init();
-
-        if (typeof AssetRenderer != 'undefined')
-            AssetRenderer.init();
-
-        if (typeof InspectorRenderer != 'undefined')
-            InspectorRenderer.init();
-
-        if (typeof HierarchyRenderer != 'undefined')
-            HierarchyRenderer.init(this._mainViewLayer );
-
+        /** view init **/
+        MainView.init();
+        BottomView.init();
+        AssetsView.init();
+        InspectorView.init();
+        HierarchyView.init( this._mainViewLayer );
 
         var self = this;
         cc.eventManager.addListener( {
