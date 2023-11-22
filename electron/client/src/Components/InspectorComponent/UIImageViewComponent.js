@@ -46,17 +46,10 @@ Genie.Component.UIImageView = Genie.Component.InspectorBase.extend({
             $('#assets').jstree('search', searchString);
         }
 
-        this.input_texFileName.ondragover = function(e) {
-            e.preventDefault();
-        }
-
         this.input_texFileName.ondrop = function( event ) {
-            // event.preventDefault();
             var sprName = event.dataTransfer.getData("spriteName");
-            cc.log("drop" );
-            cc.log("sprName : ", sprName );
-            cc.log("event.target.value : ", event.target.value );
             event.target.value = sprName;
+            event.preventDefault();
         }
 
         // texture type
