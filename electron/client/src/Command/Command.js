@@ -37,6 +37,8 @@ Genie.Command.Base = cc.Class.extend({
     },
 
     execute : function() {
+        // var log = "[command]";
+        // HtmlHelper.createCommandLog()
         this.setCommand( Genie.CommandType.EXECUTE );
     },
 

@@ -28,34 +28,62 @@ Genie.Component.UIImageView = Genie.Component.InspectorBase.extend({
         var titleBar = HtmlHelper.createComponentBar(this.getName(), iconObj);
         rootDiv.appendChild( titleBar );
 
-        // texType
-        // filename
-        // imageTextureSize
-        // ignoresize
         var imgType = {
             0 : 'LOCAL_TEXTURE',
             1 : 'PLIST_TEXTURE',
         }
 
+        // ignore size
+        HtmlHelper.createOneShortTextInput( rootDiv, "ignoreSize", owner.isIgnoreContentAdaptWithSize(), true );
+        // custom size
+        var customSize = owner.getCustomSize();
+        HtmlHelper.createSizeAttrib( rootDiv, "customSize", [customSize.width, customSize.height], [true, true], null );
+
         // sprite name
-        this.input_texFileName = HtmlHelper.createOneLongTextInput( rootDiv, 'fileName', owner._textureFile, true, null );
+        this.input_texFileName = HtmlHelper.createOneLongTextInput( rootDiv, 'textureFile', owner._textureFile, false );
         this.input_texFileName.onclick = function( event ) {
             var searchString = event.target.value;
             $('#assets').jstree('search', searchString);
         }
 
+        this.input_texFileName.ondragover = function(e) {
+            e.preventDefault();
+        }
+
+        this.input_texFileName.ondrop = function( event ) {
+            // event.preventDefault();
+            var sprName = event.dataTransfer.getData("spriteName");
+            cc.log("drop" );
+            cc.log("sprName : ", sprName );
+            cc.log("event.target.value : ", event.target.value );
+            event.target.value = sprName;
+        }
+
         // texture type
-        HtmlHelper.createOneLongTextInput( rootDiv, 'texType', imgType[owner._imageTexType], true, null );
+        HtmlHelper.createOneLongTextInput( rootDiv, 'imageTexType', imgType[owner._imageTexType], true, null );
+
+        // imageTextureSize
+        var imageTextureSize = owner.getVirtualRendererSize();
+        HtmlHelper.createSizeAttrib( rootDiv, "imgTextureSize", [imageTextureSize.width, imageTextureSize.height], [true, true], null );
+
+        // scale9sprite renderer group
+        var div_renderer =  HtmlHelper.createDiv( rootDiv, 'component_groupDiv' );
+        HtmlHelper.createLabel( div_renderer, "Renderer", "component_groupTitleLabel" );
+
+        var strRenderingType = [
+            "SIMPLE",
+            "SLICED"
+        ]
+
+        HtmlHelper.createOneLongTextInput( div_renderer, "renderingType", strRenderingType[owner.getVirtualRenderer().getRenderingType()], true );
+        HtmlHelper.createSizeAttrib( div_renderer, "contentSize", [ owner.getVirtualRenderer().width,  owner.getVirtualRenderer().height], [true, true] );
 
         // texture name
+        var div_sprite =  HtmlHelper.createDiv( rootDiv, 'component_groupDiv' );
+        HtmlHelper.createLabel( div_sprite, "SpriteFrame", "component_groupTitleLabel" );
+
         var textureName = Genie.Utils.getSpriteFrameTextureName( owner._textureFile );
-        // HtmlHelper.createOneLongTextInput( rootDiv, 'texture', textureName, true );
-
-        // texture preview
-        // var base64Image = cc.loader.getRes( textureName );
-        // HtmlHelper.createTexturePreviewAttrib( rootDiv, base64Image );
-
-        HtmlHelper.createSpritePreviewAttrib( rootDiv, owner._textureFile, textureName );
+        HtmlHelper.createSpritePreviewAttrib( div_sprite, owner._textureFile, textureName );
 
     },
 
@@ -63,16 +91,16 @@ Genie.Component.UIImageView = Genie.Component.InspectorBase.extend({
         var owner = this.getOwner();
         var value, strValue = event.target.value;
 
-        switch ( event.target.id ) {
-            case 'ttf_text':
-                value = strValue;
-                Genie.ToolController.execute( new Genie.Command.UIText( owner, {
-                    strProp : 'text',
-                    src     : owner.getString(),
-                    dest    : value
-                } ) );
-                break;
-        }
+        // switch ( event.target.id ) {
+        //     case 'ttf_text':
+        //         value = strValue;
+        //         Genie.ToolController.execute( new Genie.Command.UIText( owner, {
+        //             strProp : 'text',
+        //             src     : owner.getString(),
+        //             dest    : value
+        //         } ) );
+        //         break;
+        // }
     },
 
     setInspectorValue : function( paramObj ) {

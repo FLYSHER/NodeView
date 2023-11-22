@@ -175,6 +175,16 @@ button:active {
     background: #444444;
     /*grid-area: sub;*/
 }
+
+#div_command_log {
+    background-color: #222222;
+    overflow-y: scroll;
+}
+
+.text_command_log {
+    color: #bbbbbb;
+}
+
 #hierarchy_gridItem {
     /*background: #FF00FF;*/
     height: 50%;
@@ -501,16 +511,18 @@ ul.tabs li.current{
 
 .component_attribPointLabel {
     display: inline-block;
-    width : 10px;
+    width : 25px;
     margin: 2px;
+    text-align: center;
     color: #DEDEDEFF;
 }
 
 .component_attribSizeLabel {
     display: inline-block;
-    font-size: small;
-    width : 30px;
+    /*font-size: small;*/
+    width : 25px;
     margin: 2px;
+    text-align: center;
     color: #DEDEDEFF;
 }
 

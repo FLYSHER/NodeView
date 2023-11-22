@@ -39,7 +39,7 @@ Genie.Component.NodeProperty = Genie.Component.InspectorBase.extend({
 
         // contentSize
         var loc_size = owner.getContentSize();
-        this.input_size = HtmlHelper.createSizeAttrib( rootDiv, "size",  [loc_size.width,loc_size.height], [false, false], this.onchange.bind(this) );
+        this.input_size = HtmlHelper.createSizeAttrib( rootDiv, "contentSize",  [loc_size.width,loc_size.height], [false, false], this.onchange.bind(this) );
         this.input_size.width.id    = "width";
         this.input_size.height.id   = "height";
 

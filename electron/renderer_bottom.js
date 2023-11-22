@@ -1,3 +1,5 @@
+const log = require('electron-log/main');
+
 var bottomRenderer = {
     Tag                 : "[ HierarchyRenderer ] ",
     hierarchyData       : [],
@@ -41,8 +43,6 @@ var bottomRenderer = {
         $('#tab_btn_console').on( 'click', openTab.bind(null, 'bottom_console' ) );
         $('#tab_btn_timeline').on( 'click', openTab.bind(null, 'bottom_timeline' ) );
         $('#tab_btn_temp').on( 'click', openTab.bind(null, 'bottom_temp' ) );
-
-
     },
 
 }

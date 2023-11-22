@@ -213,10 +213,10 @@ var HtmlHelper = {
         var div = HtmlHelper.createDiv( parent, 'component_lineDiv' );
         HtmlHelper.createLabel( div, titleName, "component_twoPropertyLabel");
 
-        HtmlHelper.createLabel( div, "width", "component_attribSizeLabel");
+        HtmlHelper.createLabel( div, "W", "component_attribSizeLabel");
         resultObj.width = HtmlHelper.createTextInput( div, arrPlaceholder[0], "component_shortTextInput", arrReadOnly[0], onchange );
 
-        HtmlHelper.createLabel( div, "height", "component_attribSizeLabel");
+        HtmlHelper.createLabel( div, "H", "component_attribSizeLabel");
         resultObj.height = HtmlHelper.createTextInput( div, arrPlaceholder[1], "component_shortTextInput", arrReadOnly[1], onchange );
 
         return resultObj;
@@ -249,13 +249,21 @@ var HtmlHelper = {
     },
 
     createSpritePreviewAttrib : function( parent, spriteName, textureName ) {
-        var div = HtmlHelper.createDiv( parent, 'img_preview_div' );
-        parent.appendChild( div );
 
         var texture     = cc.textureCache.getTextureForKey( 'image/' + textureName);
         var spriteFrame = cc.spriteFrameCache.getSpriteFrame( spriteName );
 
         if( texture && spriteFrame ) {
+
+            HtmlHelper.createOneLongTextInput( parent, "textureName", textureName, true );
+            HtmlHelper.createOneLongTextInput( parent, "frameName", spriteName, true );
+
+            var originSize = spriteFrame.getOriginalSize();
+            HtmlHelper.createSizeAttrib( parent, "frameSize", [originSize.width, originSize.height], [true, true]);
+
+            var div = HtmlHelper.createDiv( parent, 'img_preview_div' );
+            parent.appendChild( div );
+
             var img_tex   = document.createElement( 'img' );
             img_tex.src       = cc.loader.getRes( textureName );
             img_tex.className = 'img_preview';
@@ -288,4 +296,10 @@ var HtmlHelper = {
     },
 
     // endregion
+
+    createCommandLog : function( strLog ) {
+        var textNode = document.createTextNode( strLog );
+        textNode.className = "text_command_log";
+        $('#div_command_log').appendChild( textNode );
+    }
 }

@@ -13,9 +13,11 @@ var AssetRenderer = {
                     "icons": false
                 },
                 'data' : [
-                ]
+                ],
+                // 'check_callback' : true // false 면 drag 는 되는데 이동은 안된다.
             },
-            "plugins": ["search"],
+            // "plugins": ["search", "dnd"], // search, drag and drop
+            "plugins": ["search"], // search, drag and drop
             "search": {
                 "case_sensitive": false,
                 "show_only_matches": true
@@ -28,6 +30,12 @@ var AssetRenderer = {
             var selectedFileName = data.selected[0];
             cc.eventManager.dispatchCustomEvent( 'setPreviewSprite', { name : selectedFileName } );
         });
+
+        $('#assets').on("drag", function( e ){
+            cc.log("drag", e.target.innerText );
+            e.originalEvent.dataTransfer.setData( "spriteName", e.target.innerText );
+        });
+
 
         var findTextInputHTML = `<input id="assets_findInput" class="frameBar_findInput"  type="text" value="" >`;
         $('#assets_bar_root').append( findTextInputHTML );

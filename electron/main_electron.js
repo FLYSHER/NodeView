@@ -2,6 +2,7 @@
 const {app, BrowserWindow, Menu, dialog, globalShortcut } = require('electron');
 const path = require('path');
 const loadManager = require('./LoadManager');
+const log = require('electron-log/main');
 
 
 function createWindow () {
@@ -86,6 +87,13 @@ app.whenReady().then(() => {
   });
 
   loadManager.init(mainWindow);
+
+  // log
+  log.initialize({
+    preload : true
+  });
+
+  log.info("main process ready");
 })
 
 // Quit when all windows are closed, except on macOS. There, it's common

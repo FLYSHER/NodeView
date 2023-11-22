@@ -24,7 +24,7 @@ Genie.Component.Transform = Genie.Component.InspectorBase.extend({
 
         // position
         var loc_pos = owner.getPosition();
-        this.input_pos = HtmlHelper.createPointAttrib( rootDiv, "position",  [loc_pos.x,loc_pos.y], [false, false], this.onchange.bind(this) );
+        this.input_pos = HtmlHelper.createPointAttrib( rootDiv, "position",  [ parseFloat( loc_pos.x ).toFixed(0), parseFloat(loc_pos.y).toFixed(0)], [false, false], this.onchange.bind(this) );
         this.input_pos.x.id = "posX";
         this.input_pos.y.id = "posY";
 
@@ -40,6 +40,7 @@ Genie.Component.Transform = Genie.Component.InspectorBase.extend({
 
     onchange : function( event ) {
         var value = parseFloat(event.target.value);
+
         if( !cc.isNumber( value ) ) {
             return;
         }
@@ -50,7 +51,7 @@ Genie.Component.Transform = Genie.Component.InspectorBase.extend({
         switch ( event.target.id ) {
             case 'posX' : {
                 loc_src = owner.getPosition();
-                loc_dest = cc.p( value, loc_src.y );
+                loc_dest = cc.p( value.toFixed(0), loc_src.y );
                 Genie.ToolController.execute( new Genie.Command.Transform( this.getOwner(), {
                         strProp : 'position',
                         src  : loc_src,
@@ -60,7 +61,7 @@ Genie.Component.Transform = Genie.Component.InspectorBase.extend({
             } break;
             case 'posY' : {
                 loc_src = owner.getPosition();
-                loc_dest = cc.p( loc_src.x, value );
+                loc_dest = cc.p( loc_src.x, value.toFixed(0) );
                 Genie.ToolController.execute( new Genie.Command.Transform( this.getOwner(), {
                         strProp : 'position',
                         src  : loc_src,
@@ -108,12 +109,12 @@ Genie.Component.Transform = Genie.Component.InspectorBase.extend({
 
          switch ( strProp ) {
              case 'position':
-                this.input_pos.x.value = value.x;
-                this.input_pos.y.value = value.y;
+                this.input_pos.x.value = parseInt(value.x);
+                this.input_pos.y.value = parseInt(value.y);
                 break;
              case 'scale':
-                 this.input_scale.x.value = value.x;
-                 this.input_scale.y.value = value.y;
+                 this.input_scale.x.value = parseFloat(value.x).toFixed(2);
+                 this.input_scale.y.value = parseFloat(value.y).toFixed(2);
                  break;
          }
     }
