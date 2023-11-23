@@ -542,6 +542,31 @@ ul.tabs li.current{
     color: #DEDEDEFF;
 }
 
+.command_div {
+    background-color: #555555;
+    border : 1px solid #444242;
+    overflow-x: hidden;
+    overflow-y: scroll;
+}
+
+.command_groupLabel {
+    display: inline-block;
+    width : 300px;
+    color: #FBFBFB;
+}
+
+.command_nameLabel {
+    display: inline-block;
+    width : 200px;
+    color: #9ed067;
+}
+
+.command_valueLabel {
+    display: inline-block;
+    width : 300px;
+    color: #dcbf57;
+}
+
 input[readonly] {
     color: #DEDEDEFF;
     background-color: #363636;

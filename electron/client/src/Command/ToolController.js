@@ -2,8 +2,8 @@ Genie.ToolController = {
     commands : [],
 
     execute : function( command ) {
-        command.execute();
         this.commands.push( command );
+        command.execute();
 
         cc.log( "[command] execute : ", command.getCommandName() + " > " + JSON.stringify( command.getArgsObj() ) );
     },

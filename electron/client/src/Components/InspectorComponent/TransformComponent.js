@@ -50,8 +50,10 @@ Genie.Component.Transform = Genie.Component.InspectorBase.extend({
 
         switch ( event.target.id ) {
             case 'posX' : {
+
                 loc_src = owner.getPosition();
                 loc_dest = cc.p( value.toFixed(0), loc_src.y );
+
                 Genie.ToolController.execute( new Genie.Command.Transform( this.getOwner(), {
                         strProp : 'position',
                         src  : loc_src,
@@ -62,6 +64,7 @@ Genie.Component.Transform = Genie.Component.InspectorBase.extend({
             case 'posY' : {
                 loc_src = owner.getPosition();
                 loc_dest = cc.p( loc_src.x, value.toFixed(0) );
+                cc.log("[src, dest] ", owner.getName(), loc_src, loc_dest );
                 Genie.ToolController.execute( new Genie.Command.Transform( this.getOwner(), {
                         strProp : 'position',
                         src  : loc_src,

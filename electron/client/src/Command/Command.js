@@ -4,7 +4,13 @@ Genie.CommandType = {
     EXECUTE : 0,
     UNDO    : 1,
     REDO    : 2
-}
+};
+
+Genie.CommandString = [
+    "EXECUTE",
+    "UNDO",
+    "REDO"
+];
 
 Genie.Command.Base = cc.Class.extend({
     ctor : function( name, targetNode, args ) {
@@ -18,6 +24,8 @@ Genie.Command.Base = cc.Class.extend({
         this._targetNode = null;
         this._args       = null;
         this._name       = null;
+        this._logTitle   = null;
+        this._logContent = null;
     },
 
     getCommandName : function() {
@@ -32,13 +40,18 @@ Genie.Command.Base = cc.Class.extend({
         return this._args;
     },
 
-    setCommand : function() {
-        throw Error( 'do override' );
+    setCommand : function( commandType ) {
+        throw Error("override");
+    },
+
+    setCommandLog : function( commandType, strCommand, targetName, strValue ) {
+        var log_title = "[" + Genie.CommandString[ commandType ] + "] " + this.getCommandName() + " > " + strCommand;
+
+        var parent = document.getElementById('div_command_log' );
+        HtmlHelper.createCommandLog( parent, log_title, targetName, strValue );
     },
 
     execute : function() {
-        // var log = "[command]";
-        // HtmlHelper.createCommandLog()
         this.setCommand( Genie.CommandType.EXECUTE );
     },
 

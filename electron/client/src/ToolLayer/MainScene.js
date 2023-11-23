@@ -15,10 +15,7 @@ var MainScene = cc.Scene.extend({
         this._super();
         Genie.MainScene = this;
 
-        /**
-         * Init loader
-         */
-        Loader.init();
+        Loader.init(); /** Init loader */
 
         this.initLayers();
 
@@ -29,29 +26,13 @@ var MainScene = cc.Scene.extend({
         InspectorView.init();
         HierarchyView.init( this._mainViewLayer );
 
-        var self = this;
-        cc.eventManager.addListener( {
-            event: cc.EventListener.MOUSE,
-            onMouseDown: function( event ) {
-                var nodeObj = self.getFrontTouchedNode( event.getLocation() );
-                if( nodeObj.node ) {
-                    layer.updateMenu( nodeObj.nodeName, nodeObj.finalNode );
-                    setTimeout(function(){
-                        $('#fileNameTree').jstree("deselect_all");
-                        $('#fileNameTree').jstree('select_node',nodeObj.node.__instanceId);
-                    },100);
-                }
-            },
-            swallowTouches: false
-        }, this );
-
-        $("#mainLayer").click( function() {
-            this.setCurrentLayer( Genie.LayerType.MAIN );
-        }.bind(this) );
-
-        $("#previewLayer").click( function() {
-            this.setCurrentLayer( Genie.LayerType.PREVIEW );
-        }.bind(this) );
+        // $("#mainLayer").click( function() {
+        //     this.setCurrentLayer( Genie.LayerType.MAIN );
+        // }.bind(this) );
+        //
+        // $("#previewLayer").click( function() {
+        //     this.setCurrentLayer( Genie.LayerType.PREVIEW );
+        // }.bind(this) );
     },
 
     onExit: function() {

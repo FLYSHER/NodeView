@@ -34,14 +34,20 @@ var BottomView = {
             }
 
             document.getElementById( tabName ).style.display = "block";
-            if( tabName === "bottom_timeline" ) {
-                timeline.setModel( {
-                    rows : rows
-                } )
+            switch ( tabName ) {
+                case "bottom_console":
+                    break;
+                case "bottom_timeline":
+                    timeline.setModel( {
+                        rows : rows
+                    } )
+                    break;
+
             }
+
         }
 
-        $('#tab_btn_console').on( 'click', openTab.bind(null, 'bottom_console' ) );
+        $('#tab_btn_console').on( 'click', openTab.bind(null, 'bottom_history' ) );
         $('#tab_btn_timeline').on( 'click', openTab.bind(null, 'bottom_timeline' ) );
         $('#tab_btn_temp').on( 'click', openTab.bind(null, 'bottom_temp' ) );
     },

@@ -19,7 +19,7 @@ var MainViewLayer = cc.LayerColor.extend({
 
         cc.eventManager.addCustomListener( EVT.MAIN_VIEW.CREATE_UI_NODE, this.onCreateUIFile.bind(this) );
         cc.eventManager.addCustomListener( EVT.MAIN_VIEW.CREATE_AR_NODE, this.onCreateARFile.bind(this) );
-        cc.eventManager.addCustomListener( "onDeleteNode", this.onDeleteNode.bind(this));
+        cc.eventManager.addCustomListener("onDeleteNode", this.onDeleteNode.bind(this));
         cc.eventManager.addCustomListener("onChangeProperty", this.setNodeProperty.bind(this) );
         cc.eventManager.addCustomListener("onChangeNodeInHierarchy", this.setCurrNode.bind(this));
     },
