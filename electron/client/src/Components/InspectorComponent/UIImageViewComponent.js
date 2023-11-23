@@ -48,7 +48,11 @@ Genie.Component.UIImageView = Genie.Component.InspectorBase.extend({
 
         this.input_texFileName.ondrop = function( event ) {
             var sprName = event.dataTransfer.getData("spriteName");
-            event.target.value = sprName;
+            var spriteFrame = cc.spriteFrameCache.getSpriteFrame( sprName );
+            if( spriteFrame ) {
+                event.target.value = sprName;
+                // todo change
+            }
             event.preventDefault();
         }
 

@@ -19,10 +19,9 @@ var MainView = {
     init : function() {
         var canvas = cc._canvas;
 
+        // canvas element 에 file drop을 위한 drop 이벤트 등록.
         canvas.removeEventListener("drop", Loader.onDropHandler);
-        canvas.addEventListener(
-            "drop",
-            function (evt) {
+        canvas.addEventListener("drop", function (evt) {
                 evt.stopPropagation();
                 evt.preventDefault();   // stops the browser from redirecting off to the image.
 
@@ -39,30 +38,9 @@ var MainView = {
 
             }, false);
 
-
-        console.log("renderer window.onload");
-
-
-        // onWebcontentsValue에 대한 이벤트 수신
-        // ipcRenderer.on('fileDropEventReply', (evt, payload) => {
-        //
-        //     console.log("fileDropEventReply complete");
-        //
-        //     payload.dependentFiles.forEach(function(e){
-        //         let file = new FileEntry(e);
-        //         ResourceMapData[file.name] = file;
-        //
-        //     });
-        //
-        //     payload.targetFiles.forEach(function(e){
-        //
-        //         let file = new FileEntry(e);
-        //         Loader.readFile(file);
-        //     });
-        // });
-        // Loader.readFile = this.readFile;
-
+        // main process 와 통신
         ipcRenderer.on('fileDropEventReply', this.onFileDropReply.bind(this) );
+
         ipcRenderer.on('undo', function(){
             Genie.ToolController.undo();
         })
@@ -70,7 +48,6 @@ var MainView = {
 
     /**
      * main process 에서 타겟 파일과 디펜던시 리스트를 가지고 와서 renderer process 에서 리소스 로드.
-     *
      * payload
      *   ㄴ dependentFiles ex) [ ***.plist , ***.png ]
      *   ㄴ targetFiles [ ***.ExportJson ]
@@ -98,8 +75,11 @@ var MainView = {
         }
     },
 
-    // 리소스 캐싱 및 로드
-    // 마지막 프로미스를 리턴한다.
+    /**
+     * 리소스 캐싱 및 로드
+     * 마지막 프로미스를 리턴한다.
+     */
+
     loadResources : function( payload ) {
 
         // 리소스 비동기 로드 및 캐싱

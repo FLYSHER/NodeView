@@ -34,7 +34,6 @@ var AssetsView = {
         $('#assets').on("dragstart", function( e ){
             cc.log("drag", e.target.innerText );
             e.originalEvent.dataTransfer.setData( "spriteName", e.target.innerText );
-            // e.dataTransfer.setData( "spriteName", e.target.innerText );
         });
 
 
