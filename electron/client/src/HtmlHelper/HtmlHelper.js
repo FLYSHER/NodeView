@@ -299,7 +299,7 @@ var HtmlHelper = {
 
     //region [ command history ]
     createCommandLog : function( parent, groupName, strCommand, strValue ) {
-        var div     = this.createDiv( parent, 'command_dev' );
+        var div     = this.createDiv( parent, 'command_div' );
         var label1  = this.createLabel( div, groupName, "command_groupLabel");
         var label1  = this.createLabel( div, strCommand, "command_nameLabel");
         var label2  = this.createLabel( div, strValue, "command_valueLabel");

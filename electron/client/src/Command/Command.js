@@ -6,12 +6,6 @@ Genie.CommandType = {
     REDO    : 2
 };
 
-Genie.CommandString = [
-    "EXECUTE",
-    "UNDO",
-    "REDO"
-];
-
 Genie.Command.Base = cc.Class.extend({
     ctor : function( name, targetNode, args ) {
         this.initProperty();
@@ -24,8 +18,7 @@ Genie.Command.Base = cc.Class.extend({
         this._targetNode = null;
         this._args       = null;
         this._name       = null;
-        this._logTitle   = null;
-        this._logContent = null;
+        this._commandDiv = null;
     },
 
     getCommandName : function() {
@@ -44,11 +37,27 @@ Genie.Command.Base = cc.Class.extend({
         throw Error("override");
     },
 
-    setCommandLog : function( commandType, strCommand, targetName, strValue ) {
-        var log_title = "[" + Genie.CommandString[ commandType ] + "] " + this.getCommandName() + " > " + strCommand;
-
+    setCommandLog : function( commandType, targetName, strValue ) {
+        var log_title = this.getCommandName();
         var parent = document.getElementById('div_command_log' );
-        HtmlHelper.createCommandLog( parent, log_title, targetName, strValue );
+
+        switch ( commandType ) {
+
+            case Genie.CommandType.EXECUTE:
+                if( !this._commandDiv ) {
+                    this._commandDiv = HtmlHelper.createCommandLog( parent, log_title, targetName, strValue );
+                }
+                break;
+            case Genie.CommandType.REDO:
+                this._commandDiv && ( this._commandDiv.style.background = "##363636");
+                break;
+            case Genie.CommandType.UNDO:
+                this._commandDiv && ( this._commandDiv.style.background = "#777777");
+                break;
+        }
+
+
+
     },
 
     execute : function() {

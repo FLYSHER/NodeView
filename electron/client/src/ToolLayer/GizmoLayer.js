@@ -195,13 +195,14 @@ var GizmoLayer = cc.LayerColor.extend({
                         if( self._gizmoNode.isDrag() ) {
                             var diffPos = self._gizmoNode.getDiffPt();
                             var pt2 = cc.pSub( pt, diffPos );
-                            var localPos = self._targetNode.getParent().convertToNodeSpace( pt2 );
+                            var destPos = self._targetNode.getParent().convertToNodeSpace( pt2 );
                             var startPos = self._gizmoNode.getTargetNodePosAtDragStart();
+                            var startLocalPos = self._targetNode.getParent().convertToNodeSpace( startPos );
 
                             Genie.ToolController.execute( new Genie.Command.Transform( self._targetNode, {
                                 strProp : 'position',
-                                src : startPos,
-                                dest: localPos
+                                src : startLocalPos,
+                                dest: destPos
                             } ) );
                         }
                     }
@@ -264,5 +265,12 @@ var GizmoLayer = cc.LayerColor.extend({
         this._gizmoNode.setVisible( true );
         this._targetNode = targetNode;
         this._gizmoNode.setTargetNode( targetNode );
+
+        var originScale = this._targetNode.getScale();
+        var targetScale = originScale * 1.2;
+        this._targetNode.runAction( cc.sequence(
+            cc.scaleTo( 0.1, targetScale ),
+            cc.scaleTo( 0.1, originScale )
+        ));
     },
 });

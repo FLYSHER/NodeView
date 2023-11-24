@@ -188,7 +188,7 @@ cc.game.onStart = function(){
     // set _orientationChanging to false for resize
     cc.view._orientationChanging = false;
 
-    var newPolicy = new cc.ResolutionPolicy(new CustomContainerStrategy, new CustomContentStrategy);
+    var newPolicy = new cc.ResolutionPolicy(new ToolContainerStrategy, new ToolContentStrategy);
     cc.view.setDesignResolutionSize(1700, 860, newPolicy);
 
     // The game will be resized when browser size change

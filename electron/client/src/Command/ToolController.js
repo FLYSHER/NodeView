@@ -16,6 +16,14 @@ Genie.ToolController = {
         }
     },
 
+    redo : function() {
+        var command = this.command.pop();
+        command && command.redo();
+        if( command ) {
+            cc.log( "[command] redo : ", command.getCommandName() + " > " + JSON.stringify( command.getArgsObj() ) );
+        }
+    },
+
     moveNode : function( targetNode, pos ) {
         // main view
         targetNode.setPosition( pos );

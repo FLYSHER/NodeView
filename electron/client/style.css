@@ -165,10 +165,18 @@ button:active {
 
 #cocosView_gridItem {
     /*background: #00F0F0;*/
-    /*grid-area: main;*/
-    height: 95vh;
-    /*grid-area: hierarchy;*/
-    overflow: scroll;
+    height: 98vh;
+    /*overflow: scroll;*/
+}
+
+#cocosView {
+    height: 65%;
+}
+
+#bottomView {
+    background: #444242;
+    height: 35%;
+    overflow-y: scroll;
 }
 
 #bottom_menu {
@@ -193,7 +201,7 @@ button:active {
 }
 
 #second_column {
-    height: 95vh;
+    height: 98vh;
 }
 
 #assets_gridItem {
@@ -212,7 +220,7 @@ button:active {
 
 #inspector_gridItem {
     /*grid-area: inspector;*/
-    height: 95vh;
+    height: 98vh;
     overflow: scroll;
 }
 
@@ -543,7 +551,8 @@ ul.tabs li.current{
 }
 
 .command_div {
-    background-color: #555555;
+    /*background-color: #555555;*/
+    background-color: #363636;
     border : 1px solid #444242;
     overflow-x: hidden;
     overflow-y: scroll;
@@ -551,7 +560,7 @@ ul.tabs li.current{
 
 .command_groupLabel {
     display: inline-block;
-    width : 300px;
+    width : 200px;
     color: #FBFBFB;
 }
 

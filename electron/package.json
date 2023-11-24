@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "animation-timeline-js": "^2.3.0",
+    "electron-localshortcut": "^3.2.1",
     "electron-log": "^5.0.0",
     "image-data-uri": "^2.0.1"
   },

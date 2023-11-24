@@ -1,7 +1,6 @@
 Genie.Command.Transform = Genie.Command.Base.extend({
     ctor : function( targetNode, args ) {
         this._super( 'Transform', targetNode, args );
-
     },
 
     setCommand : function( commandType /* Genie.CommandType */ ) {
@@ -15,16 +14,16 @@ Genie.Command.Transform = Genie.Command.Base.extend({
                 Genie.gizmoNode.followTarget( this._targetNode );
                 this.setInspectorView( this.getCommandName(), value );
 
-                strText = cc.formatStr(" from %d %d    to %d %d ", src.x, src.y, dest.x, dest.y );
-                this.setCommandLog( commandType, this._args.strProp, this._targetNode.getName(), strText );
+                strText = cc.formatStr( "move > %d %d ", dest.x, dest.y );
+                this.setCommandLog( commandType, this._targetNode.getName(), strText );
                 break;
             case 'scale':
                 this._targetNode.setScale( value.x, value.y );
                 Genie.gizmoNode.followTarget( this._targetNode );
                 this.setInspectorView( this.getCommandName(), cc.p( value.x, value.y ) );
 
-                strText = cc.formatStr(" from %d %d    to %d %d ", src.x, src.y, dest.x, dest.y );
-                this.setCommandLog( commandType, this._args.strProp, this._targetNode.getName(), strText );
+                strText = cc.formatStr( "scale > %d %d ", dest.x, dest.y )
+                this.setCommandLog( commandType, this._targetNode.getName(), strText );
                 break;
         }
     },

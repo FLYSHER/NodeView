@@ -110,4 +110,85 @@ if( !cc.sys.isNative ) {
             return this._buildResult(w, h, w, h, scale, scale);
         }
     });
+
+    // tool 전용 strategy
+    var ToolContainerStrategy = cc.ContainerStrategy.extend({
+        apply: function (view, designedResolution) {
+
+            // var sidebarWidth = document.getElementsByClassName('sidenav')[0].clientWidth + 5;//	$('.sidenav').css("width");
+            // var w = window.innerWidth - sidebarWidth;
+            // var h = window.innerHeight;
+
+            // var w = cc.container.clientWidth,
+            //     h = cc.container.clientHeight;
+
+            var cocosView = document.getElementById("cocosView");
+            var w = cocosView.clientWidth,
+                h = cocosView.clientHeight;
+
+            if( h > ScreenUtil.minWHRatio * w) {
+                h = Math.round( ScreenUtil.minWHRatio * w );
+            }
+            cc.log("*** Container Strategy **** ")
+            cc.log("    apply > ", w, h );
+            return this._setupContainer(view, w, h);
+        }
+    });
+
+    var ToolContentStrategy = cc.ContentStrategy.extend({
+        apply: function (view, designedResolution) {
+
+            // var sidebarWidth = document.getElementsByClassName('sidenav')[0].clientWidth + 5;
+            // var w = window.innerWidth-sidebarWidth;
+            // var h = window.innerHeight;
+
+            cc.log("*** Content Strategy *** ")
+            cc.log("    cc.container.clientWidth : ", cc.container.clientWidth );
+            cc.log("    cc.container.clientHeight : ", cc.container.clientHeight );
+
+            var w = cc.container.clientWidth,
+                h = cc.container.clientHeight;
+
+            if( h > ScreenUtil.minWHRatio * w) {
+                h = Math.round( ScreenUtil.minWHRatio * w );
+            }
+
+            cc.log("    contentW : ", w);
+            cc.log("    contentH : ", h);
+
+            var contentW = w;//e
+            var contentH = h;//f
+            var scale = 1;//g
+
+            // if(contentH < 670) {
+            //     if( contentH < 400 ) {
+            //         scale = 400 / 670;
+            //     } else {
+            //         scale = contentH / 670;
+            //     }
+            //     contentH = 670;
+            //     contentW /= scale;
+            // } else if(contentH > 1000) {
+            //     scale = contentH / 1000;
+            //     contentH = 1000;
+            //     contentW /= scale;
+            // }
+            //
+            // if(contentW < 1080) {
+            //     scale = scale * contentW / 1080;
+            //     contentW = 1080;
+            //     contentH = h / scale;
+            // } else if(contentW > 2700) {
+            //     contentW = 2700;
+            // }
+
+
+            ScreenUtil.contentScale = scale;
+
+            designedResolution.width = contentW;
+            designedResolution.height = contentH;
+
+            return this._buildResult(w, h, w, h, scale, scale);
+        }
+    });
 }

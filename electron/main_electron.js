@@ -3,6 +3,7 @@ const {app, BrowserWindow, Menu, dialog, globalShortcut } = require('electron');
 const path = require('path');
 const loadManager = require('./LoadManager');
 const log = require('electron-log/main');
+const localShortcut = require('electron-localshortcut');
 
 
 function createWindow () {
@@ -82,8 +83,14 @@ app.whenReady().then(() => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   });
 
+
+
   globalShortcut.register( 'CommandOrControl+Z', function(){
       mainWindow.webContents.send('undo');
+  });
+
+  localShortcut.register( 'CommandOrControl+Shift+Z', function() {
+    mainWindow.webContents.send('redo');
   });
 
   loadManager.init(mainWindow);

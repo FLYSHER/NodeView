@@ -211,27 +211,30 @@
 <!--<script src="res/loading.js"></script>-->
 <div class="grid_container" >
     <div id="cocosView_gridItem">
-        <div>
-            <button id="mainLayer"> mainView </button>
-            <button id="previewLayer"> preview </button>
+        <div id="cocosView">
+<!--            <button id="mainLayer"> mainView </button>-->
+<!--            <button id="previewLayer"> preview </button>-->
             <canvas id="gameCanvas" width="400" height="300"></canvas>
         </div>
-        <div id="bottom_menu" >
-            <button id="tab_btn_console" > console </button>
-            <button id="tab_btn_timeline"> timeline </button>
-            <button id="tab_btn_temp" > temp </button>
-        </div>
-        <div id="bottom_history" class="bottom_content" >
-            <div id="div_command_log">
+        <div id="bottomView">
+            <div id="bottom_menu" >
+                <button id="tab_btn_console" > console </button>
+                <button id="tab_btn_timeline"> timeline </button>
+                <button id="tab_btn_temp" > temp </button>
+            </div>
+            <div id="bottom_history" class="bottom_content" >
+                <div id="div_command_log">
+
+                </div>
+            </div>
+            <div id="bottom_timeline" class="bottom_content" style="display: none">
+                <h2> timeline </h2>
+            </div>
+            <div id="bottom_temp" class="bottom_content" style="display: none">
 
             </div>
         </div>
-        <div id="bottom_timeline" class="bottom_content" style="display: none">
-            <h2> timeline </h2>
-        </div>
-        <div id="bottom_temp" class="bottom_content" style="display: none">
 
-        </div>
     </div>
 
     <div id="second_column">

@@ -43,6 +43,10 @@ var MainView = {
 
         ipcRenderer.on('undo', function(){
             Genie.ToolController.undo();
+        });
+
+        ipcRenderer.on( 'redo', function(){
+            Genie.ToolController.redo();
         })
     },
 
