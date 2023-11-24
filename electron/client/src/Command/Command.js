@@ -42,7 +42,6 @@ Genie.Command.Base = cc.Class.extend({
         var parent = document.getElementById('div_command_log' );
 
         switch ( commandType ) {
-
             case Genie.CommandType.EXECUTE:
                 if( !this._commandDiv ) {
                     this._commandDiv = HtmlHelper.createCommandLog( parent, log_title, targetName, strValue );
@@ -66,6 +65,10 @@ Genie.Command.Base = cc.Class.extend({
 
     undo : function() {
         this.setCommand( Genie.CommandType.UNDO );
+    },
+
+    redo : function() {
+        this.setCommand( Genie.CommandType.REDO )
     },
 
     setInspectorView : function ( componentName, value ) {

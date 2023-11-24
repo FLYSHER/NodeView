@@ -4,10 +4,11 @@ Genie.Command.Transform = Genie.Command.Base.extend({
     },
 
     setCommand : function( commandType /* Genie.CommandType */ ) {
-        var value = ( commandType === Genie.CommandType.EXECUTE ) ? this._args.dest : this._args.src;
+        var value = ( commandType === Genie.CommandType.UNDO ) ? this._args.src : this._args.dest;
         var strText,
-            src  = ( commandType === Genie.CommandType.EXECUTE ) ? this._args.src : this._args.dest,
-            dest = ( commandType === Genie.CommandType.EXECUTE ) ? this._args.dest : this._args.src;
+            src  = ( commandType === Genie.CommandType.UNDO ) ? this._args.dest : this._args.src,
+            dest = ( commandType === Genie.CommandType.UNDO ) ? this._args.src : this._args.dest;
+
         switch ( this._args.strProp ) {
             case 'position':
                 this._targetNode.setPosition( value );
