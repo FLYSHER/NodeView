@@ -31,24 +31,39 @@
 <body style="padding:0; margin: 0; background: #000;">
 <script src="res/loading.js"></script>
 <div class="flex-container">
-    
+
     <div id="LeftMenu" class="flex-item left-menu">
+
         <div class="btn-group btn-file-group" role="group" aria-label="Basic example">
             <button type="button" class="btn btn-primary" id="btnFileAdd">파일 추가</button>
             <button type="button" class="btn btn-danger" id="btnFileDelete">파일 삭제</button>
         </div>
-        <input type="file" id="inputFileAdd" class="inputFileAdd" multiple="multiple" onchange="handleInputFileChange(this.files)"/>
+        <input type="file" id="inputFileAdd" class="inputFileAdd" multiple="multiple"
+               onchange="handleInputFileChange(this.files)"/>
+
         <h5 style="font-weight: bold">Hierarchy</h5>
         <div id="hierarchy" class="hierarchy"></div>
+
         <h5 style="font-weight: bold; margin-top: 20px">Resources</h5>
         <div id="resourceList" class="resource-list">
+            <div id="imageFolder" class="image-folder">
+                <button id="btnImageFolder" class="btn-image-folder">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                         class="bi bi-folder" viewBox="0 0 16 16">
+  <path d="M.54 3.87.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.826a2 2 0 0 1-1.991-1.819l-.637-7a1.99 1.99 0 0 1 .342-1.31zM2.19 4a1 1 0 0 0-.996 1.09l.637 7a1 1 0 0 0 .995.91h10.348a1 1 0 0 0 .995-.91l.637-7A1 1 0 0 0 13.81 4H2.19zm4.69-1.707A1 1 0 0 0 6.172 2H2.5a1 1 0 0 0-1 .981l.006.139C1.72 3.042 1.95 3 2.19 3h5.396l-.707-.707z"/>
+</svg>
+                </button>
+                &emsp;
+                <span>Images</span>
+                <div id="imageList" class="image-list"></div>
+            </div>
         </div>
     </div>
-    
-    
+
+
     <canvas id="gameCanvas" width="480" height="720"></canvas>
-    
-    
+
+
     <div id="RightMenu" class="flex-item right-menu">
         <div class="inspector-title">
             <h1 style="color: #776B5D">Inspector</h1>
@@ -59,11 +74,11 @@
         <div id="divApply" class="inspector-apply-div">
             <div class="btn-group btn-file-group" role="group" aria-label="Basic example">
                 <button type="button" id="btnInspectorApply" class="btn btn-primary">적용</button>
-                <button type="button" id="btnInspectorDelete" class="btn btn-danger" >삭제</button>
+                <button type="button" id="btnInspectorDelete" class="btn btn-danger">삭제</button>
             </div>
         </div>
     </div>
-    
+
 </div>
 <script>
     (function () {

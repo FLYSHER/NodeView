@@ -44,6 +44,29 @@
     flex-direction: column;
 }
 
+.image-folder {
+    width: 100%;
+    display : flex;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+.btn-image-folder {
+    width : 30px;
+    height: 30px;
+}
+.image-list {
+    width : 90%;
+    background-color: #BFB29E;
+
+    display : none;
+    align-items: flex-start;
+    overflow: scroll;
+    flex-direction: column;
+}
+.image-list::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera*/
+}
+
 .hierarchy {
     width : 90%;
     background-color: #BFB29E;

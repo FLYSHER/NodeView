@@ -3,6 +3,22 @@ window.GameScene = {};
 window.ResourceMap = {};
 
 var eResourceList = document.getElementById("resourceList");
+var eBtnImageFolder = document.getElementById("btnImageFolder");
+var eImageList = document.getElementById("imageList");
+eBtnImageFolder.addEventListener('click', function(e){
+    toggleImageList();
+});
+
+var isImageListShow = false;
+function toggleImageList(){
+    if(isImageListShow === true) {
+        isImageListShow = false;
+        eImageList.style.display = "none";
+    } else {
+        isImageListShow = true;
+        eImageList.style.display = "flex";
+    }
+}
 
 function handleInputFileChange(files){
     fileHandler.onFileAdd(files);
@@ -32,7 +48,8 @@ FileHandler.prototype.addFile = function (file) {
 }
 
 FileHandler.prototype.addFileToResourceList = function (file) {
-    this.appendItem(file.name);
+    var extName = cc.path.extname(file.name);
+    this.appendItem(file.name, extName !== ".ExportJson");
     var mainName = cc.path.mainFileName(file.name)
     ResourceMap[mainName] = file;
     this.readFile(file);
@@ -125,12 +142,16 @@ FileHandler.prototype.processFileData = function (url, fileContents, ext, cb) {
     }
 }
 
-FileHandler.prototype.appendItem = function (name) {
+FileHandler.prototype.appendItem = function (name, isImage) {
     var item = document.createElement("p");
     item.textContent = name;
     item.style.borderBottom = "2px solid black";
     item.style.margin = "0px";
-    eResourceList.appendChild(item);
+    
+    if(isImage)
+        eImageList.appendChild(item);
+    else
+        eResourceList.appendChild(item);
 }
 
 window.fileHandler = new FileHandler();

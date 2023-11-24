@@ -70,6 +70,7 @@ InspectorHandler.prototype.onClickApply = function(){
 InspectorHandler.prototype.onClickDelete = function(){
     this._currNode.removeFromParent(true);
     this.reset();
+    this._eHandler.reset();
     hierarchyHandler.reload();
 };
 
@@ -79,6 +80,7 @@ function ElementHandler() {
 
 ElementHandler.prototype.reset = function () {
     eInspectorPanel.innerHTML = "";
+    document.getElementById("divApply").style.display = "none";
 }
 
 ElementHandler.prototype.createItemList = function (listName) {
