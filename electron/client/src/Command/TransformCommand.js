@@ -15,7 +15,7 @@ Genie.Command.Transform = Genie.Command.Base.extend({
                 Genie.gizmoNode.followTarget( this._targetNode );
                 this.setInspectorView( this.getCommandName(), value );
 
-                strText = cc.formatStr( "move > %d %d ", dest.x, dest.y );
+                strText = cc.formatStr( "move  > x: %d, y: %d ", dest.x, dest.y );
                 this.setCommandLog( commandType, this._targetNode.getName(), strText );
                 break;
             case 'scale':
@@ -23,7 +23,7 @@ Genie.Command.Transform = Genie.Command.Base.extend({
                 Genie.gizmoNode.followTarget( this._targetNode );
                 this.setInspectorView( this.getCommandName(), cc.p( value.x, value.y ) );
 
-                strText = cc.formatStr( "scale > %d %d ", dest.x, dest.y )
+                strText = cc.formatStr( "scale  > x: %d, y: %d ", dest.x, dest.y )
                 this.setCommandLog( commandType, this._targetNode.getName(), strText );
                 break;
         }

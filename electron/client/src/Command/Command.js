@@ -48,15 +48,12 @@ Genie.Command.Base = cc.Class.extend({
                 }
                 break;
             case Genie.CommandType.REDO:
-                this._commandDiv && ( this._commandDiv.style.background = "##363636");
+                this._commandDiv && ( this._commandDiv.style.background = "#363636");
                 break;
             case Genie.CommandType.UNDO:
                 this._commandDiv && ( this._commandDiv.style.background = "#777777");
                 break;
         }
-
-
-
     },
 
     execute : function() {
@@ -81,6 +78,10 @@ Genie.Command.Base = cc.Class.extend({
             args    : this._args,
             value   : value,
         });
+    },
+
+    getCommandElement : function() {
+        return this._commandDiv;
     }
 
 

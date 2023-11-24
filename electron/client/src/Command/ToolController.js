@@ -3,12 +3,27 @@ Genie.ToolController = {
     _currentIndex   : -1,
 
     execute : function( command ) {
+
+        // if( this._currentIndex < 0 || (this._currentIndex === this.commands.length - 1 ) ) {
+        //
+        // }
+        if( this._currentIndex >= 0 && this._currentIndex < this.commands.length -1 ) {
+            var commandToDel = this.commands.splice( this._currentIndex + 1 );
+
+            var i, div;
+            for( i = 0; i < commandToDel.length; ++i ) {
+                div = commandToDel[i].getCommandElement();
+                div && div.remove();
+            }
+        }
+
         this.commands.push( command );
-        this._currentIndex = this.commands.length - 1;
+        ++this._currentIndex;
 
         command.execute();
 
-        cc.log( "[command] execute : ", command.getCommandName() + " > " + JSON.stringify( command.getArgsObj() ) );
+
+        cc.log( "[command] execute : ", this._currentIndex,  command.getCommandName() + " > " + JSON.stringify( command.getArgsObj() ) );
     },
 
     undo : function() {
@@ -17,27 +32,36 @@ Genie.ToolController = {
         }
 
         var command = this.commands[ this._currentIndex ];
-        // var command = this.commands.pop();
-        command && command.undo();
         if( command ) {
-            cc.log( "[command] undo : ", command.getCommandName() + " > " + JSON.stringify( command.getArgsObj() ) );
+            command.undo();
+            if( --this._currentIndex < 0 ) {
+                var i, div;
+                for( i = 0; i < this.commands.length; ++i ) {
+                    div = this.commands[i].getCommandElement();
+                    div && div.remove();
+                }
+
+                this.commands.length = 0;
+            }
+
+            cc.log( "[command] undo : ", this._currentIndex, command.getCommandName() + " > " + JSON.stringify( command.getArgsObj() ) );
         }
 
-        --this._currentIndex;
+
     },
 
     redo : function() {
         if( this.commands.length <= 0 || this._currentIndex >= this.commands.length ) {
             return;
         }
-        var command = this.commands[ this._currentIndex ];
-        // var command = this.command.pop();
-        command && command.redo();
+        var command = this.commands[ this._currentIndex + 1 ];
         if( command ) {
-            cc.log( "[command] redo : ", command.getCommandName() + " > " + JSON.stringify( command.getArgsObj() ) );
+            ++this._currentIndex;
+            command.redo();
+            cc.log( "[command] redo : ", this._currentIndex, command.getCommandName() + " > " + JSON.stringify( command.getArgsObj() ) );
         }
 
-        ++this._currentIndex;
+
     },
 
     moveNode : function( targetNode, pos ) {

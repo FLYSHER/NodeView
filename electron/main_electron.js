@@ -85,11 +85,11 @@ app.whenReady().then(() => {
 
 
 
-  globalShortcut.register( 'CommandOrControl+Z', function(){
+  localShortcut.register( mainWindow, 'CommandOrControl+Z', function(){
       mainWindow.webContents.send('undo');
   });
 
-  localShortcut.register( 'CommandOrControl+Shift+Z', function() {
+  localShortcut.register( mainWindow, 'CommandOrControl+Shift+Z', function() {
     mainWindow.webContents.send('redo');
   });
 

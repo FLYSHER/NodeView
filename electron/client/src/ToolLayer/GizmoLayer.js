@@ -56,19 +56,17 @@ var Gizmo = cc.Node.extend({
 
         var self = this;
         touchComp.onTriggerEvent = function(touchEventName , pt) {
-            if (touchEventName !== "move" && touchComp._owner)
-                cc.log("RockN.Component.SpriteButton event triggered :" + touchEventName + " by " + this._owner.getName());
+            if (touchEventName !== "move" && touchComp._owner){
+                // cc.log("RockN.Component.SpriteButton event triggered :" + touchEventName + " by " + this._owner.getName());
+            }
 
             switch (touchEventName)
             {
                 case "normal": {
-
                 }break;
                 case "over": {
-
                 }break;
                 case "up": {
-                    cc.log("up");
                 }break;
                 case "down": {
                     self.setDrag(true);
@@ -77,11 +75,9 @@ var Gizmo = cc.Node.extend({
                     self._targetNodePtAtDragStart = self.getPosition();
                 }break;
                 case "click": {
-                    cc.log("click");
                 }break;
                 case "move": {
-                    cc.log("move");
-                }break;``
+                }break;
             }
         }
 
@@ -178,8 +174,9 @@ var GizmoLayer = cc.LayerColor.extend({
 
         var self = this;
         touchComp.onTriggerEvent = function(touchEventName , pt) {
-            if (touchEventName !== "move" && touchComp._owner)
-                cc.log("RockN.Component.SpriteButton event triggered :" + touchEventName + " by " + this._owner.getName());
+            if (touchEventName !== "move" && touchComp._owner) {
+                // cc.log("RockN.Component.SpriteButton event triggered :" + touchEventName + " by " + this._owner.getName());
+            }
 
             switch (touchEventName)
             {
@@ -209,14 +206,10 @@ var GizmoLayer = cc.LayerColor.extend({
 
                     self._targetNode && self._gizmoNode.setDrag( false );
                     self._gizmoNode.setActiveTouchComp( true );
-
-                    cc.log("up");
                 }break;
                 case "down": {
-                    cc.log("down");
                 }break;
                 case "click": {
-                    cc.log("click");
                 }break;
                 case "move": {
                     if( self._targetNode && self._gizmoNode.isDrag() ) {
