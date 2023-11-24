@@ -70,8 +70,9 @@ cc.game.onStart = function(){
     //load resources
     setMarginZero();
     cc.LoaderScene.preload(g_resources, function () {
-        cc.director.runScene(new EditorScene());
-        window.GameScene = cc.director.getRunningScene();
+        var editorScene = new EditorScene();
+        window.GameScene = editorScene;
+        cc.director.runScene(editorScene);
     }, this);
 };
 

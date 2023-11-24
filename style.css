@@ -25,6 +25,12 @@
 
 .left-menu {
 }
+.btn-file-group {
+    padding: 10px;
+}
+.btn-file-add {
+    float : left;
+}
 .file-getter {
 }
 .resource-list {
@@ -33,10 +39,11 @@
     min-height: 300px;
     
     display : flex;
-    align-items: center;
+    align-items: flex-start;
     overflow: scroll;
     flex-direction: column;
 }
+
 .hierarchy {
     width : 90%;
     background-color: #BFB29E;
@@ -47,7 +54,43 @@
     flex-direction: column;
     padding: 10px;
 }
+.hierarchy-item {
+    margin : unset;
+}
+.hierarchy-item:hover {
+    color : crimson;
+    cursor: pointer;
+}
 
 .right-menu {
     
+}
+.inspector-title {
+    width: 100%;
+    border-bottom: 1px solid black;
+    text-align: center;
+}
+.inspector-panel {
+    width: 100%;
+}
+.inspector-item-list {
+    width: 100%;
+    padding : 10px;
+    border-bottom: 1px solid black;
+}
+.inspector-item-content {
+    width: 50%;
+    font-weight: bold;
+}
+.inspector-item-input {
+    max-width: 100px;
+}
+.inspector-apply-div{
+    padding: 10px;
+    display: none;
+}
+
+
+.inputFileAdd {
+    display: none;
 }

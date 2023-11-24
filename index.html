@@ -31,22 +31,39 @@
 <body style="padding:0; margin: 0; background: #000;">
 <script src="res/loading.js"></script>
 <div class="flex-container">
+    
     <div id="LeftMenu" class="flex-item left-menu">
-        <h1 style="color: red">Left</h1>
-        <input type="file" id="btnFileAdd" multiple="multiple" onchange="onFileAdd(this.files)"/>
-        <h5 style="font-weight: bold">Hierarchy</h5>
-        <div id="hierarchy" class="hierarchy">
-            
+        <div class="btn-group btn-file-group" role="group" aria-label="Basic example">
+            <button type="button" class="btn btn-primary" id="btnFileAdd">파일 추가</button>
+            <button type="button" class="btn btn-danger" id="btnFileDelete">파일 삭제</button>
         </div>
+        <input type="file" id="inputFileAdd" class="inputFileAdd" multiple="multiple" onchange="handleInputFileChange(this.files)"/>
+        <h5 style="font-weight: bold">Hierarchy</h5>
+        <div id="hierarchy" class="hierarchy"></div>
         <h5 style="font-weight: bold; margin-top: 20px">Resources</h5>
         <div id="resourceList" class="resource-list">
         </div>
     </div>
+    
+    
     <canvas id="gameCanvas" width="480" height="720"></canvas>
+    
+    
     <div id="RightMenu" class="flex-item right-menu">
-        <h1 style="color: red">Right</h1>
-        <button class="btn btn-primary">test</button>
+        <div class="inspector-title">
+            <h1 style="color: #776B5D">Inspector</h1>
+        </div>
+        <div id="Inspector" class="inspector-panel">
+            <div class="inspector-item-list"></div>
+        </div>
+        <div id="divApply" class="inspector-apply-div">
+            <div class="btn-group btn-file-group" role="group" aria-label="Basic example">
+                <button type="button" id="btnInspectorApply" class="btn btn-primary">적용</button>
+                <button type="button" id="btnInspectorDelete" class="btn btn-danger" >삭제</button>
+            </div>
+        </div>
     </div>
+    
 </div>
 <script>
     (function () {
@@ -67,6 +84,8 @@
 </script>
 <script src="frameworks/cocos2d-html5/CCBoot.js"></script>
 <script cocos src="main.js"></script>
-<script src="./src/windowHandler.js"></script>
+<script src="src/Handlers/windowHandler.js"></script>
+<script src="src/Handlers/InspectorHandler.js"></script>
+<script src="src/Handlers/hierarchyHandler.js"></script>
 </body>
 </html>
