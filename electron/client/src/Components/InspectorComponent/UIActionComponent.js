@@ -46,22 +46,24 @@ Genie.Component.UIActionView = Genie.Component.InspectorBase.extend({
                 arrOption.push( actionList[i].getName() );
             }
 
-            var div_select = HtmlHelper.createDiv( rootDiv, 'component_lineDiv' );
-            HtmlHelper.createLabel( div_uiAction, "track", "component_lineLabel");
+            this.select_uiAction =  HtmlHelper.createSelectMenuAttrib( rootDiv, "ui action", actionList[0].getName(), arrOption );
+            this.btn_play = HtmlHelper.creatIconButton( rootDiv, {
+                className : 'fa-solid fa-play',
+            }, this.onclick.bind(this) );
 
-            var self = this;
-            this._selectedIdx = 0;
-            HtmlHelper.createSelectMenu( div_uiAction, actionList[0].getName(), arrOption, function(event){
-                self._selectedIdx = event.target.value;
-            });
+        }
+    },
 
-            HtmlHelper.createButton( div_uiAction, "play", function (){
-                var actionName = actionList[self._selectedIdx].getName();
-                ccs.actionManager.playActionByName( self._jsonName, actionName, cc.callFunc( function(){
+    onclick : function( event ) {
+        switch ( event.target ) {
+            case this.btn_play:
+                var currIdx    = parseInt(this.select_uiAction.value);
+                var actionList = ccs.actionManager.getActionList( this._jsonName );
+                var actionName = actionList[ currIdx ].getName();
+                ccs.actionManager.playActionByName( this._jsonName, actionName, cc.callFunc( function(){
                     // todo 종료
                 }, this));
-            });
-
+                break;
         }
     },
 
