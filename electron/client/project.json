@@ -41,6 +41,7 @@
         "src/Components/InspectorComponent/UITextComponent.js",
         "src/Components/InspectorComponent/UIImageViewComponent.js",
         "src/Components/InspectorComponent/UILabelBMFontComponent.js",
+        "src/Components/InspectorComponent/UIButtonComponent.js",
 
         "src/Command/Command.js",
         "src/Command/TransformCommand.js",

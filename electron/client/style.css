@@ -197,7 +197,7 @@ button:active {
     /*background: #FF00FF;*/
     height: 50%;
     /*grid-area: hierarchy;*/
-    overflow: scroll;
+    /*overflow: scroll;*/
 }
 
 #second_column {
@@ -214,8 +214,14 @@ button:active {
 #assets {
 
 }
-#hierarchy {
 
+#hierarchy_bar_root {
+    height: 6%;
+}
+
+#hierarchy {
+    height: 92%;
+    overflow: scroll;
 }
 
 #inspector_gridItem {
@@ -486,27 +492,11 @@ ul.tabs li.current{
     border-bottom: 2px solid #444242;
 }
 
-.component_longPropertyLabel {
+.component_propertyLabel {
     display: inline-block; /* inline-block width, height 적용 가능 */
-    width : 110px;
+    width : 120px;
     margin-left: 2px; /* inline-block 은 margin 좌,우만 적용, padding 은 의미 없음.*/
     margin-right: 10px;
-    color: #DEDEDEFF;
-}
-
-.component_oneShortLabel {
-    display: inline-block; /* inline-block width, height 적용 가능 */
-    width : 50px;
-    margin-left: 2px; /* inline-block 은 margin 좌,우만 적용, padding 은 의미 없음.*/
-    margin-right: 10px;
-    color: #DEDEDEFF;
-}
-
-.component_twoPropertyLabel {
-    display: inline-block; /* inline-block width, height 적용 가능 */
-    width : 100px;
-    margin-left: 2px; /* inline-block 은 margin 좌,우만 적용, padding 은 의미 없음.*/
-    margin-right : 10px;
     color: #DEDEDEFF;
 }
 
@@ -583,5 +573,6 @@ input[readonly] {
 
 *{
     /*border: solid 1px #e51313;*/
+    overflow-y: hidden;
 }
 

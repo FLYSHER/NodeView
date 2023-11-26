@@ -184,20 +184,20 @@ var HtmlHelper = {
     // component view
     createOneLongTextInput : function( parent, propertyName, placeholder, readonly, onchange  ) {
         var div = HtmlHelper.createDiv( parent, 'component_lineDiv' );
-        HtmlHelper.createLabel( div, propertyName, 'component_longPropertyLabel');
+        HtmlHelper.createLabel( div, propertyName, 'component_propertyLabel');
         return HtmlHelper.createTextInput( div, placeholder, 'component_longTextInput', readonly, onchange );
     },
 
     createOneShortTextInput : function( parent, propertyName, placeholder, readonly, onchange ) {
         var div = HtmlHelper.createDiv( parent, 'component_lineDiv' );
-        HtmlHelper.createLabel( div, propertyName, 'component_longPropertyLabel');
+        HtmlHelper.createLabel( div, propertyName, 'component_propertyLabel');
         return HtmlHelper.createTextInput( div, placeholder, 'component_shortTextInput', readonly, onchange );
     },
 
     createPointAttrib : function( parent, titleName, arrPlaceholder, arrReadOnly, onchange ) {
         var resultObj = {};
         var div = HtmlHelper.createDiv( parent, 'component_lineDiv' );
-        HtmlHelper.createLabel( div, titleName, "component_twoPropertyLabel");
+        HtmlHelper.createLabel( div, titleName, "component_propertyLabel");
 
         HtmlHelper.createLabel( div, "X", "component_attribPointLabel");
         resultObj.x = HtmlHelper.createTextInput( div, arrPlaceholder[0], "component_shortTextInput", arrReadOnly[0], onchange );
@@ -211,7 +211,7 @@ var HtmlHelper = {
     createSizeAttrib : function( parent, titleName, arrPlaceholder, arrReadOnly, onchange ) {
         var resultObj = {};
         var div = HtmlHelper.createDiv( parent, 'component_lineDiv' );
-        HtmlHelper.createLabel( div, titleName, "component_twoPropertyLabel");
+        HtmlHelper.createLabel( div, titleName, "component_propertyLabel");
 
         HtmlHelper.createLabel( div, "W", "component_attribSizeLabel");
         resultObj.width = HtmlHelper.createTextInput( div, arrPlaceholder[0], "component_shortTextInput", arrReadOnly[0], onchange );
@@ -224,14 +224,39 @@ var HtmlHelper = {
 
     createCheckboxAttrib : function( parent, propertyName, checked, readyonly, onchange ) {
         var div = HtmlHelper.createDiv( parent, 'component_lineDiv' );
-        HtmlHelper.createLabel( div, propertyName, "component_longPropertyLabel" );
+        HtmlHelper.createLabel( div, propertyName, "component_propertyLabel" );
         return HtmlHelper.createCheckbox( div, "", checked, readyonly, onchange );
     },
 
     createColorAttrib : function( parent, propertyName, placeholder, onchange) {
         var div = HtmlHelper.createDiv( parent, 'component_lineDiv' );
-        HtmlHelper.createLabel( div, propertyName, 'component_longPropertyLabel');
+        HtmlHelper.createLabel( div, propertyName, 'component_propertyLabel');
         return HtmlHelper.createColorInput( div, placeholder, 'component_shortTextInput',  onchange );
+    },
+
+    createScale9RendererGroup : function( parent, scale9Renderer, change ) {
+        var strRenderingType = [
+            "SIMPLE",
+            "SLICED"
+        ]
+
+        var div_renderer =  HtmlHelper.createDiv( parent, 'component_groupDiv' );
+        HtmlHelper.createLabel( div_renderer, "Scale9Sprite", "component_groupTitleLabel" );
+
+        HtmlHelper.createOneLongTextInput( div_renderer, "renderingType", strRenderingType[ scale9Renderer.getRenderingType() ], true );
+        HtmlHelper.createSizeAttrib( div_renderer, "contentSize", [ scale9Renderer.width,  scale9Renderer.height], [true, true] );
+
+        // texture name
+        var div_sprite =  HtmlHelper.createDiv( div_renderer, 'component_groupDiv' );
+        HtmlHelper.createLabel( div_sprite, "SpriteFrame", "component_groupTitleLabel" );
+
+        var spriteFrame = scale9Renderer._spriteFrame;
+        var frameName     = Object.keys(cc.spriteFrameCache._spriteFrames).find( function( key) {
+            return cc.spriteFrameCache._spriteFrames[ key ] === spriteFrame;
+        } )
+
+        var textureName = Genie.Utils.getSpriteFrameTextureName( frameName);
+        HtmlHelper.createSpritePreviewAttrib( div_sprite, frameName, textureName );
     },
 
     createTexturePreviewAttrib : function( parent, src ) {
@@ -291,7 +316,7 @@ var HtmlHelper = {
 
     createSelectMenuAttrib : function( parent, propertyName, strPlaceHolder, arrOption, onchange  ) {
         var div = HtmlHelper.createDiv( parent, 'component_lineDiv' );
-        HtmlHelper.createLabel( div, propertyName, 'component_longPropertyLabel');
+        HtmlHelper.createLabel( div, propertyName, 'component_propertyLabel');
         return HtmlHelper.createSelectMenu( div, strPlaceHolder, arrOption, onchange );
     },
 

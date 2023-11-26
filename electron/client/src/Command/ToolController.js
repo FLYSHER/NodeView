@@ -3,10 +3,6 @@ Genie.ToolController = {
     _currentIndex   : -1,
 
     execute : function( command ) {
-
-        // if( this._currentIndex < 0 || (this._currentIndex === this.commands.length - 1 ) ) {
-        //
-        // }
         if( this._currentIndex >= 0 && this._currentIndex < this.commands.length -1 ) {
             var commandToDel = this.commands.splice( this._currentIndex + 1 );
 
@@ -21,8 +17,6 @@ Genie.ToolController = {
         ++this._currentIndex;
 
         command.execute();
-
-
         cc.log( "[command] execute : ", this._currentIndex,  command.getCommandName() + " > " + JSON.stringify( command.getArgsObj() ) );
     },
 

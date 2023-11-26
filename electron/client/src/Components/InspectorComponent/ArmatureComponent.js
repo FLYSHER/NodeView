@@ -55,7 +55,7 @@ Genie.Component.ArmatureView = Genie.Component.InspectorBase.extend({
 
         // gotoAndPause
         var div_gotoAndPause = HtmlHelper.createDiv( rootDiv, 'component_lineDiv' );
-        HtmlHelper.createLabel( div_gotoAndPause, 'gotoAndPause', 'component_longPropertyLabel');
+        HtmlHelper.createLabel( div_gotoAndPause, 'gotoAndPause', 'component_propertyLabel');
         this.input_gotoAndPause = HtmlHelper.createTextInput( div_gotoAndPause, 0, 'component_shortTextInput', false, this.onchange.bind(this) );
         this.btn_gotoAndPause = HtmlHelper.creatIconButton( div_gotoAndPause, {
             className : 'fa-solid fa-forward-step',

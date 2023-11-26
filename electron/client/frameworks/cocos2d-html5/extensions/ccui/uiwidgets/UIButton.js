@@ -98,6 +98,8 @@ ccui.Button = ccui.Widget.extend(/** @lends ccui.Button# */{
         if (normalImage) {
             this.loadTextures(normalImage, selectedImage,disableImage, texType);
         }
+
+        this.addComponent( new Genie.Component.UIButtonView() );
     },
 
     _createTitleRendererIfNeeded: function ( ) {

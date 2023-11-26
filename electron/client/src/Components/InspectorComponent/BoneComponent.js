@@ -41,7 +41,7 @@ Genie.Component.BoneView = Genie.Component.InspectorBase.extend({
         var boneData = this.getOwner().getBoneData();
         HtmlHelper.createOneLongTextInput( div_group, 'name', boneData.name, true );
         HtmlHelper.createOneLongTextInput( div_group, 'parentName', boneData.parentName, true );
-        HtmlHelper.createLabel( div_group, "displayManager", "component_longPropertyLabel" );
+        HtmlHelper.createLabel( div_group, "displayManager", "component_propertyLabel" );
     },
 
     drawDisplayManager : function() {
