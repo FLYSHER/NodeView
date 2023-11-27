@@ -241,6 +241,7 @@ button:active {
 
 
 
+
 .component_lineLabel {
     display: inline;
     width: 70px;
@@ -472,6 +473,10 @@ ul.tabs li.current{
     margin-left: 2px; /* inline-block 은 margin 좌,우만 적용, padding 은 의미 없음.*/
     margin-right: 10px;
     color: #DEDEDEFF;
+}
+
+.component_groupDiv .component_propertyLabel{
+    padding-left: 10px;
 }
 
 .component_attribLabel {
