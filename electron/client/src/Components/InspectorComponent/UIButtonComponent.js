@@ -49,7 +49,7 @@ Genie.Component.UIButtonView = Genie.Component.InspectorBase.extend({
 
     },
 
-    onchange_render : function() {
+    onchange_render : function( event ) {
         var owner = this.getOwner();
         var value, strValue = event.target.value;
     },

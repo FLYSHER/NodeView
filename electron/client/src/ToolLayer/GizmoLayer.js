@@ -9,10 +9,10 @@ var Gizmo = cc.Node.extend({
     },
 
     initProperty : function() {
-        this._isDrag        = false;
-        this._dragStartPt   = cc.p( 0, 0 );
-        this._targetNodePtAtDragStart = cc.p( 0, 0 );
-        this._touchComp     = null;
+        this._isDrag                    = false;
+        this._dragBeginWorldPt          = cc.p( 0, 0);
+        this._dragBeginTargetWorldPos   = cc.p( 0, 0);
+        this._currTargetNode            = null;
     },
 
     initGizmo : function () {
@@ -25,10 +25,10 @@ var Gizmo = cc.Node.extend({
         this._drawCSizeNode = new cc.DrawNode();
         this.rootNode.addChild( this._drawCSizeNode );
 
-        var LINE_LENGTH = 80;
+        var LINE_LENGTH = 50;
         var LINE_WIDTH  = 2;
         var LINE_OPACITY = 100;
-        var ARROW_LENGTH = 10;
+        var ARROW_LENGTH = 5;
         var ARROW_COLOR_X = cc.color( 255, 0, 0, LINE_OPACITY );
         var ARROW_COLOR_Y = cc.color( 0, 255, 0, LINE_OPACITY );
 
@@ -45,43 +45,63 @@ var Gizmo = cc.Node.extend({
         this._drawNode.drawDot( cc.p( 0, 0), 2, cc.color( 200, 200, 200, 200) );
 
         // 터치 영역
-        var RECT_SIZE = cc.p( 30, 30 );
+        var RECT_SIZE = cc.p( 20, 20 );
         this._drawNode.drawRect( cc.p( 0, 0 ), RECT_SIZE, cc.color( 200, 200, 0, 100), 1, cc.color( 200, 200, 0, 255) );
-
         this._drawNode.setContentSize( cc.size( RECT_SIZE.x, RECT_SIZE.y ) );
 
+        this.initTouchListener();
+    },
 
-        var touchComp = new Genie.Component.Touch();
-        this._drawNode.addComponent( touchComp );
+    initTouchListener : function() {
 
         var self = this;
-        touchComp.onTriggerEvent = function(touchEventName , pt) {
-            if (touchEventName !== "move" && touchComp._owner){
-                // cc.log("RockN.Component.SpriteButton event triggered :" + touchEventName + " by " + this._owner.getName());
-            }
+        cc.eventManager.addListener({
+            event: cc.EventListener.MOUSE,
+            onMouseDown : function( event ) {
+                var pt      = event.getLocation();
+                var target  = event.getCurrentTarget();
+                var rect    = target.getBoundingBox();
+                var worldTM = target.getNodeToWorldTransform();
+                var worldRect = cc.rectApplyAffineTransform( rect, worldTM );
+                var result  = cc.rectContainsPoint( worldRect, pt );
+                result && self.setDrag( true );
+                if( result ) {
+                    self.setDrag( true );
+                    self._dragBeginWorldPt = pt;
+                    self.setDragBeginTargetWorldPos();
+                }
+                return result;
+            },
+            onMouseMove: function( event ) {
+                if( self.isDrag() && self._currTargetNode ) {
+                    var diffPos  = self.getDiffPt();
+                    var pt2      = cc.pSub( event.getLocation(), diffPos );
+                    var localPos = self._currTargetNode.getParent().convertToNodeSpace( pt2 );
 
-            switch (touchEventName)
-            {
-                case "normal": {
-                }break;
-                case "over": {
-                }break;
-                case "up": {
-                }break;
-                case "down": {
-                    self.setDrag(true);
-                    self.setActiveTouchComp( false );
-                    self._dragStartPt = pt;
-                    self._targetNodePtAtDragStart = self.getPosition();
-                }break;
-                case "click": {
-                }break;
-                case "move": {
-                }break;
-            }
-        }
+                    Genie.ToolController.moveNode( self._currTargetNode, localPos );
+                    self.followTarget( self._currTargetNode );
+                }
+            },
+            onMouseUp: function( event ) {
+                if( self.isDrag() && self._currTargetNode ) {
+                    self.setDrag( false );
 
-        this._touchComp = touchComp;
+                    var pt          = event.getLocation();
+                    var diffPos     = self.getDiffPt();
+                    var pt2         = cc.pSub( pt, diffPos );
+
+                    var srcLocalPos     = self._currTargetNode.getParent().convertToNodeSpace( self.getDragBeginTargetWorldPos() );
+                    var destLocalPos    = self._currTargetNode.getParent().convertToNodeSpace( pt2 );
+
+                    Genie.ToolController.execute( new Genie.Command.Transform( self._currTargetNode, {
+                        strProp : 'position',
+                        src : srcLocalPos,
+                        dest: destLocalPos
+                    } ) );
+                }
+            },
+
+        }, this._drawNode )
     },
 
     refreshContentSize : function( node ) {
@@ -98,6 +118,11 @@ var Gizmo = cc.Node.extend({
     },
 
     setTargetNode : function( node ) {
+        if( this._currTargetNode === node ) {
+            cc.log("GizmoNode.setTargetNode > same node!" );
+            return;
+        }
+
         var worldPos;
         if( node instanceof ccui.Widget ) {
             worldPos = node.getWorldPosition();
@@ -111,8 +136,9 @@ var Gizmo = cc.Node.extend({
         this.setPosition( worldPos );
         this.refreshContentSize( node );
 
-        this._targetNodePtAtDragStart = worldPos;
+        this._currTargetNode = node;
     },
+
 
     setDrag : function( drag ) {
         this._isDrag = drag;
@@ -122,20 +148,34 @@ var Gizmo = cc.Node.extend({
         return this._isDrag;
     },
 
-    getDragStartPt : function() {
-        return this._dragStartPt;
+    getDragBeginWorldPt : function() {
+        return this._dragBeginWorldPt;
     },
 
-    getTargetNodePosAtDragStart : function() {
-        return this._targetNodePtAtDragStart;
+    setDragBeginTargetWorldPos : function() {
+        var worldPos,
+            targetNode = this._currTargetNode;
+
+        if( targetNode ) {
+            if( targetNode instanceof ccui.Widget ) {
+                worldPos = targetNode.getWorldPosition();
+            }
+            else {
+                var parent = targetNode.getParent();
+                parent = !!parent ? parent : targetNode;
+                worldPos = parent.convertToWorldSpace( targetNode.getPosition() );
+            }
+
+            this._dragBeginTargetWorldPos = worldPos;
+        }
+    },
+
+    getDragBeginTargetWorldPos : function() {
+        return this._dragBeginTargetWorldPos;
     },
 
     getDiffPt : function() {
-        return cc.pSub( this._dragStartPt, this._targetNodePtAtDragStart );
-    },
-
-    setActiveTouchComp : function( active ) {
-        this._touchComp && this._touchComp.setEnabled( active );
+        return cc.pSub( this._dragBeginWorldPt, this._dragBeginTargetWorldPos );
     },
 
     followTarget : function( targetNode ) {
@@ -168,69 +208,8 @@ var GizmoLayer = cc.LayerColor.extend({
         this._targetNode = null;
     },
 
-    initTouchComponent : function() {
-        var touchComp = new Genie.Component.Touch();
-        this.addComponent( touchComp );
-
-        var self = this;
-        touchComp.onTriggerEvent = function(touchEventName , pt) {
-            if (touchEventName !== "move" && touchComp._owner) {
-                // cc.log("RockN.Component.SpriteButton event triggered :" + touchEventName + " by " + this._owner.getName());
-            }
-
-            switch (touchEventName)
-            {
-                case "normal": {
-                    self._targetNode && self._gizmoNode.setDrag( false );
-                    self._gizmoNode.setActiveTouchComp( true );
-                }break;
-                case "over": {
-
-                }break;
-                case "up": {
-                    if( self._targetNode ) {
-                        if( self._gizmoNode.isDrag() ) {
-                            var diffPos = self._gizmoNode.getDiffPt();
-                            var pt2 = cc.pSub( pt, diffPos );
-                            var destPos = self._targetNode.getParent().convertToNodeSpace( pt2 );
-                            var startPos = self._gizmoNode.getTargetNodePosAtDragStart();
-                            var startLocalPos = self._targetNode.getParent().convertToNodeSpace( startPos );
-
-                            Genie.ToolController.execute( new Genie.Command.Transform( self._targetNode, {
-                                strProp : 'position',
-                                src : startLocalPos,
-                                dest: destPos
-                            } ) );
-                        }
-                    }
-
-                    self._targetNode && self._gizmoNode.setDrag( false );
-                    self._gizmoNode.setActiveTouchComp( true );
-                }break;
-                case "down": {
-                }break;
-                case "click": {
-                }break;
-                case "move": {
-                    if( self._targetNode && self._gizmoNode.isDrag() ) {
-
-                        var diffPos = self._gizmoNode.getDiffPt();
-                        var pt2 = cc.pSub( pt, diffPos );
-                        var localPos = self._targetNode.getParent().convertToNodeSpace( pt2 );
-
-                        Genie.ToolController.moveNode( self._targetNode, localPos );
-
-                        // self._targetNode.setPosition( localPos );
-                        self._gizmoNode.followTarget( self._targetNode );
-                    }
-                }break;
-            }
-        }
-    },
-
     onEnter : function() {
         this._super();
-        this.initTouchComponent();
         cc.eventManager.addCustomListener("onChangeNodeInHierarchy", this.setTargetNode.bind(this));
     },
 

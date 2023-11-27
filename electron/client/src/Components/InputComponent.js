@@ -1,5 +1,3 @@
-
-
 Genie.Component.Touch = Genie.Component.Base.extend({
     SHOW_DEBUG_DRAW_HITRECT : false,
 
@@ -8,7 +6,6 @@ Genie.Component.Touch = Genie.Component.Base.extend({
         this.setName("Genie.Component.Touch");
         this.initProperties();
     },
-
 
     initProperties : function (){
         this._touchEnabled = true;
@@ -106,7 +103,6 @@ Genie.Component.Touch = Genie.Component.Base.extend({
         this._customHitRectSize = cc.size(width, height);
     },
 
-
     setEnabled : function(bEnabled)
     {
         this._super(bEnabled);
@@ -196,7 +192,6 @@ Genie.Component.Touch = Genie.Component.Base.extend({
     //이벤트 트리거
     onTriggerEvent : function (touchEventName, pt){
 
-
     },
 
     _isVisibleInHierarchy : function( target ) {
@@ -273,7 +268,7 @@ Genie.Component.Touch = Genie.Component.Base.extend({
     },
 
     //이벤트 리스너 생성
-    _createEvent : function (  ){
+    _createEvent : function () {
         var self = this;
         var isTouchEnabled = this.isEnabled() && this._touchEnabled;
         if( 'mouse' in cc.sys.capabilities  && this._mouseListener == null ) {
