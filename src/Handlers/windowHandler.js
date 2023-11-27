@@ -107,32 +107,6 @@ FileHandler.prototype.processFileData = function (url, fileContents, ext, cb) {
                 );
             }
             break;
-        case ".json":
-            dic = JSON.parse(fileContents);
-            cc.loader.cache[url] = dic;
-            if (dic["Content"] && dic["Content"]["Content"] && dic["Content"]["Content"]["UsedResources"]) {
-                let fntList = [];
-                let plistList = [];
-                let pngList = []
-                let resArray = dic["Content"]["Content"]["UsedResources"];
-                for (let n = 0; n < resArray.length; n++) {
-                    let ext = cc.path.extname(resArray[n]).toLowerCase();
-                    if (ext === '.fnt') {
-                        fntList.push(resArray[n]);
-                    } else if (ext === '.plist') {
-                        plistList.push(resArray[n]);
-                    } else if (ext === '.png') {
-                        pngList.push(resArray[n]);
-                    }
-                }
-                this.loadFnt(fntList, function () {
-                    this.readResources(plistList, pngList);
-                    this.uiTextures[fileName] = plistList;
-                    this.checkFiles(fileName, 'cocosStudio');
-                }.bind(this))
-            }
-
-            break;
         case ".exportjson":
             dic = JSON.parse(fileContents);
             cc.loader.cache[url] = dic;
@@ -152,6 +126,8 @@ FileHandler.prototype.appendItem = function (name, isImage) {
         eImageList.appendChild(item);
     else
         eResourceList.appendChild(item);
+    
+    modalHandler.addArmatureData(name);
 }
 
 window.fileHandler = new FileHandler();

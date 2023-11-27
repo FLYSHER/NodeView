@@ -160,6 +160,7 @@ HierarchyHandler.prototype.resetElemStatus = function(){
     }
 };
 
+
 // Getter
 HierarchyHandler.prototype.getSelectedNode = function(){
     return this._selectedNode;

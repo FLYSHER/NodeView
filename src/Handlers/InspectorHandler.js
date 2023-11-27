@@ -2,11 +2,11 @@ var eInspectorPanel = document.getElementById("Inspector");
 var eInspectorBtnApply = document.getElementById("btnInspectorApply");
 eInspectorBtnApply.addEventListener("click",function(){
     inspectorHandler.onClickApply();
-})
+});
 var eInspectorBtnDelete = document.getElementById("btnInspectorDelete");
 eInspectorBtnDelete.addEventListener("click", function(){
     inspectorHandler.onClickDelete();
-})
+});
 
 function InspectorHandler() {
     /** @type {cc.Node} */
@@ -64,9 +64,33 @@ InspectorHandler.prototype.createBtnApply = function(){
     this._eHandler.createBtnApply();
 };
 
-InspectorHandler.prototype.onClickApply = function(){
-    this.applyNodeAttribute();
+InspectorHandler.prototype.getElementValue = function(elementID){
+    var key = ElementHandlerKey.Type.input + elementID;
+    return this._eHandler.getElement(key).value;
 };
+
+// Apply
+InspectorHandler.prototype.onClickApply = function(){
+    this._applyNodeAttribute();
+};
+
+InspectorHandler.prototype._applyNodeAttribute = function(){
+    var pos = cc.p(0,0);
+    pos.x = this.getElementValue(ElementHandlerKey.NodeProperties.PosX);
+    pos.y = this.getElementValue(ElementHandlerKey.NodeProperties.PosY);
+    this._currNode.setPosition(pos);
+    
+    var anchor = cc.p(0,0);
+    anchor.x = this.getElementValue(ElementHandlerKey.NodeProperties.AnchorX);
+    anchor.y = this.getElementValue(ElementHandlerKey.NodeProperties.AnchorY);
+    this._currNode.setAnchorPoint(anchor);
+    
+    var content = cc.size(0,0);
+    content.width = this.getElementValue(ElementHandlerKey.NodeProperties.ContentSizeWidth);
+    content.height = this.getElementValue(ElementHandlerKey.NodeProperties.ContentSizeHeight);
+    this._currNode.setContentSize(content);
+};
+
 InspectorHandler.prototype.onClickDelete = function(){
     this._currNode.removeFromParent(true);
     this.reset();
@@ -75,7 +99,7 @@ InspectorHandler.prototype.onClickDelete = function(){
 };
 
 function ElementHandler() {
-    this._pList = {};
+    this._elementList = {};
 }
 
 ElementHandler.prototype.reset = function () {
@@ -86,7 +110,7 @@ ElementHandler.prototype.reset = function () {
 ElementHandler.prototype.createItemList = function (listName) {
     var elem = document.createElement("div");
     elem.className = "inspector-item-list";
-    this._pList[listName] = elem;
+    this._elementList[listName] = elem;
     return elem;
 };
 
@@ -94,7 +118,7 @@ ElementHandler.prototype.createItemContent = function (pName) {
     var elem = document.createElement("p");
     elem.className = "inspector-item-content";
     elem.innerHTML = pName + " :";
-    this._pList[pName] = elem;
+    this._elementList[pName] = elem;
     return elem;
 };
 
@@ -104,7 +128,7 @@ ElementHandler.prototype.createItemInput = function (pName, inputType) {
     elem.className = "inspector-item-input";
     
     var name = "input_"+pName;
-    this._pList[name] = elem;
+    this._elementList[name] = elem;
     return elem;
 };
 
@@ -130,12 +154,28 @@ ElementHandler.prototype.appendChild = function (node, target) {
     target.appendChild(node);
 }
 
+/** @return {HTMLElement | any} */
 ElementHandler.prototype.getElement = function(name){
-    return this._pList[name];
+    return this._elementList[name];
 };
 
 ElementHandler.prototype.createBtnApply = function(){
     document.getElementById("divApply").style.display = "block";
+};
+
+ElementHandlerKey = {
+    Type : {
+        input : "input_",
+        list : "list_"
+    },
+    NodeProperties : {
+        AnchorX : "anchorX",
+        AnchorY : "anchorY",
+        ContentSizeHeight : "contentSizeHeight",
+        ContentSizeWidth : "contentSizeWidth",
+        PosX : "posX",
+        PosY : "posY",
+    },
 };
 
 window.inspectorHandler = new InspectorHandler();

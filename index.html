@@ -50,14 +50,19 @@
                 <button id="btnImageFolder" class="btn-image-folder">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                          class="bi bi-folder" viewBox="0 0 16 16">
-  <path d="M.54 3.87.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.826a2 2 0 0 1-1.991-1.819l-.637-7a1.99 1.99 0 0 1 .342-1.31zM2.19 4a1 1 0 0 0-.996 1.09l.637 7a1 1 0 0 0 .995.91h10.348a1 1 0 0 0 .995-.91l.637-7A1 1 0 0 0 13.81 4H2.19zm4.69-1.707A1 1 0 0 0 6.172 2H2.5a1 1 0 0 0-1 .981l.006.139C1.72 3.042 1.95 3 2.19 3h5.396l-.707-.707z"/>
-</svg>
+                        <path d="M.54 3.87.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.826a2 2 0 0 1-1.991-1.819l-.637-7a1.99 1.99 0 0 1 .342-1.31zM2.19 4a1 1 0 0 0-.996 1.09l.637 7a1 1 0 0 0 .995.91h10.348a1 1 0 0 0 .995-.91l.637-7A1 1 0 0 0 13.81 4H2.19zm4.69-1.707A1 1 0 0 0 6.172 2H2.5a1 1 0 0 0-1 .981l.006.139C1.72 3.042 1.95 3 2.19 3h5.396l-.707-.707z"/>
+                    </svg>
                 </button>
                 &emsp;
                 <span>Images</span>
                 <div id="imageList" class="image-list"></div>
             </div>
         </div>
+        <br/>
+        <button type="button" id="btnModalOpen" class="btn btn-success">
+            노드 생성
+        </button>
+        <br/>
     </div>
 
 
@@ -79,6 +84,56 @@
         </div>
     </div>
 
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Create Node</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body modal-creator-content" id="modalContent">
+                <div class="modal-category-list">
+                    <div class="modal-item" id="modalItemEmptyNode">
+                        <img src="./res/imgNode.jpg" class="rounded modal-item-img" alt="...">
+                        <h5>Empty Node</h5>
+                    </div>
+                    <div class="modal-item" id="modalItemArmature">
+                        <img src="./res/imgArmature.jpg" class="rounded modal-item-img" alt="...">
+                        <h5>Armature</h5>
+                    </div>
+                    <div class="modal-item" id="modalItemUIWidget">
+                        <img src="./res/imgUIWidget.jpg" class="rounded modal-item-img" alt="...">
+                        <h5>UIWidget</h5>
+                    </div>
+                </div>
+                <div class="modal-item-detail" id="modalDetail">
+                    <div class="modal-item-detail-panel" id="modalDetailEmptyNode">
+                        <h3>Empty Node</h3>
+                        <p>Name : <input type="text" id="modalInputEmptyNodeName" placeholder="Please enter node name."> </p>
+                    </div>
+                    <div class="modal-item-detail-panel" id="modalDetailArmature">
+                        <h3>Armature</h3>
+                        <p>Name : <input type="text" id="modalInputArmatureName" placeholder="Please enter node name."> </p>
+                        <select class="form-select" aria-label="Default select example" id="modalARFileSelect">
+                            <option selected>Select Armature File.</option>
+                        </select>
+                    </div>
+                    <div class="modal-item-detail-panel" id="modalDetailUIWidget">
+                        <h3>UIWidget</h3>
+                        <p>Name : <input type="text" id="modalInputUIWidgetName" placeholder="Please enter node name."> </p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <span id="modalWarning" class="modal-warning"></span>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" id="btnCreateNode" class="btn btn-primary">Create</button>
+            </div>
+        </div>
+    </div>
 </div>
 <script>
     (function () {
@@ -102,5 +157,6 @@
 <script src="src/Handlers/windowHandler.js"></script>
 <script src="src/Handlers/InspectorHandler.js"></script>
 <script src="src/Handlers/hierarchyHandler.js"></script>
+<script src="src/Handlers/modalHandler.js"></script>
 </body>
 </html>
