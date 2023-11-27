@@ -110,8 +110,12 @@ FileHandler.prototype.processFileData = function (url, fileContents, ext, cb) {
         case ".exportjson":
             dic = JSON.parse(fileContents);
             cc.loader.cache[url] = dic;
-            if(!!dic["armature_data"])
+            if(!!dic["armature_data"]) {
                 ccs.armatureDataManager.addArmatureFileInfo(url);
+                modalHandler.addArmatureData(url);
+            } else {
+                modalHandler.addUIWidgetData(url);
+            }
             break;
     }
 }
@@ -126,8 +130,6 @@ FileHandler.prototype.appendItem = function (name, isImage) {
         eImageList.appendChild(item);
     else
         eResourceList.appendChild(item);
-    
-    modalHandler.addArmatureData(name);
 }
 
 window.fileHandler = new FileHandler();

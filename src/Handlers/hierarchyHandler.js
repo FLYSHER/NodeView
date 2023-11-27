@@ -14,7 +14,10 @@ function HierarchyHandler(){
     this._selectedElem = null;
     /** @type {cc.Node} */
     this._selectedNode = null;
-};
+    
+    /** @type {[string]} */
+    this._nodeNames = [];
+}
 
 HierarchyHandler.prototype.reload = function(){
     this.drawHierarchy(GameScene);
@@ -28,6 +31,7 @@ HierarchyHandler.prototype.reset = function(){
     };
     this._currScene = null;
     eHierarchy.innerHTML = "";
+    this._nodeNames = [];
 };
 
 HierarchyHandler.prototype.drawHierarchy = function (scene) {
@@ -41,6 +45,9 @@ HierarchyHandler.prototype.drawHierarchy = function (scene) {
 HierarchyHandler.prototype._createSceneGraph = function(){
     var self = this;
     function setGraph(node){
+        if(node instanceof ccs.Armature)
+            return;
+        
         var children = node.getChildren();
         
         for(var i=0; i<children.length; i++){
@@ -53,6 +60,7 @@ HierarchyHandler.prototype._createSceneGraph = function(){
                     children : {},
                 };
                 self.insertChild(node.getName(), retVal);
+                self._nodeNames.push(childName);
                 setGraph(children[i]);
             }
         }
@@ -167,6 +175,9 @@ HierarchyHandler.prototype.getSelectedNode = function(){
 };
 HierarchyHandler.prototype.getSelectedElem = function(){
     return this._selectedElem;
+};
+HierarchyHandler.prototype.getNodeNames = function(){
+    return this._nodeNames;
 };
 
 // Utils

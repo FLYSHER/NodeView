@@ -31,6 +31,7 @@ ModalHandlerKey = {
         UIWidgetName : "modalInputUIWidgetName",
         
         ARFileSelect : "modalARFileSelect",
+        UIFileSelect : "modalUIWidgetFileSelect",
         BtnCreateNode : "btnCreateNode",
     },
 };
@@ -118,7 +119,7 @@ ModalHandler.prototype._onClickItem = function(key){
     panelElem.className = "modal-item-detail-panel-activate";
 };
 ModalHandler.prototype._onClickCreate = function(){
-    if(this._showWarningMessage())
+    if(this._isCreateValid() === false)
         return;
 
     document.getElementById("modalWarning").className = "modal-warning";
@@ -127,24 +128,23 @@ ModalHandler.prototype._onClickCreate = function(){
             this._createEmptyNode();
             break;
         case ModalHandlerKey.Type.Armature:
+            this._createArmature();
             break;
         case ModalHandlerKey.Type.UIWidget:
+            this._createUIWidget();
             break;
     }
 };
-ModalHandler.prototype._showWarningMessage = function(){
-    var elem = document.getElementById("modalWarning");
+ModalHandler.prototype._isCreateValid = function(){
     var text = "";
-    
     if(this._currSelectedType < 0)
         text = "Please Select Node Type.";
     
     if(hierarchyHandler.getSelectedNode() === null)
         text = "Please select parent node or scene.";
     
-    elem.innerHTML = text;
-    
-    return text.length > 0;
+    this.createWarningMessage(text);
+    return text.length === 0;
 };
 
 ModalHandler.prototype._resetOnClick = function(){
@@ -175,17 +175,21 @@ ModalHandler.prototype.addArmatureData = function(arName){
     option.text = arName;
     elem.appendChild(option);
 };
+ModalHandler.prototype.addUIWidgetData = function(widgetName){
+    var elem = this._modalList[ModalHandlerKey.InputElement.UIFileSelect];
+    var option = document.createElement("option");
+    option.value = widgetName;
+    option.text = widgetName;
+    elem.appendChild(option);
+};
 
 
 // Create Empty Node
 ModalHandler.prototype._createEmptyNode = function(){
-    var nodeName = this._modalList[ModalHandlerKey.InputElement.EmptyNodeName].value;
-    
-    if(cc.isString(nodeName) === false || nodeName.length < 1) {
-        document.getElementById("modalWarning").innerHTML = "Invalid node name.";
+    if(this._isEmptyNodeDataValid() === false)
         return;
-    }
-
+    
+    var nodeName = this._modalList[ModalHandlerKey.InputElement.EmptyNodeName].value;
     this._modalList[ModalHandlerKey.InputElement.EmptyNodeName].value = "";
     var node = new cc.Node();
     node.setName(nodeName);
@@ -194,12 +198,118 @@ ModalHandler.prototype._createEmptyNode = function(){
     hierarchyHandler.reload();
     this.setModalVisible(false);
 };
+ModalHandler.prototype._isEmptyNodeDataValid = function(){
+    var nodeElem = this._modalList[ModalHandlerKey.InputElement.EmptyNodeName];
+    var text = "";
+    if(cc.isString(nodeElem.value) === false || nodeElem.value.length < 1 || hierarchyHandler.getNodeNames().indexOf(nodeElem.value) !== -1) 
+        text = "Invalid node name.";
+    
+    if(hierarchyHandler.getSelectedNode() instanceof ccs.Armature)
+        text = "You can't add node to armature.";
+    
+    this.createWarningMessage(text);
+    return text.length === 0;
+};
+
+// Create Armature
+ModalHandler.prototype._createArmature = function(){
+    if(this._isArmatureDataValid() === false)
+        return;
+    
+    var nodeNameElem = this._modalList[ModalHandlerKey.InputElement.ArmatureName];
+    var selectElem = document.getElementById("modalARFileSelect");
+    var selectIndex = selectElem.options.selectedIndex;
+    var ARName = cc.path.mainFileName(selectElem.options[selectIndex].value);
+    
+    var ar = new ccs.Armature(ARName);
+    ar.setName(nodeNameElem.value);
+    
+    hierarchyHandler.getSelectedNode().addChild(ar);
+    hierarchyHandler.reload();
+    
+    nodeNameElem.value = "";
+    selectElem.options.selectedIndex = 0;
+    
+    this._modal.hide();
+};
+ModalHandler.prototype._isArmatureDataValid = function(){
+    var nodeNameElem = this._modalList[ModalHandlerKey.InputElement.ArmatureName];
+    var selectElem = document.getElementById("modalARFileSelect");
+
+    var warning = "";
+    if(nodeNameElem.value.length === 0)
+        warning = "Please input node name.";
+    
+    if(hierarchyHandler.getNodeNames().indexOf(nodeNameElem.value) !== -1)
+        warning = "Current node name is already exist.";
+
+    if(selectElem.options.selectedIndex === 0)
+        warning = "Choose Armature file.";
+    
+    if(hierarchyHandler.getSelectedNode() instanceof ccs.Armature)
+        warning = "You can't add node to armature.";
+    
+    this.createWarningMessage(warning);
+    return warning.length === 0;
+};
+
+// Create UIWidget
+ModalHandler.prototype._createUIWidget = function(){
+    if(this._isUIWidgetValid() === false)
+        return;
+    
+    var nodeName = this._modalList[ModalHandlerKey.InputElement.UIWidgetName];
+    
+    var selectElem = this._modalList[ModalHandlerKey.InputElement.UIFileSelect];
+    var selectIndex = selectElem.options.selectedIndex;
+    var uiName = selectElem.options[selectIndex].value;
+    
+    var uiWidget = ccs.uiReader.widgetFromJsonFile(uiName);
+    uiWidget.setAnchorPoint(cc.p(0.5,0.5));
+    uiWidget.setName(nodeName.value);
+    
+    hierarchyHandler.getSelectedNode().addChild(uiWidget);
+    hierarchyHandler.reload();
+    
+    selectElem.options.selectedIndex = 0;
+    nodeName.value = "";
+    
+    this._modal.hide();
+};
+ModalHandler.prototype._isUIWidgetValid = function(){
+    var uiName = document.getElementById("modalInputUIWidgetName");
+    var uiSelect = document.getElementById("modalUIWidgetFileSelect");
+    
+    var text = "";
+    if(uiName.value.length < 1)
+        text = "Please input node name";
+
+    if(hierarchyHandler.getNodeNames().indexOf(uiName.value) !== -1)
+        text = "Current node name is already exist.";
+    
+    if(uiSelect.options.selectedIndex === 0)
+        text = "Please select ui file.";
+
+    if(hierarchyHandler.getSelectedNode() instanceof ccs.Armature)
+        text = "You can't add ui to armature.";
+    
+    this.createWarningMessage(text);
+    return text.length === 0;
+};
+
+// Utils
 ModalHandler.prototype.setModalVisible = function(visible){
     if(typeof visible !== "boolean")
         return;
-    
+
     if(visible)
         this._modal.show();
     else
         this._modal.hide();
+};
+ModalHandler.prototype.createWarningMessage = function(msg){
+    if(cc.isString(msg) === false)
+        return;
+    
+    document.getElementById("modalWarning").innerHTML = msg;
 };
