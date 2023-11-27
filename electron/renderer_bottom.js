@@ -1,7 +1,7 @@
 var timelineModule = require('animation-timeline-js');
 const log = require('electron-log/main');
 
-var BottomView = {
+var Renderer_bottom = {
     Tag                 : "[ HierarchyRenderer ] ",
     hierarchyData       : [],
     nodeInstanceIDMap   : {},

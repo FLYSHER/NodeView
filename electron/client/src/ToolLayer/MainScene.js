@@ -20,11 +20,11 @@ var MainScene = cc.Scene.extend({
         this.initLayers();
 
         /** view init **/
-        MainView.init();
-        BottomView.init();
-        AssetsView.init();
-        InspectorView.init();
-        HierarchyView.init( this._mainViewLayer );
+        Renderer_main.init();
+        Renderer_bottom.init();
+        Renderer_assets.init();
+        Renderer_inspector.init();
+        Renderer_hierarchy.init( this._mainViewLayer );
 
         // $("#mainLayer").click( function() {
         //     this.setCurrentLayer( Genie.LayerType.MAIN );

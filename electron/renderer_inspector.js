@@ -1,5 +1,5 @@
 
-var InspectorView = {
+var Renderer_inspector = {
     formData : {},
     formMeta : {},
     options  : {},

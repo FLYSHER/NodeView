@@ -1,5 +1,5 @@
-var HierarchyView = {
-    Tag                 : "[ HierarchyView ] ",
+var Renderer_hierarchy = {
+    Tag                 : "[ Renderer_hierarchy ] ",
     hierarchyData       : [],
     nodeInstanceIDMap   : {},
     rootLayer           : null,
@@ -41,7 +41,7 @@ var HierarchyView = {
                                 "label"     : "component",
                                 "action"    : function( obj ) {
                                     var instanceID = obj.reference.prevObject[0].id;
-                                    var realNode = HierarchyView.nodeInstanceIDMap[ instanceID ];
+                                    var realNode = Renderer_hierarchy.nodeInstanceIDMap[ instanceID ];
 
                                 },
                             }
@@ -54,7 +54,7 @@ var HierarchyView = {
                                 console.log("check! : ", obj );
                             }
                             var instanceID = obj.reference.prevObject[0].id;
-                            var realNode = HierarchyView.nodeInstanceIDMap[ instanceID ];
+                            var realNode = Renderer_hierarchy.nodeInstanceIDMap[ instanceID ];
                             cc.eventManager.dispatchCustomEvent('onDeleteNode', { cocosNode : realNode })
                         },
                     }
@@ -145,7 +145,7 @@ var HierarchyView = {
      * @param realNode  실제 코코스 노드
      */
     addTreeNode : function( id, parentID, text, realNode  ) {
-        // cc.log( HierarchyView.Tag, " ** addTreeNode ** ", id, parentID, text, realNode );
+        // cc.log( Renderer_hierarchy.Tag, " ** addTreeNode ** ", id, parentID, text, realNode );
 
         if( this.isExistNode( id, parentID ) ) {
             return;

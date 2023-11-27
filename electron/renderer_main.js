@@ -15,7 +15,7 @@ class FileEntry {
 
 }
 
-var MainView = {
+var Renderer_main = {
     init : function() {
         var canvas = cc._canvas;
 

@@ -28,13 +28,13 @@ Genie.ResourceLoader = {
             case '.exportjson':
                 key = fileEntry.name;
                 cc.loader.cache[ fileEntry.name ] = JSON.parse( fileEntry.content );
-                AssetsView.addAsset( key );
+                Renderer_assets.addAsset( key );
                 resolve();
                 break;
             case '.fnt':
                 key = 'image/' + fileEntry.name;
                 cc.loader.cache[ key ] = _fntLoader.parseFnt( fileEntry.content, key );
-                AssetsView.addAsset( key );
+                Renderer_assets.addAsset( key );
                 resolve();
                 break;
             case '.plist':
@@ -42,7 +42,7 @@ Genie.ResourceLoader = {
                 key = 'image/' + fileEntry.name;
                 cc.loader.cache[ key ] = plist_data;
                 cc.spriteFrameCache.addSpriteFrames( key );
-                AssetsView.addAsset( key );
+                Renderer_assets.addAsset( key );
                 resolve();
                 break;
             case '.png':
@@ -58,7 +58,7 @@ Genie.ResourceLoader = {
                         cc.loader.cache[ fileEntry.name ] = fileEntry.content;
                         cc.loader.cache[key] = tex2d;
                         cc.textureCache.cacheImage( key, tex2d );
-                        AssetsView.addAsset( key );
+                        Renderer_assets.addAsset( key );
                         resolve();
                     });
                 break;
