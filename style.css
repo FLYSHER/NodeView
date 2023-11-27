@@ -1,3 +1,7 @@
+button {
+    all : unset;
+}
+
 .flex-container{
     background-color: #DADDB1;
     display: flex;
@@ -81,6 +85,9 @@
     overflow: scroll;
     flex-direction: column;
     padding: 10px;
+}
+.hierarchy-folder {
+    display : flex;
 }
 .hierarchy-item {
     margin : unset;

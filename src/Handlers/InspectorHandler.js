@@ -23,13 +23,14 @@ InspectorHandler.prototype.onClickNode = function (node) {
     this.reset();
     this._currNode = node;
     this.createNodeInspector();
+    this.createBtnApply();
 };
 
 InspectorHandler.prototype.createNodeInspector = function () {
     this.createPosition();
+    this.createScale();
     this.createAnchorPoint();
     this.createContentSize();
-    this.createBtnApply();
 };
 
 InspectorHandler.prototype.createPosition = function () {
@@ -40,6 +41,15 @@ InspectorHandler.prototype.createPosition = function () {
     inputX.value = pos.x;
     var inputY = this._eHandler.getElement("input_posY");
     inputY.value = pos.y;
+};
+
+InspectorHandler.prototype.createScale = function(){
+    this._eHandler.createInputList("list_scale", ["scaleX","scaleY"], ["number","number"]);
+    
+    var scaleX = this._eHandler.getElement("input_scaleX");
+    scaleX.value = Number(this._currNode.getScaleX());
+    var scaleY = this._eHandler.getElement("input_scaleY");
+    scaleY.value = Number(this._currNode.getScaleY());
 };
 
 InspectorHandler.prototype.createAnchorPoint = function () {
@@ -89,6 +99,13 @@ InspectorHandler.prototype._applyNodeAttribute = function(){
     content.width = this.getElementValue(ElementHandlerKey.NodeProperties.ContentSizeWidth);
     content.height = this.getElementValue(ElementHandlerKey.NodeProperties.ContentSizeHeight);
     this._currNode.setContentSize(content);
+    
+    var scale = 1;
+    var scaleY = 1;
+    scale = Number(this.getElementValue(ElementHandlerKey.NodeProperties.scaleX));
+    scaleY = Number(this.getElementValue(ElementHandlerKey.NodeProperties.scaleY));
+    this._currNode.setScale(scale,scaleY);
+    
 };
 
 InspectorHandler.prototype.onClickDelete = function(){
@@ -175,6 +192,8 @@ ElementHandlerKey = {
         ContentSizeWidth : "contentSizeWidth",
         PosX : "posX",
         PosY : "posY",
+        scaleX : "scaleX",
+        scaleY : "scaleY",
     },
 };
 
