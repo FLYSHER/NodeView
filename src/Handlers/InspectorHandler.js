@@ -141,11 +141,10 @@ InspectorHandler.prototype.getElementValue = function(elementID){
     return this._eHandler.getElement(key).value;
 };
 
-// Apply
+// Apply & Delete
 InspectorHandler.prototype.onClickApply = function(){
     this._applyNodeAttribute();
 };
-
 InspectorHandler.prototype._applyNodeAttribute = function(){
     var pos = cc.p(0,0);
     pos.x = this.getElementValue(ElementHandlerKey.NodeProperties.PosX);
@@ -171,7 +170,6 @@ InspectorHandler.prototype._applyNodeAttribute = function(){
     var isVisible = this._eHandler.getElement("input_visible");
     this._currNode.setVisible(isVisible.checked);
 };
-
 InspectorHandler.prototype.onClickDelete = function(){
     this._currNode.removeFromParent(true);
     this.reset();

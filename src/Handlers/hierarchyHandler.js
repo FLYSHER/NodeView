@@ -18,6 +18,11 @@ function HierarchyHandler(){
     
     /** @type {[string]} */
     this._nodeNames = [];
+    
+    window.addEventListener("keyup",function(event){
+        if(event.key === "Delete" && !!hierarchyHandler.getSelectedNode())
+            !!window.inspectorHandler && window.inspectorHandler.onClickDelete();
+    });
 }
 
 HierarchyHandler.prototype.reload = function(){
@@ -31,8 +36,10 @@ HierarchyHandler.prototype.reset = function(){
         children : {},
     };
     this._currScene = null;
-    eHierarchy.innerHTML = "";
+    this._selectedNode = null;
+    this._selectedElem = null;
     this._nodeNames = [];
+    eHierarchy.innerHTML = "";
 };
 
 HierarchyHandler.prototype.drawHierarchy = function (scene) {
