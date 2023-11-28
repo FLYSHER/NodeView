@@ -90,7 +90,7 @@ InspectorHandler.prototype.createArmatureInspector = function(){
 InspectorHandler.prototype.createAnimation = function(){
     var list = this._eHandler.createItemList("list_animation");
     this._eHandler.appendChild(list, eInspectorPanel);
-    var content = this._eHandler.createItemContent("currMovementID");
+    var content = this._eHandler.createItemContent("Animation");
     this._eHandler.appendChild(content, list);
     var input = this._eHandler.createItemInput("input_animation", "text");
     this._eHandler.appendChild(input, content);
@@ -101,7 +101,8 @@ InspectorHandler.prototype.createAnimation = function(){
     var self = this;
     selectElem.addEventListener("change", function(e){
         input.value = e.target.options[e.target.options.selectedIndex].value;
-        self._currNode.getAnimation().play(input.value, -1, 1);
+        var loop = Boolean(self._eHandler.getElement("input_animation_loop").checked);
+        self._currNode.getAnimation().play(input.value, -1, loop);
     });
     this._eHandler.appendChild(selectElem, content);
     
@@ -115,6 +116,24 @@ InspectorHandler.prototype.createAnimation = function(){
     }
 
     input.value = selectElem.options[selectElem.options.selectedIndex].value;
+    
+    // Loop Checkbox
+    var pCheckBox = document.createElement("p");
+    this._eHandler.appendChild(pCheckBox, content);
+    
+    var spanCheckBox = document.createElement("span");
+    spanCheckBox.textContent="isLoop : ";
+    this._eHandler.appendChild(spanCheckBox, pCheckBox);
+    
+    var checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.checked = this._currNode.getAnimation().getAnimationData().getMovement(input.value).loop;
+    checkbox.addEventListener("change",function(e){
+        self._currNode.getAnimation().stop();
+        self._currNode.getAnimation().play(input.value, -1, Boolean(e.target.checked));
+    });
+    this._eHandler.appendChild(checkbox, pCheckBox);
+    this._eHandler.addElement("input_animation_loop",checkbox);
 };
 
 InspectorHandler.prototype.getElementValue = function(elementID){

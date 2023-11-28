@@ -42,7 +42,6 @@ HierarchyHandler.prototype.drawHierarchy = function (scene) {
     this._createSceneGraph();
     this._createHierarchyElement();
 };
-
 HierarchyHandler.prototype._createSceneGraph = function(){
     var self = this;
     function setGraph(node){
@@ -69,7 +68,6 @@ HierarchyHandler.prototype._createSceneGraph = function(){
     
     setGraph(this._currScene);
 };
-
 HierarchyHandler.prototype.insertChild = function(ownerName, value) {
     function find(object){
         if(object.hasOwnProperty("children") === false)
@@ -101,7 +99,6 @@ HierarchyHandler.prototype.insertChild = function(ownerName, value) {
     
     find(this._sceneGraph);
 };
-
 HierarchyHandler.prototype._createHierarchyElement = function(){
     var self = this;
     var depth = 0;
@@ -129,7 +126,6 @@ HierarchyHandler.prototype._createHierarchyElement = function(){
     
     createElemRecursive(this._sceneGraph);
 };
-
 HierarchyHandler.prototype._createNodeElement = function(depth, nodeName, isFold){
     var self = this;
     var div = document.createElement("div");
