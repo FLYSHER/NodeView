@@ -163,6 +163,7 @@ HierarchyHandler.prototype._createNodeElement = function(depth, nodeName, isFold
     
     eHierarchy.appendChild(div);
     
+    elem.isFold = false;
     this.findObjectRecursive(nodeName).htmlElement = elem;
 };
 
@@ -238,7 +239,8 @@ HierarchyHandler.prototype.foldElementRecursive = function(nodeName, isfold){
         child[keys[i]].htmlElement.style.display = isfold ? "none" : "block";
         
         // recursive child toggle.
-        this.foldElementRecursive(child[keys[i]].name, isfold);
+        if(child[keys[i]].htmlElement.isFold === false)
+            this.foldElementRecursive(child[keys[i]].name, isfold);
     }
 };
 
