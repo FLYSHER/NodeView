@@ -9,7 +9,7 @@ eInspectorBtnDelete.addEventListener("click", function(){
 });
 
 function InspectorHandler() {
-    /** @type {cc.Node} */
+    /** @type {cc.Node | ccs.Armature | ccui.Widget} */
     this._currNode = null;
     this._eHandler = new ElementHandler();
 }
@@ -23,16 +23,22 @@ InspectorHandler.prototype.onClickNode = function (node) {
     this.reset();
     this._currNode = node;
     this.createNodeInspector();
+    if(this._currNode instanceof ccs.Armature)
+        this.createArmatureInspector();
     this.createBtnApply();
 };
+InspectorHandler.prototype.createBtnApply = function(){
+    this._eHandler.createBtnApply();
+};
 
+// Node Inspector
 InspectorHandler.prototype.createNodeInspector = function () {
     this.createPosition();
     this.createScale();
     this.createAnchorPoint();
     this.createContentSize();
+    this.createVisible();
 };
-
 InspectorHandler.prototype.createPosition = function () {
     var pos = this._currNode.getPosition();
     this._eHandler.createInputList("list_pos", ["posX", "posY"],["number", "number"]);
@@ -42,7 +48,6 @@ InspectorHandler.prototype.createPosition = function () {
     var inputY = this._eHandler.getElement("input_posY");
     inputY.value = pos.y;
 };
-
 InspectorHandler.prototype.createScale = function(){
     this._eHandler.createInputList("list_scale", ["scaleX","scaleY"], ["number","number"]);
     
@@ -51,7 +56,6 @@ InspectorHandler.prototype.createScale = function(){
     var scaleY = this._eHandler.getElement("input_scaleY");
     scaleY.value = Number(this._currNode.getScaleY());
 };
-
 InspectorHandler.prototype.createAnchorPoint = function () {
     var anchor = this._currNode.getAnchorPoint();
     this._eHandler.createInputList("list_anchor",["anchorX","anchorY"], ["number", "number"]);
@@ -60,7 +64,6 @@ InspectorHandler.prototype.createAnchorPoint = function () {
     var inputAnchorY = this._eHandler.getElement('input_anchorY');
     inputAnchorY.value = anchor.y;
 };
-
 InspectorHandler.prototype.createContentSize = function(){
     var contentSize = this._currNode.getContentSize();
     this._eHandler.createInputList("list_content", ["contentSizeWidth","contentSizeHeight"], ["number","number"]);
@@ -69,9 +72,49 @@ InspectorHandler.prototype.createContentSize = function(){
     var inputContentSizeY = this._eHandler.getElement("input_contentSizeHeight");
     inputContentSizeY.value = contentSize.height;
 };
+InspectorHandler.prototype.createVisible = function(){
+    this._eHandler.createInputList("list_visible", ["visible"], ["checkbox"]);
 
-InspectorHandler.prototype.createBtnApply = function(){
-    this._eHandler.createBtnApply();
+    var isVisible = this._eHandler.getElement("input_visible");
+    isVisible.checked = this._currNode.isVisible();
+    var self = this;
+    isVisible.addEventListener('change',function(e){
+        self._currNode.setVisible(e.target.checked); 
+    });
+};
+
+// Armature Inspector
+InspectorHandler.prototype.createArmatureInspector = function(){
+    this.createAnimation();
+};
+InspectorHandler.prototype.createAnimation = function(){
+    var list = this._eHandler.createItemList("list_animation");
+    this._eHandler.appendChild(list, eInspectorPanel);
+    var content = this._eHandler.createItemContent("currMovementID");
+    this._eHandler.appendChild(content, list);
+    var input = this._eHandler.createItemInput("input_animation", "text");
+    this._eHandler.appendChild(input, content);
+    input.readOnly = true;
+    
+    var selectElem = document.createElement("select");
+    selectElem.className = "form-select";
+    var self = this;
+    selectElem.addEventListener("change", function(e){
+        input.value = e.target.options[e.target.options.selectedIndex].value;
+        self._currNode.getAnimation().play(input.value, -1, 1);
+    });
+    this._eHandler.appendChild(selectElem, content);
+    
+    var movements =  this._currNode.getAnimation().getAnimationData().movementNames;
+    for(var i=0; i<movements.length; i++){
+        var option = document.createElement("option");
+        option.value = movements[i];
+        option.innerHTML = movements[i];
+        selectElem.appendChild(option);
+        this._eHandler.addElement(movements[i], option);
+    }
+
+    input.value = selectElem.options[selectElem.options.selectedIndex].value;
 };
 
 InspectorHandler.prototype.getElementValue = function(elementID){
@@ -106,6 +149,8 @@ InspectorHandler.prototype._applyNodeAttribute = function(){
     scaleY = Number(this.getElementValue(ElementHandlerKey.NodeProperties.scaleY));
     this._currNode.setScale(scale,scaleY);
     
+    var isVisible = this._eHandler.getElement("input_visible");
+    this._currNode.setVisible(isVisible.checked);
 };
 
 InspectorHandler.prototype.onClickDelete = function(){
@@ -180,6 +225,10 @@ ElementHandler.prototype.createBtnApply = function(){
     document.getElementById("divApply").style.display = "block";
 };
 
+ElementHandler.prototype.addElement = function(name, elem){
+    this._elementList[name] = elem;
+};
+
 ElementHandlerKey = {
     Type : {
         input : "input_",
@@ -194,6 +243,7 @@ ElementHandlerKey = {
         PosY : "posY",
         scaleX : "scaleX",
         scaleY : "scaleY",
+        visible : "visible",
     },
 };
 
