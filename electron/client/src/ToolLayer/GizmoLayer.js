@@ -201,6 +201,8 @@ var GizmoLayer = cc.LayerColor.extend({
         this.addChild( this._gizmoNode);
         this._gizmoNode.setVisible( false );
         Genie.gizmoNode = this._gizmoNode;
+
+        this.initPreviewArea();
     },
 
     initProperty : function() {
@@ -218,6 +220,23 @@ var GizmoLayer = cc.LayerColor.extend({
         this.CY = size.height / 2;
 
         this.setContentSize( size.width, size.height );
+    },
+
+    initPreviewArea : function() {
+        var w = 300,
+            h = 200;
+
+        this._rt = new cc.RenderTexture( w,h, cc.Texture2D.PIXEL_FORMAT_RGBA8888, gl.DEPTH_STENCIL );
+        this._rt.setPosition( Genie.Utils.getScreenCenterPos() );
+        this._rt.setClearColor( cc.color.RED );
+        this.addChild( this._rt );
+    },
+
+    setAssetsOnPreview : function( spriteFrameName ) {
+        var frame = cc.spriteFrameCache.getSpriteFrame( spriteFrameName );
+        this._rt.begin();
+        frame && frame.visit();
+        this._rt.end();
     },
 
     setTargetNode : function( event ) {
