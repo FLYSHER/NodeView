@@ -207,6 +207,15 @@ button:active {
     height: 98vh;
 }
 
+#inspector_bar_root{
+    height: 3%;
+}
+
+#inspector {
+    height: 97%;
+    overflow: scroll;
+}
+
 .component_title {
     display: block;
     background-color: #95B8E7;
