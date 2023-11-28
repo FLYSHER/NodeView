@@ -24,6 +24,57 @@ var MainViewLayer = cc.LayerColor.extend({
         cc.eventManager.addCustomListener("onChangeNodeInHierarchy", this.setCurrNode.bind(this));
     },
 
+    initTouchListener : function() {
+        var self = this;
+        cc.eventManager.addListener({
+            event: cc.EventListener.MOUSE,
+            onMouseDown : function( event ) {
+                var pt      = event.getLocation();
+                var target  = event.getCurrentTarget();
+                var rect    = target.getBoundingBox();
+                var worldTM = target.getNodeToWorldTransform();
+                var worldRect = cc.rectApplyAffineTransform( rect, worldTM );
+                var result  = cc.rectContainsPoint( worldRect, pt );
+                result && self.setDrag( true );
+                if( result ) {
+                    self.setDrag( true );
+                    self._dragBeginWorldPt = pt;
+                    self.setDragBeginTargetWorldPos();
+                }
+                return result;
+            },
+            onMouseMove: function( event ) {
+                if( self.isDrag() && self._currTargetNode ) {
+                    var diffPos  = self.getDiffPt();
+                    var pt2      = cc.pSub( event.getLocation(), diffPos );
+                    var localPos = self._currTargetNode.getParent().convertToNodeSpace( pt2 );
+
+                    Genie.ToolController.moveNode( self._currTargetNode, localPos );
+                    self.followTarget( self._currTargetNode );
+                }
+            },
+            onMouseUp: function( event ) {
+                if( self.isDrag() && self._currTargetNode ) {
+                    self.setDrag( false );
+
+                    var pt          = event.getLocation();
+                    var diffPos     = self.getDiffPt();
+                    var pt2         = cc.pSub( pt, diffPos );
+
+                    var srcLocalPos     = self._currTargetNode.getParent().convertToNodeSpace( self.getDragBeginTargetWorldPos() );
+                    var destLocalPos    = self._currTargetNode.getParent().convertToNodeSpace( pt2 );
+
+                    Genie.ToolController.execute( new Genie.Command.Transform( self._currTargetNode, {
+                        strProp : 'position',
+                        src : srcLocalPos,
+                        dest: destLocalPos
+                    } ) );
+                }
+            },
+
+        }, this );
+    },
+
     onCreateUIFile : function( event ) {
         var userData    = event.getUserData();
         var fileName    = userData.fileName;
@@ -69,7 +120,6 @@ var MainViewLayer = cc.LayerColor.extend({
         // cc.eventManager.dispatchCustomEvent( "refreshInspector", { node : uiRoot });
         cc.eventManager.dispatchCustomEvent( "onRefreshHierarchy" );
     },
-
 
     onDeleteNode : function( event ) {
         var userData    = event.getUserData();

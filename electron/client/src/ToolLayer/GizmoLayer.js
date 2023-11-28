@@ -101,7 +101,7 @@ var Gizmo = cc.Node.extend({
                 }
             },
 
-        }, this._drawNode )
+        }, this._drawNode );
     },
 
     refreshContentSize : function( node ) {
@@ -138,7 +138,6 @@ var Gizmo = cc.Node.extend({
 
         this._currTargetNode = node;
     },
-
 
     setDrag : function( drag ) {
         this._isDrag = drag;
@@ -245,4 +244,6 @@ var GizmoLayer = cc.LayerColor.extend({
             cc.scaleTo( 0.1, originScale )
         ));
     },
+
+
 });

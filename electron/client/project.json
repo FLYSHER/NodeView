@@ -12,22 +12,18 @@
     "modules" : ["cocos2d","extensions"],
 
     "jsList" : [
-        "src/resolution.js",
         "src/resource.js",
-        "src/arPool.js",
+        "src/eventDispatcher.js",
+        "src/loader.js",
         "src/app.js",
+
         "src/HtmlHelper/HtmlHelper.js",
         "src/Defines/eventDefines.js",
+
         "src/Utils/GenieUtils.js",
-        "src/uiListViewTest.js",
-        "src/uiItemList.js",
-        "src/uiPositionCtrl.js",
-        "src/uiScreenCtrl.js",
-        "src/uiScrollTreeViewCtrl.js",
+        "src/Utils/ScreenUtils.js",
+
         "src/GenieResourceLoader/GenieResourceLoader.js",
-        "src/loader.js",
-        "src/draggableNode.js",
-        "src/eventDispatcher.js",
 
         "src/Components/GenieComponent.js",
         "src/Components/InputComponent.js",
@@ -54,7 +50,6 @@
         "src/ToolLayer/MainScene.js",
         "src/ToolLayer/MainViewLayer.js",
         "src/ToolLayer/GizmoLayer.js",
-        "src/ToolLayer/PreviewLayer.js",
-        "src/uiErrorLog.js"
+        "src/ToolLayer/PreviewLayer.js"
     ]
 }
