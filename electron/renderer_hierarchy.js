@@ -98,6 +98,17 @@ var Renderer_hierarchy = {
         } );
 
         cc.eventManager.addCustomListener('onRefreshHierarchy', this.onRefreshTree.bind(this));
+        cc.eventManager.addCustomListener( 'onSelectNodeInMainView', this.onSelectNode.bind(this));
+    },
+
+    onSelectNode : function( event ) {
+        var userData    = event.getUserData();
+        var node    = userData.node;
+        var id      = node.__instanceId;
+
+        $("#hierarchy").jstree("deselect_all");
+        $("#hierarchy").jstree(true).select_node( id.toString() );
+
     },
 
     // jstree를 데이터 대로 재구성

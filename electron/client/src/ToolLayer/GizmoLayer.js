@@ -21,15 +21,18 @@ var GizmoLayer = cc.LayerColor.extend({
 
         this.onResize();
         ScreenUtil.addResizeListener( this.onResize, this );
+
+
     },
 
     initProperty : function() {
         this._targetNode = null;
-        this._rtSize     = cc.size( 300, 200 );
+        this._rtSize     = cc.size( 300, 250 );
     },
 
     onEnter : function() {
         this._super();
+        this.initTouchListener();
         cc.eventManager.addCustomListener("onChangeNodeInHierarchy", this.setTargetNode.bind(this));
         cc.eventManager.addCustomListener( "onSetPreviewSprite", this.setPreviewSprite.bind(this) );
     },
@@ -41,6 +44,19 @@ var GizmoLayer = cc.LayerColor.extend({
 
         this.setContentSize( size.width, size.height );
         this.repositionPreview();
+    },
+
+    initTouchListener : function() {
+        var self = this;
+        cc.eventManager.addListener({
+            event :  cc.EventListener.MOUSE,
+            onMouseDown : function( event ) {
+                var findNode = self.getFrontTouchedNode( event.getLocation() );
+                if( findNode ) {
+                    cc.eventManager.dispatchCustomEvent( "onSelectNodeInMainView", { node : findNode });
+                }
+            }
+        }, this );
     },
 
     initPreviewArea : function() {
@@ -65,7 +81,7 @@ var GizmoLayer = cc.LayerColor.extend({
         var sprName = userData.name;
         var spriteFrame = cc.spriteFrameCache.getSpriteFrame( sprName );
         if( spriteFrame ) {
-            this._rt.beginWithClear( 80, 80, 80 );
+            this._rt.beginWithClear( 60, 60, 60 );
             this._spr.setSpriteFrame(spriteFrame);
             this._adjustSpriteSize();
             this._spr.visit();
@@ -111,4 +127,20 @@ var GizmoLayer = cc.LayerColor.extend({
             cc.scaleTo( 0.1, originScale )
         ));
     },
+
+    getFrontTouchedNode : function( pt ) {
+        var i, bb, localPt, child,
+            children = Genie.mainLayer.getChildren();
+
+        for( i = 0; i < children.length; ++i ) {
+            child = children[i];
+            bb = child.getBoundingBox();
+            localPt = this.convertToNodeSpace( pt );
+            if( cc.rectContainsPoint( bb, localPt ) ) {
+                return child;
+            }
+        }
+
+        return null;
+    }
 });

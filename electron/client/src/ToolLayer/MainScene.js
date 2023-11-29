@@ -5,6 +5,7 @@ Genie.LayerType = {
 }
 
 Genie.gizmoLayer = null;
+Genie.mainLayer  = null;
 
 var MainScene = cc.Scene.extend({
     ctor : function() {
@@ -55,6 +56,7 @@ var MainScene = cc.Scene.extend({
         this.setCurrentLayer( Genie.LayerType.MAIN );
 
         Genie.gizmoLayer = this._gizmoLayer;
+        Genie.mainLayer = this._mainViewLayer;
     },
 
     setCurrentLayer : function( layerType ) {
