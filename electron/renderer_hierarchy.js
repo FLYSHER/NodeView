@@ -68,39 +68,42 @@ var Renderer_hierarchy = {
             }
         });
 
-        // 트리 노드 선택 시 이벤트
-        $('#hierarchy').on("changed.jstree", function (e, data) {
-            console.log( e, data );
-            var selectedFileName = data.selected[0];
-            cc.log("selectedFileName > ", selectedFileName );
+        // 트리 노드 선택 시 이벤트 등록
+        $('#hierarchy').on("changed.jstree", this.onchangeSelectedNode.bind(this));
 
-            if( data.node && data.node.id ) {
-                var realNode = this.nodeInstanceIDMap[data.node.id];
-                if( realNode ) {
-                    cc.eventManager.dispatchCustomEvent( "onChangeNodeInHierarchy", { node : realNode } );
-                    cc.eventManager.dispatchCustomEvent( "refreshInspector", { node : realNode });
-
-                }
-                else {
-                    console.log( "not exist node in nodeInstanceIDMap : ", data.node.id );
-                }
-
-            }
-        }.bind(this));
-
-        var findTextInputHTML = `<input id="hierarchy_findInput" class="frameBar_findInput"  type="text" value="" >`;
-        $('#hierarchy_bar_root').append( findTextInputHTML );
-
-        $('#hierarchy_findInput').change( function( event ){
-            console.log("find assets > ", event.target.value );
-            var searchString = event.target.value;
-            $('#hierarchy').jstree('search', searchString);
-        } );
+        // 노드 검색 시 이벤트 등록
+        $('#hierarchy_findInput').change( this.onchangeInputFind );
 
         cc.eventManager.addCustomListener('onRefreshHierarchy', this.onRefreshTree.bind(this));
         cc.eventManager.addCustomListener( 'onSelectNodeInMainView', this.onSelectNode.bind(this));
     },
 
+    onchangeInputFind : function( event ) {
+        console.log("find assets > ", event.target.value );
+        var searchString = event.target.value;
+        $('#hierarchy').jstree('search', searchString);
+    },
+
+    // hierarchy view 에서 선택 노드 변경시
+    onchangeSelectedNode : function (e, data) {
+        console.log( e, data );
+        var selectedFileName = data.selected[0];
+        cc.log("selectedFileName > ", selectedFileName );
+
+        if( data.node && data.node.id ) {
+            var realNode = this.nodeInstanceIDMap[data.node.id];
+            if( realNode ) {
+                cc.eventManager.dispatchCustomEvent( "onChangeNodeInHierarchy", { node : realNode } );
+                cc.eventManager.dispatchCustomEvent( "refreshInspector", { node : realNode });
+
+            }
+            else {
+                console.log( "not exist node in nodeInstanceIDMap : ", data.node.id );
+            }
+        }
+    },
+
+    // main view 에서 노드 선택 시
     onSelectNode : function( event ) {
         var userData    = event.getUserData();
         var node    = userData.node;

@@ -22,10 +22,10 @@ var Gizmo = cc.Node.extend({
         this._drawCSizeNode = new cc.DrawNode();
         this.rootNode.addChild( this._drawCSizeNode );
 
-        var LINE_LENGTH = 50;
-        var LINE_WIDTH  = 2;
+        var LINE_LENGTH = 100;
+        var LINE_WIDTH  = 4;
         var LINE_OPACITY = 100;
-        var ARROW_LENGTH = 5;
+        var ARROW_LENGTH = 10;
         var ARROW_COLOR_X = cc.color( 255, 0, 0, LINE_OPACITY );
         var ARROW_COLOR_Y = cc.color( 0, 255, 0, LINE_OPACITY );
 
@@ -42,7 +42,7 @@ var Gizmo = cc.Node.extend({
         this._drawNode.drawDot( cc.p( 0, 0), 2, cc.color( 200, 200, 200, 200) );
 
         // 터치 영역
-        var RECT_SIZE = cc.p( 20, 20 );
+        var RECT_SIZE = cc.p( 40, 40 );
         this._drawNode.drawRect( cc.p( 0, 0 ), RECT_SIZE, cc.color( 200, 200, 0, 100), 1, cc.color( 200, 200, 0, 255) );
         this._drawNode.setContentSize( cc.size( RECT_SIZE.x, RECT_SIZE.y ) );
 
@@ -66,6 +66,7 @@ var Gizmo = cc.Node.extend({
                     self.setDrag( true );
                     self._dragBeginWorldPt = pt;
                     self.setDragBeginTargetWorldPos();
+                    event.stopPropagation();
                 }
                 return result;
             },

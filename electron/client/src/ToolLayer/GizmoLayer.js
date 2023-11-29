@@ -87,9 +87,7 @@ var GizmoLayer = cc.LayerColor.extend({
             this._spr.visit();
             this._rt.end();
         }
-        else {
 
-        }
     },
 
     _adjustSpriteSize : function() {
@@ -105,18 +103,19 @@ var GizmoLayer = cc.LayerColor.extend({
 
     setTargetNode : function( event ) {
         var userData  = event.getUserData();
-        this._gizmoNode.setVisible( false );
+        this._gizmoNode.setVisible( !!userData.node );
+
         if( !userData || !userData.node ) {
             cc.error( "invalid userData : ", userData );
             return;
         }
+
         var targetNode = userData.node;
         if( this._targetNode === targetNode ) {
             cc.warn( "same node" );
             return;
         }
 
-        this._gizmoNode.setVisible( true );
         this._targetNode = targetNode;
         this._gizmoNode.setTargetNode( targetNode );
 
@@ -130,9 +129,17 @@ var GizmoLayer = cc.LayerColor.extend({
 
     getFrontTouchedNode : function( pt ) {
         var i, bb, localPt, child,
+            sortedChildren = [],
             children = Genie.mainLayer.getChildren();
 
-        for( i = 0; i < children.length; ++i ) {
+        children.sort( function( a,b ){
+            var order_a = a.getLocalZOrder();
+            var order_b = b.getLocalZOrder();
+
+            return order_a - order_b;
+        });
+
+        for( i = children.length-1; i > -1; --i ) {
             child = children[i];
             bb = child.getBoundingBox();
             localPt = this.convertToNodeSpace( pt );
