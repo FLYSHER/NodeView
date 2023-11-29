@@ -45,14 +45,10 @@ var MainScene = cc.Scene.extend({
         this._mainViewLayer = new MainViewLayer();
         this.addChild( this._mainViewLayer, 0 );
 
-        this._previewLayer = new PreviewLayer();
-        this.addChild( this._previewLayer, 0 );
-
         this._gizmoLayer   = new GizmoLayer();
         this.addChild( this._gizmoLayer, 1 );
 
         this._mainViewLayer.setPosition( 0, 0 );
-        this._previewLayer.setPosition( 0, 0 );
         this._gizmoLayer.setPosition( 0, 0 );
 
         this._currLayerType = -1;
@@ -71,12 +67,10 @@ var MainScene = cc.Scene.extend({
         switch ( layerType ) {
             case Genie.LayerType.MAIN:
                 this._mainViewLayer.setVisible( true );
-                this._previewLayer.setVisible( false );
 
                 break;
             case Genie.LayerType.PREVIEW:
                 this._mainViewLayer.setVisible( false );
-                this._previewLayer.setVisible( true );
                 break;
         }
     },

@@ -28,7 +28,7 @@ var Renderer_assets = {
             console.log( e, data );
 
             var selectedFileName = data.selected[0];
-            cc.eventManager.dispatchCustomEvent( 'setPreviewSprite', { name : selectedFileName } );
+            cc.eventManager.dispatchCustomEvent( 'onSetPreviewSprite', { name : selectedFileName } );
         });
 
         $('#assets').on("dragstart", function( e ){
