@@ -19,7 +19,7 @@ Genie.Component.Transform = Genie.Component.InspectorBase.extend({
             className : "fa-sharp fa-solid fa-arrows-up-down-left-right",
             style : "color: #d0b8f4;"
         }
-        var titleBar = HtmlHelper.createComponentBar("Transform", iconObj);
+        var titleBar = HtmlHelper.createComponentBar(this.getName(), iconObj);
         rootDiv.appendChild( titleBar );
 
         // position
