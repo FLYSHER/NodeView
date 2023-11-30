@@ -84,6 +84,7 @@ var Gizmo = cc.Node.extend({
                 if( self.isDrag() && self._currTargetNode ) {
                     self.setDrag( false );
 
+
                     var pt          = event.getLocation();
                     var diffPos     = self.getDiffPt();
                     var pt2         = cc.pSub( pt, diffPos );
@@ -91,11 +92,18 @@ var Gizmo = cc.Node.extend({
                     var srcLocalPos     = self._currTargetNode.getParent().convertToNodeSpace( self.getDragBeginTargetWorldPos() );
                     var destLocalPos    = self._currTargetNode.getParent().convertToNodeSpace( pt2 );
 
-                    Genie.ToolController.execute( new Genie.Command.Transform( self._currTargetNode, {
-                        strProp : 'position',
-                        src : srcLocalPos,
-                        dest: destLocalPos
-                    } ) );
+                    var src     = cc.p( Math.round( srcLocalPos.x ), Math.round( srcLocalPos.y ) );
+                    var dest    = cc.p( Math.round( destLocalPos.x ), Math.round( destLocalPos.y ) );
+
+                    var moveDelta = cc.pDistance( srcLocalPos, self._currTargetNode.getPosition() );
+                    if( moveDelta > 1.0 ) {
+                        Genie.ToolController.execute( new Genie.Command.Transform( self._currTargetNode, {
+                            strProp : 'position',
+                            src     : src,
+                            dest    : dest
+                        } ) );
+                    }
+
                 }
             },
 

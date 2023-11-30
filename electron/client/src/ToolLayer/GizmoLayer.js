@@ -27,7 +27,7 @@ var GizmoLayer = cc.LayerColor.extend({
 
     initProperty : function() {
         this._targetNode = null;
-        this._rtSize     = cc.size( 300, 250 );
+        this._rtSize     = cc.size( 400, 300 );
     },
 
     onEnter : function() {
@@ -82,12 +82,11 @@ var GizmoLayer = cc.LayerColor.extend({
         var spriteFrame = cc.spriteFrameCache.getSpriteFrame( sprName );
         if( spriteFrame ) {
             this._rt.beginWithClear( 60, 60, 60 );
-            this._spr.setSpriteFrame(spriteFrame);
+            this._spr.setSpriteFrame( spriteFrame );
             this._adjustSpriteSize();
             this._spr.visit();
             this._rt.end();
         }
-
     },
 
     _adjustSpriteSize : function() {
