@@ -4,15 +4,19 @@
     "debugMode" : 1,
     "showFPS" : true,
     "frameRate" : 60,
-    "noCache" : false,
+    "noCache" : true,
     "id" : "gameCanvas",
     "renderMode" : 0,
     "engineDir":"frameworks/cocos2d-html5",
 
     "modules" : ["cocos2d", "extensions"],
+    
+    "ASSET_BASE_URL" : "assets/",
 
     "jsList" : [
+        "src/Game/RNC/RNCCompatibility.js",
         "src/Game/resource.js",
-        "src/Game/app.js"
+        "src/Game/app.js",
+        "src/Game/RNC/CommonSlotMenu.js"
     ]
 }

@@ -38,6 +38,7 @@ InspectorHandler.prototype.createNodeInspector = function () {
     this.createAnchorPoint();
     this.createContentSize();
     this.createVisible();
+    this.createZOrder();
 };
 InspectorHandler.prototype.createPosition = function () {
     var pos = this._currNode.getPosition();
@@ -82,6 +83,11 @@ InspectorHandler.prototype.createVisible = function(){
         self._currNode.setVisible(e.target.checked); 
     });
 };
+InspectorHandler.prototype.createZOrder = function(){
+    this._eHandler.createInputList("list_ZOrder",["zOrder"],["number"]);
+    var input = this._eHandler.getElement("input_zOrder");
+    input.value = this._currNode.getLocalZOrder();
+};
 
 // Armature Inspector
 InspectorHandler.prototype.createArmatureInspector = function(){
@@ -92,8 +98,9 @@ InspectorHandler.prototype.createAnimation = function(){
     this._eHandler.appendChild(list, eInspectorPanel);
     var content = this._eHandler.createItemContent("Animation");
     this._eHandler.appendChild(content, list);
-    var input = this._eHandler.createItemInput("input_animation", "text");
+    var input = this._eHandler.createItemInput("animation", "text");
     this._eHandler.appendChild(input, content);
+    this._eHandler.addElement("input_animation", input);
     input.readOnly = true;
     
     var selectElem = document.createElement("select");
@@ -144,6 +151,9 @@ InspectorHandler.prototype.getElementValue = function(elementID){
 // Apply & Delete
 InspectorHandler.prototype.onClickApply = function(){
     this._applyNodeAttribute();
+    
+    if(this._currNode instanceof ccs.Armature)
+        this._applyArmatureAttribute();
 };
 InspectorHandler.prototype._applyNodeAttribute = function(){
     var pos = cc.p(0,0);
@@ -169,6 +179,14 @@ InspectorHandler.prototype._applyNodeAttribute = function(){
     
     var isVisible = this._eHandler.getElement("input_visible");
     this._currNode.setVisible(isVisible.checked);
+    
+    var zOrder = this.getElementValue(ElementHandlerKey.NodeProperties.zOrder);
+    this._currNode.setLocalZOrder(parseInt(zOrder));
+};
+InspectorHandler.prototype._applyArmatureAttribute = function(){
+    var trackName = this.getElementValue(ElementHandlerKey.ArmatureProperties.movementName);
+    var loop = this.getElementValue(ElementHandlerKey.ArmatureProperties.isLoop);
+    this._currNode.getAnimation().play(trackName, -1, loop);
 };
 InspectorHandler.prototype.onClickDelete = function(){
     this._currNode.removeFromParent(true);
@@ -261,6 +279,11 @@ ElementHandlerKey = {
         scaleX : "scaleX",
         scaleY : "scaleY",
         visible : "visible",
+        zOrder : "zOrder"
+    },
+    ArmatureProperties : {
+        isLoop : "animation_loop",
+        movementName : "animation"
     },
 };
 

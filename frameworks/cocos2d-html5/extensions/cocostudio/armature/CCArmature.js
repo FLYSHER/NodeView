@@ -41,7 +41,6 @@ ccs.Armature = ccs.Node.extend(/** @lends ccs.Armature# */{
     animation: null,
     armatureData: null,
     batchNode: null,
-    _textureAtlas: null,
     _parentBone: null,
     _boneDic: null,
     _topBoneList: null,
@@ -70,6 +69,8 @@ ccs.Armature = ccs.Node.extend(/** @lends ccs.Armature# */{
         this._armatureTransformDirty = true;
         this._blendFunc = {src: cc.BLEND_SRC, dst: cc.BLEND_DST};
         name && ccs.Armature.prototype.init.call(this, name, parentBone);
+        // Hack way to avoid RendererWebGL from skipping Armature
+        this._texture = {};
     },
 
     /**
@@ -79,7 +80,6 @@ ccs.Armature = ccs.Node.extend(/** @lends ccs.Armature# */{
      * @return {Boolean}
      */
     init: function (name, parentBone) {
-        cc.Node.prototype.init.call(this);
         if (parentBone)
             this._parentBone = parentBone;
         this.removeAllChildren();
@@ -96,13 +96,13 @@ ccs.Armature = ccs.Node.extend(/** @lends ccs.Armature# */{
         if (name !== "") {
             //animationData
             animationData = armatureDataManager.getAnimationData(name);
-            cc.assert(animationData, "AnimationData not exist!");
+            cc.assert(animationData, "AnimationData not exist! " + name);
 
             this.animation.setAnimationData(animationData);
 
             //armatureData
             var armatureData = armatureDataManager.getArmatureData(name);
-            cc.assert(armatureData, "ArmatureData not exist!");
+            cc.assert(armatureData, "ArmatureData not exist! " + name);
 
             this.armatureData = armatureData;
 
@@ -150,8 +150,21 @@ ccs.Armature = ccs.Node.extend(/** @lends ccs.Armature# */{
         return true;
     },
 
+    visit: function (parent) {
+        var cmd = this._renderCmd, parentCmd = parent ? parent._renderCmd : null;
+
+        // quick return if not visible
+        if (!this._visible) {
+            cmd._propagateFlagsDown(parentCmd);
+            return;
+        }
+
+        cmd.visit(parentCmd);
+        cmd._dirtyFlag = 0;
+    },
+
     addChild: function (child, localZOrder, tag) {
-        if(child instanceof ccui.Widget){
+        if (child instanceof ccui.Widget) {
             cc.log("Armature doesn't support to add Widget as its child, it will be fix soon.");
             return;
         }
@@ -192,9 +205,9 @@ ccs.Armature = ccs.Node.extend(/** @lends ccs.Armature# */{
      * @param {String} parentName The parent Bone's name you want to add to. If it's  null, then set Armature to its parent
      */
     addBone: function (bone, parentName) {
-        cc.assert(bone, "Argument must be non-nil");
+        cc.assert(bone, "Argument must be non-nil" + parentName);
         var locBoneDic = this._boneDic;
-        if(bone.getName())
+        if (bone.getName())
             cc.assert(!locBoneDic[bone.getName()], "bone already added. It can't be added again");
 
         if (parentName) {
@@ -282,7 +295,7 @@ ccs.Armature = ccs.Node.extend(/** @lends ccs.Armature# */{
             this.setAnchorPoint(locOffsetPoint.x / rect.width, locOffsetPoint.y / rect.height);
     },
 
-    getOffsetPoints: function(){
+    getOffsetPoints: function () {
         return {x: this._offsetPoint.x, y: this._offsetPoint.y};
     },
 
@@ -345,21 +358,21 @@ ccs.Armature = ccs.Node.extend(/** @lends ccs.Armature# */{
      * This boundingBox will calculate all bones' boundingBox every time
      * @returns {cc.Rect}
      */
-    getBoundingBox: function(){
+    getBoundingBox: function () {
         var minX, minY, maxX, maxY = 0;
         var first = true;
 
         var boundingBox = cc.rect(0, 0, 0, 0), locChildren = this._children;
 
         var len = locChildren.length;
-        for (var i=0; i<len; i++) {
+        for (var i = 0; i < len; i++) {
             var bone = locChildren[i];
             if (bone) {
                 var r = bone.getDisplayManager().getBoundingBox();
                 if (r.x === 0 && r.y === 0 && r.width === 0 && r.height === 0)
                     continue;
 
-                if(first) {
+                if (first) {
                     minX = r.x;
                     minY = r.y;
                     maxX = r.x + r.width;
@@ -429,7 +442,7 @@ ccs.Armature = ccs.Node.extend(/** @lends ccs.Armature# */{
         for (var key in locBoneDic) {
             var bone = locBoneDic[key];
             var detector = bone.getColliderDetector();
-            if(!detector)
+            if (!detector)
                 continue;
             var bodyList = detector.getColliderBodyList();
             for (var i = 0; i < bodyList.length; i++) {
@@ -477,7 +490,7 @@ ccs.Armature = ccs.Node.extend(/** @lends ccs.Armature# */{
      * @param {Number} [dst]
      */
     setBlendFunc: function (blendFunc, dst) {
-        if(dst === undefined){
+        if (dst === undefined) {
             this._blendFunc.src = blendFunc.src;
             this._blendFunc.dst = blendFunc.dst;
         } else {
@@ -544,11 +557,43 @@ ccs.Armature = ccs.Node.extend(/** @lends ccs.Armature# */{
         this.version = version;
     },
 
-    _createRenderCmd: function(){
-        if(cc._renderType === cc.game.RENDER_TYPE_CANVAS)
+    _createRenderCmd: function () {
+        if (cc._renderType === cc.game.RENDER_TYPE_CANVAS)
             return new ccs.Armature.CanvasRenderCmd(this);
         else
             return new ccs.Armature.WebGLRenderCmd(this);
+    },
+
+    //get the texture name of the bone skin
+    getBoneTexture: function(boneName, displayDataIndex) {
+        var bone = this.getBone(boneName);
+        if (bone)
+        {
+            var displayManger = bone.getDisplayManager();
+            var decoDisplay = displayManger.getDecorativeDisplayByIndex(displayDataIndex);
+            if (decoDisplay)
+            {
+                var skin = decoDisplay.getDisplay();
+                if (skin)
+                {
+                    return skin.getDisplayName();
+                }
+            }
+        }
+
+        return undefined;
+    },
+
+    //set the texture of the bone skin
+    setBoneTexture:function (boneName, displayDataIndex, displayName)  {
+        var bone = this.getBone(boneName);
+        if (bone)
+        {
+            var displayData = new ccs.SpriteDisplayData();
+            displayData.displayName = displayName;
+            displayData.displayType = ccs.DISPLAY_TYPE_SPRITE;
+            bone.addDisplay(displayData, displayDataIndex);
+        }
     }
 });
 

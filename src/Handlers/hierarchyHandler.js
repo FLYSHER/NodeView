@@ -1,5 +1,6 @@
 var eHierarchy = document.getElementById("hierarchy");
 var HierarchyItemNodeName = "ccNodeName";
+var HierarchyHideList = ["SlotMenu"];
 
 function HierarchyHandler(){
     /** @type {cc.Node & cc.Scene} */
@@ -28,7 +29,6 @@ function HierarchyHandler(){
 HierarchyHandler.prototype.reload = function(){
     this.drawHierarchy(GameScene);
 };
-
 HierarchyHandler.prototype.reset = function(){
     this._sceneGraph = {
         name : "Scene",
@@ -53,6 +53,9 @@ HierarchyHandler.prototype._createSceneGraph = function(){
     var self = this;
     function setGraph(node){
         if(node instanceof ccs.Armature)
+            return;
+        
+        if(HierarchyHideList.indexOf(node.getName()) !== -1)
             return;
         
         var children = node.getChildren();

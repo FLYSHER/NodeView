@@ -129,6 +129,9 @@ cc.screen = /** @lends cc.screen# */{
             document.addEventListener(eventName, onFullScreenChange, false);
         }
 
+        cc.view.setDesignResolutionSize(cc.view.getDesignResolutionSize().width, cc.view.getDesignResolutionSize().height, RockN.resolutionPolicy);
+
+
         return element[this._fn.requestFullscreen]();
     },
     
@@ -137,6 +140,15 @@ cc.screen = /** @lends cc.screen# */{
      * @return {Boolean}
      */
     exitFullScreen: function () {
+
+        if(cc.winSize.width < RockN.resolutionPolicyStandard.width ){
+            // cc.view.setDesignResolutionSize(cc.view.getDesignResolutionSize().width, cc.view.getDesignResolutionSize().height, cc.ResolutionPolicy.SHOW_ALL);
+            cc.view.setResolutionPolicy(cc.ResolutionPolicy.SHOW_ALL);
+        } else {
+            // cc.view.setDesignResolutionSize(cc.view.getDesignResolutionSize().width, cc.view.getDesignResolutionSize().height, RockN.resolutionPolicy);
+            cc.view.setResolutionPolicy(RockN.resolutionPolicy);
+        }
+
         return this._supportsFullScreen ? document[this._fn.exitFullscreen]() : true;
     },
     
@@ -147,12 +159,12 @@ cc.screen = /** @lends cc.screen# */{
      */
     autoFullScreen: function (element, onFullScreenChange) {
         element = element || document.body;
-        var touchTarget = cc._canvas || element;
+        var touchTarget = cc.game.canvas || element;
         var theScreen = this;
         // Function bind will be too complicated here because we need the callback function's reference to remove the listener
         function callback() {
-            theScreen.requestFullScreen(element, onFullScreenChange);
             touchTarget.removeEventListener(theScreen._touchEvent, callback);
+            theScreen.requestFullScreen(element, onFullScreenChange);
         }
         this.requestFullScreen(element, onFullScreenChange);
         touchTarget.addEventListener(this._touchEvent, callback);

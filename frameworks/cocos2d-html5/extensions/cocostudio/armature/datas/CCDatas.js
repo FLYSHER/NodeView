@@ -508,6 +508,39 @@ ccs.ArmatureData = ccs.Class.extend(/** @lends ccs.ArmatureData# */{
      */
     getBoneData:function (boneName) {
         return this.boneDataDic[boneName];
+    },
+
+    getBoneTexture:function (boneName, displayDataIndex)  {
+        var bone = this.getBoneData(boneName);
+        if (bone)
+        {
+            if (displayDataIndex >= 0 && displayDataIndex < bone.displayDataList.length)
+            {
+                var dispData = bone.displayDataList[displayDataIndex];
+                if (dispData)
+                {
+                    return dispData.displayName;
+                }
+            }
+        }
+        return undefined;
+    },
+
+    setBoneTexture:function (boneName, displayDataIndex, displayName)  {
+        var bone = this.getBoneData(boneName);
+        if (bone)
+        {
+            if (displayDataIndex >= 0 && displayDataIndex < bone.displayDataList.length)
+            {
+                var dispData = bone.displayDataList[displayDataIndex];
+                if (dispData)
+                {
+                    dispData.displayName = displayName;
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 });
 

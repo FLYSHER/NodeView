@@ -33,616 +33,689 @@
  * REPLAY_AFTER_TOUCH   : The first music will fail, must be replay after touchstart
  * USE_EMPTIED_EVENT    : Whether to use the emptied event to replace load callback
  * DELAY_CREATE_CTX     : delay created the context object - only webAudio
- * NEED_MANUAL_LOOP     : WebAudio loop attribute failure, need to manually perform loop
+ * NEED_MANUAL_LOOP     : loop attribute failure, need to perform loop manually
  *
  * May be modifications for a few browser version
  */
-(function(){
+(function() {
 
-    var DEBUG = false;
+	var DEBUG = true;
 
-    var sys = cc.sys;
-    var version = sys.browserVersion;
+	var sys     = cc.sys;
+	var version = sys.browserVersion;
 
-    // check if browser supports Web Audio
-    // check Web Audio's context
-    var supportWebAudio = !!(window.AudioContext || window.webkitAudioContext || window.mozAudioContext);
+	// check if browser supports Web Audio
+	// check Web Audio's context
+	var supportWebAudio = !!(window.AudioContext || window.webkitAudioContext || window.mozAudioContext);
 
-    var supportTable = {
-        "common" : {MULTI_CHANNEL: true , WEB_AUDIO: supportWebAudio , AUTOPLAY: true }
-    };
-    supportTable[sys.BROWSER_TYPE_IE]  = {MULTI_CHANNEL: true , WEB_AUDIO: supportWebAudio , AUTOPLAY: true, USE_EMPTIED_EVENT: true};
-    //  ANDROID  //
-    supportTable[sys.BROWSER_TYPE_ANDROID]  = {MULTI_CHANNEL: false, WEB_AUDIO: false, AUTOPLAY: false};
-    supportTable[sys.BROWSER_TYPE_CHROME]   = {MULTI_CHANNEL: true , WEB_AUDIO: true , AUTOPLAY: false};
-    supportTable[sys.BROWSER_TYPE_FIREFOX]  = {MULTI_CHANNEL: true , WEB_AUDIO: true , AUTOPLAY: true , DELAY_CREATE_CTX: true};
-    supportTable[sys.BROWSER_TYPE_UC]       = {MULTI_CHANNEL: true , WEB_AUDIO: false, AUTOPLAY: false};
-    supportTable[sys.BROWSER_TYPE_QQ]       = {MULTI_CHANNEL: false, WEB_AUDIO: false, AUTOPLAY: true };
-    supportTable[sys.BROWSER_TYPE_OUPENG]   = {MULTI_CHANNEL: false, WEB_AUDIO: false, AUTOPLAY: false, REPLAY_AFTER_TOUCH: true , USE_EMPTIED_EVENT: true };
-    supportTable[sys.BROWSER_TYPE_WECHAT]   = {MULTI_CHANNEL: false, WEB_AUDIO: false, AUTOPLAY: false, REPLAY_AFTER_TOUCH: true , USE_EMPTIED_EVENT: true };
-    supportTable[sys.BROWSER_TYPE_360]      = {MULTI_CHANNEL: false, WEB_AUDIO: false, AUTOPLAY: true };
-    supportTable[sys.BROWSER_TYPE_MIUI]     = {MULTI_CHANNEL: false, WEB_AUDIO: false, AUTOPLAY: true };
-    supportTable[sys.BROWSER_TYPE_LIEBAO]   = {MULTI_CHANNEL: false, WEB_AUDIO: false, AUTOPLAY: false, REPLAY_AFTER_TOUCH: true , USE_EMPTIED_EVENT: true };
-    supportTable[sys.BROWSER_TYPE_SOUGOU]   = {MULTI_CHANNEL: false, WEB_AUDIO: false, AUTOPLAY: false, REPLAY_AFTER_TOUCH: true , USE_EMPTIED_EVENT: true };
-    //"Baidu" browser can automatically play
-    //But because it may be play failed, so need to replay and auto
-    supportTable[sys.BROWSER_TYPE_BAIDU]    = {MULTI_CHANNEL: false, WEB_AUDIO: false, AUTOPLAY: false, REPLAY_AFTER_TOUCH: true , USE_EMPTIED_EVENT: true };
-    supportTable[sys.BROWSER_TYPE_BAIDU_APP]= {MULTI_CHANNEL: false, WEB_AUDIO: false, AUTOPLAY: false, REPLAY_AFTER_TOUCH: true , USE_EMPTIED_EVENT: true };
 
-    //  APPLE  //
-    supportTable[sys.BROWSER_TYPE_SAFARI]  = {MULTI_CHANNEL: true , WEB_AUDIO: true , AUTOPLAY: false, webAudioCallback: function(realUrl){
-        document.createElement("audio").src = realUrl;
-    }};
+	var support = { ONLY_ONE : false, WEB_AUDIO : supportWebAudio, DELAY_CREATE_CTX : false, ONE_SOURCE : false };
 
-    if(cc.sys.isMobile){
-        if(cc.sys.os !== cc.sys.OS_IOS)
-            window.__audioSupport = supportTable[sys.browserType] || supportTable["common"];
-        else
-            window.__audioSupport = supportTable[sys.BROWSER_TYPE_SAFARI];
-    }else{
-        switch(sys.browserType){
-            case sys.BROWSER_TYPE_IE:
-                window.__audioSupport = supportTable[sys.BROWSER_TYPE_IE];
-                break;
-            case sys.BROWSER_TYPE_FIREFOX:
-                window.__audioSupport = supportTable[sys.BROWSER_TYPE_FIREFOX];
-                break;
-            default:
-                window.__audioSupport = supportTable["common"];
-        }
-    }
+	if( sys.browserType === sys.BROWSER_TYPE_FIREFOX ) {
+		support.DELAY_CREATE_CTX = true;
+		support.USE_LOADER_EVENT = 'canplay';
+	}
 
-    ///////////////////////////
-    //  Browser compatibility//
-    ///////////////////////////
-    if(version){
-        switch(sys.browserType){
-            case sys.BROWSER_TYPE_CHROME:
-                version = parseInt(version);
-                if(version < 30){
-                    window.__audioSupport  = {MULTI_CHANNEL: false , WEB_AUDIO: true , AUTOPLAY: false};
-                }else if(version === 42){
-                    window.__audioSupport.NEED_MANUAL_LOOP = true;
-                }
-                break;
-            case sys.BROWSER_TYPE_MIUI:
-                if(cc.sys.isMobile){
-                    version = version.match(/\d+/g);
-                    if(version[0] < 2 || (version[0] === 2 && version[1] === 0 && version[2] <= 1)){
-                        window.__audioSupport.AUTOPLAY = false;
-                    }
-                }
-                break;
-        }
-    }
+	if( sys.os === sys.OS_IOS ) {
+		support.USE_LOADER_EVENT = 'loadedmetadata';
+	}
 
-    if(DEBUG){
-        setTimeout(function(){
-            cc.log("browse type: " + sys.browserType);
-            cc.log("browse version: " + version);
-            cc.log("MULTI_CHANNEL: " + window.__audioSupport.MULTI_CHANNEL);
-            cc.log("WEB_AUDIO: " + window.__audioSupport.WEB_AUDIO);
-            cc.log("AUTOPLAY: " + window.__audioSupport.AUTOPLAY);
-        }, 0);
-    }
+	if( sys.os === sys.OS_ANDROID ) {
+		if( sys.browserType === sys.BROWSER_TYPE_UC ) {
+			support.ONE_SOURCE = true;
+		}
+	}
+
+	window.__audioSupport = support;
+
+	if( sys.browserType === sys.BROWSER_TYPE_IE ) {
+		createAudio( window.__audioSupport );
+	}
+
+	if( DEBUG ) {
+		cc.log( "browse type: " + sys.browserType );
+		cc.log( "browse version: " + version );
+		cc.log( "MULTI_CHANNEL: " + window.__audioSupport.MULTI_CHANNEL );
+		cc.log( "WEB_AUDIO: " + window.__audioSupport.WEB_AUDIO );
+		cc.log( "AUTOPLAY: " + window.__audioSupport.AUTOPLAY );
+		cc.log( 'audio support : ', support );
+	}
+
+    // var DEBUG = true;
+    //
+    // var sys = cc.sys;
+    // var version = sys.browserVersion;
+    //
+    // // check if browser supports Web Audio
+    // // check Web Audio's context
+    // var supportWebAudio = !!(window.AudioContext || window.webkitAudioContext || window.mozAudioContext);
+    //
+    // var supportTable = {
+    //     "common" : {MULTI_CHANNEL: true , WEB_AUDIO: supportWebAudio , AUTOPLAY: true, DELAY_CREATE_CTX : false, ONE_SOURCE : false }
+    // };
+    // supportTable[sys.BROWSER_TYPE_IE]  = {MULTI_CHANNEL: true , WEB_AUDIO: supportWebAudio , AUTOPLAY: true, USE_EMPTIED_EVENT: true};
+    // //  ANDROID  //
+    // supportTable[sys.BROWSER_TYPE_ANDROID]  = {MULTI_CHANNEL: false, WEB_AUDIO: false, AUTOPLAY: false};
+    // supportTable[sys.BROWSER_TYPE_CHROME]   = {MULTI_CHANNEL: true , WEB_AUDIO: true , AUTOPLAY: false};
+    // supportTable[sys.BROWSER_TYPE_FIREFOX]  = {MULTI_CHANNEL: true , WEB_AUDIO: true , AUTOPLAY: true , DELAY_CREATE_CTX: true};
+    // supportTable[sys.BROWSER_TYPE_UC]       = {MULTI_CHANNEL: true , WEB_AUDIO: false, AUTOPLAY: false};
+    // supportTable[sys.BROWSER_TYPE_QQ]       = {MULTI_CHANNEL: false, WEB_AUDIO: false, AUTOPLAY: true };
+    // supportTable[sys.BROWSER_TYPE_OUPENG]   = {MULTI_CHANNEL: false, WEB_AUDIO: false, AUTOPLAY: false, REPLAY_AFTER_TOUCH: true , USE_EMPTIED_EVENT: true };
+    // supportTable[sys.BROWSER_TYPE_WECHAT]   = {MULTI_CHANNEL: false, WEB_AUDIO: false, AUTOPLAY: false, REPLAY_AFTER_TOUCH: true , USE_EMPTIED_EVENT: true };
+    // supportTable[sys.BROWSER_TYPE_360]      = {MULTI_CHANNEL: false, WEB_AUDIO: false, AUTOPLAY: true };
+    // supportTable[sys.BROWSER_TYPE_MIUI]     = {MULTI_CHANNEL: false, WEB_AUDIO: false, AUTOPLAY: true };
+    // supportTable[sys.BROWSER_TYPE_LIEBAO]   = {MULTI_CHANNEL: false, WEB_AUDIO: false, AUTOPLAY: false, REPLAY_AFTER_TOUCH: true , USE_EMPTIED_EVENT: true };
+    // supportTable[sys.BROWSER_TYPE_SOUGOU]   = {MULTI_CHANNEL: false, WEB_AUDIO: false, AUTOPLAY: false, REPLAY_AFTER_TOUCH: true , USE_EMPTIED_EVENT: true };
+    // //"Baidu" browser can automatically play
+    // //But because it may be play failed, so need to replay and auto
+    // supportTable[sys.BROWSER_TYPE_BAIDU]    = {MULTI_CHANNEL: false, WEB_AUDIO: false, AUTOPLAY: false, REPLAY_AFTER_TOUCH: true , USE_EMPTIED_EVENT: true };
+    // supportTable[sys.BROWSER_TYPE_BAIDU_APP]= {MULTI_CHANNEL: false, WEB_AUDIO: false, AUTOPLAY: false, REPLAY_AFTER_TOUCH: true , USE_EMPTIED_EVENT: true };
+    //
+    // //  APPLE  //
+    // supportTable[sys.BROWSER_TYPE_SAFARI]  = {MULTI_CHANNEL: true , WEB_AUDIO: true , AUTOPLAY: false, webAudioCallback: function(realUrl){
+    //         document.createElement("audio").src = realUrl;
+    //     }};
+    //
+    // if(cc.sys.isMobile){
+    //     if(cc.sys.os !== cc.sys.OS_IOS)
+    //         window.__audioSupport = supportTable[sys.browserType] || supportTable["common"];
+    //     else
+    //         window.__audioSupport = supportTable[sys.BROWSER_TYPE_SAFARI];
+    // }else{
+    //     switch(sys.browserType){
+    //         case sys.BROWSER_TYPE_IE:
+    //             window.__audioSupport = supportTable[sys.BROWSER_TYPE_IE];
+    //             break;
+    //         case sys.BROWSER_TYPE_FIREFOX:
+    //             window.__audioSupport = supportTable[sys.BROWSER_TYPE_FIREFOX];
+    //             break;
+    //         default:
+    //             window.__audioSupport = supportTable["common"];
+    //     }
+    // }
+    //
+    // ///////////////////////////
+    // //  Browser compatibility//
+    // ///////////////////////////
+    // if(version){
+    //     switch(sys.browserType){
+    //         case sys.BROWSER_TYPE_CHROME:
+    //             version = parseInt(version);
+    //             if(version < 30){
+    //                 window.__audioSupport  = {MULTI_CHANNEL: false , WEB_AUDIO: true , AUTOPLAY: false};
+    //             }else if(version === 42){
+    //                 window.__audioSupport.NEED_MANUAL_LOOP = true;
+    //             }
+    //             break;
+    //         case sys.BROWSER_TYPE_MIUI:
+    //             if(cc.sys.isMobile){
+    //                 version = version.match(/\d+/g);
+    //                 if(version[0] < 2 || (version[0] === 2 && version[1] === 0 && version[2] <= 1)){
+    //                     window.__audioSupport.AUTOPLAY = false;
+    //                 }
+    //             }
+    //             break;
+    //     }
+    // }
+    //
+    // if(DEBUG){
+    //     setTimeout(function(){
+    //         cc.log("browse type: " + sys.browserType);
+    //         cc.log("browse version: " + version);
+    //         cc.log("MULTI_CHANNEL: " + window.__audioSupport.MULTI_CHANNEL);
+    //         cc.log("WEB_AUDIO: " + window.__audioSupport.WEB_AUDIO);
+    //         cc.log("AUTOPLAY: " + window.__audioSupport.AUTOPLAY);
+    //     }, 0);
+    // }
 
 })();
 
 /**
  * Encapsulate DOM and webAudio
  */
-cc.Audio = cc.Class.extend({
-    //TODO Maybe loader shift in will be better
-    volume: 1,
-    loop: false,
-    src: null,
-    _touch: false,
+cc.Audio = cc.Class.extend( {
+	interruptPlay : false,
+	src           : null,
+	_element      : null,
+	_AUDIO_TYPE   : "AUDIO",
 
-    _playing: false,
-    _AUDIO_TYPE: "AUDIO",
-    _pause: false,
+	ctor : function( url ) {
+		this.src = url;
+	},
 
-    //Web Audio
-    _buffer: null,
-    _currentSource: null,
-    _startTime: null,
-    _currentTime: null,
-    _context: null,
-    _volume: null,
+	setBuffer : function( buffer ) {
+		this._AUDIO_TYPE = "WEBAUDIO";
+		this._element    = new cc.Audio.WebAudio( buffer );
+	},
 
-    _ignoreEnded: false,
-    _manualLoop: false,
+	setElement : function( element ) {
+		this._AUDIO_TYPE = "AUDIO";
+		this._element    = element;
 
-    //DOM Audio
-    _element: null,
+		// Prevent partial browser from playing after the end does not reset the paused tag
+		// Will cause the player to judge the status of the error
+		element.addEventListener( 'ended', function() {
+			if( !element.loop ) {
+				element.paused = true;
+			}
+		} );
+	},
 
-    ctor: function(context, volume, url){
-        context && (this._context = context);
-        volume && (this._volume = volume);
-        if(context && volume){
-            this._AUDIO_TYPE = "WEBAUDIO";
-        }
-        this.src = url;
-    },
+	play : function( offset, loop ) {
+		if( !this._element ) {
+			this.interruptPlay = false;
+			return;
+		}
+		this._element.loop = loop;
+		this._element.play();
+		if( this._AUDIO_TYPE === 'AUDIO' && this._element.paused ) {
+			this.stop();
+			cc.Audio.touchPlayList.push( { loop : loop, offset : offset, audio : this._element } );
+		}
 
-    _setBufferCallback: null,
-    setBuffer: function(buffer){
-        if(!buffer) return;
-        var playing = this._playing;
-        this._AUDIO_TYPE = "WEBAUDIO";
+		if( cc.Audio.bindTouch === false ) {
+			cc.Audio.bindTouch = true;
+			// Listen to the touchstart body event and play the audio when necessary.
+			cc.game.canvas.addEventListener( 'touchstart', cc.Audio.touchStart );
+		}
 
-        if(this._buffer && this._buffer !== buffer && this.getPlaying())
-            this.stop();
+		if( this._onEndedCallback ){
+			this.setOnEndedCallback( this._onEndedCallback );
+			delete this._onEndedCallback;
+		}
+	},
 
-        this._buffer = buffer;
-        if(playing)
-            this.play();
+	getPlaying : function() {
+		if( !this._element ) {
+			return true;
+		}
+		return !this._element.paused;
+	},
 
-        this._volume["gain"].value = this.volume;
-        this._setBufferCallback && this._setBufferCallback(buffer);
-    },
+	stop : function() {
+		if( !this._element ) {
+			this.interruptPlay = true;
+			cc.error( 'stop audio error. element is null' );
+			return;
+		}
+		this._element.pause();
+		// console.log( 'audio stop. %s // loop : %d', this._element.src, this._element.loop );
+		// console.log( 'audio stop. %s // paused : %d', this._element.src, this._element.paused );
+		try {
+			this._element.currentTime = 0;
+		}
+		catch( err ) {
+			cc.error( 'stop audio error : ', err );
+		}
+	},
 
-    _setElementCallback: null,
-    setElement: function(element){
-        if(!element) return;
-        var playing = this._playing;
-        this._AUDIO_TYPE = "AUDIO";
+	pause : function() {
+		if( !this._element ) {
+			this.interruptPlay = true;
+			return;
+		}
+		this._element.pause();
+	},
 
-        if(this._element && this._element !== element && this.getPlaying())
-            this.stop();
+	resume : function() {
+		if( !this._element ) {
+			this.interruptPlay = false;
+			return;
+		}
+		this._element.play();
+	},
 
-        this._element = element;
-        if(playing)
-            this.play();
+	setVolume : function( volume ) {
+		if( !this._element ) {
+			return;
+		}
+		this._element.volume = volume;
+	},
 
-        element.volume = this.volume;
-        element.loop = this.loop;
-        this._setElementCallback && this._setElementCallback(element);
-    },
+	getVolume : function() {
+		if( !this._element ) {
+			return;
+		}
+		return this._element.volume;
+	},
 
-    play: function(offset, loop){
-        this._playing = true;
-        this.loop = loop === undefined ? this.loop : loop;
-        if(this._AUDIO_TYPE === "AUDIO"){
-            this._playOfAudio(offset);
-        }else{
-            this._playOfWebAudio(offset);
-        }
-    },
+	cloneNode : function() {
+		var audio = new cc.Audio( this.src );
+		if( this._AUDIO_TYPE === "AUDIO" ) {
+			var elem    = document.createElement( "audio" );
+			var sources = elem.getElementsByTagName( 'source' );
+			for( var i = 0; i < sources.length; i++ ) {
+				elem.appendChild( sources[ i ] );
+			}
+			elem.src = this.src;
+			audio.setElement( elem );
+		}
+		else {
+			audio.setBuffer( this._element.buffer );
+		}
+		return audio;
+	},
 
-    getPlaying: function(){
-        if(!this._playing){
-            return false;
-        }
-        if(this._AUDIO_TYPE === "AUDIO"){
-            var audio = this._element;
-            if(!audio || this._pause || audio.ended){
-                return this._playing = false;
-            }
-            return true;
-        }
-        var sourceNode = this._currentSource;
-        if(!sourceNode || !sourceNode["playbackState"])
-            return true;
+	//오디오 끝에 도달 할 때 호출되는 콜백 등록
+	setOnEndedCallback : function (cb) {
+		if(this._element)
+			this._element.setOnEndedCallback(cb);
+		else{
+			this._onEndedCallback = cb;
+		}
+	}
+} );
 
-        if(this._currentTime + this._context.currentTime - this._startTime < sourceNode.buffer.duration)
-            return true;
+cc.Audio.touchPlayList = [
+	//{ offset: 0, audio: audio }
+];
 
-        return sourceNode["playbackState"] == 2;
-    },
+cc.Audio.bindTouch  = false;
+cc.Audio.touchStart = function() {
+	var list = cc.Audio.touchPlayList;
+	var item = null;
+	while( item = list.pop() ) {
+		item.audio.loop = !!item.loop;
+		item.audio.play( item.offset );
+	}
+};
 
-    _playOfWebAudio: function(offset){
-        var cs = this._currentSource;
-        if(!this._buffer){
-            return;
-        }
-        if(!this._pause && cs){
-            if(this._context.currentTime === 0 || this._currentTime + this._context.currentTime - this._startTime > cs.buffer.duration)
-                this._stopOfWebAudio();
-            else
-                return;
-        }
-        var audio = this._context["createBufferSource"]();
-        audio.buffer = this._buffer;
-        audio["connect"](this._volume);
-        if(this._manualLoop)
-            audio.loop = false;
-        else
-            audio.loop = this.loop;
-        this._startTime = this._context.currentTime;
-        this._currentTime = offset || 0;
-        this._ignoreEnded = false;
+cc.Audio.WebAudio = function( buffer ) {
+	this.buffer  = buffer;
+	this.context = cc.Audio._context;
 
-        /*
-         * Safari on iOS 6 only supports noteOn(), noteGrainOn(), and noteOff() now.(iOS 6.1.3)
-         * The latest version of chrome has supported start() and stop()
-         * start() & stop() are specified in the latest specification (written on 04/26/2013)
-         *      Reference: https://dvcs.w3.org/hg/audio/raw-file/tip/webaudio/specification.html
-         * noteOn(), noteGrainOn(), and noteOff() are specified in Draft 13 version (03/13/2012)
-         *      Reference: http://www.w3.org/2011/audio/drafts/2WD/Overview.html
-         */
-        if(audio.start){
-            audio.start(0, offset || 0);
-        }else if(audio["noteGrainOn"]){
-            var duration = audio.buffer.duration;
-            if (this.loop) {
-                /*
-                 * On Safari on iOS 6, if loop == true, the passed in @param duration will be the duration from now on.
-                 * In other words, the sound will keep playing the rest of the music all the time.
-                 * On latest chrome desktop version, the passed in duration will only be the duration in this cycle.
-                 * Now that latest chrome would have start() method, it is prepared for iOS here.
-                 */
-                audio["noteGrainOn"](0, offset, duration);
-            } else {
-                audio["noteGrainOn"](0, offset, duration - offset);
-            }
-        }else {
-            // if only noteOn() is supported, resuming sound will NOT work
-            audio["noteOn"](0);
-        }
-        this._currentSource = audio;
-        var self = this;
-        audio["onended"] = function(){
-            if(self._manualLoop && self._playing && self.loop){
-                self.stop();
-                self.play();
-                return;
-            }
-            if(self._ignoreEnded){
-                self._ignoreEnded = false;
-            }else{
-                if(!self._pause)
-                    self.stop();
-                else
-                    self._playing = false;
-            }
-        };
-    },
+	var volume             = this.context[ 'createGain' ]();
+	volume[ 'gain' ].value = 1;
+	volume[ 'connect' ]( this.context[ 'destination' ] );
+	this._volume = volume;
 
-    _playOfAudio: function(){
-        var audio = this._element;
-        if(audio){
-            audio.loop = this.loop;
-            audio.play();
-        }
-    },
+	this._loop = false;
 
-    stop: function(){
-        this._playing = false;
-        if(this._AUDIO_TYPE === "AUDIO"){
-            this._stopOfAudio();
-        }else{
-            this._stopOfWebAudio();
-        }
-    },
+	// The time stamp on the audio time axis when the recording begins to play.
+	this._startTime     = -1;
+	// Record the currently playing Source
+	this._currentSource = null;
+	// Record the time has been played
+	this.playedLength   = 0;
 
-    _stopOfWebAudio: function(){
-        var audio = this._currentSource;
-        this._ignoreEnded = true;
-        if(audio){
-            audio.stop(0);
-            this._currentSource = null;
-        }
-    },
+	this._currextTimer = null;
 
-    _stopOfAudio: function(){
-        var audio = this._element;
-        if(audio){
-            audio.pause();
-            if (audio.duration && audio.duration !== Infinity)
-                audio.currentTime = 0;
-        }
-    },
+	this._onendedCallback = null;
+};
 
-    pause: function(){
-        if(this.getPlaying() === false)
-            return;
-        this._playing = false;
-        this._pause = true;
-        if(this._AUDIO_TYPE === "AUDIO"){
-            this._pauseOfAudio();
-        }else{
-            this._pauseOfWebAudio();
-        }
-    },
+cc.Audio.WebAudio.prototype = {
+	constructor : cc.Audio.WebAudio,
 
-    _pauseOfWebAudio: function(){
-        this._currentTime += this._context.currentTime - this._startTime;
-        var audio = this._currentSource;
-        if(audio){
-            audio.stop(0);
-        }
-    },
+	get paused() {
+		// If the current audio is a loop, then paused is false
+		if( this._currentSource && this._currentSource.loop ) {
+			return false;
+		}
 
-    _pauseOfAudio: function(){
-        var audio = this._element;
-        if(audio){
-            audio.pause();
-        }
-    },
+		// StartTime does not have value, as the default -1, it does not begin to play
+		if( this._startTime === -1 ) {
+			return true;
+		}
 
-    resume: function(){
-        if(this._pause){
-            if(this._AUDIO_TYPE === "AUDIO"){
-                this._resumeOfAudio();
-            }else{
-                this._resumeOfWebAudio();
-            }
-            this._pause = false;
-            this._playing = true;
-        }
-    },
+		// currentTime - startTime > durationTime
+		return this.context.currentTime - this._startTime > this.buffer.duration;
+	},
+	set paused( bool ) {
+	},
 
-    _resumeOfWebAudio: function(){
-        var audio = this._currentSource;
-        if(audio){
-            this._startTime = this._context.currentTime;
-            var offset = this._currentTime % audio.buffer.duration;
-            this._playOfWebAudio(offset);
-        }
-    },
+	get loop() {
+		return this._loop;
+	},
+	set loop( bool ) {
+		return this._loop = bool;
+	},
 
-    _resumeOfAudio: function(){
-        var audio = this._element;
-        if(audio){
-            audio.play();
-        }
-    },
+	get volume() {
+		return this._volume[ 'gain' ].value;
+	},
+	set volume( num ) {
+		return this._volume[ 'gain' ].value = num;
+	},
 
-    setVolume: function(volume){
-        if(volume > 1) volume = 1;
-        if(volume < 0) volume = 0;
-        this.volume = volume;
-        if(this._AUDIO_TYPE === "AUDIO"){
-            if(this._element){
-                this._element.volume = volume;
-            }
-        }else{
-            if(this._volume){
-                this._volume["gain"].value = volume;
-            }
-        }
-    },
+	get currentTime() {
+		return this.playedLength;
+	},
+	set currentTime( num ) {
+		return this.playedLength = num;
+	},
 
-    getVolume: function(){
-        return this.volume;
-    },
+	play  : function( offset ) {
 
-    cloneNode: function(){
-        var audio, self;
-        if(this._AUDIO_TYPE === "AUDIO"){
-            audio = new cc.Audio();
+		// If repeat play, you need to stop before an audio
+		if( this._currentSource && !this.paused ) {
+			this._currentSource.stop( 0 );
+			this.playedLength = 0;
+		}
 
-            var elem = document.createElement("audio");
-            elem.src = this.src;
-            audio.setElement(elem);
-        }else{
-            var volume = this._context["createGain"]();
-            volume["gain"].value = 1;
-            volume["connect"](this._context["destination"]);
-            audio = new cc.Audio(this._context, volume, this.src);
-            if(this._buffer){
-                audio.setBuffer(this._buffer);
-            }else{
-                self = this;
-                this._setBufferCallback = function(buffer){
-                    audio.setBuffer(buffer);
-                    self._setBufferCallback = null;
-                };
-            }
-            audio._manualLoop = this._manualLoop;
-        }
-        audio._AUDIO_TYPE = this._AUDIO_TYPE;
-        return audio;
-    }
+		var audio    = this.context[ "createBufferSource" ]();
+		audio.buffer = this.buffer;
+		audio[ "connect" ]( this._volume );
+		audio.loop = this._loop;
 
-});
+		this._startTime = this.context.currentTime;
+		offset          = offset || this.playedLength;
 
-(function(polyfill){
+		var duration = this.buffer.duration;
+		if( !this._loop ) {
+			if( audio.start ) {
+				audio.start( 0, offset, duration - offset );
+			}
+			else if( audio[ "notoGrainOn" ] ) {
+				audio[ "noteGrainOn" ]( 0, offset, duration - offset );
+			}
+			else {
+				audio[ "noteOn" ]( 0, offset, duration - offset );
+			}
+		}
+		else {
+			if( audio.start ) {
+				audio.start(0, offset);    	//@terry loop audio가 pause후 resume될때 처음부터 재생되는 현상을 offset 부터 시작되게 수정
+			}
+			else if( audio[ "notoGrainOn" ] ) {
+				audio["noteGrainOn"](0, offset);	 //@terry loop audio가 pause후 resume될때 처음부터 재생되는 현상을 offset 부터 시작되게 수정
+			}
+			else {
+				audio["noteOn"](0, offset);			 //@terry loop audio가 pause후 resume될때 처음부터 재생되는 현상을 offset 부터 시작되게 수정
+			}
+		}
 
-    var SWA = polyfill.WEB_AUDIO,
-        SWB = polyfill.MULTI_CHANNEL,
-        SWC = polyfill.AUTOPLAY;
+		this._currentSource = audio;
+
+		// If the current audio context time stamp is 0
+		// There may be a need to touch events before you can actually start playing audio
+		// So here to add a timer to determine whether the real start playing audio, if not, then the incoming touchPlay queue
+		if( this.context.currentTime === 0 ) {
+			var self = this;
+			clearTimeout( this._currextTimer );
+			this._currextTimer = setTimeout( function() {
+				if( self.context.currentTime === 0 ) {
+					cc.Audio.touchPlayList.push( {
+						offset : offset,
+						audio  : self
+					} );
+				}
+			}, 10 );
+		}
+		if(this._onendedCallback )
+			this.setOnEndedCallback(this._onendedCallback)
+	},
+	pause : function() {
+		// Record the time the current has been played
+		//@terry audio가 play중에 pause / resume 이 2번이상 반복되면 오디오가 pause된시점부터 resume play되지않고 다른 시점부터 반복되는 오류 수정
+		//this.playedLength   = this.context.currentTime - this._startTime;
+		this.playedLength   += this.context.currentTime - this._startTime;
+
+		//If the duration of playedLendth exceeds the audio, you should take the remainder
+		//@terry audio가 play중에 pause / resume 이 2번이상 반복되면 오디오가 pause된 시점부터 resume play되지않고 다른 시점부터 반복되는 오류 수정
+		//this.playedLength %= this.buffer.duration;
+		if (this.loop)
+		{
+			this.playedLength %= this.buffer.duration;
+		}
+		else if (this.playedLength > this.buffer.duration)
+		{
+			this.playedLength =  this.buffer.duration;
+		}
+
+		var audio           = this._currentSource;
+		this._currentSource = null;
+		this._startTime     = -1;
+		if( audio ) {
+			audio.stop( 0 );
+		}
+	},
+
+	_onEndedCallbackFunc : function () {
+		if(this._currentSource) {
+			cc.log("[CHECK] " + this.buffer.duration + " , " + this._currentSource.loop);
+			var tempCallback = this._onendedCallback;
+			this._onendedCallback = null;
+			this._currentSource.onended = null;
+			tempCallback && tempCallback();
+		}
+	},
+	//오디오 끝에 도달 할 때 호출되는 콜백 등록
+	setOnEndedCallback : function(cb){
+		this._onendedCallback = cb;
+		if(this._onendedCallback ) {
+			this._currentSource.onended = this._onEndedCallbackFunc.bind(this);
+		}
+		else{
+			this._currentSource.onended = null;
+		}
+	}
+};
+
+function createAudio( polyfill ) {
+    var SWA = polyfill.WEB_AUDIO, SWB = polyfill.ONLY_ONE;
 
     var support = [];
 
-    (function(){
-        var audio = document.createElement("audio");
-        if(audio.canPlayType) {
-            var ogg = audio.canPlayType('audio/ogg; codecs="vorbis"');
-            if (ogg && ogg !== "") support.push(".ogg");
-            var mp3 = audio.canPlayType("audio/mpeg");
-            if (mp3 && mp3 !== "") support.push(".mp3");
-            var wav = audio.canPlayType('audio/wav; codecs="1"');
-            if (wav && wav !== "") support.push(".wav");
-            var mp4 = audio.canPlayType("audio/mp4");
-            if (mp4 && mp4 !== "") support.push(".mp4");
-            var m4a = audio.canPlayType("audio/x-m4a");
-            if (m4a && m4a !== "") support.push(".m4a");
+    (function() {
+        var audio = document.createElement( "audio" );
+        if( audio.canPlayType ) {
+            var ogg = audio.canPlayType( 'audio/ogg; codecs="vorbis"' );
+            if( ogg && ogg !== "" ) {
+                support.push( ".ogg" );
+            }
+            var mp3 = audio.canPlayType( "audio/mpeg" );
+            if( mp3 && mp3 !== "" ) {
+                support.push( ".mp3" );
+            }
+            var wav = audio.canPlayType( 'audio/wav; codecs="1"' );
+            if( wav && wav !== "" ) {
+                support.push( ".wav" );
+            }
+            var mp4 = audio.canPlayType( "audio/mp4" );
+            if( mp4 && mp4 !== "" ) {
+                support.push( ".mp4" );
+            }
+            var m4a = audio.canPlayType( "audio/x-m4a" );
+            if( m4a && m4a !== "" ) {
+                support.push( ".m4a" );
+            }
         }
     })();
-    try{
-        if(SWA){
-            var context = new (window.AudioContext || window.webkitAudioContext || window.mozAudioContext)();
-            if(polyfill.DELAY_CREATE_CTX)
-                setTimeout(function(){ context = new (window.AudioContext || window.webkitAudioContext || window.mozAudioContext)(); }, 0);
+    try {
+        if( SWA ) {
+            var context       = new (window.AudioContext || window.webkitAudioContext || window.mozAudioContext)();
+            cc.Audio._context = context;
+            // check context integrity
+            if(
+                !context[ "createBufferSource" ] ||
+                !context[ "createGain" ] ||
+                !context[ "destination" ] ||
+                !context[ "decodeAudioData" ]
+            ) {
+                throw 'context is incomplete';
+            }
+
+            if( polyfill.DELAY_CREATE_CTX ) {
+                setTimeout( function() {
+                    context           = new (window.AudioContext || window.webkitAudioContext || window.mozAudioContext)();
+                    cc.Audio._context = context;
+                }, 0 );
+            }
         }
-    }catch(error){
+    } catch( error ) {
         SWA = false;
-        cc.log("browser don't support web audio");
+        cc.warn( "browser don't support web audio" );
     }
 
     var loader = {
+        cache       : {},
+        useWebAudio : true,
 
-        cache: {},
+        loadBuffer : function( url, cb ) {
+            if( !SWA ) {
+                return;
+            } // WebAudio Buffer
 
-        load: function(realUrl, url, res, cb){
+            var request = cc.loader.getXMLHttpRequest();
+            request.open( "GET", url, true );
+            request.responseType = "arraybuffer";
 
-            if(support.length === 0)
-                return cb("can not support audio!");
-
-            var i;
-
-            if(cc.loader.audioPath)
-                realUrl = cc.path.join(cc.loader.audioPath, realUrl);
-
-            var extname = cc.path.extname(realUrl);
-
-            var typeList = [extname];
-            for(i=0; i<support.length; i++){
-                if(extname !== support[i]){
-                    typeList.push(support[i]);
+            // Our asynchronous callback
+            request.onload = function() {
+                if( request._timeoutId >= 0 ) {
+                    clearTimeout( request._timeoutId );
                 }
+                context[ "decodeAudioData" ]( request.response, function( buffer ) {
+                    //success
+                    cb( null, buffer );
+                    //audio.setBuffer(buffer);
+                }, function() {
+                    //error
+                    cc.error('sound. decode error - ' + url );
+                    cb( 'decode error - ' + url );
+                } );
+            };
+
+            request.onerror = function() {
+                cc.error('sound. request error - ' + url );
+                cb( 'request error - ' + url );
+            };
+
+            if( request.ontimeout === undefined ) {
+                request._timeoutId = setTimeout( function() {
+                    request.ontimeout();
+                }, request.timeout );
             }
 
-            var audio;
+            request.ontimeout = function() {
+                cc.error('sound. request timeout - ' + url );
+                cb( 'request timeout - ' + url );
+            };
 
-            if(loader.cache[url])
-                return cb(null, loader.cache[url]);
-
-            if(SWA){
-                try{
-                    var volume = context["createGain"]();
-                    volume["gain"].value = 1;
-                    volume["connect"](context["destination"]);
-                    audio = new cc.Audio(context, volume, realUrl);
-                    if(polyfill.NEED_MANUAL_LOOP)
-                        audio._manualLoop = true;
-                }catch(err){
-                    SWA = false;
-                    cc.log("browser don't support web audio");
-                    audio = new cc.Audio(null, null, realUrl);
-                }
-            }else{
-                audio = new cc.Audio(null, null, realUrl);
-            }
-
-            this.loadAudioFromExtList(realUrl, typeList, audio, cb);
-
-            loader.cache[url] = audio;
-
+            request.send();
         },
 
-        loadAudioFromExtList: function(realUrl, typeList, audio, cb){
+        load : function( realUrl, url, res, cb ) {
+            if( support.length === 0 ) {
+                return cb( "can not support audio!" );
+            }
 
-            if(typeList.length === 0){
+            var audio = cc.loader.getRes( url );
+            if( audio ) {
+                return cb( null, audio );
+            }
+
+            if( cc.loader.audioPath ) {
+                realUrl = cc.path.join( cc.loader.audioPath, realUrl );
+            }
+
+            var extname = cc.path.extname( realUrl );
+
+            var typeList = [ extname ];
+            for( var i = 0; i < support.length; i++ ) {
+                if( extname !== support[ i ] ) {
+                    typeList.push( support[ i ] );
+                }
+            }
+
+            audio                  = new cc.Audio( realUrl );
+            cc.loader.cache[ url ] = audio;
+            this.loadAudioFromExtList( realUrl, typeList, audio, cb );
+            return audio;
+        },
+
+        loadAudioFromExtList : function( realUrl, typeList, audio, cb ) {
+            if( typeList.length === 0 ) {
                 var ERRSTR = "can not found the resource of audio! Last match url is : ";
-                ERRSTR += realUrl.replace(/\.(.*)?$/, "(");
-                support.forEach(function(ext){
+                ERRSTR += realUrl.replace( /\.(.*)?$/, "(" );
+                support.forEach( function( ext ) {
                     ERRSTR += ext + "|";
-                });
-                ERRSTR = ERRSTR.replace(/\|$/, ")");
-                return cb({status:520, errorMessage:ERRSTR}, null);
+                } );
+                ERRSTR = ERRSTR.replace( /\|$/, ")" );
+                return cb( { status : 520, errorMessage : ERRSTR }, null );
             }
 
-            realUrl = cc.path.changeExtname(realUrl, typeList.splice(0, 1));
-
-            if(SWA){//Buffer
-                if(polyfill.webAudioCallback)
-                    polyfill.webAudioCallback(realUrl);
-                var request = new XMLHttpRequest();
-                request.open("GET", realUrl, true);
-                request.responseType = "arraybuffer";
-
-                // Our asynchronous callback
-                request.onload = function () {
-                    context["decodeAudioData"](request.response, function(buffer){
-                        //success
-                        audio.setBuffer(buffer);
-                        cb(null, audio);
-                    }, function(){
-                        //error
-                        loader.loadAudioFromExtList(realUrl, typeList, audio, cb);
-                    });
-                };
-
-                request.onerror = function(){
-                    cb({status:520, errorMessage:ERRSTR}, null);
-                };
-
-                request.send();
-            }else{//DOM
-
-                var element = document.createElement("audio");
-                var cbCheck = false;
-                var termination = false;
-
-                var timer = setTimeout(function(){
-                    if(element.readyState === 0){
-                        emptied();
-                    }else{
-                        termination = true;
-                        element.pause();
-                        document.body.removeChild(element);
-                        cb("audio load timeout : " + realUrl, audio);
+            if( SWA && this.useWebAudio ) {
+                this.loadBuffer( realUrl, function( error, buffer ) {
+                    if( error ) {
+                        cc.log( error );
                     }
-                }, 10000);
 
-                var success = function(){
-                    if(!cbCheck){
-                        //element.pause();
-                        try { element.currentTime = 0;
-                            element.volume = 1; } catch (e) {}
-                        document.body.removeChild(element);
-                        audio.setElement(element);
-                        element.removeEventListener("canplaythrough", success, false);
-                        element.removeEventListener("error", failure, false);
-                        element.removeEventListener("emptied", emptied, false);
-                        !termination && cb(null, audio);
-                        cbCheck = true;
-                        clearTimeout(timer);
+                    if( buffer ) {
+                        audio.setBuffer( buffer );
                     }
-                };
 
-                var failure = function(){
-                    if(!cbCheck) return;
-                    //element.pause();
-                    document.body.removeChild(element);
-                    element.removeEventListener("canplaythrough", success, false);
-                    element.removeEventListener("error", failure, false);
-                    element.removeEventListener("emptied", emptied, false);
-                    !termination && loader.loadAudioFromExtList(realUrl, typeList, audio, cb);
-                    cbCheck = true;
-                    clearTimeout(timer);
-                };
+                    cb( null, audio );
+                } );
+                return;
+            }
 
-                var emptied = function(){
-                    termination = true;
+            var num = polyfill.ONE_SOURCE ? 1 : typeList.length;
+
+            // 加载统一使用dom
+            var dom = document.createElement( 'audio' );
+            for( var i = 0; i < num; i++ ) {
+                var source = document.createElement( 'source' );
+                source.src = cc.path.changeExtname( realUrl, typeList[ i ] );
+                dom.appendChild( source );
+            }
+
+            audio.setElement( dom );
+
+            var timer = setTimeout( function() {
+                if( dom.readyState === 0 ) {
+                    failure();
+                }
+                else {
                     success();
-                    cb(null, audio);
-                };
+                }
+            }, 8000 );
 
-                element.addEventListener("canplaythrough", success, false);
-                element.addEventListener("error", failure, false);
-                if(polyfill.USE_EMPTIED_EVENT)
-                    element.addEventListener("emptied", emptied, false);
+            var success = function() {
+                dom.removeEventListener( "canplaythrough", success, false );
+                dom.removeEventListener( "error", error, false );
+                dom.removeEventListener( "emptied", success, false );
+                if( polyfill.USE_LOADER_EVENT ) {
+                    dom.removeEventListener( polyfill.USE_LOADER_EVENT, success, false );
+                }
+                clearTimeout( timer );
+                cb( null, audio );
+            };
 
-                element.src = realUrl;
-                document.body.appendChild(element);
-                element.volume = 0;
-                //some browsers cannot pause(qq 6.1)
-                //element.play();
+            var failure = function() {
+                success();
+            };
+
+            var error = function() {
+                cc.error( 'load audio error - ' + realUrl );
+                cb( 'load audio error - ' + realUrl, null );
+            };
+            dom.addEventListener( "canplaythrough", success, false );
+            dom.addEventListener( "error", error, false );
+            if( polyfill.USE_LOADER_EVENT ) {
+                dom.addEventListener( polyfill.USE_LOADER_EVENT, success, false );
             }
-
         }
     };
-    cc.loader.register(["mp3", "ogg", "wav", "mp4", "m4a"], loader);
+    cc.loader.register( [ "mp3", "ogg", "wav", "mp4", "m4a" ], loader );
 
     /**
      * cc.audioEngine is the singleton object, it provide simple audio APIs.
      * @namespace
      */
     cc.audioEngine = {
-        _currMusic: null,
-        _musicVolume: 1,
+        _currMusic   : null,
+        _musicVolume : 1,
 
-        features: polyfill,
+        features : polyfill,
 
         /**
          * Indicates whether any background music can be played or not.
          * @returns {boolean} <i>true</i> if the background music is playing, otherwise <i>false</i>
          */
-        willPlayMusic: function(){return false;},
+        willPlayMusic : function() {
+            return false;
+        },
 
         /**
          * Play music.
@@ -652,18 +725,24 @@ cc.Audio = cc.Class.extend({
          * //example
          * cc.audioEngine.playMusic(path, false);
          */
-        playMusic: function(url, loop){
+        playMusic : function( url, loop ) {
             var bgMusic = this._currMusic;
-            if(bgMusic && bgMusic.src !== url && bgMusic.getPlaying()){
+            if( bgMusic && bgMusic.getPlaying() ) {
                 bgMusic.stop();
             }
-            var audio = loader.cache[url];
-            if(!audio){
-                cc.loader.load(url);
-                audio = loader.cache[url];
+            var musicVolume = this._musicVolume;
+            var audio       = cc.loader.getRes( url );
+            if( !audio ) {
+                cc.loader.load( url, function() {
+                    if( !audio.getPlaying() && !audio.interruptPlay ) {
+                        audio.setVolume( musicVolume );
+                        audio.play( 0, loop || false );
+                    }
+                } );
+                audio = cc.loader.getRes( url );
             }
-            audio.play(0, loop);
-            audio.setVolume(this._musicVolume);
+            audio.setVolume( musicVolume );
+            audio.play( 0, loop || false );
 
             this._currMusic = audio;
         },
@@ -675,12 +754,21 @@ cc.Audio = cc.Class.extend({
          * //example
          * cc.audioEngine.stopMusic();
          */
-        stopMusic: function(releaseData){
+        stopMusic : function( releaseData ) {
             var audio = this._currMusic;
-            if(audio){
+            if( audio ) {
+                var list = cc.Audio.touchPlayList;
+                for( var i = list.length - 1; i >= 0; --i ) {
+                    if( this[ i ] && this[ i ].audio === audio._element ) {
+                        list.splice( i, 1 );
+                    }
+                }
+
                 audio.stop();
-                if (releaseData)
-                    cc.loader.release(audio.src);
+                this._currMusic = null;
+                if( releaseData ) {
+                    cc.loader.release( audio.src );
+                }
             }
         },
 
@@ -690,10 +778,11 @@ cc.Audio = cc.Class.extend({
          * //example
          * cc.audioEngine.pauseMusic();
          */
-        pauseMusic: function(){
+        pauseMusic : function() {
             var audio = this._currMusic;
-            if(audio)
+            if( audio ) {
                 audio.pause();
+            }
         },
 
         /**
@@ -702,10 +791,11 @@ cc.Audio = cc.Class.extend({
          * //example
          * cc.audioEngine.resumeMusic();
          */
-        resumeMusic: function(){
+        resumeMusic : function() {
             var audio = this._currMusic;
-            if(audio)
+            if( audio ) {
                 audio.resume();
+            }
         },
 
         /**
@@ -714,9 +804,9 @@ cc.Audio = cc.Class.extend({
          * //example
          * cc.audioEngine.rewindMusic();
          */
-        rewindMusic: function(){
+        rewindMusic : function() {
             var audio = this._currMusic;
-            if(audio){
+            if( audio ) {
                 audio.stop();
                 audio.play();
             }
@@ -729,7 +819,7 @@ cc.Audio = cc.Class.extend({
          * //example
          * var volume = cc.audioEngine.getMusicVolume();
          */
-        getMusicVolume: function(){
+        getMusicVolume : function() {
             return this._musicVolume;
         },
 
@@ -740,16 +830,22 @@ cc.Audio = cc.Class.extend({
          * //example
          * cc.audioEngine.setMusicVolume(0.5);
          */
-        setMusicVolume: function(volume){
+        setMusicVolume : function( volume ) {
             volume = volume - 0;
-            if(isNaN(volume)) volume = 1;
-            if(volume > 1) volume = 1;
-            if(volume < 0) volume = 0;
+            if( isNaN( volume ) ) {
+                volume = 1;
+            }
+            if( volume > 1 ) {
+                volume = 1;
+            }
+            if( volume < 0 ) {
+                volume = 0;
+            }
 
             this._musicVolume = volume;
-            var audio = this._currMusic;
-            if(audio){
-                audio.setVolume(volume);
+            var audio         = this._currMusic;
+            if( audio ) {
+                audio.setVolume( volume );
             }
         },
 
@@ -765,18 +861,145 @@ cc.Audio = cc.Class.extend({
          *      cc.log("music is not playing");
          *  }
          */
-        isMusicPlaying: function(){
+        isMusicPlaying : function() {
             var audio = this._currMusic;
-            if(audio){
+            if( audio ) {
                 return audio.getPlaying();
-            }else{
+            }
+            else {
                 return false;
             }
         },
 
-        _audioPool: {},
-        _maxAudioInstance: 5,
-        _effectVolume: 1,
+        //region [SubBGM]
+        _subMusic : null,
+        _subMusicEndCB  : null,
+        playSubMusic : function( url, loop, volume ) {
+            var bgMusic = this._subMusic;
+            if (bgMusic && bgMusic.getPlaying()) {
+                bgMusic.setOnEndedCallback(null);
+                bgMusic.stop();
+            }
+
+            var musicVolume = volume? volume : this._musicVolume;
+            var audio = cc.loader.getRes(url);
+
+            if( audio ) {
+                if( !audio.src ) {
+                    cc.loader.release( url );
+                    audio = null;
+                }
+            }
+            this._subMusicEndCB = null;
+
+            if (!audio) {
+                var self = this;
+                cc.loader.load(url, function () {
+                    audio = cc.loader.getRes(url);
+                    if (audio && !audio.getPlaying() && !audio.interruptPlay) {
+                        audio.setVolume(musicVolume);
+                        audio.play(0, loop || false);
+                        self._subMusic = audio;
+                        audio.setOnEndedCallback( self._subMusicEndCB );
+                    }
+                });
+            } else {
+                audio.setVolume(musicVolume);
+                audio.play(0, loop || false);
+                this._subMusic = audio;
+            }
+        },
+
+        stopSubMusic : function(releaseData) {
+            var audio = this._subMusic;
+            if (audio) {
+                var list = cc.Audio.touchPlayList;
+                for (var i=list.length-1; i>=0; --i) {
+                    if (this[i] && this[i].audio === audio._element)
+                        list.splice(i, 1);
+                }
+                audio.setOnEndedCallback(null);
+                audio.stop();
+                this._subMusic = null;
+                this._subMusicEndCB = null;
+                if (releaseData)
+                    cc.loader.release(audio.src);
+            }
+        },
+
+        pauseSubMusic : function() {
+            var audio = this._subMusic;
+            if (audio)
+                audio.pause();
+        },
+
+        resumeSubMusic : function() {
+            var audio = this._subMusic;
+            if (audio)
+                audio.resume();
+        },
+
+        setSubMusicVolume : function( volume ) {
+            volume = volume - 0;
+            if( isNaN( volume ) ) {
+                volume = 1;
+            }
+            if( volume > 1 ) {
+                volume = 1;
+            }
+            if( volume < 0 ) {
+                volume = 0;
+            }
+
+            var audio = this._subMusic;
+            if (audio) {
+                audio.setVolume(volume);
+            }
+        },
+
+        getSubMusicVolume : function(){
+            var audio = this._subMusic;
+            if( audio )
+                return audio.getVolume();
+
+            return 0;
+        },
+
+        isSubMusicPlaying : function() {
+            var audio = this._subMusic;
+            if (audio) {
+                return audio.getPlaying();
+            } else {
+                return false;
+            }
+        },
+
+        setSubMusicOnEndedCallback : function(cb){
+            this._subMusicEndCB = cb;
+            var audio = this._subMusic;
+            if( audio ) {
+                audio.setOnEndedCallback( this._subMusicEndCB );
+            }
+        },
+
+        switchMainToSubMusic : function(){
+            if(  this._currMusic == null
+                || this._subMusic == null)
+                return;
+
+            var temp = this._currMusic;
+            this._currMusic = this._subMusic;
+            this._subMusic = temp;
+
+            this._musicVolume = this._currMusic.getVolume();
+            this._currMusic.setOnEndedCallback( null );
+            this._subMusic.setOnEndedCallback(  this._subMusicEndCB );
+        },
+        //endregion [SubBGM]
+
+        _audioPool        : {},
+        _maxAudioInstance : 10,
+        _effectVolume     : 1,
         /**
          * Play sound effect.
          * @param {String} url The path of the sound effect with filename extension.
@@ -786,45 +1009,83 @@ cc.Audio = cc.Class.extend({
          * //example
          * var soundId = cc.audioEngine.playEffect(path);
          */
-        playEffect: function(url, loop){
-            //If the browser just support playing single audio
-            if(!SWB){
-                //Must be forced to shut down
-                //Because playing MULTI_CHANNEL audio will be stuck in chrome 28 (android)
+        playEffect        : function( url, loop ) {
+
+            if( SWB && this._currMusic && this._currMusic.getPlaying() ) {
+                cc.log( 'Browser is only allowed to play one audio' );
                 return null;
             }
 
-            var effectList = this._audioPool[url];
-            if(!effectList){
-                effectList = this._audioPool[url] = [];
+            var effectList = this._audioPool[ url ];
+            if( !effectList ) {
+                effectList = this._audioPool[ url ] = [];
             }
 
-            var i;
-
-            for(i=0; i<effectList.length; i++){
-                if(!effectList[i].getPlaying()){
+            for( var i = 0; i < effectList.length; i++ ) {
+                if( !effectList[ i ].getPlaying() ) {
                     break;
                 }
             }
 
-            if(effectList[i]){
-                audio = effectList[i];
-                audio.setVolume(this._effectVolume);
-                audio.play(0, loop);
-            }else if(!SWA && i > this._maxAudioInstance){
+            if( !SWA && i > this._maxAudioInstance ) {
+                var first = effectList.shift();
+                first.stop();
+                effectList.push( first );
+                i = effectList.length - 1;
                 cc.log("Error: %s greater than %d", url, this._maxAudioInstance);
-            }else{
-                var audio = loader.cache[url];
-                if(!audio){
-                    cc.loader.load(url);
-                    audio = loader.cache[url];
-                }
-                audio = audio.cloneNode();
-                audio.setVolume(this._effectVolume);
-                audio.loop = loop || false;
-                audio.play();
-                effectList.push(audio);
             }
+
+            var audio;
+            if( effectList[ i ] ) {
+                audio = effectList[ i ];
+                audio.setVolume( this._effectVolume );
+
+                //@terry 아래 한줄 추가 audio가 play중에 pause가 된후 resume 됐을때 다음번 재생시 _audioPool 있던 audio로 전에 pause되었던 시점부터 플레이되는 오류 수정
+				audio.stop();
+
+                audio.play( 0, loop || false );
+                return audio;
+            }
+
+            audio = cc.loader.getRes( url );
+
+            if( audio && SWA && audio._AUDIO_TYPE === 'AUDIO' ) {
+                cc.loader.release( url );
+                audio = null;
+            }
+
+            if( audio ) {
+                if( SWA && audio._AUDIO_TYPE === 'AUDIO' ) {
+                    loader.loadBuffer( url, function( error, buffer ) {
+                        audio.setBuffer( buffer );
+                        audio.setVolume( cc.audioEngine._effectVolume );
+                        if( !audio.getPlaying() ) {
+                            audio.play( 0, loop || false );
+                        }
+                    } );
+                }
+                else {
+                    audio = audio.cloneNode();
+                    audio.setVolume( this._effectVolume );
+                    audio.play( 0, loop || false );
+                    effectList.push( audio );
+                    return audio;
+                }
+
+            }
+
+            cc.warn( url + ' is not loaded on play effect' );
+
+            var cache          = loader.useWebAudio;
+            loader.useWebAudio = true;
+            cc.loader.load( url, function( audio ) {
+                audio = cc.loader.getRes( url );
+                audio = audio.cloneNode();
+                audio.setVolume( cc.audioEngine._effectVolume );
+                audio.play( 0, loop || false );
+                effectList.push( audio );
+            } );
+            loader.useWebAudio = cache;
 
             return audio;
         },
@@ -836,22 +1097,46 @@ cc.Audio = cc.Class.extend({
          * //example
          * cc.audioEngine.setEffectsVolume(0.5);
          */
-        setEffectsVolume: function(volume){
+        setEffectsVolume : function( volume ) {
             volume = volume - 0;
-            if(isNaN(volume)) volume = 1;
-            if(volume > 1) volume = 1;
-            if(volume < 0) volume = 0;
+            if( isNaN( volume ) ) {
+                volume = 1;
+            }
+            if( volume > 1 ) {
+                volume = 1;
+            }
+            if( volume < 0 ) {
+                volume = 0;
+            }
 
             this._effectVolume = volume;
-            var audioPool = this._audioPool;
-            for(var p in audioPool){
-                var audioList = audioPool[p];
-                if(Array.isArray(audioList))
-                    for(var i=0; i<audioList.length; i++){
-                        audioList[i].setVolume(volume);
+            var audioPool      = this._audioPool;
+            for( var p in audioPool ) {
+                var audioList = audioPool[ p ];
+                if( Array.isArray( audioList ) ) {
+                    for( var i = 0; i < audioList.length; i++ ) {
+                        audioList[ i ].setVolume( volume );
                     }
+                }
             }
         },
+
+		//Todo:사용금지
+		setEffectsVolumeByID: function (audio , volume) {
+			volume = volume - 0;
+			if( isNaN( volume ) ) {
+				volume = 1;
+			}
+			if( volume > 1 ) {
+				volume = 1;
+			}
+			if( volume < 0 ) {
+				volume = 0;
+			}
+			if (audio) {
+				audio.setVolume(volume);
+			}
+		},
 
         /**
          * The volume of the effects max value is 1.0,the min value is 0.0 .
@@ -860,19 +1145,19 @@ cc.Audio = cc.Class.extend({
          * //example
          * var effectVolume = cc.audioEngine.getEffectsVolume();
          */
-        getEffectsVolume: function(){
+        getEffectsVolume : function() {
             return this._effectVolume;
         },
 
         /**
          * Pause playing sound effect.
-         * @param {Number} cc.Audio The return value of function playEffect.
+         * @param {Number} audio The return value of function playEffect.
          * @example
          * //example
          * cc.audioEngine.pauseEffect(audioID);
          */
-        pauseEffect: function(audio){
-            if(audio){
+        pauseEffect : function( audio ) {
+            if( audio ) {
                 audio.pause();
             }
         },
@@ -883,13 +1168,13 @@ cc.Audio = cc.Class.extend({
          * //example
          * cc.audioEngine.pauseAllEffects();
          */
-        pauseAllEffects: function(){
+        pauseAllEffects : function() {
             var ap = this._audioPool;
-            for(var p in ap){
-                var list = ap[p];
-                for(var i=0; i<ap[p].length; i++){
-                    if(list[i].getPlaying()){
-                        list[i].pause();
+            for( var p in ap ) {
+                var list = ap[ p ];
+                for( var i = 0; i < ap[ p ].length; i++ ) {
+                    if( list[ i ].getPlaying() ) {
+                        list[ i ].pause();
                     }
                 }
             }
@@ -897,14 +1182,15 @@ cc.Audio = cc.Class.extend({
 
         /**
          * Resume playing sound effect.
-         * @param {Number} cc.Audio The return value of function playEffect.
+         * @param {Number} audio The return value of function playEffect.
          * @audioID
          * //example
          * cc.audioEngine.resumeEffect(audioID);
          */
-        resumeEffect: function(audio){
-            if(audio)
+        resumeEffect : function( audio ) {
+            if( audio ) {
                 audio.resume();
+            }
         },
 
         /**
@@ -913,26 +1199,27 @@ cc.Audio = cc.Class.extend({
          * //example
          * cc.audioEngine.resumeAllEffects();
          */
-        resumeAllEffects: function(){
+        resumeAllEffects : function() {
             var ap = this._audioPool;
-            for(var p in ap){
-                var list = ap[p];
-                for(var i=0; i<ap[p].length; i++){
-                    list[i].resume();
+            for( var p in ap ) {
+                var list = ap[ p ];
+                for( var i = 0; i < ap[ p ].length; i++ ) {
+                    list[ i ].resume();
                 }
             }
         },
 
         /**
          * Stop playing sound effect.
-         * @param {Number} cc.Audio The return value of function playEffect.
+         * @param {Number} audio The return value of function playEffect.
          * @example
          * //example
          * cc.audioEngine.stopEffect(audioID);
          */
-        stopEffect: function(audio){
-            if(audio)
+        stopEffect : function( audio ) {
+            if( audio ) {
                 audio.stop();
+            }
         },
 
         /**
@@ -941,13 +1228,32 @@ cc.Audio = cc.Class.extend({
          * //example
          * cc.audioEngine.stopAllEffects();
          */
-        stopAllEffects: function(){
-            var ap = this._audioPool;
-            for(var p in ap){
-                var list = ap[p];
-                for(var i=0; i<ap[p].length; i++){
-                    list[i].stop();
+        stopAllEffects : function() {
+            for( var k in this._audioPool ) {
+                var pool = this._audioPool[ k ];
+                if( pool ) {
+                    for( var i = 0; i < pool.length; i++ ) {
+                        pool[ i ].stop();
+                    }
+                    pool.length = 0;
                 }
+                delete this._audioPool[ k ];
+            }
+        },
+
+        stopAllEffectsAndRelease : function() {
+            for( var k in this._audioPool ) {
+                cc.log( '##### SOUND RELEASE : ', k );
+                cc.loader.release( k );
+
+                var pool = this._audioPool[ k ];
+                if( pool ) {
+                    for( var i = 0; i < pool.length; i++ ) {
+                        pool[ i ].stop();
+                    }
+                    pool.length = 0;
+                }
+                delete this._audioPool[ k ];
             }
         },
 
@@ -958,80 +1264,64 @@ cc.Audio = cc.Class.extend({
          * //example
          * cc.audioEngine.unloadEffect(EFFECT_FILE);
          */
-        unloadEffect: function(url){
-            if(!url){
+        unloadEffect : function( url ) {
+            if( !url ) {
                 return;
             }
 
-            cc.loader.release(url);
-            var pool = this._audioPool[url];
-            if(pool) pool.length = 0;
-            delete this._audioPool[url];
-            delete loader.cache[url];
+            cc.loader.release( url );
+            var pool = this._audioPool[ url ];
+            if( pool ) {
+                for( var i = 0; i < pool.length; i++ ) {
+                    pool[ i ].stop();
+                }
+                pool.length = 0;
+            }
+            delete this._audioPool[ url ];
         },
 
         /**
          * End music and effects.
          */
-        end: function(){
+        end : function() {
             this.stopMusic();
-            this.stopAllEffects();
+            this.stopSubMusic();
+            this.stopAllEffectsAndRelease();
         },
 
-        _pauseCache: [],
-        _pausePlaying: function(){
+        _pauseCache   : [],
+        _pausePlaying : function() {
             var bgMusic = this._currMusic;
-            if(bgMusic && bgMusic.getPlaying()){
+            if( bgMusic && bgMusic.getPlaying() ) {
                 bgMusic.pause();
-                this._pauseCache.push(bgMusic);
+                this._pauseCache.push( bgMusic );
             }
+			var subMusic = this._subMusic;
+			if( subMusic ) {
+				if( subMusic && subMusic.getPlaying() ) {
+					subMusic.pause();
+					this._pauseCache.push( subMusic );
+				}
+			}
+
             var ap = this._audioPool;
-            for(var p in ap){
-                var list = ap[p];
-                for(var i=0; i<ap[p].length; i++){
-                    if(list[i].getPlaying()){
-                        list[i].pause();
-                        this._pauseCache.push(list[i]);
+            for( var p in ap ) {
+                var list = ap[ p ];
+                for( var i = 0; i < ap[ p ].length; i++ ) {
+                    if( list[ i ].getPlaying() ) {
+                        list[ i ].pause();
+                        this._pauseCache.push( list[ i ] );
                     }
                 }
             }
         },
 
-        _resumePlaying: function(){
+        _resumePlaying : function() {
             var list = this._pauseCache;
-            for(var i=0; i<list.length; i++){
-                list[i].resume();
+            for( var i = 0; i < list.length; i++ ) {
+                list[ i ].resume();
             }
             list.length = 0;
         }
     };
-
-    /**
-     * ome browsers must click on the page
-     */
-    if(!SWC){
-
-        //TODO Did not complete loading
-        var reBGM = function(){
-            var bg = cc.audioEngine._currMusic;
-            if(
-                bg &&
-                bg._touch === false &&
-                bg._playing &&
-                bg.getPlaying()
-            ){
-                bg._touch = true;
-                bg.play(0, bg.loop);
-                !polyfill.REPLAY_AFTER_TOUCH && cc._canvas.removeEventListener("touchstart", reBGM);
-            }
-
-        };
-
-        setTimeout(function(){
-            if(cc._canvas){
-                cc._canvas.addEventListener("touchstart", reBGM, false);
-            }
-        }, 150);
-    }
-
-})(window.__audioSupport);
+}

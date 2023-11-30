@@ -197,7 +197,12 @@ ccs.ActionObject = ccs.Class.extend(/** @lends ccs.ActionObject# */{
         var locActionNodeList = this._actionNodeList;
         var frameNum = locActionNodeList.length;
         for (var i = 0; i < frameNum; i++) {
-            locActionNodeList[i].playAction(fun);
+            if( i === 0 ){
+                locActionNodeList[i].playAction(fun);
+            }
+            else {
+                locActionNodeList[i].playAction();
+            }
         }
         if (this._loop)
             this._scheduler.schedule(this.simulationActionUpdate, this, 0, cc.REPEAT_FOREVER, 0, false, this.__instanceId + "");

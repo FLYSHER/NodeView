@@ -55,6 +55,10 @@ cc.game.addEventListener(cc.game.EVENT_RENDERER_INITED, function () {
                 cc.eventManager.setEnabled(true);
         };
 
+        _p.getOpenGLView = function () {
+            return this._openGLView;
+        };
+
         _p.getVisibleSize = function () {
             //if (this._openGLView) {
             //return this._openGLView.getVisibleSize();

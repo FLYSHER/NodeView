@@ -69,15 +69,20 @@ cc.game.onStart = function(){
     cc.view.resizeWithBrowserSize(false);
     //load resources
     setMarginZero();
-    cc.LoaderScene.preload(g_resources, function () {
+    // Set Asset Path.
+    cc.loader.resPath = /(.*)\//.exec(cc.loader.resPath)[0] + cc.game.config.ASSET_BASE_URL;
+    cc.LoaderScene.preload(g_SlotEditorSlotMenu, function () {
         var editorScene = new EditorScene();
-        window.GameScene = editorScene;
+        RockN.GameScene = editorScene;
+        window.GameScene = RockN.GameScene;
         cc.director.runScene(editorScene);
     }, this);
 };
 
 function setMarginZero(){
     document.getElementById("Cocos2dGameContainer").style.margin = "0";
+    document.getElementById("Cocos2dGameContainer").style.padding = "0";
 }
+
 
 cc.game.run();
