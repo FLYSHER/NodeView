@@ -3,6 +3,7 @@
  */
 var Renderer_assets = {
     treeDataArr : [],
+    Tag         : "[AssetView] ",
 
     init : function() {
         $("#assets").jstree({
@@ -24,27 +25,36 @@ var Renderer_assets = {
             }
         });
 
-        $('#assets').on("changed.jstree", function (e, data) {
-            console.log( e, data );
+        // tree 선택 노드 변경시 이벤트 리스너 등록
+        $('#assets').on("changed.jstree", this.onchangeTree );
 
-            var selectedFileName = data.selected[0];
-            cc.eventManager.dispatchCustomEvent( 'onSetPreviewSprite', { name : selectedFileName } );
-        });
+        // tree node 드레그 스타트 리스너 등록
+        $('#assets').on("dragstart", this.onDragStartTreeNode );
 
-        $('#assets').on("dragstart", function( e ){
-            cc.log("drag", e.target.innerText );
-            e.originalEvent.dataTransfer.setData( "spriteName", e.target.innerText );
-        });
+        // 에셋 검색 시
+        $('#assets_findInput').change( this.onchangeInputFind );
+    },
 
+    // 트리 선택 노드 변경시
+    onchangeTree : function( e, data ) {
+        cc.log( Renderer_assets.Tag, "*** onchange tree *** : ", data.selected[0] );
 
-        var findTextInputHTML = `<input id="assets_findInput" class="frameBar_findInput"  type="text" value="" >`;
-        $('#assets_bar_root').append( findTextInputHTML );
+        var selectedFileName = data.selected[0];
+        cc.eventManager.dispatchCustomEvent( 'onSetPreviewSprite', { name : selectedFileName } );
+    },
 
-        $('#assets_findInput').change( function( event ){
-            console.log("find assets > ", event.target.value );
-            var searchString = event.target.value;
-            $('#assets').jstree('search', searchString);
-        } );
+    // 트리 노드 드레그 시작
+    onDragStartTreeNode : function( e ) {
+        cc.log( Renderer_assets.Tag, "*** drag start *** : ", e.target.innerText );
+        e.originalEvent.dataTransfer.setData( "spriteName", e.target.innerText );
+    },
+
+    //
+    onchangeInputFind : function( event ) {
+        cc.log( Renderer_assets.Tag, "*** find asset *** : ", event.target.value );
+
+        var searchString = event.target.value;
+        $('#assets').jstree('search', searchString);
     },
 
     isExistAsset : function( id, parentID ) {
