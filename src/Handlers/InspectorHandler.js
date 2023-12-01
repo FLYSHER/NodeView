@@ -185,18 +185,18 @@ InspectorHandler.prototype.onClickApply = function(){
 };
 InspectorHandler.prototype._applyNodeAttribute = function(){
     var pos = cc.p(0,0);
-    pos.x = this.getElementValue(ElementHandlerKey.NodeProperties.PosX);
-    pos.y = this.getElementValue(ElementHandlerKey.NodeProperties.PosY);
+    pos.x = Number(this.getElementValue(ElementHandlerKey.NodeProperties.PosX));
+    pos.y = Number(this.getElementValue(ElementHandlerKey.NodeProperties.PosY));
     this._currNode.setPosition(pos);
     
     var anchor = cc.p(0,0);
-    anchor.x = this.getElementValue(ElementHandlerKey.NodeProperties.AnchorX);
-    anchor.y = this.getElementValue(ElementHandlerKey.NodeProperties.AnchorY);
+    anchor.x = Number(this.getElementValue(ElementHandlerKey.NodeProperties.AnchorX));
+    anchor.y = Number(this.getElementValue(ElementHandlerKey.NodeProperties.AnchorY));
     this._currNode.setAnchorPoint(anchor);
     
     var content = cc.size(0,0);
-    content.width = this.getElementValue(ElementHandlerKey.NodeProperties.ContentSizeWidth);
-    content.height = this.getElementValue(ElementHandlerKey.NodeProperties.ContentSizeHeight);
+    content.width = Number(this.getElementValue(ElementHandlerKey.NodeProperties.ContentSizeWidth));
+    content.height = Number(this.getElementValue(ElementHandlerKey.NodeProperties.ContentSizeHeight));
     this._currNode.setContentSize(content);
     
     var scale = 1;

@@ -65,7 +65,7 @@ ModalModuleHandler.prototype._onClickButton = function(key){
     
     switch (ModalModuleHandlerKey.ButtonElement[key]) {
         case ModalModuleHandlerKey.ButtonElement.SlotMenu:
-            this._onClickSlotMenu();
+            
             break;
     }
 };
@@ -117,6 +117,9 @@ ModalModuleHandler.prototype._onCreateSlotMenu = function(){
         return;
     
     var slotMenu = new CommonVideoSlotMenu();
+    slotMenu.setButtonEnable(true);
+    slotMenu.setPosition(cc.p(cc.winSize.width/2, cc.winSize.height/2 - 260));
+    
     hierarchyHandler.getSelectedNode().addChild(slotMenu);
     hierarchyHandler.reload();
     this._modal.hide();
@@ -126,6 +129,7 @@ ModalModuleHandler.prototype._isCreateSlotMenuValid = function(){
     if(hierarchyHandler.getNodeNames().indexOf("SlotMenu") !== -1)
         msg = "Slot Menu is already exist. You can't create another.";
     
+    this.createWarningMessage(msg);
     return msg.length === 0;
 };
 

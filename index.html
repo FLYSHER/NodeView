@@ -30,7 +30,7 @@
 </head>
 <body style="padding:0; margin: 0; background: #000;">
 <script src="res/loading.js"></script>
-<div class="flex-container">
+<div class="flex-container no-scroll-bar">
 
     <div id="LeftMenu" class="flex-item left-menu">
 
@@ -42,10 +42,10 @@
                onchange="handleInputFileChange(this.files)"/>
 
         <h5 style="font-weight: bold">Hierarchy</h5>
-        <div id="hierarchy" class="hierarchy"></div>
+        <div id="hierarchy" class="hierarchy no-scroll-bar"></div>
 
         <h5 style="font-weight: bold; margin-top: 20px">Resources</h5>
-        <div id="resourceList" class="resource-list">
+        <div id="resourceList" class="resource-list no-scroll-bar">
             <div id="imageFolder" class="image-folder">
                 <button id="btnImageFolder" class="btn-image-folder">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
@@ -73,11 +73,11 @@
     <canvas id="gameCanvas" width="480" height="720"></canvas>
 
 
-    <div id="RightMenu" class="flex-item right-menu">
+    <div id="RightMenu" class="flex-item right-menu no-scroll-bar">
         <div class="inspector-title">
             <h1 style="color: #776B5D">Inspector</h1>
         </div>
-        <div id="Inspector" class="inspector-panel">
+        <div id="Inspector" class="inspector-panel no-scroll-bar">
             <div class="inspector-item-list"></div>
         </div>
         <div id="divApply" class="inspector-apply-div">

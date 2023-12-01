@@ -86,7 +86,7 @@ FileHandler.prototype.processFileData = function (url, fileContents, ext, cb) {
     let fileName = cc.path.mainFileName(url);
     switch (ext) {
         case ".fnt":
-            cc.loader.cache["image/" + url] = cc._fntLoader.parseFnt(fileContents, "image/" + url);
+            cc.loader.cache["image/" + url] = _fntLoader.parseFnt(fileContents, "image/" + url);
             break;
         case ".plist":
             var plistUrl = 'image/'+url;
