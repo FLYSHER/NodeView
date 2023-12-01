@@ -2,11 +2,11 @@ var eModalContent = null;
 var eModalDetail = null;
 
 /** @type {ModalHandler} */
-var modalHandler = null;
+var modalNodeHandler = null;
 document.addEventListener("DOMContentLoaded", function(){
     eModalContent = document.getElementById("modalContent");
     eModalDetail = document.getElementById("modalDetail");
-    modalHandler = new ModalHandler();
+    modalNodeHandler = new ModalHandler();
 });
 ModalHandlerKey = {
     Type : {
@@ -54,7 +54,7 @@ ModalHandler.prototype._init = function(){
 ModalHandler.prototype._initModalElement = function(){
     this._modal = new bootstrap.Modal(document.getElementById("exampleModal"));
     var self = this;
-    document.getElementById("btnModalOpen").addEventListener("click", function(){
+    document.getElementById("btnModalOpenNode").addEventListener("click", function(){
         self._modal.show();
     })
 };

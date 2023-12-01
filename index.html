@@ -59,9 +59,13 @@
             </div>
         </div>
         <br/>
-        <button type="button" id="btnModalOpen" class="btn btn-success">
-            노드 생성
-        </button>
+        <div class="btn-group btn-file-group" role="group" aria-label="Basic example">
+            <button type="button" id="btnModalOpenNode" class="btn btn-success">
+                노드 생성
+            </button>
+            <button type="button" class="btn btn-primary" id="btnModalOpenModule">모듈 생성</button>
+        </div>
+        
         <br/>
     </div>
 
@@ -86,7 +90,7 @@
 
 </div>
 
-<!-- Modal -->
+<!-- Modal Node -->
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -139,6 +143,36 @@
     </div>
 </div>
 
+<!-- Modal Module -->
+<div class="modal fade" id="moduleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5">Create Module</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body modal-creator-content" id="modalModuleContent">
+                <div class="modal-category-list">
+                    <div class="modal-item" id="modalModuleItemSlotMenu">
+                        <img src="./res/imgSlotMenu.png" class="rounded modal-item-img" alt="...">
+                        <h5>Slot Menu</h5>
+                    </div>
+                </div>
+                <div class="modal-item-detail" id="modalModuleDetail">
+                    <div class="modal-item-detail-panel" id="modalModuleDetailSlotMenu">
+                        <h3>SlotMenu</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <span id="modalModuleWarning" class="modal-warning"></span>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" id="btnCreateModule" class="btn btn-primary">Create</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     (function () {
         var nav = window.navigator;
@@ -161,6 +195,7 @@
 <script src="src/Handlers/windowHandler.js"></script>
 <script src="src/Handlers/InspectorHandler.js"></script>
 <script src="src/Handlers/hierarchyHandler.js"></script>
-<script src="src/Handlers/modalHandler.js"></script>
+<script src="src/Handlers/modalNodeHandler.js"></script>
+<script src="src/Handlers/modalMoudleHandler.js"></script>
 </body>
 </html>

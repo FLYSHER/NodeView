@@ -48,6 +48,34 @@ InspectorHandler.prototype.createPosition = function () {
     inputX.value = pos.x;
     var inputY = this._eHandler.getElement("input_posY");
     inputY.value = pos.y;
+    
+    // make center positioning button
+    var parentNode = this._currNode.getParent();
+    if(!!parentNode && parentNode.hasOwnProperty("_contentSize") && parentNode.getContentSize().width > 0 && parentNode.getContentSize().height > 0)
+        this._createBtnCenterPos();
+};
+InspectorHandler.prototype._createBtnCenterPos = function(){
+    var span = document.createElement("span");
+    this._eHandler.appendChild(span, this._eHandler.getElement("list_pos"));
+    
+    var btn = document.createElement("button");
+    btn.innerHTML = "Place Center";
+    btn.className = "btn btn-info";
+    var self = this;
+    btn.addEventListener("click", function(evt){
+        var parent = hierarchyHandler.getSelectedNode().getParent(); 
+        if(!!parent && parent.getName() !== "Scene")
+            return;
+        
+        var elemPosX = self._eHandler.getElement("input_posX");
+        var elemPosY = self._eHandler.getElement("input_posY");
+        
+        var contentSize = parent.getContentSize();
+        hierarchyHandler.getSelectedNode().setPosition(cc.p(contentSize.width / 2, contentSize.height / 2));
+        elemPosX.value = contentSize.width / 2;
+        elemPosY.value = contentSize.height / 2;
+    })
+    this._eHandler.appendChild(btn, span);
 };
 InspectorHandler.prototype.createScale = function(){
     this._eHandler.createInputList("list_scale", ["scaleX","scaleY"], ["number","number"]);

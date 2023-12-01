@@ -28,6 +28,8 @@ RockN.GLOBAL_ORDER = {
     COIN_TRAIL     : 5000
 };
 
+window.isNetworkOffLine = false;
+
 // For Resource Loading.
 function convertObjToArr( obj ) {
     var tempArr = [];
@@ -78,6 +80,12 @@ RockN.AutoPositionNode = cc.Node.extend( {
         }
     }
 } );
+
+var SlotUtils = SlotUtils || {};
+SlotUtils.testUtil = SlotUtils.testUtil || {};
+SlotUtils.testUtil.getSpinTestPanel = function(){
+    return null;
+};
 
 function bigNumberToString( num, maxDigit, pointNum, hasT, noComma, roundingRules ) {
     var digit = 1;
@@ -180,6 +188,22 @@ function toLocale( num, isFloat ) {
         s = sx[ 0 ].slice( 0, i ) + s;
         sx[ 0 ] = s;
         return sx.join( '.' );
+    }
+}
+function localeStringToNumber( string ) {
+    if( 0 === string ) {
+        return 0;
+    }
+
+    var res = string.replace(/,/g, "");
+    if( string[ string.length -1 ] === 'K' ) {
+        return parseInt( res, 10 ) * 1000;
+    } else if ( string[ string.length -1 ] === 'M' ) {
+        return parseInt( res, 10 ) * 1000000;
+    } else if ( string[ string.length -1 ] === 'B' ) {
+        return parseInt( res, 10 ) * 1000000000;
+    } else {
+        return parseInt( res, 10 );
     }
 }
 

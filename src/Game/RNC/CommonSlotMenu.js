@@ -133,7 +133,7 @@ var CommonVideoSlotMenu = RockN.AutoPositionNode.extend({
         this._initBetUnlockGuide();
         this._initVIPWheel();
         this._initListner();
-        // this._initSpinTestPanel();
+        this._initSpinTestPanel();
         this._initBonusWinPanel();
         this._initSpinCountFx();
         this._setBtnOverEnable();
@@ -434,7 +434,7 @@ var CommonVideoSlotMenu = RockN.AutoPositionNode.extend({
 
         switch( type ) {
             case ccui.Widget.TOUCH_ENDED:
-                SoundControl.getInstance().playEffect( slotCommon.ComboButtonClick );
+                // SoundControl.getInstance().playEffect( slotCommon.ComboButtonClick );
                 this._autoSpinCountTable.setVisible(!this._autoSpinCountTable.isVisible());
                 break;
         }
@@ -494,7 +494,7 @@ var CommonVideoSlotMenu = RockN.AutoPositionNode.extend({
                     if( this._currSelectedAutoSpin === 'I' || this._currSelectedAutoSpin === 'T' )
                         spinLog = 0;
 
-                    LogHandler.getInst().sendButtonEventLogToServer(LogHandler.BUTTON_EVENT.HOLD_FOR_AUTO_SPIN, spinLog);
+                    // LogHandler.getInst().sendButtonEventLogToServer(LogHandler.BUTTON_EVENT.HOLD_FOR_AUTO_SPIN, spinLog);
                     //////////////////////////////////////////////////////////////////////////////
                 }
                 else
@@ -514,10 +514,10 @@ var CommonVideoSlotMenu = RockN.AutoPositionNode.extend({
     onFastTouch : function( sender, type ) {
         switch( type ) {
             case ccui.Widget.TOUCH_ENDED:
-                SoundControl.getInstance().playEffect( globalCommon.Click );
+                // SoundControl.getInstance().playEffect( globalCommon.Click );
                 this._imgFastOn.setVisible(!this._imgFastOn.isVisible());
                 this._isFastMode = !this._isFastMode;
-                LogHandler.getInst().sendButtonEventLogToServer(LogHandler.BUTTON_EVENT.FAST, this._isFastMode?1:0);
+                // LogHandler.getInst().sendButtonEventLogToServer(LogHandler.BUTTON_EVENT.FAST, this._isFastMode?1:0);
                 break;
         }
     },
@@ -527,20 +527,20 @@ var CommonVideoSlotMenu = RockN.AutoPositionNode.extend({
 
         switch( type ) {
             case ccui.Widget.TOUCH_ENDED:
-                SoundControl.getInstance().playEffect( globalCommon.Click );
+                // SoundControl.getInstance().playEffect( globalCommon.Click );
                 if( this._betIndex < this._betTable.length - 1 ){
                     if( this.isBetEnable( this._betTable[ this._betIndex+1 ] * this._betLines ) === true ){
                         this._prevBetIndex = this._betIndex;
                         this._betIndex++;
                         this._betPerLine   = this._betTable[ this._betIndex ];
                         this._onChangeBet();
-                        LogHandler.getInst().sendEvent( LogHandler.EVENT.CLICK_BET_PLUS, {
-                            id       : RockN.Player.playerID,
-                            grade    : RockN.Player.grade,
-                            level    : RockN.Player.level,
-                            platform : 'web',
-                            slotMenu : 0
-                        }, null );
+                        // LogHandler.getInst().sendEvent( LogHandler.EVENT.CLICK_BET_PLUS, {
+                        //     id       : RockN.Player.playerID,
+                        //     grade    : RockN.Player.grade,
+                        //     level    : RockN.Player.level,
+                        //     platform : 'web',
+                        //     slotMenu : 0
+                        // }, null );
                     }
                 }
                 break;
@@ -552,7 +552,7 @@ var CommonVideoSlotMenu = RockN.AutoPositionNode.extend({
 
         switch( type ) {
             case ccui.Widget.TOUCH_ENDED:
-                SoundControl.getInstance().playEffect( globalCommon.Click );
+                // SoundControl.getInstance().playEffect( globalCommon.Click );
                 if( this._betIndex > 0 ){
                     var newBetIndex = this._betIndex - 1;
                     if( newBetIndex >= this.betTable.length ) {
@@ -563,13 +563,13 @@ var CommonVideoSlotMenu = RockN.AutoPositionNode.extend({
                         this._betIndex = newBetIndex;
                         this._betPerLine   = this._betTable[ this._betIndex ];
                         this._onChangeBet();
-                        LogHandler.getInst().sendEvent( LogHandler.EVENT.CLICK_BET_MINUS, {
-                            id       : RockN.Player.playerID,
-                            grade    : RockN.Player.grade,
-                            level    : RockN.Player.level,
-                            platform : 'web',
-                            slotMenu : 0
-                        }, null );
+                        // LogHandler.getInst().sendEvent( LogHandler.EVENT.CLICK_BET_MINUS, {
+                        //     id       : RockN.Player.playerID,
+                        //     grade    : RockN.Player.grade,
+                        //     level    : RockN.Player.level,
+                        //     platform : 'web',
+                        //     slotMenu : 0
+                        // }, null );
                     }
                 }
                 break;
@@ -977,7 +977,7 @@ var CommonVideoSlotMenu = RockN.AutoPositionNode.extend({
             if( isSuperRichBet ) {
                 this._wheelChangeAR.setVisible(true);
                 this._wheelChangeAR.getAnimation().play( 'super' );
-                SoundControl.getInstance().playEffect( slotCommon.EnableSuperRichBet );
+                // SoundControl.getInstance().playEffect( slotCommon.EnableSuperRichBet );
             }
             return;
         }
@@ -986,10 +986,10 @@ var CommonVideoSlotMenu = RockN.AutoPositionNode.extend({
             this._wheelChangeAR.setVisible(true);
             if( isSuperRichBet ) {
                 this._wheelChangeAR.getAnimation().play( 'super' );
-                SoundControl.getInstance().playEffect( slotCommon.EnableSuperRichBet );
+                // SoundControl.getInstance().playEffect( slotCommon.EnableSuperRichBet );
             } else {
                 this._wheelChangeAR.getAnimation().play( 'change' );
-                SoundControl.getInstance().playEffect( slotCommon.VipWheelChange );
+                // SoundControl.getInstance().playEffect( slotCommon.VipWheelChange );
             }
         }
     },
@@ -1554,7 +1554,7 @@ var CommonSlotMenu_ExtraBetPanel = cc.Node.extend({
         if( this._isSpin )
             return;
 
-        SoundControl.getInstance().playEffect( globalCommon.Click );
+        // SoundControl.getInstance().playEffect( globalCommon.Click );
         switch( type ){
             case ccui.CheckBox.EVENT_SELECTED:
                 this._changeExtraBetState(this.STATE.ON);
@@ -1570,7 +1570,7 @@ var CommonSlotMenu_ExtraBetPanel = cc.Node.extend({
 
         switch( type ){
             case ccui.Widget.TOUCH_ENDED:
-                SoundControl.getInstance().playEffect( globalCommon.Click );
+                // SoundControl.getInstance().playEffect( globalCommon.Click );
                 if( this._currState === this.STATE.ON )
                     this._changeExtraBetState(this.STATE.OFF);
                 else if( this._currState === this.STATE.OFF )
@@ -1623,7 +1623,7 @@ var CommonSlotMenu_ExtraBetPanel = cc.Node.extend({
                 this._btnBig.setSelected(false);
                 this._btnBig.setEnabled(false);
                 this._playExtraBetEffect(this.EFFECT.OFF,0);
-                SoundControl.getInstance().playEffect( globalCommon.couponOff );
+                // SoundControl.getInstance().playEffect( globalCommon.couponOff );
                 if( this._extraBetCallback !== null )
                     this._extraBetCallback(false);
                 break;
@@ -1658,8 +1658,8 @@ var CommonSlotMenu_ExtraBetPanel = cc.Node.extend({
             if( !!this._extraBetEffectTrack[index] ){
                 this._extraBetEffectAR.setVisible(true);
                 this._extraBetEffectAR.getAnimation().play(this._extraBetEffectTrack[index],-1,loop);
-                if( !!this._extraBetEffectSnd )
-                    SoundControl.getInstance().playEffect( this._extraBetEffectSnd );
+                // if( !!this._extraBetEffectSnd )
+                    // SoundControl.getInstance().playEffect( this._extraBetEffectSnd );
             }
             else{
                 this._extraBetEffectAR.getAnimation().stop();

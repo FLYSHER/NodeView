@@ -112,9 +112,9 @@ FileHandler.prototype.processFileData = function (url, fileContents, ext, cb) {
             cc.loader.cache[url] = dic;
             if(!!dic["armature_data"]) {
                 ccs.armatureDataManager.addArmatureFileInfo(url);
-                modalHandler.addArmatureData(url);
+                modalNodeHandler.addArmatureData(url);
             } else {
-                modalHandler.addUIWidgetData(url);
+                modalNodeHandler.addUIWidgetData(url);
             }
             break;
     }
