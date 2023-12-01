@@ -28,7 +28,7 @@
             integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
             crossorigin="anonymous"></script>
 </head>
-<body style="padding:0; margin: 0; background: #000;">
+<body class="no-scroll-bar" style="padding:0; margin: 0; background: #000;">
 <script src="res/loading.js"></script>
 
 <!-- Top Navi -->
@@ -52,6 +52,10 @@
             <li><a id="btnExportScene" class="dropdown-item" href="#">Export Scene</a></li>
             <li><a id="btnExportResources" class="dropdown-item" href="#">Export Resources</a></li>
         </ul>
+    </div>
+
+    <div id="spinner" class="spinner-border text-secondary loading-custom" role="status">
+        <span class="visually-hidden">Loading...</span>
     </div>
 </div>
 

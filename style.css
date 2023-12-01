@@ -1,4 +1,7 @@
 /*Global*/
+body {
+    overflow: scroll;
+}
 button {
     all : unset;
 }
@@ -8,6 +11,10 @@ button {
 
 /*Top Navi*/
 .top-navi {
+    position : sticky;
+    top : 0;
+    z-index: 99;
+    
     background-color: #B0926A;
     width : 100vw;
     min-height: 30px;
@@ -25,6 +32,9 @@ button {
 .btn-dropdown-custom {
     border-right : 1px solid #E1C78F;
     border-radius: unset;
+}
+.loading-custom{
+    visibility: hidden;
 }
 
 /*Main*/
@@ -57,7 +67,7 @@ button {
 .resource-list {
     width : 90%;
     background-color: #DED0B6;
-    min-height: 300px;
+    height: 300px;
 
     display : flex;
     align-items: flex-start;
@@ -133,6 +143,8 @@ button {
 .inspector-panel {
     width: 100%;
     overflow: scroll;
+    
+    max-height: 78vh;
 }
 .inspector-item-list {
     width: 100%;

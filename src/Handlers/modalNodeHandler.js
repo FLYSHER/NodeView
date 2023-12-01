@@ -226,7 +226,7 @@ ModalHandler.prototype._createArmature = function(){
     
     hierarchyHandler.getSelectedNode().addChild(ar);
     hierarchyHandler.reload();
-    hierarchyHandler.setResourceName(nodeNameElem.value, ARName);
+    hierarchyHandler.setResourceName(nodeNameElem.value, selectElem.options[selectIndex].value);
     
     nodeNameElem.value = "";
     selectElem.options.selectedIndex = 0;

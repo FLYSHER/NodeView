@@ -11,6 +11,7 @@ ImportHandlerKeys = {
 
 function ImportHandler() {
     this._currFile = null;
+    this._isImportEnable = true;
     this._init();
 }
 
@@ -28,17 +29,12 @@ ImportHandler.prototype._initButtons = function () {
     }
 };
 ImportHandler.prototype._onClickButton = function (key) {
-    document.getElementById("inputFileAdd").click();
-    return;
-
-    switch (ImportHandlerKeys.ButtonElement[key]) {
-        case ImportHandlerKeys.ButtonElement.Scene:
-            this._onClickScene();
-            break;
-        case ImportHandlerKeys.ButtonElement.Resources:
-            this._onClickResources();
-            break;
+    if(this._isImportEnable === false){
+        alert("Resource is loading now... please wait.");
+        return;
     }
+    
+    document.getElementById("inputFileAdd").click();
 };
 
 // Event when json load finish
@@ -84,32 +80,36 @@ ImportHandler.prototype._createScene = function () {
             return;
         }
 
-        if (!nodeData["NodeType"])
+        if (nodeData["nodeType"] === undefined)
             return;
 
         var node = null;
-        switch (nodeData["NodeType"]) {
+        switch (nodeData["nodeType"]) {
             case ExportHandlerKey.NodeType.Scene:
+                for(var key in nodeData.children){
+                    createSceneRecursive(nodeData.children[key], scene);
+                }
                 break;
             case ExportHandlerKey.NodeType.Node:
                 node = new cc.Node();
                 break;
             case ExportHandlerKey.NodeType.Armature:
-                node = new ccs.Armature(nodeData.resourceName);
+                node = new ccs.Armature(cc.path.mainFileName(nodeData.resourceName));
                 break;
             case ExportHandlerKey.NodeType.UIWidget:
                 if (!!nodeData.resourceName)
-                    node = new ccs.uiReader.widgetFromJsonFile(nodeData.resourceName);
+                    node = ccs.uiReader.widgetFromJsonFile(nodeData.resourceName);
                 break;
         }
         
-        self._applyNodeAttr(nodeData, node);
-        parent.addChild(node);
-        
-        var childrenkeys = Object.keys(nodeData.children);
-        for(var i=0; i<childrenkeys.length; i++){
-            var childkey = childrenkeys[i];
-            createSceneRecursive(nodeData.children[childkey], node);
+        if(!!node) {
+            self._applyNodeAttr(nodeData, node);
+            parent.addChild(node);
+            var childrenkeys = Object.keys(nodeData.children);
+            for(var i=0; i<childrenkeys.length; i++){
+                var childkey = childrenkeys[i];
+                createSceneRecursive(nodeData.children[childkey], node);
+            }
         }
     }
 
@@ -132,12 +132,30 @@ ImportHandler.prototype._applyNodeAttr = function (data, node) {
 
 // Import Resources
 ImportHandler.prototype._onClickResources = function () {
+    this._isImportEnable = false;
+    document.getElementById("spinner").style.visibility = "visible";
+    
+    
     for(var key in this._currFile.resources) {
         var resPath = this._currFile.resources[key];
-        if(!!cc.loader.cache[resPath])
-            continue;
-        
         cc.loader.load(resPath);
-        fileHandler.appendItem(resPath, cc.path.extname(resPath) !== ".ExportJson");
     }
+    
+    var self = this;
+    setTimeout(function(){
+        self._isImportEnable = true;
+        document.getElementById("spinner").style.visibility = "hidden";
+        for(var key in self._currFile.resources) {
+            var resPath = self._currFile.resources[key];
+            var dic = cc.loader.cache[resPath];
+            if(!!dic["armature_data"]) {
+                ccs.armatureDataManager.addArmatureFileInfo(resPath);
+                modalNodeHandler.addArmatureData(resPath);
+            } else {
+                modalNodeHandler.addUIWidgetData(resPath);
+            }
+
+            fileHandler.appendItem(resPath, cc.path.extname(resPath) !== ".ExportJson");
+        }
+    }, 10000);
 };
