@@ -63,6 +63,7 @@ ImportHandler.prototype._onClickScene = function () {
     window.GameScene = nextScene;
     RockN.GameScene = nextScene;
     hierarchyHandler.reload();
+    inspectorHandler.reset();
 };
 ImportHandler.prototype._createScene = function () {
     if (this._currFile.name !== "Scene") {
@@ -71,6 +72,7 @@ ImportHandler.prototype._createScene = function () {
     }
 
     var scene = new EditorScene();
+    scene.removeAllChildren(true);
 
     var self = this;
 
