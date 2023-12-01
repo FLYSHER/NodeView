@@ -202,6 +202,9 @@ HierarchyHandler.prototype.resetElemStatus = function(){
 
 
 // Getter
+HierarchyHandler.prototype.getSceneGraph = function(){
+    return this._sceneGraph;
+};
 HierarchyHandler.prototype.getSelectedNode = function(){
     return this._selectedNode;
 };

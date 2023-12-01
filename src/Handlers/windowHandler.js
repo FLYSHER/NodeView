@@ -107,6 +107,9 @@ FileHandler.prototype.processFileData = function (url, fileContents, ext, cb) {
                 );
             }
             break;
+        case ".json":
+            cc.loader.cache[url] = JSON.parse(fileContents);
+            break;
         case ".exportjson":
             dic = JSON.parse(fileContents);
             cc.loader.cache[url] = dic;

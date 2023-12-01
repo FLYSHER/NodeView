@@ -24,10 +24,6 @@ var EditorScene = cc.Scene.extend({
         this._inputLabel = new cc.LabelTTF("Please Add File.","Arial", 38);
         this._inputLabel.setName("InputLabel");
         this._gameNode.addChild(this._inputLabel);
-        
-        this._testNode = new cc.Node();
-        this.addChild(this._testNode);
-        this._testNode.setName("TestNode");
     },
     
     onEnterTransitionDidFinish: function(){

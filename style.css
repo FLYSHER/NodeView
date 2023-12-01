@@ -1,3 +1,4 @@
+/*Global*/
 button {
     all : unset;
 }
@@ -5,6 +6,28 @@ button {
     display: none;
 }
 
+/*Top Navi*/
+.top-navi {
+    background-color: #B0926A;
+    width : 100vw;
+    min-height: 30px;
+    
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+.top-navi-title {
+    margin: 10px 20px;
+}
+.top-navi-item {
+    margin : 5px;
+}
+.btn-dropdown-custom {
+    border-right : 1px solid #E1C78F;
+    border-radius: unset;
+}
+
+/*Main*/
 .flex-container{
     background-color: #DADDB1;
     display: flex;
@@ -12,11 +35,9 @@ button {
     justify-content: center;
     overflow: scroll;
 }
-
 .gameContainer {
     float: inside;
 }
-
 .flex-item{
     width: 100%;
     height: 100%;
@@ -33,6 +54,16 @@ button {
 .left-menu {
     flex : 1;
 }
+.resource-list {
+    width : 90%;
+    background-color: #DED0B6;
+    min-height: 300px;
+
+    display : flex;
+    align-items: flex-start;
+    overflow: scroll;
+    flex-direction: column;
+}
 .btn-file-group {
     padding: 10px;
 }
@@ -40,16 +71,6 @@ button {
     float : left;
 }
 .file-getter {
-}
-.resource-list {
-    width : 90%;
-    background-color: #DED0B6;
-    min-height: 300px;
-    
-    display : flex;
-    align-items: flex-start;
-    overflow: scroll;
-    flex-direction: column;
 }
 
 .image-folder {

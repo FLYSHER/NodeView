@@ -30,6 +30,32 @@
 </head>
 <body style="padding:0; margin: 0; background: #000;">
 <script src="res/loading.js"></script>
+
+<!-- Top Navi -->
+<div class="top-navi">
+    <h1 class="top-navi-title">Slot Editor</h1>
+    
+    <div class="dropdown top-navi-item">
+        <button class="btn dropdown-toggle btn-dropdown-custom" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Import
+        </button>
+        <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="#">Import Scene</a></li>
+            <li><a class="dropdown-item" href="#">Import Resources</a></li>
+        </ul>
+    </div>
+    <div class="dropdown top-navi-item">
+        <button class="btn dropdown-toggle btn-dropdown-custom" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Export
+        </button>
+        <ul class="dropdown-menu">
+            <li><a id="btnExportScene" class="dropdown-item" href="#">Export Scene</a></li>
+            <li><a id="btnExportResources" class="dropdown-item" href="#">Export Resources</a></li>
+        </ul>
+    </div>
+</div>
+
+<!-- Contents -->
 <div class="flex-container no-scroll-bar">
 
     <div id="LeftMenu" class="flex-item left-menu">
@@ -196,6 +222,8 @@
 <script src="src/Handlers/InspectorHandler.js"></script>
 <script src="src/Handlers/hierarchyHandler.js"></script>
 <script src="src/Handlers/modalNodeHandler.js"></script>
-<script src="src/Handlers/modalMoudleHandler.js"></script>
+<script src="src/Handlers/modalModuleHandler.js"></script>
+<script src="src/Handlers/ExportHandler.js"></script>
+
 </body>
 </html>
