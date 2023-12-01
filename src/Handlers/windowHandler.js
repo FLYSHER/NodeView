@@ -51,7 +51,7 @@ FileHandler.prototype.addFileToResourceList = function (file) {
     var extName = cc.path.extname(file.name);
     this.appendItem(file.name, extName !== ".ExportJson");
     var mainName = cc.path.mainFileName(file.name)
-    ResourceMap[mainName] = file;
+    ResourceMap[file.name] = file;
     this.readFile(file);
 }
 
@@ -108,7 +108,10 @@ FileHandler.prototype.processFileData = function (url, fileContents, ext, cb) {
             }
             break;
         case ".json":
-            cc.loader.cache[url] = JSON.parse(fileContents);
+            var parsedJson = JSON.parse(fileContents);
+            cc.loader.cache[url] = parsedJson;
+            if(!!parsedJson["useInSlotEditor"] && parsedJson["useInSlotEditor"] === true)
+                importHandler.readFile(url);
             break;
         case ".exportjson":
             dic = JSON.parse(fileContents);
@@ -137,7 +140,7 @@ FileHandler.prototype.appendItem = function (name, isImage) {
 
 window.fileHandler = new FileHandler();
 
-document.getElementById("btnFileAdd").addEventListener('click',()=>{
+document.getElementById("btnFileAdd").addEventListener('click',function(evt){
     document.getElementById("inputFileAdd").click();
 });
 

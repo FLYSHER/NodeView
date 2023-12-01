@@ -2,10 +2,21 @@ document.addEventListener("DOMContentLoaded", function(){
     window.exportHandler = new ExportHandler();
 });
 
-ExportHandlerKey = {
+var ExportHandlerKey = {
     ButtonElement : {
         Scene : "btnExportScene",
         Resources : "btnExportResources"
+    },
+    ExportType : {
+        Scene : 0,
+        Resources : 1,
+        TagName : "exportType",
+    },
+    NodeType : {
+        Scene : 0,
+        Node : 1,
+        Armature : 2,
+        UIWidget : 3,
     },
 };
 
@@ -49,6 +60,9 @@ ExportHandler.prototype._onClickExportScene = function(){
         alert("Creating JSON File is failed.");
         return;
     }
+
+    jsonObject["useInSlotEditor"] = true;
+    jsonObject[ExportHandlerKey.ExportType.TagName] = ExportHandlerKey.ExportType.Scene;
     
     this.exportToJsonFile(jsonObject);
 };
@@ -90,43 +104,65 @@ ExportHandler.prototype._makeNodeObject = function(sceneObject){
             visible : false,
             zOrder : 0,
         },
-        children : {},
+        nodeType : ExportHandlerKey.NodeType.Node,
+        resourceName : sceneObject.resourceName,
+        children : {}
     };
     
     retVal.name = node.getName();
-    
     retVal.node.posX = node.getPositionX();
     retVal.node.posY = node.getPositionY();
-    
     retVal.node.scaleX = node.getScaleX();
     retVal.node.scaleY = node.getScaleY();
-    
     retVal.node.anchorX = node.getAnchorPoint().x;
     retVal.node.anchorY = node.getAnchorPoint().y;
-    
     retVal.node.contentSizeWidth = node.getContentSize().width;
     retVal.node.contentSizeHeight = node.getContentSize().height;
-    
     retVal.node.visible = node.visible;
-    
     retVal.node.zOrder = node.getLocalZOrder();
+    
+    if(sceneObject.node instanceof cc.Scene)
+        retVal.nodeType = ExportHandlerKey.NodeType.Scene;
+    
+    if(sceneObject.node instanceof ccs.Armature)
+        retVal.nodeType = ExportHandlerKey.NodeType.Armature;
+    
+    if(sceneObject.node instanceof ccui.Widget)
+        retVal.nodeType = ExportHandlerKey.NodeType.UIWidget;
     
     return retVal;
 };
 
 // Export Resources
-ExportHandler.prototype._onClickExportResources = function(){};
+ExportHandler.prototype._onClickExportResources = function(){
+    var retVal = {
+        resources : {},
+    };
+    for(var key in ResourceMap) {
+        var fileName = ResourceMap[key].name;
+        var extName = cc.path.extname(fileName); 
+        if(extName !== ".ExportJson")
+            fileName = "image/"+fileName;
+        
+        retVal.resources[key] = fileName;
+    }
+    
+    retVal["useInSlotEditor"] = true;
+    retVal[ExportHandlerKey.ExportType.TagName] = ExportHandlerKey.ExportType.Resources;
+    
+    this.exportToJsonFile(retVal);
+};
 
 // Export
 ExportHandler.prototype.exportToJsonFile = function(object){
     // get File Name to make.
-    var name = prompt("파일명을 입력하세요.", "Scene");
+    var name = prompt("파일명을 입력하세요.", "download");
     if(name === null)
         return;
 
     name += ".json";
     
-    // if object is not string, make it stringify.
+    // if object is not string, make it string.
     var obj = null;
     if(typeof object !== "string") {
         try {

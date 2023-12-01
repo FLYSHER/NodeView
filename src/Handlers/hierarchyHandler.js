@@ -69,6 +69,10 @@ HierarchyHandler.prototype._createSceneGraph = function(){
                     node : children[i],
                     children : {},
                 };
+                
+                if(children[i] instanceof ccui.Widget && children[i].getWidgetParent() === null)
+                    retVal["rootUI"] = true;
+                
                 self.insertChild(node.getName(), retVal);
                 self._nodeNames.push(childName);
                 setGraph(children[i]);
@@ -255,6 +259,9 @@ HierarchyHandler.prototype.foldElementRecursive = function(nodeName, isfold){
         if(child[keys[i]].htmlElement.isFold === false)
             this.foldElementRecursive(child[keys[i]].name, isfold);
     }
+};
+HierarchyHandler.prototype.setResourceName = function(nodeName, resourceName) {
+    this.findObjectRecursive(nodeName).resourceName = resourceName;
 };
 
 window.hierarchyHandler = new HierarchyHandler();

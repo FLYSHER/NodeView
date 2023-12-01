@@ -226,6 +226,7 @@ ModalHandler.prototype._createArmature = function(){
     
     hierarchyHandler.getSelectedNode().addChild(ar);
     hierarchyHandler.reload();
+    hierarchyHandler.setResourceName(nodeNameElem.value, ARName);
     
     nodeNameElem.value = "";
     selectElem.options.selectedIndex = 0;
@@ -270,6 +271,7 @@ ModalHandler.prototype._createUIWidget = function(){
     
     hierarchyHandler.getSelectedNode().addChild(uiWidget);
     hierarchyHandler.reload();
+    hierarchyHandler.setResourceName(nodeName.value, uiName);
     
     selectElem.options.selectedIndex = 0;
     nodeName.value = "";
