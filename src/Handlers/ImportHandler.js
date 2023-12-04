@@ -64,6 +64,8 @@ ImportHandler.prototype._onClickScene = function () {
     RockN.GameScene = nextScene;
     hierarchyHandler.reload();
     inspectorHandler.reset();
+    
+    toastHandler.showMessage("Import Scene Succeed!", ToastHandlerKey.Status.Code.Success);
 };
 ImportHandler.prototype._createScene = function () {
     if (this._currFile.name !== "Scene") {
@@ -159,5 +161,7 @@ ImportHandler.prototype._onClickResources = function () {
 
             fileHandler.appendItem(resPath, cc.path.extname(resPath) !== ".ExportJson");
         }
+        
+        toastHandler.showMessage("Import Resources Succeed!", ToastHandlerKey.Status.Code.Success);
     }, 10000);
 };

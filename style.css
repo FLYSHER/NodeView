@@ -220,6 +220,11 @@ button {
     color : red;
 }
 
+.toast-status {
+    width : 10px;
+    height: 10px;
+}
+
 .inputFileAdd {
     display: none;
 }

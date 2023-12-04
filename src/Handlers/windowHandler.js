@@ -2,11 +2,20 @@
 window.GameScene = {};
 window.ResourceMap = {};
 
-var eResourceList = document.getElementById("resourceList");
-var eBtnImageFolder = document.getElementById("btnImageFolder");
-var eImageList = document.getElementById("imageList");
-eBtnImageFolder.addEventListener('click', function(e){
-    toggleImageList();
+document.addEventListener("DOMContentLoaded", function(){
+    window.eResourceList = document.getElementById("resourceList");
+    window.eBtnImageFolder = document.getElementById("btnImageFolder");
+    window.eImageList = document.getElementById("imageList");
+    eBtnImageFolder.addEventListener('click', function(e){
+        toggleImageList();
+    });
+    
+    window.fileHandler = new FileHandler();
+    window.toastHandler = new ToastHandler();
+
+    document.getElementById("btnFileAdd").addEventListener('click',function(evt){
+        document.getElementById("inputFileAdd").click();
+    });
 });
 
 var isImageListShow = false;
@@ -150,9 +159,39 @@ FileHandler.prototype.isImageValid = function(name){
     return FileHandlerKey.ImageList.indexOf(fileName) !== -1;
 };
 
-window.fileHandler = new FileHandler();
 
-document.getElementById("btnFileAdd").addEventListener('click',function(evt){
-    document.getElementById("inputFileAdd").click();
-});
+var ToastHandlerKey = {
+    Status : {
+        Code : {
+            Fail : 0,
+            Success : 1,
+            Primary : 2,
+        },
+        imgPath : [
+            "./res/toast_fail.png",
+            "./res/toast_success.png",
+            "./res/toast_primary.png"
+        ],
+        Title : [
+            "Fail",
+            "Success",
+            "Notice"
+        ],
+    },
+};
+function ToastHandler() {
+    this._toastDiv = document.getElementById("toast");
+    this._toastMsg = document.getElementById("toastBody");
+    this._toastTime = document.getElementById("toastTime");
+    this._toastStatus = document.getElementById("toastStatus");
+    this._toastStatusTitle = document.getElementById("toastStatusTitle");
+}
+ToastHandler.prototype.showMessage = function(text, status){
+    this._toastStatus.src = ToastHandlerKey.Status.imgPath[status];
+    this._toastStatusTitle.innerHTML = ToastHandlerKey.Status.Title[status];
+    this._toastMsg.innerHTML = text;
+    this._toastTime.innerHTML = "";
+    const toastBootStrap = bootstrap.Toast.getOrCreateInstance(this._toastDiv);
+    toastBootStrap.show();
+};
 

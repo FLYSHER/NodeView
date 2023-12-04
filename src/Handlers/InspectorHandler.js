@@ -1,7 +1,14 @@
 var eInspectorPanel = document.getElementById("Inspector");
 var eInspectorBtnApply = document.getElementById("btnInspectorApply");
 eInspectorBtnApply.addEventListener("click",function(){
-    inspectorHandler.onClickApply();
+    try {
+        inspectorHandler.onClickApply();
+    } catch(e) {
+        toastHandler.showMessage("Error : Applying node attribute failed.", ToastHandlerKey.Status.Code.Fail);
+        return;
+    }
+    
+    toastHandler.showMessage("Sucess : Applying node attribute succeed.", ToastHandlerKey.Status.Code.Success);
 });
 var eInspectorBtnDelete = document.getElementById("btnInspectorDelete");
 eInspectorBtnDelete.addEventListener("click", function(){
@@ -51,7 +58,7 @@ InspectorHandler.prototype.createPosition = function () {
     
     // make center positioning button
     var parentNode = this._currNode.getParent();
-    if(!!parentNode && parentNode.hasOwnProperty("_contentSize") && parentNode.getContentSize().width > 0 && parentNode.getContentSize().height > 0)
+    if(!!parentNode && parentNode.getName() === "Scene")
         this._createBtnCenterPos();
 };
 InspectorHandler.prototype._createBtnCenterPos = function(){
@@ -238,7 +245,6 @@ ElementHandler.prototype.createItemList = function (listName) {
     this._elementList[listName] = elem;
     return elem;
 };
-
 ElementHandler.prototype.createItemContent = function (pName) {
     var elem = document.createElement("p");
     elem.className = "inspector-item-content";
@@ -246,7 +252,6 @@ ElementHandler.prototype.createItemContent = function (pName) {
     this._elementList[pName] = elem;
     return elem;
 };
-
 ElementHandler.prototype.createItemInput = function (pName, inputType) {
     var elem = document.createElement("input");
     elem.type = inputType;
@@ -256,7 +261,6 @@ ElementHandler.prototype.createItemInput = function (pName, inputType) {
     this._elementList[name] = elem;
     return elem;
 };
-
 ElementHandler.prototype.createInputList = function (listName, pName, inputType) {
     var pNameArr = [];
     if (Array.isArray(pName) === false)
@@ -283,13 +287,11 @@ ElementHandler.prototype.appendChild = function (node, target) {
 ElementHandler.prototype.getElement = function(name){
     return this._elementList[name];
 };
-
-ElementHandler.prototype.createBtnApply = function(){
-    document.getElementById("divApply").style.display = "block";
-};
-
 ElementHandler.prototype.addElement = function(name, elem){
     this._elementList[name] = elem;
+};
+ElementHandler.prototype.createBtnApply = function(){
+    document.getElementById("divApply").style.display = "block";
 };
 
 ElementHandlerKey = {
