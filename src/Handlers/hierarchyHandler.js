@@ -260,8 +260,5 @@ HierarchyHandler.prototype.foldElementRecursive = function(nodeName, isfold){
             this.foldElementRecursive(child[keys[i]].name, isfold);
     }
 };
-HierarchyHandler.prototype.setResourceName = function(nodeName, resourceName) {
-    this.findObjectRecursive(nodeName).resourceName = resourceName;
-};
 
 window.hierarchyHandler = new HierarchyHandler();

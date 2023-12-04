@@ -223,10 +223,10 @@ ModalHandler.prototype._createArmature = function(){
     
     var ar = new ccs.Armature(ARName);
     ar.setName(nodeNameElem.value);
+    ar.attr({customResName : selectElem.options[selectIndex].value});
     
     hierarchyHandler.getSelectedNode().addChild(ar);
     hierarchyHandler.reload();
-    hierarchyHandler.setResourceName(nodeNameElem.value, selectElem.options[selectIndex].value);
     
     nodeNameElem.value = "";
     selectElem.options.selectedIndex = 0;
@@ -268,10 +268,10 @@ ModalHandler.prototype._createUIWidget = function(){
     var uiWidget = ccs.uiReader.widgetFromJsonFile(uiName);
     uiWidget.setAnchorPoint(cc.p(0.5,0.5));
     uiWidget.setName(nodeName.value);
+    uiWidget.attr({customResName : uiName});
     
     hierarchyHandler.getSelectedNode().addChild(uiWidget);
     hierarchyHandler.reload();
-    hierarchyHandler.setResourceName(nodeName.value, uiName);
     
     selectElem.options.selectedIndex = 0;
     nodeName.value = "";

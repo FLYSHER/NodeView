@@ -105,7 +105,7 @@ ExportHandler.prototype._makeNodeObject = function(sceneObject){
             zOrder : 0,
         },
         nodeType : ExportHandlerKey.NodeType.Node,
-        resourceName : sceneObject.resourceName,
+        resourceName : sceneObject.node.customResName,
         children : {}
     };
     
