@@ -4,10 +4,9 @@ Genie.Command.Transform = Genie.Command.Base.extend({
     },
 
     setCommand : function( commandType /* Genie.CommandType */ ) {
-        var value = ( commandType === Genie.CommandType.UNDO ) ? this._args.src : this._args.dest;
+
         var strText,
-            src  = ( commandType === Genie.CommandType.UNDO ) ? this._args.dest : this._args.src,
-            dest = ( commandType === Genie.CommandType.UNDO ) ? this._args.src : this._args.dest;
+            value = ( commandType === Genie.CommandType.UNDO ) ? this._args.src : this._args.dest;
 
         switch ( this._args.strProp ) {
             case 'position':
@@ -15,7 +14,7 @@ Genie.Command.Transform = Genie.Command.Base.extend({
                 Genie.gizmoNode.followTarget( this._targetNode );
                 this.setInspectorView( this.getCommandName(), value );
 
-                strText = cc.formatStr( "move  > x: %d, y: %d ", dest.x, dest.y );
+                strText = cc.formatStr( "move  > x: %d, y: %d ", value.x, value.y );
                 this.setCommandLog( commandType, this._targetNode.getName(), strText );
                 break;
             case 'scale':
@@ -23,7 +22,7 @@ Genie.Command.Transform = Genie.Command.Base.extend({
                 Genie.gizmoNode.followTarget( this._targetNode );
                 this.setInspectorView( this.getCommandName(), cc.p( value.x, value.y ) );
 
-                strText = cc.formatStr( "scale  > x: %d, y: %d ", dest.x, dest.y )
+                strText = cc.formatStr( "scale  > x: %d, y: %d ", value.x, value.y )
                 this.setCommandLog( commandType, this._targetNode.getName(), strText );
                 break;
         }

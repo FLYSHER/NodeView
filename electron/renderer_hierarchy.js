@@ -4,10 +4,30 @@ var Renderer_hierarchy = {
     nodeInstanceIDMap   : {},
     rootLayer           : null,
 
+    MenuPrefix : {
+        Node    : "Node",
+        Sprite  : "SpriteNode",
+    },
+
     init : function( rootLayer ) {
         this.rootLayer = rootLayer;
+        this._initJSTree();
 
-        $('#hierarchy').jstree({
+        cc.eventManager.addCustomListener('onRefreshHierarchy', this.onRefreshTree.bind(this));
+        cc.eventManager.addCustomListener( 'onSelectNodeInMainView', this.onSelectNode.bind(this));
+    },
+
+    _initJSTree : function() {
+        // root node 생성 ( main layer )
+        this.addTreeNode(
+            this.rootLayer.__instanceId,
+            "#",
+            "Root"
+        );
+        this.nodeInstanceIDMap[ this.rootLayer.__instanceId ] = this.rootLayer;
+
+        var self = this;
+        this._jstreeConfig = {
             'core' : {
                 'themes' : {
                     "name": "default-dark",
@@ -19,58 +39,81 @@ var Renderer_hierarchy = {
             },
             "contextmenu" : {
                 "items" : {
-                    "add" : {
-                        "label" : "add",
-                        "action" : function( obj ){
-                            console.log("add > ", obj );
-                        },
-                        "submenu" : {
-                            "node" : {
-                                "label"     : "node",
-                                "action"    : function( obj ) {
-                                    console.log("add node > ", obj );
-                                },
-                            },
-
-                            "component" : {
-                                "label"     : "component",
-                                "action"    : function( obj ) {
-                                    var instanceID = obj.reference.prevObject[0].id;
-                                    var realNode = Renderer_hierarchy.nodeInstanceIDMap[ instanceID ];
-
-                                },
-                            }
-                        }
+                    "addNode"       : {
+                        "label"     : "add Node",
+                        "subMenu"   : {}
                     },
-                    "delete" : {
-                        "label" : "delete",
-                        "action" : function( obj ){
-                            if( !obj.hasOwnProperty( 'reference') ) {
-                                console.log("check! : ", obj );
-                            }
-                            var instanceID = obj.reference.prevObject[0].id;
-                            var realNode = Renderer_hierarchy.nodeInstanceIDMap[ instanceID ];
-                            cc.eventManager.dispatchCustomEvent('onDeleteNode', { cocosNode : realNode })
-                        },
-                    }
+                    "addComponent"  : {
+                        "label"     : "add Component",
+                        "subMenu"   : {}
+                    },
+                    "deleteNode"    : {
+                        "label"     : "delete Node",
+                        "subMenu"   : self.onDeleteNodeByMenu.bind(self)
+                    },
+                    "deleteComponent" : {
+                        "label"     : "delete Component",
+                        "subMenu"   : {}
+                    },
                 }
-
             },
             "plugins": ["search", "contextmenu"],
             "search": {
                 "case_sensitive": false,
                 "show_only_matches": true
             }
-        });
+        }
+
+        this._initContextMenu();
+
+        $('#hierarchy').jstree( this._jstreeConfig );
 
         // 트리 노드 선택 시 이벤트 등록
         $('#hierarchy').on("changed.jstree", this.onchangeSelectedNode.bind(this));
 
         // 노드 검색 시 이벤트 등록
         $('#hierarchy_findInput').change( this.onchangeInputFind );
+    },
 
-        cc.eventManager.addCustomListener('onRefreshHierarchy', this.onRefreshTree.bind(this));
-        cc.eventManager.addCustomListener( 'onSelectNodeInMainView', this.onSelectNode.bind(this));
+    //region [ jsTree ]
+
+    _initContextMenu : function() {
+        var addNodeSubMenu = this._jstreeConfig["contextmenu"]["items"]["addNode"]["subMenu"];
+        this._addSubMenu( addNodeSubMenu, this.MenuPrefix.Node, this.onAddNodeByMenu, this );
+        this._addSubMenu( addNodeSubMenu, this.MenuPrefix.Sprite, this.onAddNodeByMenu, this );
+    },
+
+    _addSubMenu : function( targetMenu, strMenu, selector, target ) {
+        targetMenu[ strMenu ] = { "label" : strMenu, "action" : selector.bind( target, strMenu ) };
+    },
+
+    onAddNodeByMenu : function( obj ) {
+        var parentNodeId = parseInt( obj.reference.prevObject[0].id );
+        var parentNode   = this.nodeInstanceIDMap[parentNodeId];
+
+        if( parentNode ) {
+            var newNode = new cc.Node();
+            newNode.setName( "newNode");
+
+            parentNode.addChild( newNode );
+            this.addTreeNode( newNode.__instanceId, parentNodeId, "newNode", newNode );
+            $(`#hierarchy`).jstree("refresh");
+        }
+    },
+
+    onDeleteNodeByMenu : function( obj ) {
+        var targetNodeID = parseInt( obj.reference.prevObject[0].id );
+        var targetNode   = this.nodeInstanceIDMap[targetNodeID];
+        var parentNode   = targetNode.getParent();
+
+        if( targetNode && parentNode ) {
+
+            this.deleteTreeNode( targetNodeID, parentNode.__instanceId );
+            targetNode.removeFromParent();
+
+            // $(`#hierarchy`).jstree("remove", targetNodeID );
+            $(`#hierarchy`).jstree("refresh");
+        }
     },
 
     onchangeInputFind : function( event ) {
@@ -100,13 +143,12 @@ var Renderer_hierarchy = {
 
     // main view 에서 노드 선택 시
     onSelectNode : function( event ) {
-        var userData    = event.getUserData();
+        var userData= event.getUserData();
         var node    = userData.node;
         var id      = node.__instanceId;
 
         $("#hierarchy").jstree("deselect_all");
         $("#hierarchy").jstree(true).select_node( id.toString() );
-
     },
 
     // jstree를 데이터 대로 재구성
@@ -123,10 +165,7 @@ var Renderer_hierarchy = {
         // console.log("   > ", cocosNode.getName(), cocosNode.__instanceId, cocosNode._className );
 
         var id       = cocosNode.__instanceId;
-
-        if( id !== this.rootLayer.__instanceId ) {
-            this.addTreeNode( id, parentID, cocosNode.getName(), cocosNode );
-        }
+        this.addTreeNode( id, parentID, cocosNode.getName(), cocosNode );
 
         if( !!cocosNode && cocosNode.getChildren ) {
 
@@ -144,7 +183,7 @@ var Renderer_hierarchy = {
                     }
                 }
                 console.log("       > ", child.getName(), child.__instanceId, child._className );
-                loc_parentID = cocosNode.__instanceId === this.rootLayer.__instanceId ? "#" : cocosNode.__instanceId;
+                loc_parentID = cocosNode.__instanceId;
                 this.refreshTree( children[i], loc_parentID, cocosNode  );
             }
         }
@@ -171,6 +210,22 @@ var Renderer_hierarchy = {
             "parent"    : parentID,
             "text"      : text
         });
+    },
+
+    deleteTreeNode : function( id, parentId ) {
+        if( this.isExistNode( id, parentId ) ) {
+            var findIdx = this.hierarchyData.findIndex( function( treeNode ) {
+                return ( treeNode.id === id && parentId === parentId );
+            } );
+
+            if( findIdx < 0 ) {
+                return;
+            }
+
+            this.hierarchyData.splice( findIdx, 1 );
+            delete this.nodeInstanceIDMap[id];
+        }
+
     },
 
     isExistNode : function( id, parentID ) {

@@ -19,7 +19,6 @@ var MainViewLayer = cc.LayerColor.extend({
 
         cc.eventManager.addCustomListener( EVT.MAIN_VIEW.CREATE_UI_NODE, this.onCreateUIFile.bind(this) );
         cc.eventManager.addCustomListener( EVT.MAIN_VIEW.CREATE_AR_NODE, this.onCreateARFile.bind(this) );
-        cc.eventManager.addCustomListener("onDeleteNode", this.onDeleteNode.bind(this));
         cc.eventManager.addCustomListener("onChangeProperty", this.setNodeProperty.bind(this) );
         cc.eventManager.addCustomListener("onChangeNodeInHierarchy", this.setCurrNode.bind(this));
     },
@@ -35,8 +34,6 @@ var MainViewLayer = cc.LayerColor.extend({
         uiRoot.setName( basename );
         uiRoot.addComponent(  new Genie.Component.UIActionView( fileName ) );
         this.addChild( uiRoot );
-
-        // this.currNode = uiRoot;
 
         cc.eventManager.dispatchCustomEvent( "onRefreshHierarchy" );
     },
@@ -62,15 +59,7 @@ var MainViewLayer = cc.LayerColor.extend({
             bone.addComponent( new Genie.Component.BoneView() );
         }
 
-        // this.currNode = ar;
-
         cc.eventManager.dispatchCustomEvent( "onRefreshHierarchy" );
-    },
-
-    onDeleteNode : function( event ) {
-        var userData    = event.getUserData();
-        var node        = userData.cocosNode;
-        cc.log("[event] onDeleteNode >  ", node );
     },
 
     setNodeProperty : function( event ) {
