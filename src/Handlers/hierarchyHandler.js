@@ -48,6 +48,7 @@ HierarchyHandler.prototype.drawHierarchy = function (scene) {
     this._sceneGraph.node = scene;
     this._createSceneGraph();
     this._createHierarchyElement();
+    this.foldAllElement();
 };
 HierarchyHandler.prototype._createSceneGraph = function(){
     var self = this;
@@ -259,6 +260,25 @@ HierarchyHandler.prototype.foldElementRecursive = function(nodeName, isfold){
         if(child[keys[i]].htmlElement.isFold === false)
             this.foldElementRecursive(child[keys[i]].name, isfold);
     }
+};
+HierarchyHandler.prototype.foldAllElement = function(){
+    function foldAll(object) {
+        var keys = Object.keys(object.children);
+        if(keys.length > 0) {
+            object.htmlElement.isFold = true;
+            object.htmlElement.parentNode.children[1].style.display = "none";
+        }
+        
+        object.htmlElement.style.display = "none";
+        for(var i=0; i<keys.length; i++){
+            foldAll(object.children[keys[i]]);
+        }
+    }
+    
+    foldAll(this._sceneGraph);
+    // Restore Root Scene.
+    this._sceneGraph.htmlElement.style.display = "block";
+    this._sceneGraph.htmlElement.parentNode.children[1].style.display = "block";
 };
 
 window.hierarchyHandler = new HierarchyHandler();

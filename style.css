@@ -113,7 +113,7 @@ button {
 .hierarchy {
     width : 90%;
     background-color: #DED0B6;
-    min-height: 300px;
+    height: 300px;
 
     display : flex;
     overflow: scroll;
