@@ -48,7 +48,6 @@ HierarchyHandler.prototype.drawHierarchy = function (scene) {
     this._sceneGraph.node = scene;
     this._createSceneGraph();
     this._createHierarchyElement();
-    this.foldAllElement();
 };
 HierarchyHandler.prototype._createSceneGraph = function(){
     var self = this;
@@ -170,7 +169,10 @@ HierarchyHandler.prototype._createNodeElement = function(depth, nodeName, isFold
             return function(e){
                 var obj = self.findObjectRecursive(nodeName);
                 obj.htmlElement.isFold = !obj.htmlElement.isFold;
-                self.foldElementRecursive(nodeName, obj.htmlElement.isFold);
+                if(obj.htmlElement.isFold === true)
+                    self.foldChildren(obj, true);
+                else
+                    self.foldElementRecursive(nodeName, obj.htmlElement.isFold);
             }
         })(nodeName));
         div.appendChild(btnElem);
@@ -261,24 +263,27 @@ HierarchyHandler.prototype.foldElementRecursive = function(nodeName, isfold){
             this.foldElementRecursive(child[keys[i]].name, isfold);
     }
 };
-HierarchyHandler.prototype.foldAllElement = function(){
+HierarchyHandler.prototype.foldChildren = function(object, isFold){
+    if(!object.htmlElement)
+        return;
+    
     function foldAll(object) {
         var keys = Object.keys(object.children);
         if(keys.length > 0) {
-            object.htmlElement.isFold = true;
-            object.htmlElement.parentNode.children[1].style.display = "none";
+            object.htmlElement.isFold = isFold;
+            object.htmlElement.parentNode.children[1].style.display = isFold ? "none" : "block";
         }
         
-        object.htmlElement.style.display = "none";
+        object.htmlElement.style.display = isFold ? "none" : "block";
         for(var i=0; i<keys.length; i++){
             foldAll(object.children[keys[i]]);
         }
     }
     
-    foldAll(this._sceneGraph);
+    foldAll(object);
     // Restore Root Scene.
-    this._sceneGraph.htmlElement.style.display = "block";
-    this._sceneGraph.htmlElement.parentNode.children[1].style.display = "block";
+    object.htmlElement.style.display = "block";
+    object.htmlElement.parentNode.children[1].style.display = "block";
 };
 
 window.hierarchyHandler = new HierarchyHandler();

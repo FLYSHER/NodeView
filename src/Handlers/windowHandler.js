@@ -19,15 +19,20 @@ function toggleImageList(){
         eImageList.style.display = "flex";
     }
 }
-
 function handleInputFileChange(files){
     fileHandler.onFileAdd(files);
 }
 
+var FileHandlerKey = {
+    ImageList : [
+        "png",
+        "plist",
+        "fnt"
+    ],
+};
 function FileHandler(){
     
 }
-
 FileHandler.prototype.onFileAdd = function (files) {
     if (!(files instanceof FileList))
         return;
@@ -37,7 +42,6 @@ FileHandler.prototype.onFileAdd = function (files) {
         this.addFile(files[i]);
     }
 }
-
 FileHandler.prototype.addFile = function (file) {
     if (!!ResourceMap[file.name]) {
         console.error("File " + file.name + " is already loaded.\nPlease restart the page if you want to reload.");
@@ -46,7 +50,6 @@ FileHandler.prototype.addFile = function (file) {
 
     this.addFileToResourceList(file);
 }
-
 FileHandler.prototype.addFileToResourceList = function (file) {
     var extName = cc.path.extname(file.name);
     this.appendItem(file.name, extName !== ".ExportJson");
@@ -54,7 +57,6 @@ FileHandler.prototype.addFileToResourceList = function (file) {
     ResourceMap[file.name] = file;
     this.readFile(file);
 }
-
 FileHandler.prototype.readFile = function (file) {
     var reader = new FileReader();
     var ext = cc.path.extname(file.name).toLowerCase();
@@ -80,7 +82,6 @@ FileHandler.prototype.readFile = function (file) {
         };
     })(file);
 }
-
 FileHandler.prototype.processFileData = function (url, fileContents, ext, cb) {
     let armatureDataArr, i, dic;
     let fileName = cc.path.mainFileName(url);
@@ -127,6 +128,9 @@ FileHandler.prototype.processFileData = function (url, fileContents, ext, cb) {
 }
 
 FileHandler.prototype.appendItem = function (name, isImage) {
+    if(isImage && this.isImageValid(name) === false)
+        return;
+    
     var item = document.createElement("p");
     item.textContent = name;
     item.style.borderBottom = "2px solid black";
@@ -137,6 +141,14 @@ FileHandler.prototype.appendItem = function (name, isImage) {
     else
         eResourceList.appendChild(item);
 }
+FileHandler.prototype.isImageValid = function(name){
+    if(typeof name !== "string")
+        return false;
+    
+    var execName = cc.path.extname(name).toLowerCase();
+    var fileName = execName.substring(1, execName.length);
+    return FileHandlerKey.ImageList.indexOf(fileName) !== -1;
+};
 
 window.fileHandler = new FileHandler();
 
