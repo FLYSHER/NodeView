@@ -8,10 +8,12 @@ document.addEventListener("DOMContentLoaded", function(){
 
 var ModalModuleHandlerKey = {
     ButtonElement : {
-        SlotMenu : "modalModuleItemSlotMenu"
+        SlotMenu : "modalModuleItemSlotMenu",
+        JackpotNoti : "modalModuleItemJackpotNoti",
     },
     PanelElement: {
         SlotMenuPanel : "modalModuleDetailSlotMenu",
+        JackpotNotiPanel : "modalModuleDetailJackpotNoti",
     },
 };
 
@@ -38,17 +40,19 @@ ModalModuleHandler.prototype._initModalElement = function(){
 ModalModuleHandler.prototype._initButtonElement = function(){
     var self = this;
     for(var key in ModalModuleHandlerKey.ButtonElement){
-        this._modalList[key] = document.getElementById(ModalModuleHandlerKey.ButtonElement[key]);
-        this._modalList[key].addEventListener("click", (function(key){
+        var keyName = ModalModuleHandlerKey.ButtonElement[key];
+        this._modalList[keyName] = document.getElementById(ModalModuleHandlerKey.ButtonElement[key]);
+        this._modalList[keyName].addEventListener("click", (function(key){
             return function(evt) {
                 self._onClickButton(key);
             }
-        })(key));
+        })(keyName));
     }
 };
 ModalModuleHandler.prototype._initPanelElement = function(){
     for(var key in ModalModuleHandlerKey.PanelElement){
-        this._modalList[key] = document.getElementById(ModalModuleHandlerKey.PanelElement[key]);
+        var keyName = ModalModuleHandlerKey.PanelElement[key];
+        this._modalList[keyName] = document.getElementById(keyName);
     }
 };
 ModalModuleHandler.prototype._initCustom = function(){
@@ -56,6 +60,30 @@ ModalModuleHandler.prototype._initCustom = function(){
     document.getElementById("btnCreateModule").addEventListener("click", function(e){
         self._onClickCreate();
     });
+    
+    this._initJackpotNoti();
+};
+ModalModuleHandler.prototype._initJackpotNoti = function(){
+    var selectUI = document.getElementById("modalJackpotNotiUISelect");
+    for(var key in window.UIWidgetFiles) {
+        var option = document.createElement("option");
+        option.innerHTML = window.UIWidgetFiles[key];
+        selectUI.appendChild(option);
+    }
+    
+    var selectProgress = document.getElementById("modalJackpotNotiProgressSelect");
+    for(var key in window.ArmatureFiles) {
+        var option = document.createElement("option");
+        option.innerHTML = window.ArmatureFiles[key];
+        selectProgress.appendChild(option);
+    }
+
+    var selectFx = document.getElementById("modalJackpotNotiFxSelect");
+    for(var key in window.ArmatureFiles) {
+        var option = document.createElement("option");
+        option.innerHTML = window.ArmatureFiles[key];
+        selectFx.appendChild(option);
+    }
 };
 
 ModalModuleHandler.prototype._onClickButton = function(key){
@@ -63,9 +91,12 @@ ModalModuleHandler.prototype._onClickButton = function(key){
     this._modalList[key].className = "modal-item modal-item-clicked noHover";
     this._currSelectBtn = key;
     
-    switch (ModalModuleHandlerKey.ButtonElement[key]) {
+    switch (key) {
         case ModalModuleHandlerKey.ButtonElement.SlotMenu:
             
+            break;
+        case ModalModuleHandlerKey.ButtonElement.JackpotNoti:
+            this._onClickJackpotNoti(key);
             break;
     }
 };
@@ -75,12 +106,14 @@ ModalModuleHandler.prototype._resetOnClick = function(){
 };
 ModalModuleHandler.prototype._resetButtonElement = function(){
     for(var key in ModalModuleHandlerKey.ButtonElement) {
-        this._modalList[key].className = "modal-item";
+        var keyName = ModalModuleHandlerKey.ButtonElement[key];
+        this._modalList[keyName].className = "modal-item";
     }
 };
 ModalModuleHandler.prototype._resetPanelElement = function(){
     for(var key in ModalModuleHandlerKey.PanelElement) {
-        this._modalList[key].className = "modal-item-detail-panel";
+        var keyName = ModalModuleHandlerKey.PanelElement[key];
+        this._modalList[keyName].className = "modal-item-detail-panel";
     }
 };
 
@@ -89,7 +122,7 @@ ModalModuleHandler.prototype._onClickCreate = function(){
     if(this._isCreateValid() === false)
         return;
     
-    switch (ModalModuleHandlerKey.ButtonElement[this._currSelectBtn]) {
+    switch (this._currSelectBtn) {
         case ModalModuleHandlerKey.ButtonElement.SlotMenu:
             this._onCreateSlotMenu();
             break;
@@ -98,7 +131,7 @@ ModalModuleHandler.prototype._onClickCreate = function(){
 ModalModuleHandler.prototype._isCreateValid = function(){
     var msg = "";
 
-    if(this._currSelectBtn < 0)
+    if(!this._currSelectBtn)
         msg = "Please Select Node Type.";
 
     if(!hierarchyHandler.getSelectedNode())
@@ -131,6 +164,11 @@ ModalModuleHandler.prototype._isCreateSlotMenuValid = function(){
     
     this.createWarningMessage(msg);
     return msg.length === 0;
+};
+
+// Create Jackpot Noti
+ModalModuleHandler.prototype._onClickJackpotNoti = function(){
+    this._modalList[ModalModuleHandlerKey.PanelElement.JackpotNotiPanel].className = "modal-item-detail-panel-activate";
 };
 
 // Utils

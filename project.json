@@ -17,6 +17,7 @@
         "src/Game/RNC/RNCCompatibility.js",
         "src/Game/resource.js",
         "src/Game/app.js",
-        "src/Game/RNC/CommonSlotMenu.js"
+        "src/Game/RNC/Component/CommonSlotMenu.js",
+        "src/Game/RNC/Component/JackpotNoti.js"
     ]
 }

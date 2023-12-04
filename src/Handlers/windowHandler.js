@@ -1,6 +1,10 @@
 /** @type {EditorScene} */
 window.GameScene = {};
-window.ResourceMap = {};
+window.ResourceMap = {
+    
+};
+window.ArmatureFiles = {};
+window.UIWidgetFiles = {};
 
 document.addEventListener("DOMContentLoaded", function(){
     window.eResourceList = document.getElementById("resourceList");
@@ -149,6 +153,13 @@ FileHandler.prototype.appendItem = function (name, isImage) {
         eImageList.appendChild(item);
     else
         eResourceList.appendChild(item);
+    
+    if(cc.path.extname(name) === ".ExportJson") {
+        if(!!cc.loader.cache[name].armature_data)
+            window.ArmatureFiles[name] = name;
+        else
+            window.UIWidgetFiles[name] = name;
+    }
 }
 FileHandler.prototype.isImageValid = function(name){
     if(typeof name !== "string")
