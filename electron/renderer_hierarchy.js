@@ -6,11 +6,6 @@ var Renderer_hierarchy = {
 
     init : function( rootLayer ) {
         this.rootLayer = rootLayer;
-        this.addTreeNode(
-            this.rootLayer.__instanceId,
-            "#",
-            "mainLayer"
-        );
 
         $('#hierarchy').jstree({
             'core' : {
@@ -125,9 +120,13 @@ var Renderer_hierarchy = {
     // 최상위 노드부터 다시 트리 데이터 세팅
     refreshTree : function( cocosNode, parentID ) {
         console.log("** refreshTree ** ");
-        console.log("   > ", cocosNode.getName(), cocosNode.__instanceId, cocosNode._className );
+        // console.log("   > ", cocosNode.getName(), cocosNode.__instanceId, cocosNode._className );
+
         var id       = cocosNode.__instanceId;
-        this.addTreeNode( id, parentID, cocosNode.getName(), cocosNode );
+
+        if( id !== this.rootLayer.__instanceId ) {
+            this.addTreeNode( id, parentID, cocosNode.getName(), cocosNode );
+        }
 
         if( !!cocosNode && cocosNode.getChildren ) {
 
@@ -145,7 +144,7 @@ var Renderer_hierarchy = {
                     }
                 }
                 console.log("       > ", child.getName(), child.__instanceId, child._className );
-                loc_parentID = cocosNode.__instanceId;
+                loc_parentID = cocosNode.__instanceId === this.rootLayer.__instanceId ? "#" : cocosNode.__instanceId;
                 this.refreshTree( children[i], loc_parentID, cocosNode  );
             }
         }

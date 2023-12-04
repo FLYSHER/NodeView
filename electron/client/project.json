@@ -17,11 +17,12 @@
         "src/loader.js",
         "src/app.js",
 
-        "src/HtmlHelper/HtmlHelper.js",
+
         "src/Defines/eventDefines.js",
 
         "src/Utils/GenieUtils.js",
         "src/Utils/ScreenUtils.js",
+        "src/Utils/HtmlHelper.js",
 
         "src/GenieResourceLoader/GenieResourceLoader.js",
 
