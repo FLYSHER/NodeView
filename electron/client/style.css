@@ -528,6 +528,16 @@ ul.tabs li.current{
     color: #DEDEDEFF;
 }
 
+.component_attribSlider {
+    display : inline-block;
+    width : 150px;
+    margin : 2px;
+    background: #222222;
+    border-radius: 50%;
+    /*color: #DEDEDEFF;*/
+    cursor: pointer;
+}
+
 .command_div {
     /*background-color: #555555;*/
     background-color: #363636;

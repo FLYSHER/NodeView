@@ -171,7 +171,6 @@ var Renderer_hierarchy = {
             var i, loc_parentID, child,
                 children = cocosNode.getChildren();
 
-
             for( i = 0; i < children.length; ++i ) {
                 child = children[i];
 
@@ -209,6 +208,21 @@ var Renderer_hierarchy = {
             "parent"    : parentID,
             "text"      : text
         });
+    },
+
+    renameTreeNode : function( id, value ) {
+        var treeNode    = $('#hierarchy').jstree(true).get_node( id );
+        if( treeNode ) {
+            var findIdx = this.hierarchyData.findIndex( function( item ){
+                return item.id === id;
+            });
+
+            if( findIdx >= 0 ) {
+                this.hierarchyData[findIdx].text = value;
+            }
+
+            $('#hierarchy').jstree('refresh');
+        }
     },
 
     deleteTreeNode : function( id, parentId ) {

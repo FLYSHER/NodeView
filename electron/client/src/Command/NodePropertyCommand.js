@@ -9,6 +9,14 @@ Genie.Command.NodeProperty = Genie.Command.Base.extend({
             value = ( commandType === Genie.CommandType.UNDO ) ? this._args.src : this._args.dest;
 
         switch ( this._args.strProp ) {
+            case 'name':
+                this._targetNode.setName( value );
+                var treeNodeID  = this._targetNode.__instanceId;
+                var treeNode    = $('#hierarchy').jstree(true).get_node( treeNodeID );
+                treeNode && Renderer_hierarchy.renameTreeNode( treeNodeID, value );
+
+                strText = cc.formatStr( "name  > ", value );
+                break;
             case 'anchor':
                 this._targetNode.setAnchorPoint( value );
                 Genie.gizmoNode.followTarget( this._targetNode );

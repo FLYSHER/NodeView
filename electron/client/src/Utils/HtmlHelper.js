@@ -68,6 +68,20 @@ var HtmlHelper = {
         return el_input;
     },
 
+    createSliderInput : function(  parent, placeHolder, min, max, className, readOnly, onchange ) {
+        var el_input = document.createElement('input');
+        el_input.type   = "range";
+        el_input.value  = placeHolder;
+        el_input.min    = min;
+        el_input.max    = max;
+        el_input.readOnly   = !!readOnly;
+        el_input.className  = className;
+
+        onchange && el_input.addEventListener( "change", onchange );
+        parent.appendChild(el_input);
+        return el_input;
+    },
+
     createColorInput : function( parent, placeholder, className, onchange ) {
         // <label htmlFor="colorpicker">Color Picker:</label>
         // <input type="color" id="colorpicker" value="#0000ff">
@@ -320,6 +334,11 @@ var HtmlHelper = {
         return HtmlHelper.createSelectMenu( div, strPlaceHolder, arrOption, onchange );
     },
 
+    createSliderAttrib : function( parent, propertyName, placeholder, min, max, readonly, onchange ) {
+        var div = HtmlHelper.createDiv( parent, 'component_lineDiv' );
+        HtmlHelper.createLabel( div, propertyName, 'component_propertyLabel');
+        return HtmlHelper.createSliderInput( div, placeholder, min, max,'component_attribSlider', readonly, onchange );
+    },
     // endregion
 
     //region [ command history ]

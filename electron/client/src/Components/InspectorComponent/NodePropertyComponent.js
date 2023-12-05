@@ -12,18 +12,17 @@ Genie.Component.NodeProperty = Genie.Component.InspectorBase.extend({
     // do overried
     drawInspector : function() {
         var owner = this.getOwner();
-
         var rootDiv = HtmlHelper.createComponentRootDiv();
 
         var iconObj = {
-            className : "fa-brands fa-codepen",
-            style : "color: #d0b8f4;"
+            className   : "fa-brands fa-codepen",
+            style       : "color: #d0b8f4;"
         }
         var titleBar = HtmlHelper.createComponentBar(this.getName(), iconObj);
         rootDiv.appendChild( titleBar );
 
         // name
-        HtmlHelper.createOneLongTextInput( rootDiv, "name", owner.getName(), true );
+        this.input_name = HtmlHelper.createOneLongTextInput( rootDiv, "name", owner.getName(), false, this.onchange.bind(this) );
 
         // class name
         HtmlHelper.createOneLongTextInput( rootDiv, "className", owner._className, true );
@@ -44,6 +43,7 @@ Genie.Component.NodeProperty = Genie.Component.InspectorBase.extend({
 
         // opacity
         this.input_opacity = HtmlHelper.createOneLongTextInput( rootDiv, "opacity", owner.getOpacity(), false, this.onchange.bind(this) );
+        // this.input_opacity = HtmlHelper.createSliderAttrib( rootDiv, "opacity", owner.getOpacity(), 0, 255, false, this.onchange.bind(this) );
 
         // visible
         this.cb_visible = HtmlHelper.createCheckboxAttrib( rootDiv, 'visible', owner.isVisible(), false, this.onchange.bind(this) );
@@ -56,6 +56,14 @@ Genie.Component.NodeProperty = Genie.Component.InspectorBase.extend({
             checkValid  = true;
 
         switch ( event.target ) {
+            case this.input_name:
+                checkValid = checkValid && ( strValue.length > 0 );
+                checkValid || (this.input_name.value = owner.getName());
+
+                loc_strProp = "name";
+                loc_src     = owner.getName();
+                loc_dest    = strValue;
+                break;
             case this.input_anchor.x:
             case this.input_anchor.y:
                 value       = parseFloat( strValue );
@@ -74,8 +82,8 @@ Genie.Component.NodeProperty = Genie.Component.InspectorBase.extend({
                 checkValid  = checkValid && ( value > 0 );
 
                 loc_strProp = "size";
-                loc_src     = cc.size( owner.width, owner.height );
-                loc_dest    = event.target === this.input_size.width ?  cc.size( value, owner.height ) : cc.size( owner.width, value );
+                loc_src     = cc.size( Math.round(owner.width), Math.round(owner.height) );
+                loc_dest    = event.target === this.input_size.width ?  cc.size( value, Math.round(owner.height) ) : cc.size( Math.round(owner.width), value );
                 break;
             case this.input_order:
                 value       = parseInt( strValue );
@@ -118,6 +126,9 @@ Genie.Component.NodeProperty = Genie.Component.InspectorBase.extend({
         var dest    = paramObj.value;
 
         switch ( strProp ) {
+            case 'name':
+                this.input_name.value = dest;
+                break;
             case 'anchor':
                 this.input_anchor.x.value = dest.x;
                 this.input_anchor.y.value = dest.y;
@@ -135,7 +146,6 @@ Genie.Component.NodeProperty = Genie.Component.InspectorBase.extend({
             case 'opacity':
                 this.input_opacity.value = dest;
                 break;
-
         }
     },
 
