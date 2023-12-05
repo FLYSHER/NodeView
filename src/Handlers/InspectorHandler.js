@@ -196,7 +196,7 @@ InspectorHandler.prototype.createAnimation = function(){
     checkbox.checked = this._currNode.getAnimation().loop === 0;
     checkbox.addEventListener("change",function(e){
         self._currNode.getAnimation().stop();
-        self._currNode.getAnimation().play(input.value, -1, Boolean(e.target.checked));
+        self._currNode.getAnimation().play(input.value, -1, Boolean(e.target.checked) ? 1 : 0);
     });
     this._eHandler.appendChild(checkbox, pCheckBox);
     this._eHandler.addElement("input_animation_loop",checkbox);
