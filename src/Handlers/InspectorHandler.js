@@ -15,6 +15,15 @@ eInspectorBtnDelete.addEventListener("click", function(){
     inspectorHandler.onClickDelete();
 });
 
+InspectorHandlerKey = {
+    NodeType : {
+        EmptyNode : 0,
+        Armature : 1,
+        UIWidget : 2,
+        SlotMenu : 3,
+        JackpotNoti : 4,
+    },
+};
 function InspectorHandler() {
     /** @type {cc.Node | ccs.Armature | ccui.Widget} */
     this._currNode = null;
@@ -30,9 +39,18 @@ InspectorHandler.prototype.onClickNode = function (node) {
     this.reset();
     this._currNode = node;
     this.createNodeInspector();
-    if(this._currNode instanceof ccs.Armature)
-        this.createArmatureInspector();
+    this.createInspectorByNodeType(this.getNodeType(node));
     this.createBtnApply();
+};
+InspectorHandler.prototype.createInspectorByNodeType = function(nodeType){
+    if(!nodeType)
+        return;
+    
+    switch (nodeType) {
+        case InspectorHandlerKey.NodeType.Armature:
+            this.createArmatureInspector();
+            break;
+    }
 };
 InspectorHandler.prototype.createBtnApply = function(){
     this._eHandler.createBtnApply();
@@ -228,6 +246,31 @@ InspectorHandler.prototype.onClickDelete = function(){
     this.reset();
     this._eHandler.reset();
     hierarchyHandler.reload();
+};
+
+// Utils
+/** @param {cc.Node | ccs.Armature | ccui.Widget} node */
+InspectorHandler.prototype.getNodeType = function(node){
+    var retVal = [InspectorHandlerKey.NodeType.EmptyNode];
+    
+    if(node instanceof ccs.Armature)
+        retVal.push(InspectorHandlerKey.NodeType.Armature);
+    
+    if(node instanceof ccui.Widget)
+        retVal.push(InspectorHandlerKey.NodeType.UIWidget);
+    
+    if(node instanceof SlotJackpotNotiNode)
+        retVal.push(InspectorHandlerKey.NodeType.JackpotNoti);
+    
+    if(node instanceof CommonVideoSlotMenu)
+        retVal.push(InspectorHandlerKey.NodeType.SlotMenu);
+    
+    // Throw error if it has multiple type.
+    if(retVal.length > 2)
+        throw new Error("Can't figure out which type. Please check the node.");
+    
+    // Return specific Type & If it has no type, return empty node.
+    return retVal[1] || retVal[0];
 };
 
 function ElementHandler() {
