@@ -1,6 +1,6 @@
 var eHierarchy = document.getElementById("hierarchy");
 var HierarchyItemNodeName = "ccNodeName";
-var HierarchyHideList = ["SlotMenu"];
+var HierarchyHideList = ["SlotMenu", "JackpotNoti"];
 
 function HierarchyHandler(){
     /** @type {cc.Node & cc.Scene} */

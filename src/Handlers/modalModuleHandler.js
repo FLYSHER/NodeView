@@ -15,6 +15,13 @@ var ModalModuleHandlerKey = {
         SlotMenuPanel : "modalModuleDetailSlotMenu",
         JackpotNotiPanel : "modalModuleDetailJackpotNoti",
     },
+    InputElement : {
+        JackpotNotiUISelect : "modalJackpotNotiUISelect",
+        JackpotNotiWinSelect : "modalJackpotNotiFxSelect",
+        JackpotNotiProgressSelect : "modalJackpotNotiProgressSelect",
+        JackpotNotiCount : "modalJackpotNotiCount",
+        JackpotNotiMaxDigit : "modalJackpotNotiDigit",
+    },
 };
 
 function ModalModuleHandler() {
@@ -24,10 +31,37 @@ function ModalModuleHandler() {
     this._init();
 }
 
+ModalModuleHandler.prototype.reset = function(){
+    this._resetJackpotNoti();
+};
+ModalModuleHandler.prototype._resetJackpotNoti = function(){
+    var selectUI = document.getElementById("modalJackpotNotiUISelect");
+    for(var key in window.UIWidgetFiles) {
+        var option = document.createElement("option");
+        option.innerHTML = window.UIWidgetFiles[key];
+        selectUI.appendChild(option);
+    }
+
+    var selectProgress = document.getElementById("modalJackpotNotiProgressSelect");
+    for(var key in window.ArmatureFiles) {
+        var option = document.createElement("option");
+        option.innerHTML = window.ArmatureFiles[key];
+        selectProgress.appendChild(option);
+    }
+
+    var selectFx = document.getElementById("modalJackpotNotiFxSelect");
+    for(var key in window.ArmatureFiles) {
+        var option = document.createElement("option");
+        option.innerHTML = window.ArmatureFiles[key];
+        selectFx.appendChild(option);
+    }
+};
+
 ModalModuleHandler.prototype._init = function(){
     this._initModalElement();
     this._initButtonElement();
     this._initPanelElement();
+    this._initInputElement();
     this._initCustom();
 };
 ModalModuleHandler.prototype._initModalElement = function(){
@@ -35,6 +69,7 @@ ModalModuleHandler.prototype._initModalElement = function(){
     var self = this;
     document.getElementById("btnModalOpenModule").addEventListener("click",function(){
         self._modal.show();
+        self.reset();
     });
 };
 ModalModuleHandler.prototype._initButtonElement = function(){
@@ -52,6 +87,12 @@ ModalModuleHandler.prototype._initButtonElement = function(){
 ModalModuleHandler.prototype._initPanelElement = function(){
     for(var key in ModalModuleHandlerKey.PanelElement){
         var keyName = ModalModuleHandlerKey.PanelElement[key];
+        this._modalList[keyName] = document.getElementById(keyName);
+    }
+};
+ModalModuleHandler.prototype._initInputElement = function(){
+    for(var key in ModalModuleHandlerKey.InputElement){
+        var keyName = ModalModuleHandlerKey.InputElement[key];
         this._modalList[keyName] = document.getElementById(keyName);
     }
 };
@@ -126,6 +167,9 @@ ModalModuleHandler.prototype._onClickCreate = function(){
         case ModalModuleHandlerKey.ButtonElement.SlotMenu:
             this._onCreateSlotMenu();
             break;
+        case ModalModuleHandlerKey.ButtonElement.JackpotNoti:
+            this._onCreateJackpotNoti();
+            break;
     }
 };
 ModalModuleHandler.prototype._isCreateValid = function(){
@@ -170,8 +214,33 @@ ModalModuleHandler.prototype._isCreateSlotMenuValid = function(){
 ModalModuleHandler.prototype._onClickJackpotNoti = function(){
     this._modalList[ModalModuleHandlerKey.PanelElement.JackpotNotiPanel].className = "modal-item-detail-panel-activate";
 };
+ModalModuleHandler.prototype._onCreateJackpotNoti = function(){
+    var uiFile = this._getSelectElemValue(this._modalList[ModalModuleHandlerKey.InputElement.JackpotNotiUISelect]);
+    var winAR = this._getSelectElemValue(this._modalList[ModalModuleHandlerKey.InputElement.JackpotNotiWinSelect]);
+    var progressAR = this._getSelectElemValue(this._modalList[ModalModuleHandlerKey.InputElement.JackpotNotiProgressSelect]);
+    var jackpotCount = this._modalList[ModalModuleHandlerKey.InputElement.JackpotNotiCount].value;
+    var maxDigit = this._modalList[ModalModuleHandlerKey.InputElement.JackpotNotiMaxDigit].value;
+    
+    var digitarr = [];
+    digitarr.length = jackpotCount;
+    digitarr.fill(0);
+    digitarr[jackpotCount - 1] = maxDigit;
+    
+    var jackpotNotiNode = new SlotJackpotNotiNode(null,uiFile,winAR,progressAR,jackpotCount,digitarr,false);
+    jackpotNotiNode.setName("JackpotNoti");
+    
+    hierarchyHandler.getSelectedNode().addChild(jackpotNotiNode);
+    hierarchyHandler.reload();
+    
+    this._modal.hide();
+};
 
 // Utils
+/** @param {HTMLSelectElement} htmlElem */
+ModalModuleHandler.prototype._getSelectElemValue = function(htmlElem){
+    var selectIndex = htmlElem.options.selectedIndex;
+    return htmlElem.options[selectIndex].value;
+};
 ModalModuleHandler.prototype.createWarningMessage = function(msg){
     document.getElementById("modalModuleWarning").innerHTML = msg;
 };

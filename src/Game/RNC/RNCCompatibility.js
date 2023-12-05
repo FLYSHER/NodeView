@@ -27,6 +27,7 @@ RockN.GLOBAL_ORDER = {
     POPUP3         : 3333,
     COIN_TRAIL     : 5000
 };
+RockN.Framerate = cc.game.config[ cc.game.CONFIG_KEY.frameRate ];
 
 window.isNetworkOffLine = false;
 
@@ -206,6 +207,86 @@ function localeStringToNumber( string ) {
         return parseInt( res, 10 );
     }
 }
+function getDivided( num, max ) {
+    var digit = 1;
+    var maxDigit = max;
+    if( max === 0 ) {
+        return 0;
+    }
+
+    num = Math.round( num );
+    var temp = num;
+    while( temp >= 10 ) {
+        temp = temp / 10;
+        digit += 1;
+    }
+
+    var divided = 0;
+
+    if( digit > maxDigit ) {
+        digit -= 3;
+        divided = 1;
+        if( digit > maxDigit ) {
+            digit -= 3;
+            divided = 2;
+            if( digit > maxDigit ) {
+                divided = 3;
+            }
+        }
+    }
+
+    return divided;
+}
+var isValidObject = function( obj ) {
+    return cc.isUndefined( obj ) === false && obj !== null;
+};
+var countLabelBase = function( label, initValue, toValue, delay, duration, maxDigit, callback, prefix, postfix, pointNum ) {
+    prefix = prefix || '';
+    postfix = postfix || '';
+    pointNum = pointNum || 0;
+
+    if( !!maxDigit ) {
+        label.setString( prefix + bigNumberToString( initValue, maxDigit, pointNum ) + postfix );
+    }
+    else {
+        label.setString( prefix + toLocale( initValue ) + postfix );
+    }
+
+    var currentValue = initValue;
+    var tick = (toValue - initValue) / RockN.Framerate / duration;
+    var frameCount = 0;
+    RockN.schedule( label, function( dt ) {
+        if( dt ) {
+            frameCount++;
+            if( frameCount === 1 ) {
+                // skip first frame when delay is larger than 0
+                return;
+            }
+
+            var finish = false;
+            currentValue += tick * RockN.Framerate * dt;
+            if( (currentValue >= toValue && (toValue >= initValue)) ||
+                (currentValue <= toValue && (toValue <= initValue)) ) {
+                currentValue = toValue;
+                finish = true;
+            }
+
+            if( !!maxDigit ) {
+                label.setString( prefix + bigNumberToString( currentValue, maxDigit, pointNum ) + postfix );
+            }
+            else {
+                label.setString( prefix + toLocale( currentValue ) + postfix );
+            }
+
+            if( finish ) {
+                label.unscheduleAllCallbacks();
+                if( typeof callback === 'function' ) {
+                    callback();
+                }
+            }
+        }
+    }, 0, cc.REPEAT_FOREVER, delay );
+};
 
 // Sounds
 var SoundControl = SoundControl || {};
