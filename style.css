@@ -43,7 +43,7 @@ button {
     display: flex;
     flex-direction: row;
     justify-content: center;
-    overflow: scroll;
+    overflow: hidden;
 }
 .gameContainer {
     float: inside;
@@ -67,7 +67,7 @@ button {
 .resource-list {
     width : 90%;
     background-color: #DED0B6;
-    height: 300px;
+    height: 257px;
 
     display : flex;
     align-items: flex-start;
@@ -113,7 +113,7 @@ button {
 .hierarchy {
     width : 90%;
     background-color: #DED0B6;
-    height: 300px;
+    height: 350px;
 
     display : flex;
     overflow: scroll;

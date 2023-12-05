@@ -188,12 +188,12 @@ InspectorHandler.prototype.createAnimation = function(){
     this._eHandler.appendChild(pCheckBox, content);
     
     var spanCheckBox = document.createElement("span");
-    spanCheckBox.textContent="isLoop : ";
+    spanCheckBox.textContent= "isLoop : ";
     this._eHandler.appendChild(spanCheckBox, pCheckBox);
     
     var checkbox = document.createElement("input");
     checkbox.type = "checkbox";
-    checkbox.checked = this._currNode.getAnimation().getAnimationData().getMovement(input.value).loop;
+    checkbox.checked = this._currNode.getAnimation().loop === 0;
     checkbox.addEventListener("change",function(e){
         self._currNode.getAnimation().stop();
         self._currNode.getAnimation().play(input.value, -1, Boolean(e.target.checked));
