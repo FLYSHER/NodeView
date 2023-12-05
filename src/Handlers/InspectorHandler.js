@@ -174,8 +174,14 @@ InspectorHandler.prototype.createAnimation = function(){
         selectElem.appendChild(option);
         this._eHandler.addElement(movements[i], option);
     }
-
-    input.value = selectElem.options[selectElem.options.selectedIndex].value;
+    
+    var currMovement = this._currNode.getAnimation().getCurrentMovementID(); 
+    if(currMovement.length > 0) {
+        input.value = currMovement;
+        selectElem.selectedIndex = movements.indexOf(currMovement);
+    } else {
+        input.value = selectElem.options[selectElem.options.selectedIndex].value;
+    }
     
     // Loop Checkbox
     var pCheckBox = document.createElement("p");
