@@ -170,7 +170,7 @@ HierarchyHandler.prototype._createNodeElement = function(depth, nodeName, isFold
                 var obj = self.findObjectRecursive(nodeName);
                 obj.htmlElement.isFold = !obj.htmlElement.isFold;
                 if(obj.htmlElement.isFold === true)
-                    self.foldChildren(obj, true);
+                    self.foldChildren(nodeName, true);
                 else
                     self.foldElementRecursive(nodeName, obj.htmlElement.isFold);
             }
@@ -181,7 +181,11 @@ HierarchyHandler.prototype._createNodeElement = function(depth, nodeName, isFold
     eHierarchy.appendChild(div);
     
     elem.isFold = false;
-    this.findObjectRecursive(nodeName).htmlElement = elem;
+    var currObj = this.findObjectRecursive(nodeName);
+    if(!!currObj.htmlElement)
+        throw new Error("Same Name Object is already exist!");
+    else
+        currObj.htmlElement = elem;
 };
 
 HierarchyHandler.prototype.onClickElement = function(event){
@@ -263,7 +267,8 @@ HierarchyHandler.prototype.foldElementRecursive = function(nodeName, isfold){
             this.foldElementRecursive(child[keys[i]].name, isfold);
     }
 };
-HierarchyHandler.prototype.foldChildren = function(object, isFold){
+HierarchyHandler.prototype.foldChildren = function(nodeName, isFold){
+    var object = this.findObjectRecursive(nodeName);
     if(!object.htmlElement)
         return;
     

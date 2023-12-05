@@ -64,8 +64,6 @@ FileHandler.prototype.addFile = function (file) {
     this.addFileToResourceList(file);
 }
 FileHandler.prototype.addFileToResourceList = function (file) {
-    var extName = cc.path.extname(file.name);
-    this.appendItem(file.name, extName !== ".ExportJson");
     var mainName = cc.path.mainFileName(file.name)
     ResourceMap[file.name] = file;
     this.readFile(file);
@@ -92,6 +90,8 @@ FileHandler.prototype.readFile = function (file) {
             let fileContents = e.target.result;
             let ext = cc.path.extname(file.name).toLowerCase();
             self.processFileData(url, fileContents, ext, null);
+            var extName = cc.path.extname(file.name);
+            self.appendItem(file.name, extName !== ".ExportJson");
         };
     })(file);
 }
