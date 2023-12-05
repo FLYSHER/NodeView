@@ -123,8 +123,8 @@ Genie.Component.NodeProperty = Genie.Component.InspectorBase.extend({
                 this.input_anchor.y.value = dest.y;
                 break;
             case 'size':
-                this.input_size.width.value     = dest.width;
-                this.input_size.height.value    = dest.height;
+                this.input_size.width.value  = dest.width;
+                this.input_size.height.value = dest.height;
                 break;
             case 'zorder':
                 this.input_order.value = dest;

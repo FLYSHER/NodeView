@@ -115,11 +115,18 @@ var Gizmo = cc.Node.extend({
 
         var c_size  = node.getContentSize();
         var apps    = node.getAnchorPointInPoints();
+
         var origin  = cc.p( 0, 0 );
         var dest    = cc.p( c_size.width, c_size.height );
 
         origin  = cc.pSub( origin, apps );
         dest    = cc.pSub( dest, apps );
+
+        if( node.isIgnoreAnchorPointForPosition() ) {
+            origin = cc.pAdd( origin, apps );
+            dest = cc.pAdd( dest, apps );
+        }
+
         this._drawCSizeNode.drawRect( origin, dest, cc.color( 0, 0, 0, 0), 2, cc.color( 200, 200,0, 200 ) );
     },
 

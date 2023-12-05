@@ -41,19 +41,19 @@ var Renderer_hierarchy = {
                 "items" : {
                     "addNode"       : {
                         "label"     : "add Node",
-                        "subMenu"   : {}
+                        "submenu"   : {}
                     },
                     "addComponent"  : {
                         "label"     : "add Component",
-                        "subMenu"   : {}
+                        "submenu"   : {}
                     },
                     "deleteNode"    : {
                         "label"     : "delete Node",
-                        "subMenu"   : self.onDeleteNodeByMenu.bind(self)
+                        "action"    : self.onDeleteNodeByMenu.bind(self)
                     },
                     "deleteComponent" : {
                         "label"     : "delete Component",
-                        "subMenu"   : {}
+                        "submenu"   : {}
                     },
                 }
             },
@@ -78,13 +78,13 @@ var Renderer_hierarchy = {
     //region [ jsTree ]
 
     _initContextMenu : function() {
-        var addNodeSubMenu = this._jstreeConfig["contextmenu"]["items"]["addNode"]["subMenu"];
+        var addNodeSubMenu = this._jstreeConfig["contextmenu"]["items"]["addNode"]["submenu"];
         this._addSubMenu( addNodeSubMenu, this.MenuPrefix.Node, this.onAddNodeByMenu, this );
         this._addSubMenu( addNodeSubMenu, this.MenuPrefix.Sprite, this.onAddNodeByMenu, this );
     },
 
     _addSubMenu : function( targetMenu, strMenu, selector, target ) {
-        targetMenu[ strMenu ] = { "label" : strMenu, "action" : selector.bind( target, strMenu ) };
+        targetMenu[ strMenu ] = { "label" : strMenu, "action" : selector.bind( target ) };
     },
 
     onAddNodeByMenu : function( obj ) {
@@ -126,7 +126,6 @@ var Renderer_hierarchy = {
     onchangeSelectedNode : function (e, data) {
         console.log( e, data );
         var selectedFileName = data.selected[0];
-        cc.log("selectedFileName > ", selectedFileName );
 
         if( data.node && data.node.id ) {
             var realNode = this.nodeInstanceIDMap[data.node.id];
