@@ -12,8 +12,10 @@ Genie.Command.NodeProperty = Genie.Command.Base.extend({
             case 'name':
                 this._targetNode.setName( value );
                 var treeNodeID  = this._targetNode.__instanceId;
-                var treeNode    = $('#hierarchy').jstree(true).get_node( treeNodeID );
-                treeNode && Renderer_hierarchy.renameTreeNode( treeNodeID, value );
+                cc.eventManager.dispatchCustomEvent( 'onRenameTreeNode', {
+                    id   : treeNodeID,
+                    name : value,
+                })
 
                 strText = cc.formatStr( "name  > ", value );
                 break;

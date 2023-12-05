@@ -15,6 +15,7 @@ var Renderer_hierarchy = {
 
         cc.eventManager.addCustomListener('onRefreshHierarchy', this.onRefreshTree.bind(this));
         cc.eventManager.addCustomListener( 'onSelectNodeInMainView', this.onSelectNode.bind(this));
+        cc.eventManager.addCustomListener('onRenameTreeNode', this.renameTreeNode.bind(this) );
     },
 
     _initJSTree : function() {
@@ -210,7 +211,11 @@ var Renderer_hierarchy = {
         });
     },
 
-    renameTreeNode : function( id, value ) {
+    renameTreeNode : function( event ) {
+        var userData= event.getUserData();
+        var name    = userData.name;
+        var id      = userData.treeNodeID;
+
         var treeNode    = $('#hierarchy').jstree(true).get_node( id );
         if( treeNode ) {
             var findIdx = this.hierarchyData.findIndex( function( item ){
@@ -218,7 +223,7 @@ var Renderer_hierarchy = {
             });
 
             if( findIdx >= 0 ) {
-                this.hierarchyData[findIdx].text = value;
+                this.hierarchyData[findIdx].text = name;
             }
 
             $('#hierarchy').jstree('refresh');
