@@ -31,12 +31,15 @@ Genie.Component.NodeProperty = Genie.Component.InspectorBase.extend({
         HtmlHelper.createOneLongTextInput( rootDiv, "instanceId", owner.__instanceId, true );
 
         // anchor
-        var loc_anchor = owner.getAnchorPoint();
-        this.input_anchor = HtmlHelper.createPointAttrib( rootDiv, "anchor",  [loc_anchor.x,loc_anchor.y], [false, false], this.onchange.bind(this) );
+        var loc_anchorX = owner._getAnchorX().toFixed(1);
+        var loc_anchorY = owner._getAnchorY().toFixed(1);
+        this.input_anchor = HtmlHelper.createPointAttrib( rootDiv, "anchor",  [loc_anchorX,loc_anchorY], [false, false], this.onchange.bind(this) );
 
         // contentSize
         var loc_size = owner.getContentSize();
-        this.input_size = HtmlHelper.createSizeAttrib( rootDiv, "contentSize",  [loc_size.width,loc_size.height], [false, false], this.onchange.bind(this) );
+        var loc_width = Math.round( loc_size.width );
+        var loc_height = Math.round( loc_size.height );
+        this.input_size = HtmlHelper.createSizeAttrib( rootDiv, "contentSize",  [loc_width,loc_height], [false, false], this.onchange.bind(this) );
 
         // zorder
         this.input_order = HtmlHelper.createOneLongTextInput( rootDiv, "z-order", owner.getLocalZOrder(), false, this.onchange.bind(this) );
@@ -113,6 +116,7 @@ Genie.Component.NodeProperty = Genie.Component.InspectorBase.extend({
         }
 
         if( checkValid ) {
+            cc.log("NodeProperty Component onchange : ", loc_src, loc_dest );
             Genie.ToolController.execute( new Genie.Command.NodeProperty( owner, {
                 strProp : loc_strProp,
                 src     : loc_src,
@@ -125,6 +129,7 @@ Genie.Component.NodeProperty = Genie.Component.InspectorBase.extend({
         var strProp = paramObj.args.strProp;
         var dest    = paramObj.value;
 
+        cc.log("NodeProperty Component setInspectorValue : ", dest );
         switch ( strProp ) {
             case 'name':
                 this.input_name.value = dest;

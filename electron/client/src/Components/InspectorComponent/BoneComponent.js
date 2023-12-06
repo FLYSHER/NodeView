@@ -41,7 +41,6 @@ Genie.Component.BoneView = Genie.Component.InspectorBase.extend({
         var boneData = this.getOwner().getBoneData();
         HtmlHelper.createOneLongTextInput( div_group, 'name', boneData.name, true );
         HtmlHelper.createOneLongTextInput( div_group, 'parentName', boneData.parentName, true );
-        HtmlHelper.createLabel( div_group, "displayManager", "component_propertyLabel" );
     },
 
     drawDisplayManager : function() {
@@ -96,10 +95,14 @@ Genie.Component.BoneView = Genie.Component.InspectorBase.extend({
             "DISPLAY_TYPE_ARMATURE",
             "DISPLAY_TYPE_PARTICLE",
         ]
-        HtmlHelper.createOneLongTextInput( div_group, "   type", displayTypeNames[displayType], true );
+        HtmlHelper.createOneLongTextInput( div_group, "  type", displayTypeNames[displayType], true );
 
         var display = decoDisplay.getDisplay();
-        HtmlHelper.createOneLongTextInput( div_group, '   displayName', display._displayName, true );
+        var input_displayName =  HtmlHelper.createOneLongTextInput( div_group, '  displayName', display._displayName, true );
+        input_displayName.onclick = function( event ) {
+            var searchString = event.target.value;
+            $('#assets').jstree('search', searchString);
+        }
 
         // display sub group
         HtmlHelper.createLabel( div_group, "display", 'component_subGroupLabel' );
@@ -128,9 +131,6 @@ Genie.Component.BoneView = Genie.Component.InspectorBase.extend({
         HtmlHelper.createSizeAttrib( div_group, "contentSize", [skinContentSize.width, skinContentSize.height], [true, true] );
         var spriteName = display.getDisplayName();
         var textureName = Genie.Utils.getSpriteFrameTextureName( spriteName );
-
-        HtmlHelper.createOneLongTextInput( div_group, "textureName", textureName, true  );
-        HtmlHelper.createOneLongTextInput( div_group, "spriteFrame", spriteName, true  );
 
         HtmlHelper.createSpritePreviewAttrib( div_group, spriteName, textureName );
 

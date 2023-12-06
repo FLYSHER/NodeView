@@ -15,7 +15,7 @@ Genie.Command.NodeProperty = Genie.Command.Base.extend({
                 cc.eventManager.dispatchCustomEvent( 'onRenameTreeNode', {
                     id   : treeNodeID,
                     name : value,
-                })
+                });
 
                 strText = cc.formatStr( "name  > ", value );
                 break;
@@ -47,6 +47,7 @@ Genie.Command.NodeProperty = Genie.Command.Base.extend({
         }
 
         if( checkValid ) {
+            cc.log("NodeProperty command setInspectorValue : ", value );
             Genie.gizmoNode.followTarget( this._targetNode );
             this.setInspectorView( this.getCommandName(), value );
             this.setCommandLog( commandType, this._targetNode.getName(), strText );

@@ -17,13 +17,13 @@ function createWindow () {
       nodeIntegration: true,
       contextIsolation: false
     }
-  })
+  });
 
   console.log("electron created window");
+
   // and load the index.html of the app.
   mainWindow.loadFile('client/index.html');
-  //mainWindow.setMenu()
-  //mainWindow.setMenu(null);
+
   // Open the DevTools.
   mainWindow.webContents.openDevTools();
   return mainWindow;
@@ -80,10 +80,10 @@ app.whenReady().then(() => {
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
+    if (BrowserWindow.getAllWindows().length === 0) {
+        createWindow();
+    }
   });
-
-
 
   localShortcut.register( mainWindow, 'CommandOrControl+Z', function(){
       mainWindow.webContents.send('undo');
@@ -94,6 +94,7 @@ app.whenReady().then(() => {
   });
 
   loadManager.init(mainWindow);
+
 
   // log
   log.initialize({

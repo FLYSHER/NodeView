@@ -295,7 +295,11 @@ var HtmlHelper = {
         if( texture && spriteFrame ) {
 
             HtmlHelper.createOneLongTextInput( parent, "textureName", textureName, true );
-            HtmlHelper.createOneLongTextInput( parent, "frameName", spriteName, true );
+            var input_frameName = HtmlHelper.createOneLongTextInput( parent, "frameName", spriteName, true );
+            input_frameName.onclick = function( event ) {
+                var searchString = event.target.value;
+                $('#assets').jstree('search', searchString);
+            }
 
             var originSize = spriteFrame.getOriginalSize();
             HtmlHelper.createSizeAttrib( parent, "frameSize", [originSize.width, originSize.height], [true, true]);
@@ -316,6 +320,9 @@ var HtmlHelper = {
 
             var texSize = texture.getContentSize();
             var sprRect = spriteFrame.getRect();
+            if( spriteFrame.isRotated() ) {
+                sprRect = cc.rect( sprRect.x, sprRect.y, sprRect.height, sprRect.width );
+            }
             img_spr.style.clipPath = 'inset(' +
                     ( sprRect.y / texSize.height   * 100 ).toFixed(0) + "% " +
                     ( ( texSize.width - (sprRect.x + sprRect.width) ) / texSize.width  * 100 ).toFixed(0) + "% " +

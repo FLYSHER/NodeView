@@ -1,4 +1,3 @@
-// 소유자의 타입이 uiWidget 이어야 함.
 Genie.Component.ArmatureView = Genie.Component.InspectorBase.extend({
     ctor : function() {
         this._super();
@@ -48,7 +47,6 @@ Genie.Component.ArmatureView = Genie.Component.InspectorBase.extend({
         }, this.onclick.bind(this) );
 
         this.btn_resumeAndPause = HtmlHelper.creatIconButton( rootDiv, {
-            // resume > fa-light fa-play
             className : 'fa-solid fa-pause',
             style   : 'color: #677283'
         }, this.onclick.bind(this) );
@@ -73,7 +71,7 @@ Genie.Component.ArmatureView = Genie.Component.InspectorBase.extend({
         var currMovementData = movementDataDic[movementNames[0]];
         var name    = currMovementData.name;
         var dl      = currMovementData.duration;
-        var sc      = currMovementData.scale;
+        var sc      = currMovementData.scale.toFixed(2);
         var loop    = currMovementData.loop;
 
         // name duration scale loop moveBoneDataDic
@@ -113,12 +111,29 @@ Genie.Component.ArmatureView = Genie.Component.InspectorBase.extend({
 
     onchange : function( event ) {
         var owner = this.getOwner();
+        var currMovData = this.getSelectedMovData();
         var value, strValue = event.target.value;
 
         switch ( event.target ) {
             case  this.select_track:
-                var currMovData = this.getSelectedMovData();
                 this.setMovementData( currMovData );
+                break;
+            case this.input_gotoAndPause:
+                var dl      = currMovData.duration;
+                var name    = currMovData.name;
+                var frame   = parseInt( strValue );
+                if( frame >= 0 && frame < dl ) {
+                    owner.getAnimation().play( name );
+                    owner.getAnimation().gotoAndPause( frame );
+                }
+                else {
+                    if( frame > dl ) {
+                        this.input_gotoAndPause.value = dl;
+                    }
+                    else {
+                        this.input_gotoAndPause.value = 0;
+                    }
+                }
                 break;
             // case this.mov_sc:
             //     value = parseFloat( strValue );
