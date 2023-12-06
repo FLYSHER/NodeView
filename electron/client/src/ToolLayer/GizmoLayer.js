@@ -81,7 +81,7 @@ var GizmoLayer = cc.LayerColor.extend({
         var sprName = userData.name;
         var spriteFrame = cc.spriteFrameCache.getSpriteFrame( sprName );
         if( spriteFrame ) {
-            this._rt.beginWithClear( 60, 60, 60 );
+            this._rt.beginWithClear( 40, 40, 40 );
             this._spr.setSpriteFrame( spriteFrame );
             this._adjustSpriteSize();
             this._spr.visit();
@@ -93,11 +93,11 @@ var GizmoLayer = cc.LayerColor.extend({
         var w = this._spr.getContentSize().width,
             h = this._spr.getContentSize().height;
 
-        var rate_w = parseFloat(cc.winSize.width / w).toFixed(1),
-            rate_h = parseFloat(cc.winSize.height / h).toFixed(1);
+        var rate_w = parseFloat(cc.winSize.width / w).toFixed(2),
+            rate_h = parseFloat(cc.winSize.height / h).toFixed(2);
 
         var loc_scale = Math.min( rate_w, rate_h );
-        this._spr.setScale( loc_scale );
+        this._spr.setScale( loc_scale * 0.8 );
     },
 
     setTargetNode : function( event ) {
