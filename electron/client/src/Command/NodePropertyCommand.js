@@ -33,6 +33,10 @@ Genie.Command.NodeProperty = Genie.Command.Base.extend({
                 this._targetNode.setLocalZOrder( value );
                 strText = cc.formatStr( "z-order  >  %d ", value );
                 break;
+            case 'cascadeOpacity':
+                this._targetNode.setCascadeOpacityEnabled( value );
+                strText = cc.formatStr( "enable cascade opacity  >  ", value );
+                break;
             case 'opacity':
                 this._targetNode.setOpacity( value );
                 strText = cc.formatStr( "opacity  >  %d ", value );

@@ -44,6 +44,11 @@ Genie.Component.NodeProperty = Genie.Component.InspectorBase.extend({
         // zorder
         this.input_order = HtmlHelper.createOneLongTextInput( rootDiv, "z-order", owner.getLocalZOrder(), false, this.onchange.bind(this) );
 
+        // cascade color
+
+        // cascade opacity
+        this.cb_cascadeOpacity = HtmlHelper.createCheckboxAttrib( rootDiv, "cascadeOpacity", owner.isCascadeOpacityEnabled(), false, this.onchange.bind(this) );
+
         // opacity
         this.input_opacity = HtmlHelper.createOneLongTextInput( rootDiv, "opacity", owner.getOpacity(), false, this.onchange.bind(this) );
         // this.input_opacity = HtmlHelper.createSliderAttrib( rootDiv, "opacity", owner.getOpacity(), 0, 255, false, this.onchange.bind(this) );
@@ -95,6 +100,11 @@ Genie.Component.NodeProperty = Genie.Component.InspectorBase.extend({
                 loc_strProp = "zorder";
                 loc_src     = owner.getLocalZOrder();
                 loc_dest    = value;
+                break;
+            case this.cb_cascadeOpacity:
+                loc_strProp = "cascadeOpacity";
+                loc_src     = owner.isCascadeOpacityEnabled();
+                loc_dest    = event.target.checked;
                 break;
             case this.input_opacity:
                 value       = parseInt( strValue );
@@ -150,6 +160,9 @@ Genie.Component.NodeProperty = Genie.Component.InspectorBase.extend({
                 break;
             case 'opacity':
                 this.input_opacity.value = dest;
+                break;
+            case 'cascadeOpacity':
+                this.cb_cascadeOpacity.value = dest;
                 break;
         }
     },
