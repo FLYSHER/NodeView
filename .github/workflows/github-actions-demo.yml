@@ -16,6 +16,6 @@ jobs:
           node-version: 18.12.1
 
       - name: Build
-        run: yarn build
+        run: npm run deploy:win
         working-directory: ${{ env.working-directory }}
 
