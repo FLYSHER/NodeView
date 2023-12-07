@@ -3,7 +3,7 @@ run-name: ${{ github.actor }} Test GitHub Actions 🚀
 on: [push]
 jobs:
   Explore-GitHub-Actions:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     env:
       working-directory: ./electron
     steps:
@@ -16,6 +16,6 @@ jobs:
           node-version: 18.12.1
 
       - name: Build
-        run: npm run deploy:win
+        run: npm run deploy:mac
         working-directory: ${{ env.working-directory }}
 
