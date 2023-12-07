@@ -63,6 +63,9 @@ const template = [
       },
       {
         role: 'Close'
+      },
+      {
+        role: 'ToggleDevTools'
       }
     ]
   },
