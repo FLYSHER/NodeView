@@ -46,7 +46,7 @@ var Renderer_assets = {
     // 트리 노드 드레그 시작
     onDragStartTreeNode : function( e ) {
         cc.log( Renderer_assets.Tag, "*** drag start *** : ", e.target.innerText );
-        e.originalEvent.dataTransfer.setData( "spriteName", e.target.innerText );
+        e.originalEvent.dataTransfer.setData( "assetName", e.target.innerText );
     },
 
     //

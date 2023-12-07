@@ -5,9 +5,11 @@ var Renderer_hierarchy = {
     rootLayer           : null,
 
     MenuPrefix : {
-        Node    : "Node",
-        Sprite  : "SpriteNode",
+        Node            : "Node",
+        Sprite          : "SpriteNode",
+        PopupComponent  : "Popup", // 컴포넌트 이름과 같아야 함.
     },
+
 
     init : function( rootLayer ) {
         this.rootLayer = rootLayer;
@@ -82,6 +84,9 @@ var Renderer_hierarchy = {
         var addNodeSubMenu = this._jstreeConfig["contextmenu"]["items"]["addNode"]["submenu"];
         this._addSubMenu( addNodeSubMenu, this.MenuPrefix.Node, this.onAddNodeByMenu, this );
         this._addSubMenu( addNodeSubMenu, this.MenuPrefix.Sprite, this.onAddNodeByMenu, this );
+
+        var addComponentSubMenu = this._jstreeConfig["contextmenu"]["items"]["addComponent"]["submenu"];
+        this._addSubMenu( addComponentSubMenu, this.MenuPrefix.PopupComponent, this.onAddComponentByMenu, this );
     },
 
     _addSubMenu : function( targetMenu, strMenu, selector, target ) {
@@ -99,6 +104,19 @@ var Renderer_hierarchy = {
             parentNode.addChild( newNode );
             this.addTreeNode( newNode.__instanceId, parentNodeId, "newNode", newNode );
             $(`#hierarchy`).jstree("refresh");
+        }
+    },
+
+    onAddComponentByMenu : function( obj ) {
+        var currNodeId = parseInt( obj.reference.prevObject[0].id );
+        var currNode = this.nodeInstanceIDMap[ currNodeId ];
+        var compName = obj.item.label;
+        if( currNode ) {
+            var component = new Genie.Component[ compName ];
+            if( component ) {
+                currNode.addComponent( component );
+                component.drawInspector();
+            }
         }
     },
 

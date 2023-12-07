@@ -63,5 +63,47 @@ Genie.Utils = {
         var animationData   = armature.getAnimation().getAnimationData();
         var movementDataDic = animationData.movementDataDic;
         return movementDataDic[ movName ];
-    }
+    },
+
+    // .exportJson 파일로부터 툴 파일 타입이 뭔지 알아내기 위함. cc.loader.getRes 를 통한 객체
+    getFileTypeFromExportJson : function ( fileName ) {
+        var validCheck = cc.isString( fileName );
+        validCheck = validCheck && ( cc.path.extname( fileName ) === ".ExportJson" );
+
+        if( validCheck ) {
+            // cc.loader.loader 에 이미 캐싱되어있는 애들만 체크
+            var res = cc.loader.getRes( fileName );
+            if( res ) {
+                if( res.hasOwnProperty( 'widgetTree') ) {
+                    return Genie.ToolFileType.UIFile;
+                }
+                else {
+                    return Genie.ToolFileType.ARMATURE;
+                }
+            }
+            else {
+                return  Genie.ToolFileType.NONE;
+            }
+        }
+        else {
+            return  Genie.ToolFileType.NONE;
+        }
+    },
+
+    getMovNamesFromExportJson : function( fileName ) {
+        var moveNames = [];
+
+        if( this.getFileTypeFromExportJson( fileName ) === Genie.ToolFileType.ARMATURE ) {
+            var i,
+                res         = cc.loader.getRes( fileName ),
+                anim_data   = res['animation_data'][0],
+                mov_data    = anim_data['mov_data'];
+
+            for( i = 0; i < mov_data.length; ++i ) {
+                moveNames.push( mov_data[i].name );
+            }
+        }
+
+        return moveNames;
+    },
 }

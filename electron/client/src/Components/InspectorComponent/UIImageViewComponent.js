@@ -49,19 +49,6 @@ Genie.Component.UIImageView = Genie.Component.InspectorBase.extend({
             $('#assets').jstree('search', searchString);
         }
 
-        // this.input_texFileName.ondrop = function( event ) {
-        //     var sprName = event.dataTransfer.getData("spriteName");
-        //     var spriteFrame = cc.spriteFrameCache.getSpriteFrame( sprName );
-        //     if( spriteFrame ) {
-        //         event.target.value = sprName;
-        //
-        //         owner.loadTexture( sprName, ccui.Widget.PLIST_TEXTURE );
-        //         this.refreshAttribute();
-        //     }
-        //     event.preventDefault();
-        // }.bind(this);
-
-
         // texture type
         this.input_texType = HtmlHelper.createOneLongTextInput( rootDiv, 'imageTexType', imgType[owner._imageTexType], true, null );
 
@@ -159,7 +146,7 @@ Genie.Component.UIImageView = Genie.Component.InspectorBase.extend({
 
     onDrop : function( event ) {
         var owner = this.getOwner();
-        var sprName = event.dataTransfer.getData("spriteName");
+        var sprName = event.dataTransfer.getData("assetName");
 
         var currSprName = this.input_texFileName.value;
         if( currSprName === sprName ) {

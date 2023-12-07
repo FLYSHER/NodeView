@@ -38,15 +38,15 @@ Genie.Component.ArmatureView = Genie.Component.InspectorBase.extend({
 
         this.select_track = HtmlHelper.createSelectMenuAttrib( rootDiv, "trackName", movementNames[0], arrOption, this.onchange.bind(this) );
 
-        this.btn_play = HtmlHelper.creatIconButton( rootDiv, {
+        this.btn_play = HtmlHelper.createIconButton( rootDiv, {
             className : 'fa-solid fa-play',
         }, this.onclick.bind(this) );
 
-        this.btn_stop = HtmlHelper.creatIconButton( rootDiv, {
+        this.btn_stop = HtmlHelper.createIconButton( rootDiv, {
             className : 'fa-solid fa-stop',
         }, this.onclick.bind(this) );
 
-        this.btn_resumeAndPause = HtmlHelper.creatIconButton( rootDiv, {
+        this.btn_resumeAndPause = HtmlHelper.createIconButton( rootDiv, {
             className : 'fa-solid fa-pause',
             style   : 'color: #677283'
         }, this.onclick.bind(this) );
@@ -55,7 +55,7 @@ Genie.Component.ArmatureView = Genie.Component.InspectorBase.extend({
         var div_gotoAndPause = HtmlHelper.createDiv( rootDiv, 'component_lineDiv' );
         HtmlHelper.createLabel( div_gotoAndPause, 'gotoAndPause', 'component_propertyLabel');
         this.input_gotoAndPause = HtmlHelper.createTextInput( div_gotoAndPause, 0, 'component_shortTextInput', false, this.onchange.bind(this) );
-        this.btn_gotoAndPause = HtmlHelper.creatIconButton( div_gotoAndPause, {
+        this.btn_gotoAndPause = HtmlHelper.createIconButton( div_gotoAndPause, {
             className : 'fa-solid fa-forward-step',
         }, this.onclick.bind(this) );
 

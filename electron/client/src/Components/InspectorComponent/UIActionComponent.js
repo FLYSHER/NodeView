@@ -47,7 +47,7 @@ Genie.Component.UIActionView = Genie.Component.InspectorBase.extend({
             }
 
             this.select_uiAction =  HtmlHelper.createSelectMenuAttrib( rootDiv, "ui action", actionList[0].getName(), arrOption );
-            this.btn_play = HtmlHelper.creatIconButton( rootDiv, {
+            this.btn_play = HtmlHelper.createIconButton( rootDiv, {
                 className : 'fa-solid fa-play',
             }, this.onclick.bind(this) );
 

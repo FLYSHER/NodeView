@@ -17,7 +17,7 @@ var HtmlHelper = {
         return el_button;
     },
 
-    creatIconButton : function( parent, iconInfoObj, onclick ) {
+    createIconButton : function( parent, iconInfoObj, onclick ) {
         var button = document.createElement( 'button' );
         button.style.display = "inline";
         button.style.width = '30px';

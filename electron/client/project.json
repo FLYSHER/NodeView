@@ -21,6 +21,7 @@
         "src/Defines/eventDefines.js",
 
         "src/Utils/GenieUtils.js",
+        "src/Utils/GenieARUtils.js",
         "src/Utils/ScreenUtils.js",
         "src/Utils/HtmlHelper.js",
 
@@ -39,6 +40,7 @@
         "src/Components/InspectorComponent/UIImageViewComponent.js",
         "src/Components/InspectorComponent/UILabelBMFontComponent.js",
         "src/Components/InspectorComponent/UIButtonComponent.js",
+        "src/Components/InspectorComponent/PopupComponent.js",
 
         "src/Command/Command.js",
         "src/Command/TransformCommand.js",
