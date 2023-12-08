@@ -233,6 +233,7 @@ var HtmlHelper = {
             $.each(components, (index, item) => {
                 if (index !== 0 && item === parent) {
                     inspector.insertBefore(parent, components[index - 1]);
+                    return false;
                 }
             });
 
@@ -247,6 +248,7 @@ var HtmlHelper = {
             $.each(components, (index, item) => {
                 if (index !== components.length - 1 && item === parent) {
                     inspector.insertBefore(components[index + 1], parent);
+                    return false;
                 }
             });
 
