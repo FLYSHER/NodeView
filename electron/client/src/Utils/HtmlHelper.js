@@ -177,8 +177,7 @@ var HtmlHelper = {
         div_comp.style.display = 'block';
         div_comp.style.backgroundColor = "#555555";
         div_comp.style.border   = 'solid 2px #151515FF';
-        // div_comp.style.padding  = '5px';
-
+        div_comp.style.borderBottom = 'solid 0px';
 
         var icon = document.createElement( 'i' );
         icon.className  = iconInfoObj.className;
@@ -192,7 +191,90 @@ var HtmlHelper = {
         label.innerText =  componentName;
         div_comp.appendChild( label );
 
+        const menu_container = HtmlHelper.createComponentMenu();
+
+        const menu_icon = document.createElement('i');
+        menu_icon.className = 'fa-solid fa-ellipsis-vertical';
+        menu_icon.style.color = '#d0b8f4';
+        menu_icon.style.margin = '5px';
+        menu_icon.style.paddingRight = '10px';
+        menu_icon.style.float = 'right';
+
+        menu_icon.addEventListener('click', menu_container._onclick);
+
+        div_comp.appendChild( menu_icon );
+        div_comp.appendChild( menu_container );
+
         return div_comp;
+    },
+
+    createComponentMenu : function () {
+        const menu_container = document.createElement('div');
+
+        const menu_div = document.createElement('div');
+        menu_div.id = 'menu_div';
+        menu_div.style.backgroundColor = '#484848';
+        menu_div.style.border = 'solid 1px #151515FF';
+        menu_div.style.borderRadius = '5px';
+        menu_div.style.maxHeight = '0px';
+        menu_div.style.overflow = 'hidden';
+        menu_div.style.transition = 'max-height 0.3s ease-out';
+
+        const option_addComponent = HtmlHelper.createComponentMenuOption('Add Component', () => {
+            // todo add component
+            menu_div.style.maxHeight = '0px';
+        });
+
+        const option_moveUp = HtmlHelper.createComponentMenuOption('Move Up', () => {
+            const inspector = document.getElementById('inspector');
+            const components = inspector.children;
+            const parent = menu_div.parentElement.parentElement.parentElement;
+
+            $.each(components, (index, item) => {
+                if (index !== 0 && item === parent) {
+                    inspector.insertBefore(parent, components[index - 1]);
+                }
+            });
+
+            menu_div.style.maxHeight = '0px';
+        });
+
+        const option_moveDown = HtmlHelper.createComponentMenuOption('Move Down', () => {
+            const inspector = document.getElementById('inspector');
+            const components = inspector.children;
+            const parent = menu_div.parentElement.parentElement.parentElement;
+
+            $.each(components, (index, item) => {
+                if (index !== components.length - 1 && item === parent) {
+                    inspector.insertBefore(components[index + 1], parent);
+                }
+            });
+
+            menu_div.style.maxHeight = '0px';
+        });
+
+        menu_div.appendChild( option_addComponent );
+        menu_div.appendChild( option_moveUp );
+        menu_div.appendChild( option_moveDown );
+
+        menu_container.appendChild( menu_div );
+        menu_container._onclick = () => { menu_div.style.maxHeight = menu_div.style.maxHeight === '0px' ? '100px' : '0px'; };
+
+        return menu_container;
+    },
+
+    createComponentMenuOption : function (content, onclick) {
+        const option = document.createElement('div');
+        option.textContent = content;
+        option.style.color = '#dbdbdb';
+        option.style.textAlign = 'right';
+        option.style.padding = '3px';
+        option.style.marginRight = '10px';
+        option.addEventListener('mouseenter', () => { option.style.textShadow = '1px 1px 2px pink' });
+        option.addEventListener('mouseout', () => { option.style.textShadow = 'none' });
+        option.addEventListener('click', onclick);
+
+        return option;
     },
 
     // component view
