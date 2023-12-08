@@ -53,6 +53,8 @@ RockN.scheduleUpdate = function(node){
 };
 
 // Utilities
+RockN.UIUtil = RockN.UIUtil || {};
+
 RockN.Util = RockN.Util || {};
 RockN.Util.getARNameFromFileName = function( ARfileName ) {
     return ARfileName.split('.').slice(0, -1).join('.');
@@ -286,6 +288,51 @@ var countLabelBase = function( label, initValue, toValue, delay, duration, maxDi
             }
         }
     }, 0, cc.REPEAT_FOREVER, delay );
+};
+RockN.UIUtil.addSliderToScrollView = function(slider, scrollView){
+
+    var direction = scrollView.getDirection();
+    slider.addEventListener(function(sender,type){
+        if (type === ccui.Slider.EVENT_PERCENT_CHANGED)	{
+            var percent = sender.getPercent();
+
+            if (ccui.ScrollView.DIR_VERTICAL === direction)	{
+                scrollView.jumpToPercentVertical(percent);
+            }
+            else if (ccui.ScrollView.DIR_HORIZONTAL === direction)	{
+                scrollView.jumpToPercentHorizontal(100-percent);
+            }
+        }
+    }, this);
+
+    scrollView.addEventListener(function (sender, event) {
+
+        if (event === ccui.ScrollView.EVENT_SCROLLING||
+            event === ccui.ScrollView.EVENT_AUTOSCROLL_ENDED||
+            event === ccui.ScrollView.EVENT_CONTAINER_MOVED ){
+
+            var posScrInnerCon = scrollView.getInnerContainerPosition();
+            var sizeScrInnerCon =scrollView.getInnerContainerSize();
+            var sizeScrView = scrollView.getContentSize();
+            var temp, percent;
+            if (ccui.ScrollView.DIR_VERTICAL === direction)	{
+                temp     = sizeScrView.height - sizeScrInnerCon.height;
+                if( temp === 0 )
+                    return;
+                percent = ( 100 ) / ( -temp) * ( posScrInnerCon.y - temp );
+                slider.setPercent(cc.clampf(percent, 0, 100));
+            }
+            else if (ccui.ScrollView.DIR_HORIZONTAL === direction)	{
+                temp     = sizeScrView.width - sizeScrInnerCon.width;
+                if( temp === 0 )
+                    return;
+                percent = ( 100 ) / ( -temp) * ( posScrInnerCon.x - temp );
+                slider.setPercent(cc.clampf(percent, 0, 100));
+            }
+        }
+
+    });
+
 };
 
 // Sounds

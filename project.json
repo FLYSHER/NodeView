@@ -19,6 +19,8 @@
         "src/Game/app.js",
         "src/Game/RNC/Component/CommonSlotMenu.js",
         "src/Game/RNC/Component/JackpotNoti.js",
-        "src/Game/RNC/Component/JackpotNotiController.js"
+        "src/Game/RNC/Component/JackpotNotiController.js",
+        "src/Game/RNC/XFlight/XFlightHistoryNode.js",
+        "src/Game/RNC/XFlight/XFlightBettingListNode.js"
     ]
 }
