@@ -49,7 +49,7 @@ var XFlightBettingListNotiNode = cc.Node.extend({
             this._lbPing = null;
 
         // Scrolls
-        /** @type {[cc.Node & ccui.Widget & ccui.ScrollView]} */
+        /** @type {[cc.Node & ccui.Widget & ccui.ListView]} */
         this._scrollViewArr = [];
         /** @type {cc.Node & ccui.Slider} */
         this._slScroll = null;
@@ -159,14 +159,13 @@ var XFlightBettingListNotiNode = cc.Node.extend({
     },
     _initScrollViews: function () {
         for (var i = 0; i < this._defines.Tab.Count; i++) {
-            var sv = new ccui.ScrollView();
+            var sv = new ccui.ListView();
             sv.setContentSize(cc.size(300, 242));
             sv.setScrollBarEnabled(false);
             sv.setDirection(ccui.ScrollView.DIR_VERTICAL);
-            sv.setLayoutType(ccui.Layout.LINEAR_VERTICAL);
             sv.setPosition(cc.p(0, 37));
             sv.setTouchEnabled(false);
-            sv.addEventListener(this._onTouchScrollView.bind(this));
+            sv.addEventListenerScrollView(this._onTouchScrollView, this);
 
             this._tabNodeArr[i].addChild(sv);
             this._scrollViewArr[i] = sv;
@@ -189,28 +188,19 @@ var XFlightBettingListNotiNode = cc.Node.extend({
 
     _initMiniNoti: function () {
         for (var i = 0; i < this._defines.Tab.Count; i++) {
-            this._miniNotiArr[i] = new XFlightBettingListNotiMini(i, this._listPool, 3, cc.size(300, 242));
+            this._miniNotiArr[i] = new XFlightBettingListNotiMini(i, this._listPool, 3, cc.size(300, 22));
             this._tabNodeArr[i].addChild(this._miniNotiArr[i]);
             this._miniNotiArr[i].setPosition(cc.p(0, 257));
         }
     },
-
     _initAfter: function () {
         this._currSize = this._defines.Size.Default;
         this._currTab = this._defines.Tab.Default;
-        this.setAllContentsVisible(false);
-        this.showCurrContent();
+        this._setAllContentsVisible(false);
+        this._showCurrContent();
     },
 
-    // Main
-    addUserData: function (tabType, userData) {
-        this._listPool.addListToScrollView(tabType, userData, this._scrollViewArr[tabType]);
-        this._listPool.updateScrollViewContentSize(this._scrollViewArr[this._currTab]);
-        this._listPool.addListToMiniNoti(tabType, 0, userData, this._miniNotiArr[tabType]);
-    },
-    _updateScrollContentSize: function () {
-
-    },
+    // Interfaces
     setPing: function (status, val) {
         this._lbPing.setVisible(true);
         this._lbPing.setString(val);
@@ -225,7 +215,72 @@ var XFlightBettingListNotiNode = cc.Node.extend({
         this._lbPlayerCount.setVisible(true);
         this._lbPlayerCount.setString(count);
     },
-    setAllContentsVisible: function (visible) {
+    addListFront: function (tabType, userData) {
+        this._addToScrollView(tabType, 0, userData);
+        this._updateMiniViewFromScrollView(tabType);
+    },
+    addListBack: function (tabType, userData) {
+        var index = this._scrollViewArr[tabType].getItems().length;
+        this._addToScrollView(tabType, index, userData);
+        this._updateMiniViewFromScrollView(tabType);
+    },
+    addListByIndex: function(tabType,index,userData){
+        this._addToScrollView(tabType, index, userData);
+        this._updateMiniViewFromScrollView(tabType);
+    },
+    resetAllList: function (tabType) {
+        while(this._scrollViewArr[tabType].getItems().length > 0)
+            this._removeScrollViewList(tabType, 0);
+
+        for (var j = 0; j < this._miniNotiArr[tabType].getMaxListCount(); j++) {
+            this._removeMiniViewList(tabType, j);
+        }
+    },
+
+    // Interface - UserData
+    _addToScrollView: function (tabType, index, userData) {
+        var node = this._listPool.getList(tabType, userData);
+        this._scrollViewArr[tabType].insertCustomItem(node, index);
+        this._updateScrollViewSize(tabType);
+    },
+    _updateScrollViewSize: function (tabType) {
+        var children = this._scrollViewArr[tabType].getItems();
+        if (children.length === 0)
+            return;
+
+        var csize = children[0].getContentSize();
+        this._scrollViewArr[tabType].setInnerContainerSize(cc.size(csize.width, csize.height * children.length));
+    },
+    _removeScrollViewList: function (tabType, index) {
+        var item = this._scrollViewArr[tabType].getItem(index);
+        if (!item)
+            return;
+
+        this._listPool.returnList(tabType, item);
+        this._scrollViewArr[tabType].removeItem(index);
+    },
+
+    _updateMiniViewFromScrollView: function (tabType) {
+        for (var i = 0; i < this._miniNotiArr[tabType].getMaxListCount(); i++) {
+            var item = this._scrollViewArr[tabType].getItem(i);
+            if(!!item)
+                this._addToMiniView(tabType, i, this._listPool.getUserDataFromList(tabType, item));
+        }
+    },
+    _addToMiniView: function (tabType, index, userData) {
+        if (this._miniNotiArr[tabType].getMaxListCount() <= index)
+            return;
+
+        var node = this._listPool.getList(tabType, userData);
+        this._miniNotiArr[tabType].addList(index, node);
+    },
+    _removeMiniViewList: function (tabType, index) {
+        var node = this._miniNotiArr[tabType].removeAndReturnList(index);
+        this._listPool.returnList(tabType, node);
+    },
+
+    // Utils
+    _setAllContentsVisible: function (visible) {
         for (var i = 0; i < this._defines.Tab.Count; i++) {
             this._tabTextArr[i].setVisible(visible);
             this._tabNodeArr[i].setVisible(visible);
@@ -241,7 +296,7 @@ var XFlightBettingListNotiNode = cc.Node.extend({
 
         this._imgScroll.setVisible(visible);
     },
-    showCurrContent: function () {
+    _showCurrContent: function () {
         this._tabNodeArr[this._currTab].setVisible(true);
         this._tabTextArr[this._currTab].setVisible(true);
         this._btnTabArr[this._currTab].setHighlighted(true);
@@ -256,10 +311,6 @@ var XFlightBettingListNotiNode = cc.Node.extend({
         this._btnSizeArr[this._currSize].setVisible(true);
         this._imgBaseArr[this._currSize].setVisible(true);
         this._imgScroll.setVisible(this._currSize === this._defines.Size.Type.Extend);
-    },
-    resetList: function(tabType){
-        this._listPool.resetScrollView(tabType, this._scrollViewArr[tabType]);
-        this._miniNotiArr[tabType].reset();
     },
 
     // Abstract Events (Maybe should override someday...)
@@ -285,15 +336,15 @@ var XFlightBettingListNotiNode = cc.Node.extend({
     _onTouchBtnTab: function (index, sender, type) {
         if (type === ccui.Widget.TOUCH_ENDED) {
             this._currTab = index;
-            this.setAllContentsVisible(false);
-            this.showCurrContent(type);
+            this._setAllContentsVisible(false);
+            this._showCurrContent(type);
         }
     },
     _onTouchBtnSize: function (index, sender, type) {
         if (type === ccui.Widget.TOUCH_ENDED) {
             this._currSize = index === this._defines.Size.Type.Extend ? this._defines.Size.Type.Reduce : this._defines.Size.Type.Extend;
-            this.setAllContentsVisible(false);
-            this.showCurrContent(type);
+            this._setAllContentsVisible(false);
+            this._showCurrContent(type);
         }
     },
 });
@@ -332,34 +383,22 @@ var XFlightBettingListPoolNode = cc.Node.extend({
         }
     },
 
-    returnList: function(tabType, node){
-        if(!!node) {
+    returnList: function (tabType, node) {
+        if (!!node) {
             var idx = this._usedPoolArr[tabType].indexOf(node);
-            if(idx > -1) {
+            if (idx > -1) {
                 this._poolList[tabType].returnNode(node);
                 this._usedPoolArr[tabType][idx] = null;
             }
         }
     },
-    resetScrollView: function(type){
-        for(var i=0; i<this._usedPoolArr[type].length; i++){
-            this.returnList(type, this._usedPoolArr[type][i]);
-        }
-    },
-    
-    addListToMiniNoti: function (type, index, data, target) {
+
+    getList: function (type, data) {
         var node = this._poolList[type].getNode();
         this._applyDataToList(type, node, data);
-        target.addList(index, node);
         this._usedPoolArr[type].push(node);
+        return node;
     },
-    addListToScrollView: function (type, data, svTarget) {
-        var node = this._poolList[type].getNode();
-        this._applyDataToList(type, node, data);
-        svTarget.addChild(node);
-        this._usedPoolArr[type].push(node);
-    },
-    
     _applyDataToList: function (type, node, data) {
         var top = ccui.helper.seekWidgetByName(node, "pnTopSection");
         var allBet = ccui.helper.seekWidgetByName(node, "pnBetSection");
@@ -389,27 +428,66 @@ var XFlightBettingListPoolNode = cc.Node.extend({
         for (var i = 0; i < 7; i++) {
             this._findWidgetAndSetVisible(node, "imgMultiBase" + i, false);
         }
-        this._findWidgetAndSetVisible(node, "imgMultiBase" + data.level, true);
+        this._findWidgetAndSetVisible(node, "imgMultiBase" + this.getLevel(data.multi), true);
         this._findWidgetAndSetVisible(node, "lbRank", true);
         for (var i = 0; i < 3; i++) {
             this._findWidgetAndSetVisible(node, "imgRank" + i, false);
         }
-        this._findWidgetAndSetVisible(node, "imgRank" + data.rank, true);
+        this._findWidgetAndSetVisible(node, "imgRank" + (data.rank-1), true);
 
     },
     _findWidgetAndSetVisible: function (node, name, visible) {
-        var widget = ccui.helper.seekWidgetByName(node, "name");
+        var widget = ccui.helper.seekWidgetByName(node, name);
         !!widget && widget.setVisible(visible);
     },
 
-    updateScrollViewContentSize: function (svTarget) {
-        var children = svTarget.getChildren();
-        if(children.length === 0)
-            return;
-        
-        var listSize = children[0].getContentSize();
-        var scrollViewSize = cc.size(listSize.width, listSize.height * children.length);
-        svTarget.setInnerContainerSize(scrollViewSize);
+    getUserDataFromList: function (tabType, list) {
+        var retVal = {
+            userName: null,
+            bet: null,
+            win: null,
+            multi: null,
+            rank: null,
+            level: null,
+        };
+        var top = ccui.helper.seekWidgetByName(list, "pnTopSection");
+        var allBet = ccui.helper.seekWidgetByName(list, "pnBetSection");
+        var root = tabType === this._defines.Type.AllBet ? allBet : top;
+
+        retVal.userName = this._findWidgetAndGetString(root, "lbUserName");
+        retVal.bet = this._findWidgetAndGetString(root, "lbBetNum");
+        retVal.win = this._findWidgetAndGetString(root, "lbWinNum");
+        retVal.multi = this._findWidgetAndGetString(root, "lbMultiNum");
+        retVal.rank = this._findWidgetAndGetString(root, "lbRank");
+        retVal.level = this.getLevel(Number(retVal.multi));
+
+        return retVal;
+    },
+    _findWidgetAndGetString: function (node, name) {
+        var widget = ccui.helper.seekWidgetByName(node, name);
+        if (!!widget)
+            return widget.getString();
+    },
+
+    getLevel: function (multi) {
+        var level = 0;
+
+        if(multi > 1)
+            level = 1;
+        if(multi > 10)
+            level = 2;
+        if (multi > 20)
+            level = 3;
+        if (multi > 50)
+            level = 4;
+        if (multi > 100)
+            level = 5;
+        if (multi > 500)
+            level = 6;
+        if (multi > 1000)
+            level = 7;
+
+        return level;
     },
 });
 
@@ -433,14 +511,12 @@ var XFlightBettingListNotiMini = cc.Node.extend({
     },
     _init: function () {
         for (var i = 0; i < this._maxListCount; i++) {
-            this._listPosArr[i] = cc.p(0, this._listSize.height * i);
+            this._listPosArr[i] = cc.p(0, -(this._listSize.height * i));
         }
     },
 
     addList: function (index, node) {
-        if (index >= this._maxListCount)
-            return;
-
+        // If node is already exist, return it to pool.
         if (!!this._listArr[index])
             this._returnList(index);
 
@@ -448,11 +524,25 @@ var XFlightBettingListNotiMini = cc.Node.extend({
         this.addChild(this._listArr[index]);
         this._listArr[index].setPosition(this._listPosArr[index]);
     },
-    _returnList: function(index){
+    _returnList: function (index) {
         this._poolNode.returnList(this._tabType, this._listArr[index]);
         this._listArr[index] = null;
     },
-    reset: function(){
+    reset: function () {
         this._listArr = [];
+    },
+    removeAndReturnList: function (index) {
+        var retVal = null;
+        if (!!this._listArr[index]) {
+            this._listArr[index].removeFromParent();
+            retVal = this._listArr[index];
+            this._listArr[index] = null;
+        }
+        return retVal;
+    },
+
+    // Getter
+    getMaxListCount: function () {
+        return this._maxListCount;
     },
 });

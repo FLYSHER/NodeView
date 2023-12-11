@@ -76,15 +76,15 @@ var XFlightHistoryNotiNode = cc.Node.extend({
         // Set InPlay Unit to normal unit.
         this._unitArr[0].setLevel(level);
         this._unitArr[0].setString(value);
-        
+
         // Create new Unit & push forward.
         var newUnit = new XFlightHistoryUnitNode(resSlot213.XFlightNotiHistoryUI, 7);
         this.addChild(newUnit);
         newUnit.setPlay();
         this._unitArr.unshift(newUnit);
-        
+
         // Update Units
-        this._updateUnits();
+        this._updateHistory();
     },
 
     // Actions (inProgress)
