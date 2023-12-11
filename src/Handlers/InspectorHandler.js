@@ -22,6 +22,7 @@ InspectorHandlerKey = {
         UIWidget : 2,
         SlotMenu : 3,
         JackpotNoti : 4,
+        Label : 5,
     },
 };
 function InspectorHandler() {
@@ -38,19 +39,28 @@ InspectorHandler.prototype.reset = function () {
 InspectorHandler.prototype.onClickNode = function (node) {
     this.reset();
     this._currNode = node;
-    this.createNodeInspector();
     this.createInspectorByNodeType(this.getNodeType(node));
     this.createBtnApply();
 };
 InspectorHandler.prototype.createInspectorByNodeType = function(nodeType){
-    if(!nodeType)
+    if(cc.isArray(nodeType) === false)
         return;
     
-    switch (nodeType) {
-        case InspectorHandlerKey.NodeType.Armature:
-            this.createArmatureInspector();
-            break;
+    while(nodeType.length > 0) {
+        var type = nodeType.shift();
+        switch (type) {
+            case InspectorHandlerKey.NodeType.EmptyNode:
+                this.createNodeInspector();
+                break;
+            case InspectorHandlerKey.NodeType.Armature:
+                this.createArmatureInspector();
+                break;
+            case InspectorHandlerKey.NodeType.Label:
+                this.createLabelInspector();
+                break;
+        }
     }
+    
 };
 InspectorHandler.prototype.createBtnApply = function(){
     this._eHandler.createBtnApply();
@@ -202,6 +212,16 @@ InspectorHandler.prototype.createAnimation = function(){
     this._eHandler.addElement("input_animation_loop",checkbox);
 };
 
+// Label Inspector
+InspectorHandler.prototype.createLabelInspector = function(){
+    this.createString();
+};
+InspectorHandler.prototype.createString = function(){
+    this._eHandler.createInputList("list_String",["string"],["text"]);
+    var input = this._eHandler.getElement("input_string");
+    input.value = this._currNode.getString();
+};
+
 InspectorHandler.prototype.getElementValue = function(elementID){
     var key = ElementHandlerKey.Type.input + elementID;
     return this._eHandler.getElement(key).value;
@@ -209,10 +229,21 @@ InspectorHandler.prototype.getElementValue = function(elementID){
 
 // Apply & Delete
 InspectorHandler.prototype.onClickApply = function(){
-    this._applyNodeAttribute();
-    
-    if(this._currNode instanceof ccs.Armature)
-        this._applyArmatureAttribute();
+    var nodeTypes = this.getNodeType(this._currNode);
+    while(nodeTypes.length > 0) {
+        var type = nodeTypes.shift();
+        switch (type) {
+            case InspectorHandlerKey.NodeType.Label:
+                this._applyLabelAttribute();
+                break;
+            case InspectorHandlerKey.NodeType.EmptyNode:
+                this._applyNodeAttribute();
+                break;
+            case InspectorHandlerKey.NodeType.Armature:
+                this._applyArmatureAttribute();
+                break;
+        }
+    }
 };
 InspectorHandler.prototype._applyNodeAttribute = function(){
     var pos = cc.p(0,0);
@@ -247,6 +278,10 @@ InspectorHandler.prototype._applyArmatureAttribute = function(){
     var loop = this.getElementValue(ElementHandlerKey.ArmatureProperties.isLoop);
     this._currNode.getAnimation().play(trackName, -1, loop);
 };
+InspectorHandler.prototype._applyLabelAttribute = function(){
+    var stringVal = this.getElementValue(ElementHandlerKey.LabelProperties.string);
+    this._currNode.setString(stringVal);
+};
 InspectorHandler.prototype.onClickDelete = function(){
     this._currNode.removeFromParent(true);
     this.reset();
@@ -271,12 +306,11 @@ InspectorHandler.prototype.getNodeType = function(node){
     if(node instanceof CommonVideoSlotMenu)
         retVal.push(InspectorHandlerKey.NodeType.SlotMenu);
     
-    // Throw error if it has multiple type.
-    if(retVal.length > 2)
-        throw new Error("Can't figure out which type. Please check the node.");
+    if(node instanceof cc.LabelTTF || node instanceof cc.LabelBMFont || node instanceof ccui.Text || node instanceof ccui.TextBMFont)
+        retVal.push(InspectorHandlerKey.NodeType.Label)
     
     // Return specific Type & If it has no type, return empty node.
-    return retVal[1] || retVal[0];
+    return retVal;
 };
 
 function ElementHandler() {
@@ -363,6 +397,9 @@ ElementHandlerKey = {
     ArmatureProperties : {
         isLoop : "animation_loop",
         movementName : "animation"
+    },
+    LabelProperties : {
+        string : "string",
     },
 };
 
