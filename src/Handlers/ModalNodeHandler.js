@@ -201,7 +201,7 @@ ModalHandler.prototype._createEmptyNode = function(){
 ModalHandler.prototype._isEmptyNodeDataValid = function(){
     var nodeElem = this._modalList[ModalHandlerKey.InputElement.EmptyNodeName];
     var text = "";
-    if(cc.isString(nodeElem.value) === false || nodeElem.value.length < 1 || hierarchyHandler.getNodeNames().indexOf(nodeElem.value) !== -1) 
+    if(cc.isString(nodeElem.value) === false || nodeElem.value.length < 1) 
         text = "Invalid node name.";
     
     if(hierarchyHandler.getSelectedNode() instanceof ccs.Armature)
@@ -240,9 +240,6 @@ ModalHandler.prototype._isArmatureDataValid = function(){
     var warning = "";
     if(nodeNameElem.value.length === 0)
         warning = "Please input node name.";
-    
-    if(hierarchyHandler.getNodeNames().indexOf(nodeNameElem.value) !== -1)
-        warning = "Current node name is already exist.";
 
     if(selectElem.options.selectedIndex === 0)
         warning = "Choose Armature file.";
@@ -285,9 +282,6 @@ ModalHandler.prototype._isUIWidgetValid = function(){
     var text = "";
     if(uiName.value.length < 1)
         text = "Please input node name";
-
-    if(hierarchyHandler.getNodeNames().indexOf(uiName.value) !== -1)
-        text = "Current node name is already exist.";
     
     if(uiSelect.options.selectedIndex === 0)
         text = "Please select ui file.";

@@ -1,5 +1,5 @@
 var eHierarchy = document.getElementById("hierarchy");
-var HierarchyItemNodeName = "ccNodeName";
+var HierarchyItemNodeName = "ccNode";
 var HierarchyHideList = ["SlotMenu", "JackpotNoti"];
 
 function HierarchyHandler(){
@@ -8,7 +8,6 @@ function HierarchyHandler(){
     this._sceneGraph = {
         name : "Scene",
         node : null,
-        htmlElement : null,
         children : {},
     };
     
@@ -30,6 +29,7 @@ HierarchyHandler.prototype.reload = function(){
     this.drawHierarchy(GameScene);
 };
 HierarchyHandler.prototype.reset = function(){
+    this.resetNodeData();
     this._sceneGraph = {
         name : "Scene",
         node : null,
@@ -40,6 +40,20 @@ HierarchyHandler.prototype.reset = function(){
     this._selectedElem = null;
     this._nodeNames = [];
     eHierarchy.innerHTML = "";
+};
+HierarchyHandler.prototype.resetNodeData = function(){
+    function findAndReset(object){
+        if(!!object.node) {
+            object.node.htmlElement = null;
+            var keys = Object.keys(object.children);
+            if(keys.length > 0){
+                for(var i=0; i<keys.length; i++){
+                    findAndReset(object.children[keys[i]]);
+                }
+            }
+        }
+    }
+    findAndReset(this._sceneGraph);
 };
 
 HierarchyHandler.prototype.drawHierarchy = function (scene) {
@@ -73,7 +87,7 @@ HierarchyHandler.prototype._createSceneGraph = function(){
                 if(children[i] instanceof ccui.Widget && children[i].getWidgetParent() === null)
                     retVal["rootUI"] = true;
                 
-                self.insertChild(node.getName(), retVal);
+                self.insertChild(node, retVal);
                 self._nodeNames.push(childName);
                 setGraph(children[i]);
             }
@@ -82,12 +96,12 @@ HierarchyHandler.prototype._createSceneGraph = function(){
     
     setGraph(this._currScene);
 };
-HierarchyHandler.prototype.insertChild = function(ownerName, value) {
+HierarchyHandler.prototype.insertChild = function(ownerNode, value) {
     function find(object){
         if(object.hasOwnProperty("children") === false)
             return;
         
-        if(object.name === ownerName){
+        if(object.node === ownerNode){
             object.children[value.name] = value;
             return;
         }
@@ -95,19 +109,7 @@ HierarchyHandler.prototype.insertChild = function(ownerName, value) {
         var children = object.children;
         var keys = Object.keys(children);
         for(var i=0; i<keys.length; i++){
-            if(keys[i] === ownerName) {
-                var owner = children[keys[i]];
-                if(owner.hasOwnProperty("children"))
-                    owner.children[value.name] = value;
-                else {
-                    owner["children"] = {};
-                    owner["name"] = ownerName;
-                    owner.children[value.name] = value;
-                }
-                break;
-            } else {
-                find(children[keys[i]]);
-            }
+            find(children[keys[i]]);
         }
     }
     
@@ -127,12 +129,12 @@ HierarchyHandler.prototype._createHierarchyElement = function(){
         var children = object.children;
         var keys = Object.keys(children);
         if(keys.length > 0) {
-            self._createNodeElement(depth, object.name, true);
+            self._createNodeElement(depth, object.node, true);
             for(var i=0; i<keys.length; i++){
                 createElemRecursive(children[keys[i]]);
             }
         } else {
-            self._createNodeElement(depth, object.name, false);
+            self._createNodeElement(depth, object.node, false);
         }
         
         depth--;
@@ -140,7 +142,7 @@ HierarchyHandler.prototype._createHierarchyElement = function(){
     
     createElemRecursive(this._sceneGraph);
 };
-HierarchyHandler.prototype._createNodeElement = function(depth, nodeName, isFold){
+HierarchyHandler.prototype._createNodeElement = function(depth, node, isFold){
     var self = this;
     var div = document.createElement("div");
     div.className = "hierarchy-folder";
@@ -153,8 +155,9 @@ HierarchyHandler.prototype._createNodeElement = function(depth, nodeName, isFold
         text += "&emsp;";
     }
     
+    var nodeName = node.getName();
     elem.innerHTML = text+" "+nodeName + "&emsp;";
-    elem[HierarchyItemNodeName] = nodeName;
+    elem[HierarchyItemNodeName] = node;
     elem.addEventListener('click', function(event){
         self.onClickElement(event);
     });
@@ -165,27 +168,27 @@ HierarchyHandler.prototype._createNodeElement = function(depth, nodeName, isFold
         btnElem.innerHTML = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" fill=\"currentColor\" class=\"bi bi-file-arrow-down-fill\" viewBox=\"0 0 16 16\">\n" +
             "  <path d=\"M12 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2M8 5a.5.5 0 0 1 .5.5v3.793l1.146-1.147a.5.5 0 0 1 .708.708l-2 2a.5.5 0 0 1-.708 0l-2-2a.5.5 0 1 1 .708-.708L7.5 9.293V5.5A.5.5 0 0 1 8 5\"/>\n" +
             "</svg>";
-        btnElem.addEventListener('click',(function(nodeName){
+        btnElem.addEventListener('click',(function(node){
             return function(e){
-                var obj = self.findObjectRecursive(nodeName);
-                obj.htmlElement.isFold = !obj.htmlElement.isFold;
-                if(obj.htmlElement.isFold === true)
-                    self.foldChildren(nodeName, true);
+                var obj = self.findObjectRecursive(node);
+                obj.node.htmlElement.isFold = !obj.node.htmlElement.isFold;
+                if(obj.node.htmlElement.isFold === true)
+                    self.foldChildren(node, true);
                 else
-                    self.foldElementRecursive(nodeName, obj.htmlElement.isFold);
+                    self.foldElementRecursive(node, obj.node.htmlElement.isFold);
             }
-        })(nodeName));
+        })(node));
         div.appendChild(btnElem);
     }
     
     eHierarchy.appendChild(div);
     
     elem.isFold = false;
-    var currObj = this.findObjectRecursive(nodeName);
-    if(!!currObj.htmlElement)
-        throw new Error("Same Name Object is already exist!");
-    else
-        currObj.htmlElement = elem;
+    var currObj = this.findObjectRecursive(node);
+    if(!!currObj.node.htmlElement)
+        throw new Error("Why there is html element?");
+    
+    currObj.node.htmlElement = elem;
 };
 
 HierarchyHandler.prototype.onClickElement = function(event){
@@ -195,8 +198,8 @@ HierarchyHandler.prototype.onClickElement = function(event){
     this._selectedElem.style.color = "#435585";
     this._selectedElem.style.fontWeight = "bold";
     
-    var nodeName = this._selectedElem[HierarchyItemNodeName];
-    var obj = this.findObjectRecursive(nodeName);
+    var node = this._selectedElem[HierarchyItemNodeName];
+    var obj = this.findObjectRecursive(node);
     this._selectedNode = obj.node;
     var originalScaleX = this._selectedNode.getScaleX();
     var originalScaleY = this._selectedNode.getScaleY();
@@ -227,11 +230,11 @@ HierarchyHandler.prototype.getNodeNames = function(){
 };
 
 // Utils
-HierarchyHandler.prototype.findObjectRecursive = function(nodeName){
+HierarchyHandler.prototype.findObjectRecursive = function(node){
     var retVal = null;
     
     function findRecursive(obj) {
-        if(obj.name === nodeName) {
+        if(obj.node === node) {
             retVal = obj;
             return;
         }
@@ -250,36 +253,36 @@ HierarchyHandler.prototype.findObjectRecursive = function(nodeName){
     
     return retVal;
 };
-HierarchyHandler.prototype.foldElementRecursive = function(nodeName, isfold){
-    var currObj = this.findObjectRecursive(nodeName);
+HierarchyHandler.prototype.foldElementRecursive = function(node, isfold){
+    var currObj = this.findObjectRecursive(node);
     var child = currObj.children;
     var keys = Object.keys(child);
     for(var i=0; i<keys.length; i++){
         // button toggle
-        if(child[keys[i]].htmlElement.parentNode.children.length > 1)
-            child[keys[i]].htmlElement.parentNode.children[1].style.display = isfold ? "none" : "block";
+        if(child[keys[i]].node.htmlElement.parentNode.children.length > 1)
+            child[keys[i]].node.htmlElement.parentNode.children[1].style.display = isfold ? "none" : "block";
         
         // p tag toggle
-        child[keys[i]].htmlElement.style.display = isfold ? "none" : "block";
+        child[keys[i]].node.htmlElement.style.display = isfold ? "none" : "block";
         
         // recursive child toggle.
-        if(child[keys[i]].htmlElement.isFold === false)
-            this.foldElementRecursive(child[keys[i]].name, isfold);
+        if(child[keys[i]].node.htmlElement.isFold === false)
+            this.foldElementRecursive(child[keys[i]].node, isfold);
     }
 };
-HierarchyHandler.prototype.foldChildren = function(nodeName, isFold){
-    var object = this.findObjectRecursive(nodeName);
-    if(!object.htmlElement)
+HierarchyHandler.prototype.foldChildren = function(node, isFold){
+    var object = this.findObjectRecursive(node);
+    if(!object.node.htmlElement)
         return;
     
     function foldAll(object) {
         var keys = Object.keys(object.children);
         if(keys.length > 0) {
-            object.htmlElement.isFold = isFold;
-            object.htmlElement.parentNode.children[1].style.display = isFold ? "none" : "block";
+            object.node.htmlElement.isFold = isFold;
+            object.node.htmlElement.parentNode.children[1].style.display = isFold ? "none" : "block";
         }
         
-        object.htmlElement.style.display = isFold ? "none" : "block";
+        object.node.htmlElement.style.display = isFold ? "none" : "block";
         for(var i=0; i<keys.length; i++){
             foldAll(object.children[keys[i]]);
         }
@@ -287,8 +290,8 @@ HierarchyHandler.prototype.foldChildren = function(nodeName, isFold){
     
     foldAll(object);
     // Restore Root Scene.
-    object.htmlElement.style.display = "block";
-    object.htmlElement.parentNode.children[1].style.display = "block";
+    object.node.htmlElement.style.display = "block";
+    object.node.htmlElement.parentNode.children[1].style.display = "block";
 };
 
 window.hierarchyHandler = new HierarchyHandler();
