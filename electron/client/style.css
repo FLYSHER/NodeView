@@ -131,7 +131,6 @@ button:active {
 #bottomView {
     background: #444242;
     height: 35%;
-    overflow-y: scroll;
 }
 
 #bottom_menu {
@@ -543,6 +542,66 @@ input[readonly] {
     color: #DEDEDEFF;
     background-color: #363636;
 }
+
+.timeline_toolbar {
+    padding-left: 44px;
+    max-height: 36px;
+    height: 36px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    background-color: #3c3c3c;
+}
+
+#timeline_content {
+    display: flex;
+    height: 80%;
+    max-height: 90%;
+}
+
+#outline {
+    width: 400px;
+    min-width: 150px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    align-items: stretch;
+    align-content: stretch;
+}
+
+#timeline {
+    box-sizing: border-box;
+    flex-grow: 8;
+    max-width: 90%;
+    height: 100%;
+    scrollbar-color: gray #161616;
+}
+
+.outline-header {
+    height: 30px;
+}
+
+.outline-scroll-container {
+    overflow: hidden;
+}
+
+.outline-node {
+    padding-left: 20px;
+    font-size: 12px !important;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    font-family: Roboto, 'Helvetica Neue', sans-serif;
+    color: white;
+    user-select: none;
+    height: 30px;
+}
+
+.outline-node:hover {
+    background-color: #3399ff;
+}
+
 
 *{
     /*border: solid 1px #e51313;*/
