@@ -118,7 +118,7 @@ Genie.Component.ArmatureView = Genie.Component.InspectorBase.extend({
             case  this.select_track:
                 this.setMovementData( currMovData );
                 var arFileName = this.getOwner().getName();
-                Renderer_bottom.setAnimationTimeline(arFileName + ".ExportJson");
+                Renderer_bottom.setAnimationTimeline(arFileName + ".ExportJson", this.getSelectedMovName());
                 break;
             case this.input_gotoAndPause:
                 var dl      = currMovData.duration;

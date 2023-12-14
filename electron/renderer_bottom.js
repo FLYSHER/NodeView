@@ -311,15 +311,34 @@ var Renderer_bottom = {
     },
 
     setAnimationTimeline : function( arFileName, trackName ) {
-        var originData   = cc.loader.getRes( arFileName );
-        var armatureData = originData['armature_data'][0];
-        var boneList     = armatureData['bone_data'];
+        var originData      = cc.loader.getRes( arFileName );
+        var armature_data   = originData['armature_data'][0];
+        var boneList        = armature_data['bone_data'];
+        var animation_data  = originData['animation_data'][0];
+        var mov_dataList    = animation_data['mov_data'];
+        var move_data       = mov_dataList.find( function( item ) {
+            return item.name === trackName;
+        });
+        if( !move_data ) {
+            return;
+        }
 
+        var mov_bone_data = move_data['mov_bone_data'];
         this.timeline_rows.length = 0;
 
-        for( var i = 0; i < boneList.length; ++i ) {
+        var i,k, frame_data;
+        for( i = 0; i < mov_bone_data.length; ++i ) {
+            frame_data = mov_bone_data[i]['frame_data'];
+            var arrKeyFrames = [];
+
+            for( k = 0; k < frame_data.length; ++k ) {
+                arrKeyFrames.push({
+                    val : frame_data[k]['fi'] * 1000
+                });
+            }
             this.timeline_rows.push({
-                title : boneList[i].name
+                title : mov_bone_data[i].name,
+                keyframes : arrKeyFrames,
             });
         }
 
@@ -332,6 +351,10 @@ var Renderer_bottom = {
         if (timeline) {
             this.timeline._handleWheelEvent(event);
         }
-    }
+    },
+
+    addKeyFrame : function() {
+
+    },
 
 }
