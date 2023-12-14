@@ -584,6 +584,7 @@ input[readonly] {
 
 .outline-scroll-container {
     overflow: hidden;
+    height: 80%;
 }
 
 .outline-node {

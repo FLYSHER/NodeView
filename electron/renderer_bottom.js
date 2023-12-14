@@ -159,6 +159,114 @@ var Renderer_bottom = {
                         val: 4600,
                     },
                 ],
+            },
+            {
+                title : "bone6",
+                selected: false,
+                keyframes: [
+                    {
+                        style:{
+                            cursor: 'default',
+                        },
+                        val: 3000,
+                    },
+                    {
+                        val: 3500,
+                    },
+                    {
+                        val: 4600,
+                    },
+                ],
+            },
+            {
+                title : "bone7",
+                selected: false,
+                keyframes: [
+                    {
+                        style:{
+                            cursor: 'default',
+                        },
+                        val: 3000,
+                    },
+                    {
+                        val: 3500,
+                    },
+                    {
+                        val: 4600,
+                    },
+                ],
+            },
+            {
+                title : "bone8",
+                selected: false,
+                keyframes: [
+                    {
+                        style:{
+                            cursor: 'default',
+                        },
+                        val: 3000,
+                    },
+                    {
+                        val: 3500,
+                    },
+                    {
+                        val: 4600,
+                    },
+                ],
+            },
+            {
+                title : "bone9",
+                selected: false,
+                keyframes: [
+                    {
+                        style:{
+                            cursor: 'default',
+                        },
+                        val: 3000,
+                    },
+                    {
+                        val: 3500,
+                    },
+                    {
+                        val: 4600,
+                    },
+                ],
+            },
+            {
+                title : "bone10",
+                selected: false,
+                keyframes: [
+                    {
+                        style:{
+                            cursor: 'default',
+                        },
+                        val: 3000,
+                    },
+                    {
+                        val: 3500,
+                    },
+                    {
+                        val: 4600,
+                    },
+                ],
+            },
+            {
+                title : "bone11",
+                selected: false,
+                keyframes: [
+                    {
+                        style:{
+                            cursor: 'default',
+                        },
+                        val: 3000,
+                    },
+                    {
+                        val: 3500,
+                    },
+                    {
+                        val: 4600,
+                    },
+                ],
             }
 
 
@@ -183,21 +291,23 @@ var Renderer_bottom = {
             outlineContainer.appendChild(div);
         });
 
+        outlineContainer.onwheel = this.outlineMouseWheel.bind(this);
+
     },
 
     showActivePositionInformation : function() {
-        if ( this.timeline ) {
-            var timeline = this.timeline;
-            const fromPx = timeline.scrollLeft;
-            const toPx = timeline.scrollLeft + timeline.getClientWidth();
-            const fromMs = timeline.pxToVal(fromPx - timeline._leftMargin());
-            const toMs = timeline.pxToVal(toPx - timeline._leftMargin());
-            let positionInPixels = timeline.valToPx(timeline.getTime()) + timeline._leftMargin();
-            let message = 'Timeline in ms: ' + timeline.getTime() + 'ms. Displayed from:' + fromMs.toFixed() + 'ms to: ' + toMs.toFixed() + 'ms.';
-            message += '<br>';
-            message += 'Timeline in px: ' + positionInPixels + 'px. Displayed from: ' + fromPx + 'px to: ' + toPx + 'px';
-            document.getElementById('currentTime').innerHTML = message;
-        }
+        // if ( this.timeline ) {
+        //     var timeline = this.timeline;
+        //     const fromPx = timeline.scrollLeft;
+        //     const toPx = timeline.scrollLeft + timeline.getClientWidth();
+        //     const fromMs = timeline.pxToVal(fromPx - timeline._leftMargin());
+        //     const toMs = timeline.pxToVal(toPx - timeline._leftMargin());
+        //     let positionInPixels = timeline.valToPx(timeline.getTime()) + timeline._leftMargin();
+        //     let message = 'Timeline in ms: ' + timeline.getTime() + 'ms. Displayed from:' + fromMs.toFixed() + 'ms to: ' + toMs.toFixed() + 'ms.';
+        //     message += '<br>';
+        //     message += 'Timeline in px: ' + positionInPixels + 'px. Displayed from: ' + fromPx + 'px to: ' + toPx + 'px';
+        //     document.getElementById('currentTime').innerHTML = message;
+        // }
     },
 
     setAnimationTimeline : function( arFileName, trackName ) {
