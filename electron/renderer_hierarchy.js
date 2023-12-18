@@ -3,6 +3,7 @@ var Renderer_hierarchy = {
     hierarchyData       : [],
     nodeInstanceIDMap   : {},
     rootLayer           : null,
+    curTargetNode       : null,
 
     MenuPrefix : {
         Node            : "Node",
@@ -151,7 +152,7 @@ var Renderer_hierarchy = {
             if( realNode ) {
                 cc.eventManager.dispatchCustomEvent( "onChangeNodeInHierarchy", { node : realNode } );
                 cc.eventManager.dispatchCustomEvent( "refreshInspector", { node : realNode });
-
+                this.curTargetNode = realNode;
             }
             else {
                 console.log( "not exist node in nodeInstanceIDMap : ", data.node.id );
@@ -272,4 +273,7 @@ var Renderer_hierarchy = {
         return !!findOjb;
     },
 
+    getTargetNode : function () {
+        return this.curTargetNode;
+    }
 }

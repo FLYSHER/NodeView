@@ -218,11 +218,56 @@ var HtmlHelper = {
         menu_div.style.borderRadius = '5px';
         menu_div.style.maxHeight = '0px';
         menu_div.style.overflow = 'hidden';
-        menu_div.style.transition = 'max-height 0.3s ease-out';
+        menu_div.style.transition = 'max-height 0.5s ease-out';
+
+        const component_menu_div = document.createElement('div');
+        component_menu_div.style.backgroundColor = '#6D6D6D';
+        component_menu_div.style.border = 'hidden 1px #151515FF';
+        component_menu_div.style.borderRadius = '5px';
+        component_menu_div.style.maxHeight = '0px';
+        component_menu_div.style.overflow = 'hidden';
+        component_menu_div.style.transition = 'max-height 0.5s ease-out';
+
+        const component_option_popup = HtmlHelper.createAddComponentMenuOption('Popup Component', 'Popup', () => {
+            menu_div.style.maxHeight = '0px';
+        });
+
+        const component_option_empty = HtmlHelper.createAddComponentMenuOption('Empty Component', 'Empty', () => {
+            menu_div.style.maxHeight = '0px';
+        });
+
+        component_menu_div.appendChild(component_option_popup);
+        component_menu_div.appendChild(component_option_empty);
+
+        const component_option_icon = document.createElement('i');
+        component_option_icon.className = 'fa-solid fa-caret-right';
+        component_option_icon.style.color = '#d0b8f4';
+        component_option_icon.style.margin = '5px';
+        component_option_icon.style.paddingRight = '10px';
+        component_option_icon.style.float = 'left';
 
         const option_addComponent = HtmlHelper.createComponentMenuOption('Add Component', () => {
-            // todo add component
-            menu_div.style.maxHeight = '0px';
+            component_option_icon.className = component_menu_div.style.maxHeight === '0px' ? 'fa-solid fa-caret-down' : 'fa-solid fa-caret-right';
+            component_menu_div.style.maxHeight = component_menu_div.style.maxHeight === '0px' ? '150px' : '0px';
+        });
+
+        option_addComponent.appendChild(component_option_icon);
+        option_addComponent.appendChild(component_menu_div);
+
+        const option_removeComponent = HtmlHelper.createComponentMenuOption('Remove this Component', () => {
+            const target = Renderer_hierarchy.getTargetNode();
+            const componentName = $(menu_div.parentElement.parentElement).children('span')[0].outerText;
+
+            if (target && componentName) {
+                target.removeComponent(componentName);
+
+                // delete view at inspector
+                const child = menu_div.parentElement.parentElement.parentElement;
+                const parent = child.parentElement;
+                parent.removeChild(child);
+            } else {
+                console.error('Remove component is failed');
+            }
         });
 
         const option_moveUp = HtmlHelper.createComponentMenuOption('Move Up', () => {
@@ -256,11 +301,12 @@ var HtmlHelper = {
         });
 
         menu_div.appendChild( option_addComponent );
+        menu_div.appendChild( option_removeComponent );
         menu_div.appendChild( option_moveUp );
         menu_div.appendChild( option_moveDown );
 
         menu_container.appendChild( menu_div );
-        menu_container._onclick = () => { menu_div.style.maxHeight = menu_div.style.maxHeight === '0px' ? '100px' : '0px'; };
+        menu_container._onclick = () => { menu_div.style.maxHeight = menu_div.style.maxHeight === '0px' ? '450px' : '0px'; };
 
         return menu_container;
     },
@@ -277,6 +323,19 @@ var HtmlHelper = {
         option.addEventListener('click', onclick);
 
         return option;
+    },
+
+    createAddComponentMenuOption : function (content, componentName, onclick) {
+        return HtmlHelper.createComponentMenuOption(content, () => {
+            const target = Renderer_hierarchy.getTargetNode();
+            const popupComp = new Genie.Component[componentName];
+            if (target && popupComp) {
+                target.addComponent(popupComp);
+                popupComp.drawInspector();
+            }
+
+            onclick && onclick();
+        });
     },
 
     // component view
