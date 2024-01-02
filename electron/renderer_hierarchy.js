@@ -6,11 +6,11 @@ var Renderer_hierarchy = {
     curTargetNode       : null,
 
     MenuPrefix : {
-        Node            : "Node",
-        Sprite          : "SpriteNode",
-        PopupComponent  : "Popup", // 컴포넌트 이름과 같아야 함.
+        Node                : "Node",
+        Sprite              : "SpriteNode",
+        PopupComponent      : "Popup",      // 컴포넌트 이름과 같아야 함.
+        ARGroupComponent    : "ARGroup",    //
     },
-
 
     init : function( rootLayer ) {
         this.rootLayer = rootLayer;
@@ -75,6 +75,9 @@ var Renderer_hierarchy = {
         // 트리 노드 선택 시 이벤트 등록
         $('#hierarchy').on("changed.jstree", this.onchangeSelectedNode.bind(this));
 
+        // tree node 드레그 스타트 리스너 등록
+        // $('#hierarchy').on("dragstart", this.onDragStartTreeNode );
+
         // 노드 검색 시 이벤트 등록
         $('#hierarchy_findInput').change( this.onchangeInputFind );
     },
@@ -88,6 +91,7 @@ var Renderer_hierarchy = {
 
         var addComponentSubMenu = this._jstreeConfig["contextmenu"]["items"]["addComponent"]["submenu"];
         this._addSubMenu( addComponentSubMenu, this.MenuPrefix.PopupComponent, this.onAddComponentByMenu, this );
+        // this._addSubMenu( addComponentSubMenu, this.MenuPrefix.ARGroupComponent, this.onAddComponentByMenu, this )
     },
 
     _addSubMenu : function( targetMenu, strMenu, selector, target ) {
@@ -134,6 +138,12 @@ var Renderer_hierarchy = {
             // $(`#hierarchy`).jstree("remove", targetNodeID );
             $(`#hierarchy`).jstree("refresh");
         }
+    },
+
+    // 트리 노드 드레그 시작
+    onDragStartTreeNode : function( e ) {
+        cc.log( Renderer_hierarchy.Tag, "*** drag start *** : ", e.target.innerText );
+        e.originalEvent.dataTransfer.setData( "nodeName", e.target.innerText );
     },
 
     onchangeInputFind : function( event ) {
@@ -233,7 +243,7 @@ var Renderer_hierarchy = {
     renameTreeNode : function( event ) {
         var userData= event.getUserData();
         var name    = userData.name;
-        var id      = userData.treeNodeID;
+        var id      = userData.id;
 
         var treeNode    = $('#hierarchy').jstree(true).get_node( id );
         if( treeNode ) {

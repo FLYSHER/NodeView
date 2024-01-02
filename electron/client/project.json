@@ -41,6 +41,7 @@
         "src/Components/InspectorComponent/UILabelBMFontComponent.js",
         "src/Components/InspectorComponent/UIButtonComponent.js",
         "src/Components/InspectorComponent/PopupComponent.js",
+        "src/Components/InspectorComponent/ARGroupComponent.js",
         "src/Components/InspectorComponent/EmptyComponent.js",
 
         "src/Command/Command.js",
