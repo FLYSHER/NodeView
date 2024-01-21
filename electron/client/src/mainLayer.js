@@ -72,6 +72,10 @@ var MainLayer = cc.Layer.extend({
             self.onLoadUI( event.getUserData() );
         } );
 
+        this._loadSpineListener = cc.eventManager.addCustomListener( 'loadSpine', function( event ) {
+            self.onLoadSpine( event.getUserData() );
+        } );
+
         this._loadCocosStudioListener = cc.eventManager.addCustomListener( 'loadCocosStudio', function (event){
             self.onLoadCocosStuido( event.getUserData() );
         });
@@ -230,6 +234,43 @@ var MainLayer = cc.Layer.extend({
         this._addToJsonListMenu( name ,node);
     },
 
+    onLoadSpine: function( fileName ) {
+        var children = this.getChildren();
+
+        var self = this;
+        children.forEach( function( c ) {
+            if( c.getTag() === self.DESC_TAG ) {
+                c.removeFromParent();
+            }
+        } );
+
+        var name = cc.path.mainFileName( fileName );
+        if(this._nodeList[ name ])
+            return;
+
+        var spine = sp.SkeletonAnimation.createWithJsonFile( fileName + ".json", fileName +".atlas", 1.0 );
+        // this._spine.setAnchorPoint( cc.p( 0.5, 0.5 ) );
+        spine.setPosition( cc.p( cc.winSize.width / 2, cc.winSize.height / 2 ) );
+
+        var node = new DraggableNode( spine.getContentSize() );
+        node.setAnchorPoint( 0.5, 0.5 );
+        node.setPosition( this.CX , this.CY );
+        this.addChild( node );
+
+        node.addChildToCenter( spine );
+
+        node.armature = null;
+        node.ui = null;
+        node.spine = spine;
+
+        node.order = this._nodeOrder.length;
+        node.setLocalZOrder(10 + node.order);
+        this._nodeOrder[node.order] = node;
+
+        this._nodeList[ name ] = node;
+        this._addToJsonListMenu( name ,node);
+    },
+
     onLoadCocosStuido : function( url ) {
         var children = this.getChildren();
 
@@ -345,6 +386,22 @@ var MainLayer = cc.Layer.extend({
 
             $('#LocalSize').html("(" + selectNode.armature.getContentSize().width.toFixed(2) + " , " +selectNode.armature.getContentSize().height.toFixed(2) + ")");
         }
+        else if( selectNode.spine ) {
+            this._animationList.setVisible(true);
+            var animations = selectNode.spine.getState().data.skeletonData.animations;
+            var animNameArr = [];
+
+            for( var idx = 0; idx < animations.length; idx++ ) {
+                animNameArr.push( animations[ idx ].name );
+            }
+
+            var playCb = function ( animName) {
+                selectNode.spine.setAnimation( 0, animName, false );
+            };
+            this._animationList.init(animNameArr,playCb);
+
+            $('#LocalSize').html("(" + selectNode.spine.getContentSize().width.toFixed(2) + " , " +selectNode.spine.getContentSize().height.toFixed(2) + ")");
+        }
         else{
             this._animationList.setVisible(false);
             this._animationList.init([],null);
@@ -425,6 +482,7 @@ var MainLayer = cc.Layer.extend({
     onExit: function() {
         cc.eventManager.removeListener( this._loadArmatureListener );
         cc.eventManager.removeListener( this._loadUIListener );
+        cc.eventManager.removeListener( this._loadSpineListener );
         cc.eventManager.removeListener( this._loadCocosStudioListener );
         this._super();
     },

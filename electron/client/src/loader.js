@@ -11,12 +11,16 @@ Loader.armatureFrames = {};
 Loader.uiURL = {};
 Loader.uiTextures = {};
 Loader.armatureList = [];
+Loader.spineList = [];
 Loader.plistList = [];
+Loader.atlasList = [];
 Loader.textureList = [];
 
 Loader.armatureData = {};
+Loader.spineData = {};
 Loader.textures = {};
 Loader.plistFiles = {};
+Loader.atlasFiles = {};
 
 Loader.cocosStudioURL = {};
 
@@ -98,7 +102,7 @@ Loader.readFile = function( file , cb) {
     ext = cc.path.extname(file.name).toLowerCase();
     if (ext === ".json" || ext === ".exportjson") {
         reader.readAsText(file);
-    } else if (ext === ".plist") {
+    } else if (ext === ".plist" || ext === ".atlas") {
         reader.readAsText(file);
     } else if (ext === ".png") {
         reader.readAsDataURL(file);
@@ -159,6 +163,13 @@ Loader._processFileData = function( url, fileContents, ext, cb ) {
 
             this.checkFiles( fileName, 'plist' );
             break;
+        case ".atlas":
+            cc.loader.cache[ url ] = fileContents;
+            this.atlasFiles[ fileName ] = fileContents;
+            this.atlasList.push( fileName );
+
+            // this.checkFiles( fileName, 'atlas' );
+            break;
         case ".png":
             cc.loader.loadImg(
                 fileContents,
@@ -174,38 +185,51 @@ Loader._processFileData = function( url, fileContents, ext, cb ) {
                     if (!cc.loader.cache['image/' + url]) {
                         cc.loader.cache['image/' + url] = tex2d;
                     }
+
+                    cc.loader.cache[url] = tex2d;
+
                     self.checkFiles( fileName, 'png' );
                     cb && cb();
                 }
             );
-            return;
             break;
         case ".json":
             dic = JSON.parse(fileContents);
-            this.cocosStudioURL [ fileName ] = url;
-            cc.loader.cache[url] = dic;
-            if(dic["Content"] && dic["Content"]["Content"] && dic["Content"]["Content"]["UsedResources"]){
-                var fntList = [];
-                var plistList = [];
-                var pngList = []
-                var resArray = dic["Content"]["Content"]["UsedResources"];
-                for(var n = 0; n <resArray.length; n++){
-                    var ext = cc.path.extname(resArray[n]).toLowerCase();
-                    if(ext === '.fnt'){
-                        fntList.push(resArray[n]);
+
+            if(dic["skeleton"] && dic["skeleton"]["spine"]) {
+                cc.loader.cache[ url ] = fileContents;
+                this.spineData[ fileName ] = fileContents;
+                this.spineList.push( fileName );
+                this.readSpineResoueces( fileName );
+                this.uiTextures[ fileName ] = fileName + ".atlas";
+                this.checkFiles( fileName, 'spine' );
+            }
+            else {
+                this.cocosStudioURL [ fileName ] = url;
+                cc.loader.cache[url] = dic;
+                if(dic["Content"] && dic["Content"]["Content"] && dic["Content"]["Content"]["UsedResources"]){
+                    var fntList = [];
+                    var plistList = [];
+                    var pngList = []
+                    var resArray = dic["Content"]["Content"]["UsedResources"];
+                    for(var n = 0; n <resArray.length; n++){
+                        var ext = cc.path.extname(resArray[n]).toLowerCase();
+                        if(ext === '.fnt'){
+                            fntList.push(resArray[n]);
+                        }
+                        else if(ext === '.plist'){
+                            plistList.push(resArray[n]);
+                        }
+                        else if(ext === '.png'){
+                            pngList.push(resArray[n]);
+                        }
                     }
-                    else if(ext === '.plist'){
-                        plistList.push(resArray[n]);
-                    }
-                    else if(ext === '.png'){
-                        pngList.push(resArray[n]);
-                    }
+                    this.loadFnt( fntList, function (){
+                        this.readResoueces(plistList, pngList );
+                        this.uiTextures[ fileName ] = plistList;
+                        this.checkFiles( fileName, 'cocosStudio' );
+                    }.bind(this))
                 }
-                this.loadFnt( fntList, function (){
-                    this.readResoueces(plistList, pngList );
-                    this.uiTextures[ fileName ] = plistList;
-                    this.checkFiles( fileName, 'cocosStudio' );
-                }.bind(this))
             }
 
             break;
@@ -339,6 +363,23 @@ Loader.readResoueces = function ( pngData, plistData ) {
 
 };
 
+Loader.readSpineResoueces = function ( fileName ) {
+    var resourceName = [ fileName + ".atlas", fileName + ".png" ];
+
+    var item = null;
+    for (var i=0; i<resourceName.length; i++) {
+        item = ResourceMapData[resourceName[i] ];
+        if( !!item === false){
+            //console.log("There is no ", plistNames[i]);
+            printLog( "No resource file : "+ resourceName[i]);
+            continue;
+        }
+        item.file(function( file ) {
+            Loader.readFile( file );
+        });
+    }
+};
+
 Loader.loadFnt = function ( fntFileList , endCallback) {
     if(!fntFileList || fntFileList.length === 0){
         endCallback && endCallback();
@@ -433,6 +474,12 @@ Loader.checkFiles = function ( fileName, type ) {
                 cc.eventManager.dispatchCustomEvent( 'loadUI', this.uiURL[ fileName ] );
             }
             break;
+        case 'spine':
+            if( this._checkSpineFile( fileName ) ) {
+                this.loadedFileNames.push( fileName );
+                cc.eventManager.dispatchCustomEvent( 'loadSpine', fileName );
+            }
+            break;
         case 'cocosStudio':
             if( this._checkCocosStudioFile(fileName)){
                 this.loadedFileNames.push( fileName );
@@ -503,6 +550,24 @@ Loader._checkUIFile = function( fileName ) {
             break;
         }
     }
+    return loaded;
+};
+
+Loader._checkSpineFile = function( fileName ) {
+    if( !this.uiTextures.hasOwnProperty( fileName ) ) {
+        return false;
+    }
+    // if( this.loadedFileNames.indexOf( fileName ) >= 0 ) {
+    //     return false;
+    // }
+
+    var textures = this.uiTextures[ fileName ];
+    var loaded = true;
+    var path = cc.path.basename( textures, '.atlas' );
+    if( this.atlasList.indexOf( fileName ) < 0 || this.textureList.indexOf( fileName ) < 0 ) {
+        loaded = false;
+    }
+
     return loaded;
 };
 

@@ -161,7 +161,6 @@ var LoadManager  = {
 
                 filesImport = filesImport.concat(fileFinder.getFileList());
             }
-
         }
 
         filesImport = this.getUniqueValuesArray(filesImport);
@@ -211,7 +210,7 @@ var LoadManager  = {
                 });
                 promises.push(promise);
             }
-            else if (extName===".exportjson" || extName===".plist" || extName===".fnt"){
+            else if (extName===".exportjson" || extName===".plist" || extName===".fnt" || extName===".json" || extName===".atlas"){
                 fileInfo.content = fs.readFileSync(item, "utf8");
             }
 
@@ -227,7 +226,7 @@ var LoadManager  = {
             };
             targetFiles.push(fileInfo);
             let extName = path.extname(item).toLowerCase();
-            if (extName===".exportjson" || extName===".plist" || extName===".fnt"){
+            if (extName===".exportjson" || extName===".plist" || extName===".fnt" || extName===".json" || extName===".atlas"){
                 fileInfo.content = fs.readFileSync(item, "utf8");
             }
         });
