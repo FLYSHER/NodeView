@@ -2,6 +2,7 @@ var Renderer_hierarchy = {
     Tag                 : "[ Renderer_hierarchy ] ",
     hierarchyData       : [],
     nodeInstanceIDMap   : {},
+    arrNodeIDToDelete   : [],
     rootLayer           : null,
     curTargetNode       : null,
 
@@ -130,15 +131,36 @@ var Renderer_hierarchy = {
         var targetNode   = this.nodeInstanceIDMap[targetNodeID];
         var parentNode   = targetNode.getParent();
 
-        if( targetNode && parentNode ) {
+        this.arrNodeIDToDelete.length = 0;
 
-            this.deleteTreeNode( targetNodeID, parentNode.__instanceId );
+        if( targetNode && parentNode ) {
+            this.setIDListToDelete( targetNode );
+
+            var i, nodeID, node;
+            for( i = 0; i < this.arrNodeIDToDelete.length; ++i ) {
+                nodeID = this.arrNodeIDToDelete[i];
+                node   = this.nodeInstanceIDMap[nodeID];
+                this.deleteTreeNode( node.__instanceId );
+            }
+
             targetNode.removeFromParent();
 
-            // $(`#hierarchy`).jstree("remove", targetNodeID );
-            $(`#hierarchy`).jstree("refresh");
+            this.onRefreshTree();
         }
     },
+
+    setIDListToDelete : function( targetNode ) {
+        var i, child, children = targetNode.getChildren();
+        if( this.arrNodeIDToDelete.indexOf(targetNode.__instanceId) < 0) {
+            this.arrNodeIDToDelete.push( targetNode.__instanceId );
+        }
+
+        for( i = 0; i < children.length; ++i ) {
+            child = children[i];
+            this.setIDListToDelete( child );
+        }
+    },
+
 
     // 트리 노드 드레그 시작
     onDragStartTreeNode : function( e ) {
@@ -259,20 +281,17 @@ var Renderer_hierarchy = {
         }
     },
 
-    deleteTreeNode : function( id, parentId ) {
-        if( this.isExistNode( id, parentId ) ) {
-            var findIdx = this.hierarchyData.findIndex( function( treeNode ) {
-                return ( treeNode.id === id && parentId === parentId );
-            } );
+    deleteTreeNode : function( id) {
+        var findIdx = this.hierarchyData.findIndex( function( treeNode ) {
+            return ( treeNode.id === id );
+        } );
 
-            if( findIdx < 0 ) {
-                return;
-            }
-
-            this.hierarchyData.splice( findIdx, 1 );
-            delete this.nodeInstanceIDMap[id];
+        if( findIdx < 0 ) {
+            return;
         }
 
+        this.hierarchyData.splice( findIdx, 1 );
+        delete this.nodeInstanceIDMap[id];
     },
 
     isExistNode : function( id, parentID ) {
