@@ -90,18 +90,23 @@
                 </div>
             </li>
         </ul>
-        <div id="tab-1" class="tab-widgetContent current">
+        <div id="tab-2" class="tab-widgetContent current">
             <!-- Widget Tree -->
             <div class = "treeWidget">
                 <div id="widgetTree"></div>
                 <div id="animationTree"></div>
             </div>
-            <div align="center">
+            <div id="ui-option" align="center" style="width:95%;position:absolute;visibility:visible;">
                 <!-- Widget Tree Visible Button -->
-                <button type="button" id="toggleVisible" class="styleButton" title="노드 표시" style="width: 22%;visibility:hidden;">Visible</button>
-                <button type="button" id="openAll" class="styleButton" title="모든 노드 트리 열기" style="width: 22%;visibility:hidden;">Open</button>
-                <button type="button" id="closeAll" class="styleButton" title="모든 노드 트리 닫기" style="width: 22%;visibility:hidden;">Close</button>
-                <button type="button" id="copyBtn" class="styleButton" title="위젯 노드 트리 복사" style="width: 22%;visibility:hidden;">Copy</button>
+                <button type="button" id="toggleVisible" class="styleButton" title="노드 표시" style="width: 22%;">Visible</button>
+                <button type="button" id="openAll" class="styleButton" title="모든 노드 트리 열기" style="width: 22%;">Open</button>
+                <button type="button" id="closeAll" class="styleButton" title="모든 노드 트리 닫기" style="width: 22%;">Close</button>
+                <button type="button" id="copyBtn" class="styleButton" title="위젯 노드 트리 복사" style="width: 22%;">Copy</button>
+            </div>
+            <div id="spine-option" align="center" style="width:95%;position:absolute;visibility:hidden;">
+                <!-- Spine Bone Visible Button -->
+                <button type="button" id="debugBone" class="styleButton" title="Bone 표시" style="width: 45%;">Show Bone</button>
+                <button type="button" id="debugSlot" class="styleButton" title="Slot 표시" style="width: 45%;">Show Slot</button>
             </div>
         </div>
     </div>

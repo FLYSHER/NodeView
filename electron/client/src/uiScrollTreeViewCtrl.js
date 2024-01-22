@@ -137,6 +137,33 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
             }
         }.bind(this));
 
+        $('#debugBone').click( function( sender ){
+            this._selectNode.forEach( item => {
+                if( item.getDebugBonesEnabled() ) {
+                    sender.target.innerText = "Show Bone";
+                }
+                else {
+                    sender.target.innerText = "Hide Bone";
+                }
+
+                // item.setDebugBonesEnabled( !item.getDebugBonesEnabled() );
+                item.setDebugBone();
+            });
+        }.bind(this));
+
+        $('#debugSlot').click( function( sender ){
+            this._selectNode.forEach( item => {
+                if( item.getDebugSlotsEnabled() ) {
+                    sender.target.innerText = "Show Slot";
+                }
+                else {
+                    sender.target.innerText = "Hide Slot";
+                }
+
+                item.setDebugSlotsEnabled( !item.getDebugSlotsEnabled() );
+            });
+        }.bind(this));
+
         // console.log($("input[name=opacity]").val());
         $("input[name=opacity]").change(function(){
             this._selectNode.forEach( item => {
@@ -184,7 +211,10 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
         var treeObj = [];
         var actionObj = [];
 
-        if(node && node.ui) {
+        if( node && node.spine ) {
+            this._selectNode.push( node.spine );
+        }
+        else if(node && node.ui) {
             var childTree = this.createUIChildList(node.ui);
 
             this.treeInfo = [{
@@ -249,24 +279,18 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
         }
 
         var searchBox = document.getElementById( "searchNode" );
-        var visibleBtn = document.getElementById( "toggleVisible" );
-        var openBtn = document.getElementById( "openAll" );
-        var closeBtn = document.getElementById( "closeAll" );
-        var copyBtn = document.getElementById( "copyBtn" );
+        var uiOption = document.getElementById( "ui-option" );
+        var spineOption = document.getElementById( "spine-option" );
 
         if( treeObj.length > 0 ) {
             searchBox.style.visibility = 'visible';
-            visibleBtn.style.visibility = 'visible';
-            openBtn.style.visibility = 'visible';
-            closeBtn.style.visibility = 'visible';
-            copyBtn.style.visibility = 'visible';
+            uiOption.style.visibility = 'visible';
+            spineOption.style.visibility = 'hidden';
         }
         else {
             searchBox.style.visibility = 'hidden';
-            visibleBtn.style.visibility = 'hidden';
-            openBtn.style.visibility = 'hidden';
-            closeBtn.style.visibility = 'hidden';
-            copyBtn.style.visibility = 'hidden';
+            uiOption.style.visibility = 'hidden';
+            spineOption.style.visibility = node.spine ? 'visible' : 'hidden';
         }
     },
 

@@ -189,6 +189,7 @@ var MainLayer = cc.Layer.extend({
             node.addChildToCenter( armature );
             node.armature = armature;
             node.ui = null;
+            node.spine = null;
             node.order = this._nodeOrder.length;
             node.setLocalZOrder(10 + node.order);
             this._nodeOrder[node.order] = node;
@@ -225,6 +226,7 @@ var MainLayer = cc.Layer.extend({
 
         node.armature = null;
         node.ui = ui;
+        node.spine = null;
 
         node.order = this._nodeOrder.length;
         node.setLocalZOrder(10 + node.order);
@@ -259,9 +261,66 @@ var MainLayer = cc.Layer.extend({
 
         node.addChildToCenter( spine );
 
+        var arrBone = [];
+        var setBone = function ( bone ) {
+            var lbBone = new ccui.Text( bone.data.name, "Arial", 20 );
+            lbBone.enableOutline(cc.color(41, 0, 0, 127), 1 );
+            lbBone.enableShadow(cc.color(41, 0, 0, 127), cc.size(0, -1) );
+            lbBone.setVisible( false );
+            arrBone.push( { "bone": bone, "lbBone": lbBone } );
+
+            if( bone.children.length > 0 ) {
+                bone.children.forEach( function( _bone ) {
+                    setBone( _bone );
+                } );
+
+                lbBone.x = bone.ax;
+                lbBone.y = bone.ay;
+                lbBone.scaleX = bone.ascaleX;
+                lbBone.scaleY = bone.ascaleY;
+                lbBone.rotation = -bone.arotation;
+            } else {
+                lbBone.x = bone.ax;
+                lbBone.y = bone.ay;
+                lbBone.scaleX = bone.ascaleX;
+                lbBone.scaleY = bone.ascaleY;
+                lbBone.rotation = -bone.arotation;
+            }
+
+            spine.addChild( lbBone, 1 );
+        };
+
+        //Bone 설정
+        setBone( spine._rootBone );
+
         node.armature = null;
         node.ui = null;
         node.spine = spine;
+        node.spine.arrBone = arrBone;
+        node.spine.setDebugBone = function() {
+            node.spine.setDebugBonesEnabled( !node.spine.getDebugBonesEnabled() );
+
+            node.spine.updateFunc = function( dt ) {
+                arrBone.forEach( function( boneData ) {
+                    boneData.lbBone.x = boneData.bone.ax;
+                    boneData.lbBone.y = boneData.bone.ay;
+                    boneData.lbBone.scaleX = boneData.bone.ascaleX;
+                    boneData.lbBone.scaleY = boneData.bone.ascaleY;
+                    boneData.lbBone.rotation = -boneData.bone.arotation;
+                } );
+            };
+
+            if( node.spine.getDebugBonesEnabled() ) {
+                node.spine.schedule( node.spine.updateFunc );
+            }
+            else {
+                node.spine.unschedule( node.spine.updateFunc );
+            }
+
+            arrBone.forEach( function( boneData ) {
+                boneData.lbBone.visible = node.spine.getDebugBonesEnabled();
+            } );
+        }.bind( node.spine );
 
         node.order = this._nodeOrder.length;
         node.setLocalZOrder(10 + node.order);
