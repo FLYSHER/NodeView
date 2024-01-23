@@ -25,6 +25,7 @@
         "src/draggableNode.js",
         "src/eventDispatcher.js",
         "src/mainLayer.js",
-        "src/uiErrorLog.js"
+        "src/uiErrorLog.js",
+        "src/engineoverride.js"
     ]
 }
