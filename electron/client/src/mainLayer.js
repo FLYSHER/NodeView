@@ -262,6 +262,14 @@ var MainLayer = cc.Layer.extend({
         node.addChildToCenter( spine );
 
         var arrBone = [];
+        var setBoneLabel = function( lbBone, bone ) {
+            lbBone.setPosition( cc.p( bone.worldX, bone.worldY ) );
+            lbBone.setScaleX( bone.getWorldScaleX() );
+            lbBone.setScaleY( bone.getWorldScaleY() );
+            lbBone.setRotation( -bone.arotation );
+            // lbBone.setRotationY( -bone.getWorldRotationY() );
+        };
+
         var setBone = function ( bone ) {
             var lbBone = new ccui.Text( bone.data.name, "Arial", 20 );
             lbBone.enableOutline(cc.color(41, 0, 0, 127), 1 );
@@ -274,17 +282,9 @@ var MainLayer = cc.Layer.extend({
                     setBone( _bone );
                 } );
 
-                lbBone.x = bone.ax;
-                lbBone.y = bone.ay;
-                lbBone.scaleX = bone.ascaleX;
-                lbBone.scaleY = bone.ascaleY;
-                lbBone.rotation = -bone.arotation;
+                setBoneLabel( lbBone, bone );
             } else {
-                lbBone.x = bone.ax;
-                lbBone.y = bone.ay;
-                lbBone.scaleX = bone.ascaleX;
-                lbBone.scaleY = bone.ascaleY;
-                lbBone.rotation = -bone.arotation;
+                setBoneLabel( lbBone, bone );
             }
 
             spine.addChild( lbBone, 1 );
@@ -302,11 +302,10 @@ var MainLayer = cc.Layer.extend({
 
             node.spine.updateFunc = function( dt ) {
                 arrBone.forEach( function( boneData ) {
-                    boneData.lbBone.x = boneData.bone.ax;
-                    boneData.lbBone.y = boneData.bone.ay;
-                    boneData.lbBone.scaleX = boneData.bone.ascaleX;
-                    boneData.lbBone.scaleY = boneData.bone.ascaleY;
-                    boneData.lbBone.rotation = -boneData.bone.arotation;
+                    var lbBone = boneData.lbBone;
+                    var bone = boneData.bone;
+
+                    setBoneLabel( lbBone, bone );
                 } );
             };
 
