@@ -1,18 +1,33 @@
 cc.LabelTTF.prototype.setFontName = function( fontName ) {
-    //@HyunMyung
-    //변PD님 요청 사항
-    //모든 Label 폰트를 'Roboto-Bold'로 설정
-    // if( fontName.indexOf( 'Roboto-Regular') !== -1 ) {
-    //     this._fontName = fontName;
-    // }
-    // else {
-    //     this._fontName = 'RobotoCondensed-Bold';
-    // }
-    // else {
-    //     this._fontName = 'Roboto-Bold';
-    // }
-    this._fontName = 'RobotoCondensed-Bold';
+    if( fontName.indexOf( 'LotusEden-Bold' ) !== -1 ) {
+        this._fontName = fontName;
+    }
+    else {
+        this._fontName = 'RobotoCondensed-Bold';
+    }
     this._renderCmd._setFontStyle( this._fontName, this._fontSize, this._fontStyle, this._fontWeight );
     // Force update
     this._setUpdateTextureDirty();
+};
+
+sp._atlasLoader = {
+    spAtlasFile:null,
+    setAtlasFile:function(spAtlasFile){
+        this.spAtlasFile = spAtlasFile;
+    },
+    load:function(line){
+        var texturePath = cc.path.join(cc.path.dirname(this.spAtlasFile), line);
+        var texture = cc.loader.cache[texturePath];
+
+        if( !( texture instanceof cc.Texture2D ) ) {
+            texture = cc.textureCache.addImage(texturePath);
+        }
+
+        var tex = new sp.SkeletonTexture();
+        tex._image = { width: texture.getPixelsWide(), height: texture.getPixelsHigh() };
+        tex.setRealTexture(texture);
+        return tex;
+    },
+    unload:function(obj){
+    }
 };
