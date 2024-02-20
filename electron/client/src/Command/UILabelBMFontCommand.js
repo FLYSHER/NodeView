@@ -11,7 +11,7 @@ Genie.Command.UILabelBMFontText = Genie.Command.Base.extend({
 
     // override
     setCommandOnInspector : function( value ) {
-        var component = this._targetNode.getComponent( Genie.ComponentName.UI_IMAGE_VIEW );
+        var component = this._targetNode.getComponent( Genie.ComponentName.UI_BITMAP_FONT );
         component && component.refreshTextValue( value );
     }
 
