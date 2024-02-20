@@ -30,7 +30,6 @@
         "src/Components/GenieComponent.js",
         "src/Components/InputComponent.js",
 
-        "src/Components/InspectorComponent/InspectorComponent.js",
         "src/Components/InspectorComponent/TransformComponent.js",
         "src/Components/InspectorComponent/NodePropertyComponent.js",
         "src/Components/InspectorComponent/UIActionComponent.js",
