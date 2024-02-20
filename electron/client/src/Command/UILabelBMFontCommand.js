@@ -1,31 +1,18 @@
-Genie.Command.UILabelBMFont = Genie.Command.Base.extend({
+
+Genie.Command.UILabelBMFontText = Genie.Command.Base.extend({
     ctor : function( targetNode, args ) {
-        this._super( 'UILabelBMFontView', targetNode, args );
+        this._super( 'UILabelBMFontText', targetNode, args );
     },
 
-    setCommand : function( commandType /* Genie.CommandType */ ) {
-        var componentName = 'UILabelBMFontView';
-
-        var value = ( commandType === Genie.CommandType.EXECUTE ) ? this._args.dest : this._args.src;
-
-        switch ( this._args.strProp ) {
-            // case 'fntFileName':
-            //     this._targetNode.setFntFile( value );
-            //     this.setInspectorView( componentName, value );
-            //     break;
-            case 'text':
-                this._targetNode.setString( value );
-                this.setInspectorView( componentName, value );
-                break;
-        }
+    // override
+    setCommandOnMainView : function( value ) {
+        this._targetNode.setString( value );
     },
 
-    execute : function() {
-        this.setCommand( Genie.CommandType.EXECUTE );
-    },
-
-    undo : function() {
-        this.setCommand( Genie.CommandType.UNDO );
-    },
+    // override
+    setCommandOnInspector : function( value ) {
+        var component = this._targetNode.getComponent( Genie.ComponentName.UI_IMAGE_VIEW );
+        component && component.refreshTextValue( value );
+    }
 
 });
