@@ -37,16 +37,22 @@ Genie.Command.Base = cc.Class.extend({
         var value = ( commandType === Genie.CommandType.UNDO ) ? this._args.src : this._args.dest;
         this.setCommandOnMainView( value );
         this.setCommandOnInspector( value );
+        this.setCommandOnHierarchy( value );
         this.setCommandOnLogView( commandType, value );
     },
 
     // main view 에 command 처리
-    setCommandOnMainView : function() {
+    setCommandOnMainView : function( value ) {
 
     },
 
     // 인스펙터 에 command 처리
-    setCommandOnInspector : function() {
+    setCommandOnInspector : function( value ) {
+
+    },
+
+    // hierarchy 에 command 처리
+    setCommandOnHierarchy : function( value ) {
 
     },
 
