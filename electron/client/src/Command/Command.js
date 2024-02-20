@@ -57,8 +57,9 @@ Genie.Command.Base = cc.Class.extend({
     },
 
     // 로그 뷰에 command 처리
-    setCommandOnLogView : function() {
-
+    setCommandOnLogView : function( commandType, value ) {
+        var strText = cc.formatStr( this.getCommandName() + " > ", value );
+        this.setCommandLog( commandType, this._targetNode.getName(), strText );
     },
 
     setCommandLog : function( commandType, targetName, strValue ) {

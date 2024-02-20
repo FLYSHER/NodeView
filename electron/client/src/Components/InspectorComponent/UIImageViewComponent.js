@@ -2,18 +2,7 @@
 Genie.Component.UIImageView = Genie.Component.InspectorBase.extend({
     ctor : function() {
         this._super();
-        this.setName( "UIImageView" );
-    },
-
-    onEnter : function() {
-        this._super();
-    },
-
-    checkValid : function() {
-        var ok = this._owner;
-        ok &&= this._owner instanceof  ccui.Widget;
-        ok &&= cc.isString( this._jsonName );
-        return ok;
+        this.setName( Genie.ComponentName.UI_IMAGE_VIEW );
     },
 
     //override
@@ -77,7 +66,7 @@ Genie.Component.UIImageView = Genie.Component.InspectorBase.extend({
 
     },
 
-    refreshAttribute : function() {
+    refreshAllAttribute : function() {
         var owner = this.getOwner();
         var imgType = [
             'LOCAL_TEXTURE',
@@ -89,19 +78,18 @@ Genie.Component.UIImageView = Genie.Component.InspectorBase.extend({
             "SLICED"
         ];
 
-        this.cb_ignoreSize.checked = owner.isIgnoreContentAdaptWithSize();
-        this.input_customSize.width.value = owner.getCustomSize().width;
-        this.input_customSize.height.value = owner.getCustomSize().height;
-        this.input_texFileName.value = owner._textureFile;
-        this.input_texType.value = imgType[owner._imageTexType];
-        this.input_imgTextureSize.width.value = owner.getVirtualRendererSize().width;
-        this.input_imgTextureSize.height.value = owner.getVirtualRendererSize().height;
-
+        this.cb_ignoreSize.checked              = owner.isIgnoreContentAdaptWithSize();
+        this.input_customSize.width.value       = owner.getCustomSize().width;
+        this.input_customSize.height.value      = owner.getCustomSize().height;
+        this.input_texFileName.value            = owner._textureFile;
+        this.input_texType.value                = imgType[owner._imageTexType];
+        this.input_imgTextureSize.width.value   = owner.getVirtualRendererSize().width;
+        this.input_imgTextureSize.height.value  = owner.getVirtualRendererSize().height;
 
         // renderer group
-        this.input_renderingType.value = strRenderingType[owner.getVirtualRenderer().getRenderingType()];
-        this.size_contentSize.width.value = owner.getVirtualRenderer().width;
-        this.size_contentSize.height.value = owner.getVirtualRenderer().height;
+        this.input_renderingType.value      = strRenderingType[owner.getVirtualRenderer().getRenderingType()];
+        this.size_contentSize.width.value   = owner.getVirtualRenderer().width;
+        this.size_contentSize.height.value  = owner.getVirtualRenderer().height;
 
         // sprite view
         if( this.div_spritePreview ) {
@@ -118,30 +106,16 @@ Genie.Component.UIImageView = Genie.Component.InspectorBase.extend({
 
     onchange : function ( event ) {
         var owner = this.getOwner();
-        var loc_src, loc_dest, loc_strProp;
-        var checkValid = true;
-
         switch ( event.target ) {
             case this.cb_ignoreSize:
-                var checked = event.target.checked;
-                loc_strProp = 'ignoreSize';
-                loc_src     = owner.isIgnoreContentAdaptWithSize();
-                loc_dest    = checked;
+                Genie.ToolController.execute( new Genie.Command.UIImageIgnoreSize( owner, {
+                    src     : owner.isIgnoreContentAdaptWithSize(),
+                    dest    : event.target.checked
+                }));
                 break;
             default:
-                checkValid = false;
                 break;
         }
-
-        if( checkValid ) {
-            cc.log("UIImageView Component onchange : ", loc_src, loc_dest );
-            Genie.ToolController.execute( new Genie.Command.UIImageView( owner, {
-                strProp : loc_strProp,
-                src     : loc_src,
-                dest    : loc_dest
-            } ) );
-        }
-
     },
 
     onDrop : function( event ) {
@@ -158,7 +132,7 @@ Genie.Component.UIImageView = Genie.Component.InspectorBase.extend({
             loc_dest    = sprName;
         cc.log("UIImageView Component ondrop : ", loc_src, loc_dest );
 
-        Genie.ToolController.execute( new Genie.Command.UIImageView( owner, {
+        Genie.ToolController.execute( new Genie.Command.UIImageTexName( owner, {
             strProp : loc_strProp,
             src     : loc_src,
             dest    : loc_dest
@@ -166,21 +140,15 @@ Genie.Component.UIImageView = Genie.Component.InspectorBase.extend({
         event.preventDefault();
     },
 
-    setInspectorValue : function( paramObj ) {
-        var strProp = paramObj.args.strProp;
-        var value   = paramObj.value;
-
-        switch ( strProp ) {
-            case 'ignoreSize':
-                this.cb_ignoreSize.checked = value;
-                this.refreshAttribute();
-                break;
-            case 'texFileName':
-                this.input_texFileName.value = value;
-                this.refreshAttribute();
-                break;
-
-        }
-
+    refreshIgnoreSize : function( value ) {
+        this.cb_ignoreSize.checked = value;
+        this.refreshAllAttribute();
     },
+
+    refreshTextureFileName : function( value ) {
+        this.input_texFileName.value = value;
+        this.refreshAllAttribute();
+    },
+
+    setInspectorValue : function( paramObj ) { },
 });

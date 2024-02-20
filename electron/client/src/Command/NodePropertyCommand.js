@@ -27,12 +27,6 @@ Genie.Command.NodeName = Genie.Command.Base.extend({
         cc.eventManager.dispatchCustomEvent( 'onRenameTreeNode', params );
     },
 
-    // override
-    setCommandOnLogView : function( commandType, value ) {
-        var strText = cc.formatStr( "name  > ", value );
-        this.setCommandLog( commandType, this._targetNode.getName(), strText );
-    },
-
 });
 
 Genie.Command.AnchorPoint = Genie.Command.Base.extend({
@@ -50,12 +44,6 @@ Genie.Command.AnchorPoint = Genie.Command.Base.extend({
     setCommandOnInspector : function( value ) {
         var component = this._targetNode.getComponent( Genie.ComponentName.NODE_PROPERTY );
         component && component.refreshAnchorValue( value );
-    },
-
-    // override
-    setCommandOnLogView : function( commandType, value ) {
-        var strText = cc.formatStr( this.getCommandName() + " > ", value );
-        this.setCommandLog( commandType, this._targetNode.getName(), strText );
     },
 
 });
@@ -78,12 +66,6 @@ Genie.Command.ContentSize = Genie.Command.Base.extend({
         component && component.refreshContentSize( value );
     },
 
-    // override
-    setCommandOnLogView : function( commandType, value ) {
-        var strText = cc.formatStr( this.getCommandName() + " > ", value.width, value.height );
-        this.setCommandLog( commandType, this._targetNode.getName(), strText );
-    },
-
 });
 
 Genie.Command.LocalZOrder = Genie.Command.Base.extend({
@@ -100,12 +82,6 @@ Genie.Command.LocalZOrder = Genie.Command.Base.extend({
     setCommandOnInspector : function( value ) {
         var component = this._targetNode.getComponent( Genie.ComponentName.NODE_PROPERTY );
         component && component.refreshZOrderValue( value );
-    },
-
-    // override
-    setCommandOnLogView : function( commandType, value ) {
-        var strText = cc.formatStr( this.getCommandName() + " > ", value );
-        this.setCommandLog( commandType, this._targetNode.getName(), strText );
     },
 
 });
@@ -126,12 +102,6 @@ Genie.Command.NodeVisible = Genie.Command.Base.extend({
         component && component.refreshVisibleValue( value );
     },
 
-    // override
-    setCommandOnLogView : function( commandType, value ) {
-        var strText = cc.formatStr( this.getCommandName() + " > ", value );
-        this.setCommandLog( commandType, this._targetNode.getName(), strText );
-    },
-
 });
 
 Genie.Command.Opacity = Genie.Command.Base.extend({
@@ -150,12 +120,6 @@ Genie.Command.Opacity = Genie.Command.Base.extend({
         component && component.refreshOpacityValue( value );
     },
 
-    // override
-    setCommandOnLogView : function( commandType, value ) {
-        var strText = cc.formatStr( this.getCommandName() + " > ", value );
-        this.setCommandLog( commandType, this._targetNode.getName(), strText );
-    },
-
 });
 
 Genie.Command.CascadeOpacity = Genie.Command.Base.extend({
@@ -172,12 +136,6 @@ Genie.Command.CascadeOpacity = Genie.Command.Base.extend({
     setCommandOnInspector : function( value ) {
         var component = this._targetNode.getComponent( Genie.ComponentName.NODE_PROPERTY );
         component && component.refreshCascadeOpacityValue( value );
-    },
-
-    // override
-    setCommandOnLogView : function( commandType, value ) {
-        var strText = cc.formatStr( this.getCommandName() + " > ", value );
-        this.setCommandLog( commandType, this._targetNode.getName(), strText );
     },
 
 });
