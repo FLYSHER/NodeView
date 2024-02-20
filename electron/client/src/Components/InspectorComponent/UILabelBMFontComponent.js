@@ -41,5 +41,4 @@ Genie.Component.UILabelBMFontView = Genie.Component.InspectorBase.extend({
         this.input_text.value = value;
     },
 
-    setInspectorValue : function( paramObj ) {}
 });

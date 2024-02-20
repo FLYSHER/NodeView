@@ -202,5 +202,4 @@ Genie.Component.UITextView = Genie.Component.InspectorBase.extend({
         this.input_outlineColor.value   = Genie.Utils.rgbToHex( color );
     },
 
-    setInspectorValue : function( paramObj ) {},
 });

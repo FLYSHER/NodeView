@@ -184,21 +184,21 @@ Genie.Component.Popup = Genie.Component.InspectorBase.extend({
         event.preventDefault();
     },
 
-    setInspectorValue : function( paramObj ) {
-        var strProp = paramObj.args.strProp;
-        var value   = paramObj.value;
-
-        switch ( strProp ) {
-            case 'ignoreSize':
-                this.cb_ignoreSize.checked = value;
-                this.refreshAttribute();
-                break;
-            case 'texFileName':
-                this.input_texFileName.value = value;
-                this.refreshAttribute();
-                break;
-
-        }
-
-    },
+    // setInspectorValue : function( paramObj ) {
+    //     var strProp = paramObj.args.strProp;
+    //     var value   = paramObj.value;
+    //
+    //     switch ( strProp ) {
+    //         case 'ignoreSize':
+    //             this.cb_ignoreSize.checked = value;
+    //             this.refreshAttribute();
+    //             break;
+    //         case 'texFileName':
+    //             this.input_texFileName.value = value;
+    //             this.refreshAttribute();
+    //             break;
+    //
+    //     }
+    //
+    // },
 });

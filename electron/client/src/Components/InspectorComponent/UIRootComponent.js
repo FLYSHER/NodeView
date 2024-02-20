@@ -25,10 +25,6 @@ Genie.Component.UIRoot = Genie.Component.InspectorBase.extend({
         // using textures
 
         // ui action group
-
-
-
-
     },
 
     onchange : function( event ) {
@@ -37,22 +33,5 @@ Genie.Component.UIRoot = Genie.Component.InspectorBase.extend({
 
         }
     },
-
-    setInspectorValue : function( paramObj ) {
-        var strProp = paramObj.args.strProp;
-        var value   = paramObj.value;
-
-        switch ( strProp ) {
-            case 'position':
-                this.input_pos.x.value = parseInt(value.x);
-                this.input_pos.y.value = parseInt(value.y);
-                break;
-            case 'scale':
-                this.input_scale.x.value = parseFloat(value.x).toFixed(2);
-                this.input_scale.y.value = parseFloat(value.y).toFixed(2);
-                break;
-        }
-    }
-
 
 });

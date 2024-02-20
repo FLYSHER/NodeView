@@ -172,8 +172,4 @@ Genie.Component.NodeProperty = Genie.Component.InspectorBase.extend({
     refreshCascadeOpacityValue : function( value ) {
         this.cb_cascadeOpacity.value = value;
     },
-
-    setInspectorValue : function( paramObj ) {
-    },
-
 });

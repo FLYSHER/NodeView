@@ -22,8 +22,4 @@ Genie.Component.Empty = Genie.Component.InspectorBase.extend({
         this.rootDiv = rootDiv;
     },
 
-    setInspectorValue : function( paramObj ) {
-
-    },
-
 });

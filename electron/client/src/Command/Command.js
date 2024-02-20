@@ -33,6 +33,10 @@ Genie.Command.Base = cc.Class.extend({
         return this._args;
     },
 
+    getCommandElement : function() {
+        return this._commandDiv;
+    },
+
     setCommand : function( commandType ) {
         var value = ( commandType === Genie.CommandType.UNDO ) ? this._args.src : this._args.dest;
         this.setCommandOnMainView( value );
@@ -92,26 +96,5 @@ Genie.Command.Base = cc.Class.extend({
     redo : function() {
         this.setCommand( Genie.CommandType.REDO )
     },
-
-
-
-    // inspector view 에 command 처리
-
-    setInspectorView : function ( componentName, value ) {
-        var comp = this._targetNode.getComponent( componentName);
-        if( !comp ) {
-            return;
-        }
-
-        comp.setInspectorValue( {
-            args    : this._args,
-            value   : value,
-        });
-    },
-
-    getCommandElement : function() {
-        return this._commandDiv;
-    }
-
 
 });

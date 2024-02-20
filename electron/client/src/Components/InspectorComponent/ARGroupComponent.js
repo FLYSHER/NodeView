@@ -52,7 +52,4 @@ Genie.Component.ARGroup = Genie.Component.InspectorBase.extend({
 
     },
 
-    setInspectorValue : function( paramObj ) {
-
-    },
 });

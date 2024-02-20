@@ -54,16 +54,15 @@ Genie.Component.UIButtonView = Genie.Component.InspectorBase.extend({
         var value, strValue = event.target.value;
     },
 
-    setInspectorValue : function( paramObj ) {
-        var strProp = paramObj.args.strProp;
-        var value   = paramObj.value;
-
-        switch ( strProp ) {
-            case 'fontSize':
-                this.input_fontSize.value = value;
-                break;
-
-        }
-
-    },
+    // setInspectorValue : function( paramObj ) {
+    //     var strProp = paramObj.args.strProp;
+    //     var value   = paramObj.value;
+    //
+    //     switch ( strProp ) {
+    //         case 'fontSize':
+    //             this.input_fontSize.value = value;
+    //             break;
+    //
+    //     }
+    // },
 });

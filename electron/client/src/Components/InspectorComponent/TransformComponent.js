@@ -100,9 +100,4 @@ Genie.Component.Transform = Genie.Component.InspectorBase.extend({
         this.input_scale.y.value = parseFloat(value.y).toFixed(2);
     },
 
-    setInspectorValue : function( paramObj ) {
-
-    }
-
-
 });

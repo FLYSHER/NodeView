@@ -107,8 +107,6 @@ Genie.Component.ArmatureView = Genie.Component.InspectorBase.extend({
         return movementDataDic[ currMovName ];
     },
 
-    setInspectorValue : function( paramObj ) {},
-
     onchange : function( event ) {
         var owner = this.getOwner();
         var currMovData = this.getSelectedMovData();

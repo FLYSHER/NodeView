@@ -12,13 +12,9 @@ Genie.Component.Base = cc.Component.extend({
 });
 
 Genie.Component.InspectorBase = Genie.Component.Base.extend({
-
     // 인스펙터에 그리고 싶으면 한다.
     drawInspector : function() {
         throw Error('Do Override ');
     },
 
-    setInspectorValue : function() {
-        throw Error('Do Override ');
-    }
 });

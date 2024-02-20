@@ -149,6 +149,4 @@ Genie.Component.UIImageView = Genie.Component.InspectorBase.extend({
         this.input_texFileName.value = value;
         this.refreshAllAttribute();
     },
-
-    setInspectorValue : function( paramObj ) { },
 });

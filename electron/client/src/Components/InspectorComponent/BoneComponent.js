@@ -137,8 +137,6 @@ Genie.Component.BoneView = Genie.Component.InspectorBase.extend({
         this.div_groupSkin = div_group;
     },
 
-    setInspectorValue : function( paramObj ) {},
-
     onchange : function( event ) {
         var owner = this.getOwner();
         var value, strValue = event.target.value;
