@@ -2,14 +2,10 @@
 Genie.Component.Transform = Genie.Component.InspectorBase.extend({
     ctor : function () {
         this._super();
-        this.setName( 'Transform' );
+        this.setName( Genie.ComponentName.TRANSFORM );
     },
 
-    onEnter : function () {
-        this._super();
-    },
-
-    // do overried
+    // override
     drawInspector : function() {
         var owner = this.getOwner();
 
@@ -50,47 +46,24 @@ Genie.Component.Transform = Genie.Component.InspectorBase.extend({
 
         switch ( event.target.id ) {
             case 'posX' : {
-
                 loc_src     = cc.p( Math.round( owner.x ) , Math.round( owner.y ) )
                 loc_dest    = cc.p( Math.round( value ), loc_src.y );
-
-                Genie.ToolController.execute( new Genie.Command.Transform( this.getOwner(), {
-                        strProp : 'position',
-                        src  : loc_src,
-                        dest : loc_dest
-                    }
-                ) );
+                this.onchange_positionValue( loc_src, loc_dest );
             } break;
             case 'posY' : {
                 loc_src = owner.getPosition();
                 loc_dest = cc.p( loc_src.x, value.toFixed(0) );
-                cc.log("[src, dest] ", owner.getName(), loc_src, loc_dest );
-                Genie.ToolController.execute( new Genie.Command.Transform( this.getOwner(), {
-                        strProp : 'position',
-                        src  : loc_src,
-                        dest : loc_dest
-                    }
-                ) );
+                this.onchange_positionValue( loc_src, loc_dest );
             }break;
             case 'scaleX' : {
                 loc_src  = cc.p( owner.getScaleX(), owner.getScaleY() );
                 loc_dest = cc.p( value, loc_src.y );
-                Genie.ToolController.execute( new Genie.Command.Transform( this.getOwner(), {
-                        strProp : 'scale',
-                        src  : loc_src,
-                        dest : loc_dest
-                    }
-                ) );
+                this.onchange_scaleValue( loc_src, loc_dest );
             } break;
             case 'scaleY' : {
                 loc_src     = cc.p( owner.getScaleX(), owner.getScaleY() );
                 loc_dest    = cc.p( loc_src.x, value );
-                Genie.ToolController.execute( new Genie.Command.Transform( this.getOwner(), {
-                        strProp : 'scale',
-                        src  : loc_src,
-                        dest : loc_dest
-                    }
-                ) );
+                this.onchange_scaleValue( loc_src, loc_dest );
             }break;
             // 아마추어 객체의 경우 rotation undefined 되는 경우가 있다.
             // case 'rotationZ': {
@@ -106,20 +79,38 @@ Genie.Component.Transform = Genie.Component.InspectorBase.extend({
         }
     },
 
-    setInspectorValue : function( paramObj ) {
-         var strProp = paramObj.args.strProp;
-         var value   = paramObj.value;
+    onchange_positionValue : function( src, dest ) {
+        var command = new Genie.Command.TransformPosition( this.getOwner(), {
+                src  : src,
+                dest : dest
+            }
+        );
 
-         switch ( strProp ) {
-             case 'position':
-                this.input_pos.x.value = parseInt(value.x);
-                this.input_pos.y.value = parseInt(value.y);
-                break;
-             case 'scale':
-                 this.input_scale.x.value = parseFloat(value.x).toFixed(2);
-                 this.input_scale.y.value = parseFloat(value.y).toFixed(2);
-                 break;
-         }
+        Genie.ToolController.execute( command );
+    },
+
+    onchange_scaleValue : function( src, dest ) {
+        var command = new Genie.Command.TransformScale( this.getOwner(), {
+                src  : src,
+                dest : dest
+            }
+        );
+
+        Genie.ToolController.execute( command );
+    },
+
+    refreshPositionValue : function( value ) {
+        this.input_pos.x.value = parseInt(value.x);
+        this.input_pos.y.value = parseInt(value.y);
+    },
+
+    refreshScaleValue : function( value ) {
+        this.input_scale.x.value = parseFloat(value.x).toFixed(2);
+        this.input_scale.y.value = parseFloat(value.y).toFixed(2);
+    },
+
+    setInspectorValue : function( paramObj ) {
+
     }
 
 

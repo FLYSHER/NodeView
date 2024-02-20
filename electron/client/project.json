@@ -17,7 +17,7 @@
         "src/loader.js",
         "src/app.js",
 
-
+        "src/Defines/GenieDefines.js",
         "src/Defines/eventDefines.js",
 
         "src/Utils/GenieUtils.js",

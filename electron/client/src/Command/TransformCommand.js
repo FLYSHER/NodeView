@@ -1,38 +1,57 @@
-Genie.Command.Transform = Genie.Command.Base.extend({
+//
+Genie.Command.TransformPosition = Genie.Command.Base.extend({
     ctor : function( targetNode, args ) {
-        this._super( 'Transform', targetNode, args );
+        this._super( 'TransformPosition', targetNode, args );
     },
 
-    setCommand : function( commandType /* Genie.CommandType */ ) {
+    // override
+    setCommandOnMainView : function( value ) {
+        this._targetNode.setPosition( value );
+        Genie.gizmoNode.followTarget( this._targetNode );
+    },
 
-        var strText,
-            value = ( commandType === Genie.CommandType.UNDO ) ? this._args.src : this._args.dest;
-
-        switch ( this._args.strProp ) {
-            case 'position':
-                this._targetNode.setPosition( value );
-                Genie.gizmoNode.followTarget( this._targetNode );
-                this.setInspectorView( this.getCommandName(), value );
-
-                strText = cc.formatStr( "move  > x: %d, y: %d ", value.x, value.y );
-                this.setCommandLog( commandType, this._targetNode.getName(), strText );
-                break;
-            case 'scale':
-                this._targetNode.setScale( value.x, value.y );
-                Genie.gizmoNode.followTarget( this._targetNode );
-                this.setInspectorView( this.getCommandName(), cc.p( value.x, value.y ) );
-
-                strText = cc.formatStr( "scale  > x: %d, y: %d ", value.x, value.y )
-                this.setCommandLog( commandType, this._targetNode.getName(), strText );
-                break;
+    // override
+    setCommandOnInspector : function( value ) {
+        var component = this._targetNode.getComponent( Genie.ComponentName.TRANSFORM );
+        if( !component ) {
+            return;
         }
+
+        component.refreshPositionValue( value );
     },
 
-    execute : function() {
-        this.setCommand( Genie.CommandType.EXECUTE );
+    // override
+    setCommandOnLogView : function( commandType, value ) {
+        var strText = cc.formatStr( "move  > x: %d, y: %d ", value.x, value.y );
+        this.setCommandLog( commandType, this._targetNode.getName(), strText );
+    },
+});
+
+//
+Genie.Command.TransformScale = Genie.Command.Base.extend({
+    ctor : function( targetNode, args ) {
+        this._super( 'TransformScale', targetNode, args );
     },
 
-    undo : function() {
-        this.setCommand( Genie.CommandType.UNDO );
+    // main view 에 command 처리
+    setCommandOnMainView : function( value ) {
+        this._targetNode.setScale( value.x, value.y );
+        Genie.gizmoNode.followTarget( this._targetNode );
+    },
+
+    // 인스펙터 에 command 처리
+    setCommandOnInspector : function( value ) {
+        var component = this._targetNode.getComponent( Genie.ComponentName.TRANSFORM );
+        if( !component ) {
+            return;
+        }
+
+        component.refreshScaleValue( value );
+    },
+
+    // 로그 뷰에 command 처리
+    setCommandOnLogView : function( commandType, value ) {
+        var strText = cc.formatStr( "move  > x: %d, y: %d ", value.x, value.y );
+        this.setCommandLog( commandType, this._targetNode.getName(), strText );
     },
 });

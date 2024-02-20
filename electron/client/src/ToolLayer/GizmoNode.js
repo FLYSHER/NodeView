@@ -76,14 +76,18 @@ var Gizmo = cc.Node.extend({
                     var pt2      = cc.pSub( event.getLocation(), diffPos );
                     var localPos = self._currTargetNode.getParent().convertToNodeSpace( pt2 );
 
-                    Genie.ToolController.moveNode( self._currTargetNode, localPos );
+                    // mainView 값 변경
+                    self._currTargetNode.setPosition( localPos );
                     self.followTarget( self._currTargetNode );
+
+                    // inspector 값 변경
+                    var transComp = self._currTargetNode.getComponent( Genie.ComponentName.TRANSFORM );
+                    transComp && transComp.refreshPositionValue( localPos );
                 }
             },
             onMouseUp: function( event ) {
                 if( self.isDrag() && self._currTargetNode ) {
                     self.setDrag( false );
-
 
                     var pt          = event.getLocation();
                     var diffPos     = self.getDiffPt();
@@ -97,13 +101,11 @@ var Gizmo = cc.Node.extend({
 
                     var moveDelta = cc.pDistance( srcLocalPos, self._currTargetNode.getPosition() );
                     if( moveDelta > 1.0 ) {
-                        Genie.ToolController.execute( new Genie.Command.Transform( self._currTargetNode, {
-                            strProp : 'position',
+                        Genie.ToolController.execute( new Genie.Command.TransformPosition( self._currTargetNode, {
                             src     : src,
                             dest    : dest
                         } ) );
                     }
-
                 }
             },
 

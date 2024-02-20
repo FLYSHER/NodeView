@@ -21,6 +21,12 @@ var MainViewLayer = cc.LayerColor.extend({
         cc.eventManager.addCustomListener( EVT.MAIN_VIEW.CREATE_AR_NODE, this.onCreateARFile.bind(this) );
         cc.eventManager.addCustomListener("onChangeProperty", this.setNodeProperty.bind(this) );
         cc.eventManager.addCustomListener("onChangeNodeInHierarchy", this.setCurrNode.bind(this));
+
+        cc.eventManager.addCustomListener("command.transform", function( event ){
+            var userData = event.getUserData();
+            var targetNode = userData.targetNode;
+            cc.log("mainView-tr : ",targetNode === this.currNode );
+        });
     },
 
     onCreateUIFile : function( event ) {

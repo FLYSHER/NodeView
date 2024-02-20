@@ -34,7 +34,25 @@ Genie.Command.Base = cc.Class.extend({
     },
 
     setCommand : function( commandType ) {
-        throw Error("override");
+        var value = ( commandType === Genie.CommandType.UNDO ) ? this._args.src : this._args.dest;
+        this.setCommandOnMainView( value );
+        this.setCommandOnInspector( value );
+        this.setCommandOnLogView( commandType, value );
+    },
+
+    // main view 에 command 처리
+    setCommandOnMainView : function() {
+
+    },
+
+    // 인스펙터 에 command 처리
+    setCommandOnInspector : function() {
+
+    },
+
+    // 로그 뷰에 command 처리
+    setCommandOnLogView : function() {
+
     },
 
     setCommandLog : function( commandType, targetName, strValue ) {
@@ -67,6 +85,10 @@ Genie.Command.Base = cc.Class.extend({
     redo : function() {
         this.setCommand( Genie.CommandType.REDO )
     },
+
+
+
+    // inspector view 에 command 처리
 
     setInspectorView : function ( componentName, value ) {
         var comp = this._targetNode.getComponent( componentName);

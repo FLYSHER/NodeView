@@ -58,20 +58,4 @@ Genie.ToolController = {
 
     },
 
-    moveNode : function( targetNode, pos ) {
-        // main view
-        targetNode.setPosition( pos );
-
-        // inspector
-        //     var strProp = paramObj.args.strProp;
-        //          var value   = paramObj.value;
-
-        var transComp = targetNode.getComponent('Transform');
-        transComp.setInspectorValue( {
-            args : {
-                strProp : 'position',
-            },
-            value : pos
-        } );
-    },
 };
