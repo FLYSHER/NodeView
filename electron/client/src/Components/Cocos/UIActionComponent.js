@@ -7,17 +7,6 @@ Genie.Component.UIActionView = Genie.Component.InspectorBase.extend({
         this._jsonName = jsonName;
     },
 
-    onEnter : function() {
-        this._super();
-    },
-
-    checkValid : function() {
-        var ok = this._owner;
-        ok &&= this._owner instanceof  ccui.Widget;
-        ok &&= cc.isString( this._jsonName );
-        return ok;
-    },
-
     //override
     drawInspector : function() {
         var owner = this.getOwner();

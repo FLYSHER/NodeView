@@ -1,18 +1,8 @@
 Genie.Component.ArmatureView = Genie.Component.InspectorBase.extend({
     ctor : function() {
         this._super();
-        this.setName("ArmatureView");
+        this.setName( Genie.ComponentName.ARMATURE_VIEW );
         this._currTrackIdx = 0;
-    },
-
-    onEnter : function() {
-        this._super();
-    },
-
-    checkValid : function() {
-        var ok = this._owner;
-        ok &&= this._owner instanceof ccs.Armature;
-        return ok;
     },
 
     //override
@@ -141,7 +131,6 @@ Genie.Component.ArmatureView = Genie.Component.InspectorBase.extend({
             //     break;
         }
     },
-
 
     onclick : function( event ) {
         var owner = this.getOwner();

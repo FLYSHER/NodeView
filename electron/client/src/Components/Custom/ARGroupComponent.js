@@ -8,10 +8,6 @@ Genie.Component.ARGroup = Genie.Component.InspectorBase.extend({
         this._super();
     },
 
-    checkValid : function() {
-        return true;
-    },
-
     //override
     drawInspector : function() {
         var owner = this.getOwner();
