@@ -23,7 +23,7 @@ var MainScene = cc.Scene.extend({
         /** view init **/
         Renderer_main.init();
         Renderer_bottom.init();
-        Renderer_timeline.init();
+        // Renderer_timeline.init();
         Renderer_assets.init();
         Renderer_inspector.init();
         Renderer_hierarchy.init( this._mainViewLayer );
