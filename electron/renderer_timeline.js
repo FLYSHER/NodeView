@@ -13,15 +13,23 @@ var Renderer_timeline = {
         this.initTimeline();
         this.initPlayer();
     },
+
     initTimeline : function() {
 
         this.generateModel();
         this.timeline = new timelineModule.Timeline();
         this.timeline.initialize({ id : "timeline", headerHeight: 45 });
+        this.timeline.setOptions( this.timelineOptions );
         this.timeline.setModel( { rows : this.timeline_rows } );
         this.generateHTMLOutlineListNodes( this.timeline_rows );
 
         this.timeline.onTimeChanged( function (event) {
+            console.log("onTimeChanged : ", event );
+            var source = event.source;
+            if( source === 'user' ) {
+                this.onTimelineChangedByUser( event );
+            }
+
             this.showActivePositionInformation();
         }.bind(this));
 
@@ -40,6 +48,21 @@ var Renderer_timeline = {
             this.showActivePositionInformation();
         }.bind(this));
 
+
+    },
+
+    // 유저가 수동으로 타임라인 변경할 경우
+    onTimelineChangedByUser : function( event ) {
+        var targetNode = Genie.ToolController.getCurrentNode();
+        if( !!targetNode ) {
+            var arComponent = targetNode.getComponent( Genie.ComponentName.ARMATURE_VIEW );
+            if( arComponent ) {
+                var options = this.timeline.getOptions();
+                var snapStep = options.snapStep;
+                var frame = parseInt( event.val / snapStep );
+                arComponent.gotoFrame( frame );
+            }
+        }
     },
 
     generateModel : function() {
@@ -61,6 +84,15 @@ var Renderer_timeline = {
                 ]
             }
         ]
+
+        this.timelineOptions = {
+            stepVal  : 50, // ms
+            snapStep : 50,  //
+            zoomMin  : 3,
+            zoomMax  : 3,
+        }
+
+        this.lastFrame = 0;
     },
 
     generateHTMLOutlineListNodes : function( rows ) {
@@ -106,6 +138,7 @@ var Renderer_timeline = {
         var boneList        = armature_data['bone_data'];
         var animation_data  = originData['animation_data'][0];
         var mov_dataList    = animation_data['mov_data'];
+
         var move_data       = mov_dataList.find( function( item ) {
             return item.name === trackName;
         });
@@ -116,15 +149,21 @@ var Renderer_timeline = {
         var mov_bone_data = move_data['mov_bone_data'];
         this.timeline_rows.length = 0;
 
-        var i,k, frame_data;
+        var options = this.timeline.getOptions();
+        var stepVal = options.stepVal;
+
+        var i,k, frame_data, last_frame = 0;
         for( i = 0; i < mov_bone_data.length; ++i ) {
             frame_data = mov_bone_data[i]['frame_data'];
             var arrKeyFrames = [];
 
             for( k = 0; k < frame_data.length; ++k ) {
                 arrKeyFrames.push({
-                    val : frame_data[k]['fi'] * 1000
+                    val : frame_data[k]['fi'] * stepVal
                 });
+                if( last_frame < frame_data[k]['fi'] ) {
+                    last_frame = frame_data[k]['fi'];
+                }
             }
             this.timeline_rows.push({
                 title : mov_bone_data[i].name,
@@ -132,8 +171,16 @@ var Renderer_timeline = {
             });
         }
 
+        // this.timeline.setModel({
+        //     min : 0,
+        //     max : 1000
+        // });
+        this.lastFrame = last_frame;
         this.timeline.setModel( { rows : this.timeline_rows } );
         this.generateHTMLOutlineListNodes( this.timeline_rows );
+
+        this.timeline.setTime( 0 );
+        this.timeline.setZoom( 3 );
     },
 
     outlineMouseWheel : function( event ) {
@@ -148,6 +195,8 @@ var Renderer_timeline = {
     },
 
     playTrack : function() {
+        this.pauseTrack();
+
         this.playing = true;
         this.trackTimelineMovement = true;
 
@@ -157,27 +206,44 @@ var Renderer_timeline = {
         }
     },
 
+    pauseTrack : function() {
+        this.playing = false;
+        this.timeline && this.timeline.setOptions({
+            timelineDraggable: true
+        });
+        this.timeline.setTime( 0 );
+    },
+
     moveTimelineIntoTheBounds() {
         if( this.timeline ) {
             if( this.timeline._startPos || this.timeline._scrollAreaClickOrDragStarted ) {
                 return;
             }
             var fromPx  = this.timeline.scrollLeft;
-            var toPx    = this.timeline.scroll + this.timeline.getClientWidth();
+            var toPx    = this.timeline.scrollLeft + this.timeline.getClientWidth();
             var positionInPixels = this.timeline.valToPx( this.timeline.getTime() ) + this.timeline._leftMargin();
             if( positionInPixels <= fromPx || positionInPixels >= toPx ) {
                 this.timeline.scrollLeft = positionInPixels;
             }
+            cc.log(toPx, ",", positionInPixels );
         }
     },
 
     initPlayer : function() {
-        var playStep = 50;
+
+        var options  = this.timeline.getOptions();
+        var playStep = options.stepVal;
+
         setInterval( function(){
             if( this.playing ) {
                 if( this.timeline ) {
-                    this.timeline.setTime( this.timeline.getTime() + playStep );
+                    cc.log(this.timeline.getTime());
+                    this.timeline.setTime( this.timeline.getTime() + playStep  );
                     this.moveTimelineIntoTheBounds();
+
+                    if( this.timeline.getTime() >= this.lastFrame * options.stepVal) {
+                        this.pauseTrack();
+                    }
                 }
             }
         }.bind(this), playStep )

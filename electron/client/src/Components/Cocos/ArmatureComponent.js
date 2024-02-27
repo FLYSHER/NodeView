@@ -51,6 +51,10 @@ Genie.Component.ArmatureView = Genie.Component.InspectorBase.extend({
 
         // movement group
         this.drawMovementData( rootDiv );
+
+        // time line
+        var arFileName = this.getOwner().getName();
+        Renderer_timeline.setAnimationTimeline(arFileName + ".ExportJson", this.getSelectedMovName());
     },
 
     drawMovementData : function( rootDiv ) {
@@ -106,24 +110,11 @@ Genie.Component.ArmatureView = Genie.Component.InspectorBase.extend({
             case  this.select_track:
                 this.setMovementData( currMovData );
                 var arFileName = this.getOwner().getName();
-                Renderer_bottom.setAnimationTimeline(arFileName + ".ExportJson", this.getSelectedMovName());
+                Renderer_timeline.setAnimationTimeline(arFileName + ".ExportJson", this.getSelectedMovName());
                 break;
             case this.input_gotoAndPause:
-                var dl      = currMovData.duration;
-                var name    = currMovData.name;
                 var frame   = parseInt( strValue );
-                if( frame >= 0 && frame < dl ) {
-                    owner.getAnimation().play( name );
-                    owner.getAnimation().gotoAndPause( frame );
-                }
-                else {
-                    if( frame > dl ) {
-                        this.input_gotoAndPause.value = dl;
-                    }
-                    else {
-                        this.input_gotoAndPause.value = 0;
-                    }
-                }
+                this.gotoFrame( frame );
                 break;
             // case this.mov_sc:
             //     value = parseFloat( strValue );
@@ -140,10 +131,11 @@ Genie.Component.ArmatureView = Genie.Component.InspectorBase.extend({
                 var moveIdx     = parseInt( this.select_track.value );
                 var loop        = this.mov_loop.checked;
                 owner.getAnimation().playWithIndex( moveIdx, -1, loop );
-                // Renderer_timeline.playTrack();
+                Renderer_timeline.playTrack();
                 break;
             case this.btn_stop:
                 owner.getAnimation().stop();
+                Renderer_timeline.pauseTrack();
                 break;
             case this.btn_resumeAndPause:
                 if( owner.getAnimation().isPause() ) {
@@ -154,25 +146,35 @@ Genie.Component.ArmatureView = Genie.Component.InspectorBase.extend({
                 }
                 break;
             case this.btn_gotoAndPause:
-                var currMovData = this.getSelectedMovData();
-                var dl      = currMovData.duration;
-                var name    = currMovData.name;
                 var frame = parseInt(this.input_gotoAndPause.value);
-                if( frame >= 0 && frame < dl ) {
-                    owner.getAnimation().play( name );
-                    owner.getAnimation().gotoAndPause( frame );
-                }
-                else {
-                    if( frame > dl ) {
-                        this.btn_gotoAndPause.value = dl;
-                    }
-                    else {
-                        this.btn_gotoAndPause.value = 0;
-                    }
-                }
+                this.gotoFrame( frame );
                 break;
         }
     },
 
+    gotoFrame : function( frame ) {
+        var owner       = this.getOwner();
+        var currMovData = this.getSelectedMovData();
+        var dl      = currMovData.duration;
+        var name    = currMovData.name;
+
+        var loc_frame;
+        if( frame >= 0 && frame < dl ) {
+            loc_frame = frame;
+        }
+        else {
+            if( frame > dl ) {
+                loc_frame = dl;
+            }
+            else {
+                loc_frame = 0;
+            }
+        }
+
+        owner.getAnimation().play( name );
+        owner.getAnimation().gotoAndPause( loc_frame );
+
+        this.input_gotoAndPause.value = loc_frame;
+    },
 
 });

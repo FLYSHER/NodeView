@@ -58,4 +58,7 @@ Genie.ToolController = {
 
     },
 
+    getCurrentNode : function() {
+        return Genie.gizmoLayer.getTargetNode();
+    },
 };

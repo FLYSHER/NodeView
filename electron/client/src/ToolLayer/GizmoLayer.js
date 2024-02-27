@@ -126,6 +126,10 @@ var GizmoLayer = cc.LayerColor.extend({
         ));
     },
 
+    getTargetNode : function() {
+        return this._targetNode;
+    },
+
     getFrontTouchedNode : function( pt ) {
         var i, bb, localPt, child,
             sortedChildren = [],
