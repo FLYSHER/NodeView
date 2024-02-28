@@ -138,6 +138,10 @@ button:active {
     display: flex;
 }
 
+#bottom_history {
+    display: inline;
+}
+
 #div_command_log {
     background-color: #222222;
     overflow-y: scroll;

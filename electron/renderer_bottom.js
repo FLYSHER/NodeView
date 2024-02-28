@@ -51,7 +51,7 @@ var Renderer_bottom = {
 
         switch ( tabName ) {
             case "bottom_history":
-                document.getElementById( tabName ).style.display = "inline-block";
+                document.getElementById( tabName ).style.display = "inline";
                 break;
             case "bottom_timeline":
                 this.setTimelineVisible( true );

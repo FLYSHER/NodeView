@@ -19,7 +19,12 @@ var Renderer_timeline = {
         this.generateModel();
         this.timeline = new timelineModule.Timeline();
         this.timeline.initialize({ id : "timeline", headerHeight: 45 });
-        // this.timeline.setOptions( this.timelineOptions );
+        this.timeline.setOptions( {
+            // stepPx      : 100,
+            // stepSmallPx : 10,
+            zoomMin     : 2,
+            zoomMax     : 10
+        } );
         this.timeline.setModel( { rows : this.timeline_rows } );
         this.generateHTMLOutlineListNodes( this.timeline_rows );
 
@@ -82,13 +87,6 @@ var Renderer_timeline = {
                 ]
             }
         ]
-
-        // this.timelineOptions = {
-        //     stepVal  : 0.01, // s
-        //     snapStep : 0.01, // s
-        //     // zoomMin  : 3,
-        //     // zoomMax  : 3,
-        // }
 
         this.mov_totalFrame = 0;
         this.mov_scale      = 1;
