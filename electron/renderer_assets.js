@@ -37,10 +37,17 @@ var Renderer_assets = {
 
     // 트리 선택 노드 변경시
     onchangeTree : function( e, data ) {
-        cc.log( Renderer_assets.Tag, "*** onchange tree *** : ", data.selected[0] );
+        cc.log( Renderer_assets.Tag, "*** onchange tree *** : ", data.selected[0], e, data );
 
         var selectedFileName = data.selected[0];
-        cc.eventManager.dispatchCustomEvent( 'onSetPreviewSprite', { name : selectedFileName } );
+        var resType = -1;
+        if( data && data.node && data.node.data ) {
+            resType = data.node.data['resType'];
+        }
+        cc.eventManager.dispatchCustomEvent( 'onSetPreviewSprite', {
+            name    : selectedFileName,
+            resType : resType
+        } );
     },
 
     // 트리 노드 드레그 시작
@@ -68,7 +75,7 @@ var Renderer_assets = {
     /**
      *
      */
-    addAsset : function( path ) {
+    addAsset : function( path, resType /* Genie.ResType */ ) {
         console.log("*** add addAsset  **** ", path );
         var dirName  = cc.path.dirname( path);
         var basename =  cc.path.basename( path );
@@ -103,22 +110,28 @@ var Renderer_assets = {
 
         // step3. 에셋 추가
         if( cc.path.extname( id ) === ".plist" ) {
-            this.addAssetToHierarchy( id, parentID )
+            this.addAssetToHierarchy( id, parentID, { resType : resType } )
 
             var frameConfig = cc.spriteFrameCache._frameConfigCache[path];
             var frames = frameConfig.frames;
 
             for( var key in frames ) {
-                this.addAssetToHierarchy( key, basename );
+                this.addAssetToHierarchy( key, basename, { resType : Genie.ResType.SPRITE } );
             }
         }
         else {
-            this.addAssetToHierarchy( id, parentID );
+            this.addAssetToHierarchy( id, parentID, { resType : resType } );
         }
 
     },
 
-    addAssetToHierarchy : function( id, parentID ) {
+    /**
+     *
+     * @param id
+     * @param parentID
+     * @param customDataObj
+     */
+    addAssetToHierarchy : function( id, parentID, customDataObj ) {
         console.log("*** add hierarchy  **** ", id, parentID );
         if( this.isExistAsset( id, parentID ) ) {
             console.log(" >> already exist : ", id, parentID );
@@ -128,7 +141,8 @@ var Renderer_assets = {
         this.treeDataArr.push({
             "id"        : id,
             "parent"    : parentID,
-            "text"      : id
+            "text"      : id,
+            "data"      : customDataObj || undefined
         });
 
         $("#assets").jstree(true).settings.core.data = this.treeDataArr;

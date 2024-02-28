@@ -4,7 +4,7 @@
 var GizmoLayer = cc.LayerColor.extend({
     ctor : function() {
         this.initProperty();
-        this._super( cc.color( 255, 0, 0, 50 ));
+        this._super( cc.color( 255, 0, 0, 100 ));
 
         var size = cc.winSize;
         this.CX = size.width / 2;
@@ -78,18 +78,38 @@ var GizmoLayer = cc.LayerColor.extend({
     setPreviewSprite : function( event ) {
         cc.log("*** onEvent **** setSprite ", event );
         var userData = event.getUserData();
-        var sprName = userData.name;
-        var spriteFrame = cc.spriteFrameCache.getSpriteFrame( sprName );
-        if( spriteFrame ) {
+        var resName  = userData.name;
+        var resType  = userData.resType;
+
+        var resNode, validCheck = true;
+
+        switch ( resType ) {
+            case Genie.ResType.SPRITE:
+                var spriteFrame = cc.spriteFrameCache.getSpriteFrame( resName );
+                spriteFrame && this._spr.setSpriteFrame( spriteFrame );
+                validCheck = !!spriteFrame;
+                break;
+            case Genie.ResType.TEXTURE:
+                var tex = cc.textureCache.getTextureForKey( 'image/' + resName);
+                tex && this._spr.initWithTexture( tex )
+                validCheck = !!tex;
+                break;
+            default:
+                validCheck = false;
+                break;
+        }
+
+        // var sprName = userData.name;
+        // var spriteFrame = cc.spriteFrameCache.getSpriteFrame( sprName );
+        if( validCheck ) {
             this._rt.beginWithClear( 40, 40, 40 );
-            this._spr.setSpriteFrame( spriteFrame );
             this._adjustSpriteSize();
             this._spr.visit();
             this._rt.end();
         }
     },
 
-    _adjustSpriteSize : function() {
+    _adjustSpriteSize : function(  ) {
         var w = this._spr.getContentSize().width,
             h = this._spr.getContentSize().height;
 

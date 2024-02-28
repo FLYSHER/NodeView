@@ -8,6 +8,14 @@ Genie.ToolFileType = {
     NONE        : 0,
     UIFile      : 1,
     ARMATURE    : 2
+};
+
+Genie.ResType = {
+    TOOL_FILE   : 0,
+    TEXTURE     : 1,
+    SPRITE      : 2,
+    FONT_META   : 3,
+    ATLAS_META  : 4
 }
 
 Genie.ResourceLoader = {
@@ -28,13 +36,13 @@ Genie.ResourceLoader = {
             case '.exportjson':
                 key = fileEntry.name;
                 cc.loader.cache[ fileEntry.name ] = JSON.parse( fileEntry.content );
-                Renderer_assets.addAsset( key );
+                Renderer_assets.addAsset( key, Genie.ResType.TOOL_FILE );
                 resolve();
                 break;
             case '.fnt':
                 key = 'image/' + fileEntry.name;
                 cc.loader.cache[ key ] = _fntLoader.parseFnt( fileEntry.content, key );
-                Renderer_assets.addAsset( key );
+                Renderer_assets.addAsset( key, Genie.ResType.FONT_META );
                 resolve();
                 break;
             case '.plist':
@@ -42,7 +50,7 @@ Genie.ResourceLoader = {
                 key = 'image/' + fileEntry.name;
                 cc.loader.cache[ key ] = plist_data;
                 cc.spriteFrameCache.addSpriteFrames( key );
-                Renderer_assets.addAsset( key );
+                Renderer_assets.addAsset( key, Genie.ResType.ATLAS_META );
                 resolve();
                 break;
             case '.png':
@@ -58,7 +66,7 @@ Genie.ResourceLoader = {
                         cc.loader.cache[ fileEntry.name ] = fileEntry.content;
                         cc.loader.cache[key] = tex2d;
                         cc.textureCache.cacheImage( key, tex2d );
-                        Renderer_assets.addAsset( key );
+                        Renderer_assets.addAsset( key, Genie.ResType.TEXTURE );
                         resolve();
                     });
                 break;
