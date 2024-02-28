@@ -133,9 +133,9 @@ button:active {
     height: 35%;
 }
 
-#bottom_menu {
+#tab_button {
     background: #444444;
-    /*grid-area: sub;*/
+    display: flex;
 }
 
 #div_command_log {

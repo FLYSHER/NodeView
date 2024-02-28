@@ -19,7 +19,7 @@ var Renderer_timeline = {
         this.generateModel();
         this.timeline = new timelineModule.Timeline();
         this.timeline.initialize({ id : "timeline", headerHeight: 45 });
-        this.timeline.setOptions( this.timelineOptions );
+        // this.timeline.setOptions( this.timelineOptions );
         this.timeline.setModel( { rows : this.timeline_rows } );
         this.generateHTMLOutlineListNodes( this.timeline_rows );
 
@@ -47,8 +47,6 @@ var Renderer_timeline = {
             }
             this.showActivePositionInformation();
         }.bind(this));
-
-
     },
 
     // 유저가 수동으로 타임라인 변경할 경우
@@ -85,14 +83,17 @@ var Renderer_timeline = {
             }
         ]
 
-        this.timelineOptions = {
-            stepVal  : 50, // ms
-            snapStep : 50,  //
-            zoomMin  : 3,
-            zoomMax  : 3,
-        }
+        // this.timelineOptions = {
+        //     stepVal  : 0.01, // s
+        //     snapStep : 0.01, // s
+        //     // zoomMin  : 3,
+        //     // zoomMax  : 3,
+        // }
 
-        this.lastFrame = 0;
+        this.mov_totalFrame = 0;
+        this.mov_scale      = 1;
+        this.animationInternal = 1/60; // CCProcessBase.js 에서 사용하는 값 그대로
+        this.msPerFrame     = 0;
     },
 
     generateHTMLOutlineListNodes : function( rows ) {
@@ -139,6 +140,7 @@ var Renderer_timeline = {
         var animation_data  = originData['animation_data'][0];
         var mov_dataList    = animation_data['mov_data'];
 
+
         var move_data       = mov_dataList.find( function( item ) {
             return item.name === trackName;
         });
@@ -146,11 +148,16 @@ var Renderer_timeline = {
             return;
         }
 
+        this.mov_totalFrame = move_data['dr'];
+        this.mov_scale      = move_data['sc'];
+
         var mov_bone_data = move_data['mov_bone_data'];
         this.timeline_rows.length = 0;
 
-        var options = this.timeline.getOptions();
-        var stepVal = options.stepVal;
+        // var options = this.timeline.getOptions();
+        // var stepVal = options.stepVal;
+        var msPerFrame = this.animationInternal / this.mov_scale * 1000;
+        this.msPerFrame = msPerFrame;
 
         var i,k, frame_data, last_frame = 0;
         for( i = 0; i < mov_bone_data.length; ++i ) {
@@ -159,11 +166,9 @@ var Renderer_timeline = {
 
             for( k = 0; k < frame_data.length; ++k ) {
                 arrKeyFrames.push({
-                    val : frame_data[k]['fi'] * stepVal
+                    val : frame_data[k]['fi'] * msPerFrame
                 });
-                if( last_frame < frame_data[k]['fi'] ) {
-                    last_frame = frame_data[k]['fi'];
-                }
+                cc.log("val > ", frame_data[k]['fi'] * msPerFrame );
             }
             this.timeline_rows.push({
                 title : mov_bone_data[i].name,
@@ -175,7 +180,11 @@ var Renderer_timeline = {
         //     min : 0,
         //     max : 1000
         // });
-        this.lastFrame = last_frame;
+
+        this.timeline.setOptions( {
+            stepVal  : msPerFrame , // 눈금 하나당 단위 ms
+            snapStep : msPerFrame ,  // 타임 바 이동 단위 ms
+        });
         this.timeline.setModel( { rows : this.timeline_rows } );
         this.generateHTMLOutlineListNodes( this.timeline_rows );
 
@@ -230,9 +239,7 @@ var Renderer_timeline = {
     },
 
     initPlayer : function() {
-
-        var options  = this.timeline.getOptions();
-        var playStep = options.stepVal;
+        var playStep = 10;
 
         setInterval( function(){
             if( this.playing ) {
@@ -241,7 +248,7 @@ var Renderer_timeline = {
                     this.timeline.setTime( this.timeline.getTime() + playStep  );
                     this.moveTimelineIntoTheBounds();
 
-                    if( this.timeline.getTime() >= this.lastFrame * options.stepVal) {
+                    if( this.timeline.getTime() >= this.mov_totalFrame * this.msPerFrame ) {
                         this.pauseTrack();
                     }
                 }

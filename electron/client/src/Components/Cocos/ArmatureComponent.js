@@ -54,7 +54,7 @@ Genie.Component.ArmatureView = Genie.Component.InspectorBase.extend({
 
         // time line
         var arFileName = this.getOwner().getName();
-        // Renderer_timeline.setAnimationTimeline(arFileName + ".ExportJson", this.getSelectedMovName());
+        Renderer_timeline.setAnimationTimeline(arFileName + ".ExportJson", this.getSelectedMovName());
     },
 
     drawMovementData : function( rootDiv ) {
@@ -110,7 +110,7 @@ Genie.Component.ArmatureView = Genie.Component.InspectorBase.extend({
             case  this.select_track:
                 this.setMovementData( currMovData );
                 var arFileName = this.getOwner().getName();
-                // Renderer_timeline.setAnimationTimeline(arFileName + ".ExportJson", this.getSelectedMovName());
+                Renderer_timeline.setAnimationTimeline(arFileName + ".ExportJson", this.getSelectedMovName());
                 break;
             case this.input_gotoAndPause:
                 var frame   = parseInt( strValue );
@@ -131,11 +131,11 @@ Genie.Component.ArmatureView = Genie.Component.InspectorBase.extend({
                 var moveIdx     = parseInt( this.select_track.value );
                 var loop        = this.mov_loop.checked;
                 owner.getAnimation().playWithIndex( moveIdx, -1, loop );
-                // Renderer_timeline.playTrack();
+                Renderer_timeline.playTrack();
                 break;
             case this.btn_stop:
                 owner.getAnimation().stop();
-                // Renderer_timeline.pauseTrack();
+                Renderer_timeline.pauseTrack();
                 break;
             case this.btn_resumeAndPause:
                 if( owner.getAnimation().isPause() ) {
