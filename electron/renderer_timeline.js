@@ -166,18 +166,12 @@ var Renderer_timeline = {
                 arrKeyFrames.push({
                     val : frame_data[k]['fi'] * msPerFrame
                 });
-                cc.log("val > ", frame_data[k]['fi'] * msPerFrame );
             }
             this.timeline_rows.push({
                 title : mov_bone_data[i].name,
                 keyframes : arrKeyFrames,
             });
         }
-
-        // this.timeline.setModel({
-        //     min : 0,
-        //     max : 1000
-        // });
 
         this.timeline.setOptions( {
             stepVal  : msPerFrame , // 눈금 하나당 단위 ms
@@ -208,6 +202,7 @@ var Renderer_timeline = {
         this.trackTimelineMovement = true;
 
         if( this.timeline ) {
+            this.timeline.setTime( 0 );
             this.moveTimelineIntoTheBounds();
             this.timeline.setOptions({ timelineDraggable:false});
         }
@@ -218,7 +213,6 @@ var Renderer_timeline = {
         this.timeline && this.timeline.setOptions({
             timelineDraggable: true
         });
-        this.timeline.setTime( 0 );
     },
 
     moveTimelineIntoTheBounds() {

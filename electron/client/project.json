@@ -54,6 +54,7 @@
         "src/ToolLayer/MainScene.js",
         "src/ToolLayer/MainViewLayer.js",
         "src/ToolLayer/GizmoNode.js",
+        "src/ToolLayer/PreviewNode.js",
         "src/ToolLayer/GizmoLayer.js"
     ]
 }

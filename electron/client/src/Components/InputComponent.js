@@ -1,5 +1,5 @@
 Genie.Component.Touch = Genie.Component.Base.extend({
-    SHOW_DEBUG_DRAW_HITRECT : false,
+    SHOW_DEBUG_DRAW_HITRECT : true,
 
     ctor: function () {
         this._super();
@@ -191,7 +191,6 @@ Genie.Component.Touch = Genie.Component.Base.extend({
 
     //이벤트 트리거
     onTriggerEvent : function (touchEventName, pt){
-
     },
 
     _isVisibleInHierarchy : function( target ) {

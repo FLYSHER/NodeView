@@ -4,12 +4,7 @@
 var GizmoLayer = cc.LayerColor.extend({
     ctor : function() {
         this.initProperty();
-        this._super( cc.color( 255, 0, 0, 100 ));
-
-        var size = cc.winSize;
-        this.CX = size.width / 2;
-        this.CY = size.height / 2;
-
+        this._super( cc.color( 255, 0, 0, 50 ));
 
         this._gizmoNode = new Gizmo();
         this._gizmoNode.setPosition( 0, 0 );
@@ -21,8 +16,6 @@ var GizmoLayer = cc.LayerColor.extend({
 
         this.onResize();
         ScreenUtil.addResizeListener( this.onResize, this );
-
-
     },
 
     initProperty : function() {
@@ -34,16 +27,12 @@ var GizmoLayer = cc.LayerColor.extend({
         this._super();
         this.initTouchListener();
         cc.eventManager.addCustomListener("onChangeNodeInHierarchy", this.setTargetNode.bind(this));
-        cc.eventManager.addCustomListener( "onSetPreviewSprite", this.setPreviewSprite.bind(this) );
     },
 
     onResize : function () {
         var size = cc.winSize;
-        this.CX = size.width / 2;
-        this.CY = size.height / 2;
-
         this.setContentSize( size.width, size.height );
-        this.repositionPreview();
+        this.previewNode.onResize();
     },
 
     initTouchListener : function() {
@@ -60,64 +49,8 @@ var GizmoLayer = cc.LayerColor.extend({
     },
 
     initPreviewArea : function() {
-        this._rt = new cc.RenderTexture( this._rtSize.width, this._rtSize.height, cc.Texture2D.PIXEL_FORMAT_RGBA8888, gl.DEPTH_STENCIL );
-        this._rt.setAnchorPoint( 1.0, 0.0 );
-        this.addChild( this._rt );
-
-        this._spr = new cc.Sprite();
-        this._spr.setPosition( Genie.Utils.getScreenCenterPos() );
-    },
-
-    repositionPreview : function() {
-        var preview_margin = cc.p( 10, 10 );
-
-        this._rt.x = cc.winSize.width - this._rtSize.width/2 - preview_margin.x;
-        this._rt.y = this._rtSize.height/2 +  preview_margin.y;
-    },
-
-    setPreviewSprite : function( event ) {
-        cc.log("*** onEvent **** setSprite ", event );
-        var userData = event.getUserData();
-        var resName  = userData.name;
-        var resType  = userData.resType;
-
-        var resNode, validCheck = true;
-
-        switch ( resType ) {
-            case Genie.ResType.SPRITE:
-                var spriteFrame = cc.spriteFrameCache.getSpriteFrame( resName );
-                spriteFrame && this._spr.setSpriteFrame( spriteFrame );
-                validCheck = !!spriteFrame;
-                break;
-            case Genie.ResType.TEXTURE:
-                var tex = cc.textureCache.getTextureForKey( 'image/' + resName);
-                tex && this._spr.initWithTexture( tex )
-                validCheck = !!tex;
-                break;
-            default:
-                validCheck = false;
-                break;
-        }
-
-        // var sprName = userData.name;
-        // var spriteFrame = cc.spriteFrameCache.getSpriteFrame( sprName );
-        if( validCheck ) {
-            this._rt.beginWithClear( 40, 40, 40 );
-            this._adjustSpriteSize();
-            this._spr.visit();
-            this._rt.end();
-        }
-    },
-
-    _adjustSpriteSize : function(  ) {
-        var w = this._spr.getContentSize().width,
-            h = this._spr.getContentSize().height;
-
-        var rate_w = parseFloat(cc.winSize.width / w).toFixed(2),
-            rate_h = parseFloat(cc.winSize.height / h).toFixed(2);
-
-        var loc_scale = Math.min( rate_w, rate_h );
-        this._spr.setScale( loc_scale * 0.8 );
+        this.previewNode = new Genie.PreviewNode();
+        this.addChild( this.previewNode );
     },
 
     setTargetNode : function( event ) {
