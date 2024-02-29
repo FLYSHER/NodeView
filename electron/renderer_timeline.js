@@ -146,7 +146,7 @@ var Renderer_timeline = {
             return;
         }
 
-        this.mov_totalFrame = move_data['dr'];
+        this.mov_totalFrame = move_data['dr']-1;
         this.mov_scale      = move_data['sc'];
 
         var mov_bone_data = move_data['mov_bone_data'];
@@ -243,6 +243,7 @@ var Renderer_timeline = {
                     if( this.timeline.getTime() >= this.mov_totalFrame * this.msPerFrame ) {
                         this.pauseTrack();
                     }
+
                 }
             }
         }.bind(this), playStep )
