@@ -7,9 +7,7 @@
     "start": "electron .",
     "dev": "nodemon --exec electron  .",
     "deploy:win": "electron-builder --windows nsis:ia32",
-    "deploy:mac": "electron-builder --mac",
-    "deploy:test": "echo this this deploy:test",
-    "deploytest": "echo this this deploy:test2"
+    "deploy:mac": "electron-builder --mac"
   },
   "repository": "https://github.com/flysher/NodeView",
   "keywords": [
