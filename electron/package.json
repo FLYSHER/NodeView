@@ -35,7 +35,7 @@
     "appId": "net.flysher.nodeview",
     "publish": {
       "provider" : "github",
-      "owner": "ybj80@flysher.net",
+      "owner": "ybj80",
       "token": "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",
       "repo": "https://github.com/flysher/NodeView"
     },
