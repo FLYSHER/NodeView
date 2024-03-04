@@ -37,7 +37,7 @@
     "productName": "NodeView",
     "appId": "net.flysher.nodeview",
     "publish": {
-      "provider" : "github",
+      "provider" : "github"
     },
     "asar": true,
     "protocols": {
