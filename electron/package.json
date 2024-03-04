@@ -7,10 +7,13 @@
     "start": "electron .",
     "dev": "nodemon --exec electron  .",
     "deploy:win": "electron-builder --windows nsis:ia32",
-    "deploy:mac": "electron-builder --mac",
+    "deploy:mac": "electron-builder --mac --publish never",
     "deploy:mac-nosign": "electron-builder --mac --config -c.mac.identity=null"
   },
-  "repository": "https://github.com/flysher/NodeView",
+  "repository": {
+    "type" : "git",
+    "url" : "https://github.com/flysher/NodeView.git"
+  },
   "keywords": [
     "Electron",
     "quick",
@@ -35,9 +38,6 @@
     "appId": "net.flysher.nodeview",
     "publish": {
       "provider" : "github",
-      "owner": "ybj80",
-      "token": "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",
-      "repo": "NodeView"
     },
     "asar": true,
     "protocols": {
