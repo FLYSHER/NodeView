@@ -1,60 +1,70 @@
 Genie.Component.Popup = Genie.Component.InspectorBase.extend({
-    ctor : function() {
+    ctor : function () {
         this._super();
         this.setName( "Popup" );
     },
 
-    onEnter : function() {
+    onEnter : function () {
         this._super();
-        this.getOwner().setVisible( false );
+        // 화면 가운데 배치
+        var owner = this.getOwner(),
+            loc_src = cc.p( Math.round(owner.x), Math.round(owner.y)),
+            loc_dest = cc.p( Math.round(cc.view.getVisibleSize().width / 2), Math.round(cc.view.getVisibleSize().height / 2));
+
+        Genie.ToolController.execute(new Genie.Command.TransformPosition(owner, { src: loc_src, dest: loc_dest }));
+        owner.setVisible( false );
     },
 
-    showPopup : function() {
+    showPopup : function () {
+        // 기존에 있던 것 숨김
+        this.hidePopup();
+
+        // 초기화
+        this.initPopup();
+
+        // 보여주기
+        this.getOwner().setVisible( true );
+        Genie.ARUtil.playOnceAndLoop( this.ar, this.openTrack, this.loopTrack );
+
+    },
+
+    initPopup : function () {
         var owner = this.getOwner();
         var uiFileName = this.input_uiName.value;
         var arFileName = this.input_arName.value;
 
-        if( this.ar ) {
-            this.ar.removeFromParent();
-            this.ar = null;
-        }
-        this.ar = Genie.ARUtil.createAR( arFileName );
-        owner.addChild( this.ar );
-
-        if( this.uiRoot ) {
-            this.uiRoot.removeFromParent();
-            this.uiRoot = null;
+        if ( this.checkerAR ) {
+            if( this.ar ) {
+                this.ar.removeFromParent();
+                this.ar = null;
+            }
+            this.ar = Genie.ARUtil.createAR( arFileName );
+            owner.addChild( this.ar );
         }
 
-        this.uiRoot = ccs.uiReader.widgetFromJsonFile( uiFileName );
-        this.uiRoot.setAnchorPoint( 0.5, 0.5 );
-        owner.addChild( this.uiRoot );
+        if ( this.checkerUI ) {
+            if( this.uiRoot ) {
+                this.uiRoot.removeFromParent();
+                this.uiRoot = null;
+            }
 
-        var dl = 0.3;
-
-        owner.setScale(0.1);
-        owner.runAction( cc.sequence(
-            cc.show(),
-            cc.scaleTo( dl, 1.0, 1.0 ).easing( cc.easeBackInOut() )
-        ));
-
-        Genie.ARUtil.playOnceAndLoop( this.ar, this.openTrack, this.openTrack );
-
+            this.uiRoot = ccs.uiReader.widgetFromJsonFile( uiFileName );
+            this.uiRoot.setAnchorPoint( 0.5, 0.5 );
+            owner.addChild( this.uiRoot );
+        }
     },
 
-    hidePopup : function() {
+    hidePopup : function () {
         var owner = this.getOwner();
         owner.setVisible( false );
     },
 
-    checkValid : function() {
+    checkValid : function () {
         return true;
     },
 
     //override
-    drawInspector : function() {
-        var owner = this.getOwner();
-
+    drawInspector : function () {
         var rootDiv = HtmlHelper.createComponentRootDiv();
         var iconObj = {
             className : "fa-solid fa-bezier-curve",
@@ -64,8 +74,8 @@ Genie.Component.Popup = Genie.Component.InspectorBase.extend({
         rootDiv.appendChild( titleBar );
         this.rootDiv = rootDiv;
 
-        this.input_uiName = HtmlHelper.createOneLongTextInput( rootDiv, "UIFileName", "", false, this.onchange.bind(this));
-        this.input_arName = HtmlHelper.createOneLongTextInput( rootDiv, "ARFileName", "", false, this.onchange.bind(this));
+        this.input_uiName = HtmlHelper.createOneLongTextInput( rootDiv, "UIFileName", "", false, this.onchangeFile.bind(this));
+        this.input_arName = HtmlHelper.createOneLongTextInput( rootDiv, "ARFileName", "", false, this.onchangeFile.bind(this));
 
         this.input_uiName.ondrop = this.onDrop.bind(this);
         this.input_arName.ondrop = this.onDrop.bind(this);
@@ -85,9 +95,11 @@ Genie.Component.Popup = Genie.Component.InspectorBase.extend({
         this.loopTrack   = null;
         this.ar          = null;
         this.uiRoot      = null;
+        this.checkerAR   = false;
+        this.checkerUI   = false;
     },
 
-    refreshARGroup : function() {
+    refreshARGroup : function () {
         if( this.div_arGroup ) {
             this.div_arGroup.remove();
             this.div_arGroup = null;
@@ -99,47 +111,46 @@ Genie.Component.Popup = Genie.Component.InspectorBase.extend({
         var i, arrOption = [];
         for( i = 0; i < this.moveNames.length; ++i ) {
             arrOption.push( this.moveNames[i] );
+            if (this.moveNames[i] === 'loop') {
+                this.loopTrack = 'loop';
+            } else if (this.moveNames[i] === 'open') {
+                this.openTrack = 'open';
+            }
         }
 
-        this.openTrack = this.moveNames[0];
-        this.loopTrack = this.moveNames[0];
+        this.openTrack = this.openTrack ? this.openTrack : this.moveNames[0];
+        this.loopTrack = this.loopTrack ? this.loopTrack : this.moveNames[0];
 
-        this.select_openTrack = HtmlHelper.createSelectMenuAttrib( this.div_arGroup, "openTrack", this.moveNames[0], arrOption, this.onchange.bind(this) );
-        this.select_loopTrack = HtmlHelper.createSelectMenuAttrib( this.div_arGroup, "loopTrack", this.moveNames[0], arrOption, this.onchange.bind(this) );
+        this.select_openTrack = HtmlHelper.createSelectMenuAttrib( this.div_arGroup, "openTrack", this.openTrack, arrOption, this.onchangeAR.bind(this) );
+        this.select_loopTrack = HtmlHelper.createSelectMenuAttrib( this.div_arGroup, "loopTrack", this.loopTrack, arrOption, this.onchangeAR.bind(this) );
     },
 
-    refreshUIGroup : function() {
+    refreshUIGroup : function () {
+        if( this.div_uiGroup ) {
+            this.div_uiGroup.remove();
+            this.div_uiGroup = null;
+        }
+
         this.div_uiGroup =  HtmlHelper.createDiv( this.rootDiv, 'component_groupDiv' );
         HtmlHelper.createLabel( this.div_uiGroup, "UI initialize", "component_groupTitleLabel" );
     },
 
-    onchange : function ( event ) {
-        var owner = this.getOwner();
-        // var loc_src, loc_dest, loc_strProp;
-        var checkValid = true;
-        var strValue = event.target.value;
+    onchangeAR : function ( event ) {
+        var trackName = event.target.options[event.target.selectedIndex].innerHTML;
 
         switch ( event.target ) {
             case this.select_openTrack:
-                this.openTrack = strValue;
+                this.openTrack = trackName;
                 break;
             case this.select_loopTrack:
-                this.loopTrack = strValue;
+                this.loopTrack = trackName;
                 break;
             default:
-                checkValid = false;
                 break;
         }
-
-        // if( checkValid ) {
-        //     cc.log("UIImageView Component onchange : ", loc_src, loc_dest );
-        //     Genie.ToolController.execute( new Genie.Command.UIImageView( owner, {
-        //         strProp : loc_strProp,
-        //         src     : loc_src,
-        //         dest    : loc_dest
-        //     } ) );
-        // }
     },
+
+    onchangeFile : function ( event ) {},
 
     onclick : function( event ) {
         switch ( event.target ) {
@@ -152,16 +163,15 @@ Genie.Component.Popup = Genie.Component.InspectorBase.extend({
         }
     },
 
-    onDrop : function( event ) {
-        var owner       = this.getOwner();
+    onDrop : function ( event ) {
         var fileType;
-        var assetName   = event.dataTransfer.getData( "assetName" );
-        var checkValid  = true;
+        var assetName = event.dataTransfer.getData( "assetName" );
 
         switch ( event.target ) {
             case this.input_uiName:
                 fileType = Genie.Utils.getFileTypeFromExportJson( assetName );
                 if( fileType === Genie.ToolFileType.UIFile ) {
+                    this.checkerUI = this.input_uiName.value !== assetName;
                     this.input_uiName.value = assetName;
                     this.refreshUIGroup();
                 }
@@ -169,36 +179,15 @@ Genie.Component.Popup = Genie.Component.InspectorBase.extend({
             case this.input_arName:
                 fileType = Genie.Utils.getFileTypeFromExportJson( assetName );
                 if( fileType === Genie.ToolFileType.ARMATURE ) {
+                    this.checkerAR = this.input_arName.value !== assetName;
                     this.input_arName.value = assetName;
                     this.moveNames = Genie.Utils.getMovNamesFromExportJson( assetName );
                     this.refreshARGroup();
-                }
-                else {
-                    checkValid = false;
                 }
                 break;
             default:
                 break;
         }
-
         event.preventDefault();
     },
-
-    // setInspectorValue : function( paramObj ) {
-    //     var strProp = paramObj.args.strProp;
-    //     var value   = paramObj.value;
-    //
-    //     switch ( strProp ) {
-    //         case 'ignoreSize':
-    //             this.cb_ignoreSize.checked = value;
-    //             this.refreshAttribute();
-    //             break;
-    //         case 'texFileName':
-    //             this.input_texFileName.value = value;
-    //             this.refreshAttribute();
-    //             break;
-    //
-    //     }
-    //
-    // },
 });
