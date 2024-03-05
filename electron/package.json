@@ -6,7 +6,7 @@
   "scripts": {
     "start": "electron .",
     "dev": "nodemon --exec electron  .",
-    "deploy:win": "electron-builder --windows nsis:ia32",
+    "deploy:win": "electron-builder --windows nsis:ia32 --publish never",
     "deploy:mac": "electron-builder --mac --publish never",
     "deploy:mac-nosign": "electron-builder --mac --config -c.mac.identity=null"
   },
