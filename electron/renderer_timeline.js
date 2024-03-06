@@ -56,7 +56,7 @@ var Renderer_timeline = {
 
     // 유저가 수동으로 타임라인 변경할 경우
     onTimelineChangedByUser : function( event ) {
-        var targetNode = Genie.ToolController.getCurrentNode();
+        var targetNode = Genie.ToolController.getSelectNode(); // Genie.CommandManager.getCurrentNode();
         if( !!targetNode ) {
             var arComponent = targetNode.getComponent( Genie.ComponentName.ARMATURE_VIEW );
             if( arComponent ) {

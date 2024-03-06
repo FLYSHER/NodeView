@@ -62,7 +62,7 @@ Genie.Component.NodeProperty = Genie.Component.InspectorBase.extend({
                 checkValid || (this.input_name.value = owner.getName());
 
                 if( checkValid ) {
-                    Genie.ToolController.execute( new Genie.Command.NodeName( owner, {
+                    Genie.CommandManager.execute( new Genie.Command.NodeName( owner, {
                         src     : owner.getName(),
                         dest    : strValue
                     }) );
@@ -79,7 +79,7 @@ Genie.Component.NodeProperty = Genie.Component.InspectorBase.extend({
                     loc_src     = owner.getAnchorPoint();
                     loc_dest    = event.target === this.input_anchor.x ?  cc.p( value, owner.anchorY ) : cc.p( owner.anchorX, value );
 
-                    Genie.ToolController.execute( new Genie.Command.AnchorPoint( owner, {
+                    Genie.CommandManager.execute( new Genie.Command.AnchorPoint( owner, {
                         src     : loc_src,
                         dest    : loc_dest
                     }) );
@@ -96,7 +96,7 @@ Genie.Component.NodeProperty = Genie.Component.InspectorBase.extend({
                     loc_src     = cc.size( Math.round(owner.width), Math.round(owner.height) );
                     loc_dest    = event.target === this.input_size.width ?  cc.size( value, Math.round(owner.height) ) : cc.size( Math.round(owner.width), value );
 
-                    Genie.ToolController.execute( new Genie.Command.ContentSize( owner, {
+                    Genie.CommandManager.execute( new Genie.Command.ContentSize( owner, {
                         src     : loc_src,
                         dest    : loc_dest
                     }) );
@@ -107,7 +107,7 @@ Genie.Component.NodeProperty = Genie.Component.InspectorBase.extend({
                 value       = parseInt( strValue );
                 checkValid  = checkValid && ( cc.isNumber( value ) );
                 if( checkValid ) {
-                    Genie.ToolController.execute( new Genie.Command.LocalZOrder( owner, {
+                    Genie.CommandManager.execute( new Genie.Command.LocalZOrder( owner, {
                         src     : owner.getLocalZOrder(),
                         dest    : value
                     }) );
@@ -115,7 +115,7 @@ Genie.Component.NodeProperty = Genie.Component.InspectorBase.extend({
 
                 break;
             case this.cb_cascadeOpacity:
-                Genie.ToolController.execute( new Genie.Command.CascadeOpacity( owner, {
+                Genie.CommandManager.execute( new Genie.Command.CascadeOpacity( owner, {
                     src     : owner.isCascadeOpacityEnabled(),
                     dest    : event.target.checked
                 }) );
@@ -126,14 +126,14 @@ Genie.Component.NodeProperty = Genie.Component.InspectorBase.extend({
                 checkValid  = checkValid && ( cc.isNumber( value ) );
                 checkValid  = checkValid && ( value >= 0 );
                 if( checkValid ) {
-                    Genie.ToolController.execute( new Genie.Command.Opacity( owner, {
+                    Genie.CommandManager.execute( new Genie.Command.Opacity( owner, {
                         src     : owner.getOpacity(),
                         dest    : value
                     }) );
                 }
                 break;
             case this.cb_visible:
-                Genie.ToolController.execute( new Genie.Command.NodeVisible( owner, {
+                Genie.CommandManager.execute( new Genie.Command.NodeVisible( owner, {
                     src     : owner.isVisible(),
                     dest    : event.target.checked
                 }) );

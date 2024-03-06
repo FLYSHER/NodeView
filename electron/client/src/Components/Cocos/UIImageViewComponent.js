@@ -108,7 +108,7 @@ Genie.Component.UIImageView = Genie.Component.InspectorBase.extend({
         var owner = this.getOwner();
         switch ( event.target ) {
             case this.cb_ignoreSize:
-                Genie.ToolController.execute( new Genie.Command.UIImageIgnoreSize( owner, {
+                Genie.CommandManager.execute( new Genie.Command.UIImageIgnoreSize( owner, {
                     src     : owner.isIgnoreContentAdaptWithSize(),
                     dest    : event.target.checked
                 }));
@@ -132,7 +132,7 @@ Genie.Component.UIImageView = Genie.Component.InspectorBase.extend({
             loc_dest    = sprName;
         cc.log("UIImageView Component ondrop : ", loc_src, loc_dest );
 
-        Genie.ToolController.execute( new Genie.Command.UIImageTexName( owner, {
+        Genie.CommandManager.execute( new Genie.Command.UIImageTexName( owner, {
             strProp : loc_strProp,
             src     : loc_src,
             dest    : loc_dest

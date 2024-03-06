@@ -8,3 +8,9 @@ Genie.ComponentName = {
     UI_TEXT_VIEW    : 'component.uiTextView',
     ARMATURE_VIEW   : 'component.armatureView'
 }
+
+Genie.NodeTag = {
+    GIZMO : 1000,
+}
+
+Genie.GIZMO_ORDER = 9999;

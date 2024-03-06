@@ -61,7 +61,7 @@ Genie.Component.UITextView = Genie.Component.InspectorBase.extend({
             case this.input_fontSize:
                 value = parseInt( strValue );
                 if( cc.isNumber( value ) ) {
-                    Genie.ToolController.execute( new Genie.Command.UITextFontSize( owner, {
+                    Genie.CommandManager.execute( new Genie.Command.UITextFontSize( owner, {
                         src     : owner.getFontSize(),
                         dest    : value
                     }));
@@ -69,7 +69,7 @@ Genie.Component.UITextView = Genie.Component.InspectorBase.extend({
                 break;
 
             case this.input_text:
-                Genie.ToolController.execute( new Genie.Command.UITextFontString( owner, {
+                Genie.CommandManager.execute( new Genie.Command.UITextFontString( owner, {
                     src     : owner.getString(),
                     dest    : strValue
                 } ) );
@@ -82,7 +82,7 @@ Genie.Component.UITextView = Genie.Component.InspectorBase.extend({
                 var temp = strValue.slice( 1 );
                 value = cc.color( temp );
 
-                Genie.ToolController.execute( new Genie.Command.UITextFontColor( owner, {
+                Genie.CommandManager.execute( new Genie.Command.UITextFontColor( owner, {
                     src     : color,
                     dest    : value
                 } ) );
@@ -106,7 +106,7 @@ Genie.Component.UITextView = Genie.Component.InspectorBase.extend({
                 var strHex = this.input_shadowColor.value;
                 var color  = cc.color( strHex.slice( 1 ) );
 
-                Genie.ToolController.execute( new Genie.Command.UITextShadow( owner, {
+                Genie.CommandManager.execute( new Genie.Command.UITextShadow( owner, {
                     src     : {
                         enabled : !value,
                         offset  : this.prevShadowParams.offset,
@@ -145,7 +145,7 @@ Genie.Component.UITextView = Genie.Component.InspectorBase.extend({
                 var strHex = this.input_outlineColor.value;
                 var color  = cc.color( strHex.slice( 1 ) );
 
-                Genie.ToolController.execute( new Genie.Command.UITextOutline( owner, {
+                Genie.CommandManager.execute( new Genie.Command.UITextOutline( owner, {
                     src     : {
                         enabled : !value,
                         size    : this.prevOutlineParams.size, // number

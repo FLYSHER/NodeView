@@ -133,7 +133,7 @@ Genie.Component.Popup = Genie.Component.InspectorBase.extend({
 
         // if( checkValid ) {
         //     cc.log("UIImageView Component onchange : ", loc_src, loc_dest );
-        //     Genie.ToolController.execute( new Genie.Command.UIImageView( owner, {
+        //     Genie.CommandManager.execute( new Genie.Command.UIImageView( owner, {
         //         strProp : loc_strProp,
         //         src     : loc_src,
         //         dest    : loc_dest

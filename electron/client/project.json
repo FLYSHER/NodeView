@@ -49,12 +49,15 @@
         "src/Command/UILabelBMFontCommand.js",
         "src/Command/UIImageViewCommand.js",
         "src/Command/NodePropertyCommand.js",
-        "src/Command/ToolController.js",
+        "src/Command/CommandManager.js",
 
         "src/ToolLayer/MainScene.js",
         "src/ToolLayer/MainViewLayer.js",
-        "src/ToolLayer/GizmoNode.js",
-        "src/ToolLayer/PreviewNode.js",
-        "src/ToolLayer/GizmoLayer.js"
+        "src/Genie/HierarchyProtectNode.js",
+        "src/Genie/ToolController.js",
+        "src/Genie/Gizmo/GizmoController.js",
+        "src/Genie/Gizmo/GizmoNode.js",
+        "src/Genie/Gizmo/GizmoLayer.js",
+        "src/ToolLayer/PreviewNode.js"
     ]
 }

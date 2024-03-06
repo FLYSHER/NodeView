@@ -27,7 +27,7 @@ Genie.Component.UILabelBMFontView = Genie.Component.InspectorBase.extend({
 
         switch ( event.target ) {
             case  this.input_text:
-                Genie.ToolController.execute( new Genie.Command.UILabelBMFontText( owner, {
+                Genie.CommandManager.execute( new Genie.Command.UILabelBMFontText( owner, {
                     src     : owner.getString(),
                     dest    : strValue
                 } ) );

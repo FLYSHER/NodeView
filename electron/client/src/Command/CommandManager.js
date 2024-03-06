@@ -1,4 +1,4 @@
-Genie.ToolController = {
+Genie.CommandManager = {
     commands        : [],
     _currentIndex   : -1,
 
@@ -54,11 +54,5 @@ Genie.ToolController = {
             command.redo();
             cc.log( "[command] redo : ", this._currentIndex, command.getCommandName() + " > " + JSON.stringify( command.getArgsObj() ) );
         }
-
-
-    },
-
-    getCurrentNode : function() {
-        return Genie.gizmoLayer.getTargetNode();
     },
 };

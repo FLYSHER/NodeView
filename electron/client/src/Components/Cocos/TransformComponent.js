@@ -60,7 +60,7 @@ Genie.Component.Transform = Genie.Component.InspectorBase.extend({
         // case 'rotationZ': {
         //     loc_src = this.getOwner().getRotation();
         //     loc_dest= value;
-        //     Genie.ToolController.execute( new Genie.Command.Rotation( this.getOwner(), {
+        //     Genie.CommandManager.execute( new Genie.Command.Rotation( this.getOwner(), {
         //             src  : loc_src,
         //             dest : loc_dest
         //         }
@@ -77,7 +77,7 @@ Genie.Component.Transform = Genie.Component.InspectorBase.extend({
             }
         );
 
-        Genie.ToolController.execute( command );
+        Genie.CommandManager.execute( command );
     },
 
     onchange_scaleValue : function( src, dest ) {
@@ -87,7 +87,7 @@ Genie.Component.Transform = Genie.Component.InspectorBase.extend({
             }
         );
 
-        Genie.ToolController.execute( command );
+        Genie.CommandManager.execute( command );
     },
 
     refreshPositionValue : function( value ) {

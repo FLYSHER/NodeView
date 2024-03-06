@@ -184,6 +184,7 @@ var Renderer_hierarchy = {
             if( realNode ) {
                 cc.eventManager.dispatchCustomEvent( "onChangeNodeInHierarchy", { node : realNode } );
                 cc.eventManager.dispatchCustomEvent( "refreshInspector", { node : realNode });
+                cc.eventManager.dispatchCustomEvent( EVT.TOOL.SELECT_NODE, { targetNode : realNode } );
                 this.curTargetNode = realNode;
             }
             else {

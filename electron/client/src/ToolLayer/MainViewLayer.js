@@ -1,7 +1,6 @@
 var MainViewLayer = cc.LayerColor.extend({
     ctor: function () {
-        // this._super();
-        this._super( cc.color( 0, 255, 0, 50 ));
+        this._super( cc.color( 50, 50, 50, 50 ));
         this.setName("mainLayer");
 
         var size = cc.winSize;
@@ -10,7 +9,6 @@ var MainViewLayer = cc.LayerColor.extend({
 
         this.onResize();
         ScreenUtil.addResizeListener( this.onResize, this );
-
         return true;
     },
 
@@ -21,12 +19,20 @@ var MainViewLayer = cc.LayerColor.extend({
         cc.eventManager.addCustomListener( EVT.MAIN_VIEW.CREATE_AR_NODE, this.onCreateARFile.bind(this) );
         cc.eventManager.addCustomListener("onChangeProperty", this.setNodeProperty.bind(this) );
         cc.eventManager.addCustomListener("onChangeNodeInHierarchy", this.setCurrNode.bind(this));
+        cc.eventManager.addCustomListener( EVT.TOOL.SELECT_NODE, this.onSelectNode.bind(this));
 
         cc.eventManager.addCustomListener("command.transform", function( event ){
             var userData = event.getUserData();
             var targetNode = userData.targetNode;
             cc.log("mainView-tr : ",targetNode === this.currNode );
         });
+    },
+
+    // Hierarchy View 로부터 노드 선택 변경 시
+    onSelectNode : function( event ) {
+        var userData    = event.getUserData();
+        var targetNode  = userData.targetNode;
+        Genie.ToolController.addSelectNode( targetNode );
     },
 
     onCreateUIFile : function( event ) {

@@ -275,7 +275,7 @@ Genie.Component.Touch = Genie.Component.Base.extend({
             // cc.log("RockN.Component.Touch MouseEvent Listener Created : "+ targetNode.getName());
             this._mouseListener =   cc.EventListener.create({
                 event: cc.EventListener.MOUSE,
-                swallowTouches: false,
+                swallowTouches: true,
                 // hitSuccess: false,
                 // overState: false,
                 lastMoveState : false,
