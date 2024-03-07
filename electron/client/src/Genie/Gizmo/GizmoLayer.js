@@ -54,7 +54,7 @@ Genie.GizmoLayer = cc.LayerColor.extend({
                     // 드레그로 인한 위치 변경은 커맨드 사용하지 않는다.
 
                     // mainView 값 변경
-                    Genie.GizmoController.followTargetNode( selectNode );
+                    Genie.GizmoController.updateGizmoByTarget( selectNode );
                     selectNode.setPosition( localPos );
 
                     // insperctor 값 변경

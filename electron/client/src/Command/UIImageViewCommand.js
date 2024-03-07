@@ -7,8 +7,7 @@ Genie.Command.UIImageIgnoreSize = Genie.Command.Base.extend({
     // override
     setCommandOnMainView : function( value ) {
         this._targetNode.ignoreContentAdaptWithSize( value );
-        // Genie.gizmoNode.refreshContentSize( this._targetNode );
-        // Genie.gizmoNode.followTarget( this._targetNode );
+        Genie.GizmoController.updateGizmoByTarget( this._targetNode );
     },
 
     // override

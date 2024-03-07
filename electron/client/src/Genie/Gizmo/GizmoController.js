@@ -21,9 +21,12 @@ Genie.GizmoController = {
         return null;
     },
 
-    followTargetNode : function( node ) {
+    updateGizmoByTarget : function( node ) {
         var gizmo = this.getGizmoByTargetNode( node );
-        gizmo && gizmo.refreshPosition();
+        if( gizmo ) {
+            gizmo.refreshPosition();
+            gizmo.refreshBoundingBox();
+        }
     },
 
     attachGizmo : function( node ) {

@@ -7,7 +7,7 @@ Genie.Command.TransformPosition = Genie.Command.Base.extend({
     // override
     setCommandOnMainView : function( value ) {
         this._targetNode.setPosition( value );
-        // Genie.gizmoNode.followTarget( this._targetNode );
+        Genie.GizmoController.updateGizmoByTarget( this._targetNode );
     },
 
     // override
@@ -36,7 +36,7 @@ Genie.Command.TransformScale = Genie.Command.Base.extend({
     // main view 에 command 처리
     setCommandOnMainView : function( value ) {
         this._targetNode.setScale( value.x, value.y );
-        // Genie.gizmoNode.followTarget( this._targetNode );
+        Genie.GizmoController.updateGizmoByTarget( this._targetNode );
     },
 
     // 인스펙터 에 command 처리

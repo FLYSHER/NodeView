@@ -37,7 +37,7 @@ Genie.Command.AnchorPoint = Genie.Command.Base.extend({
     // override
     setCommandOnMainView : function( value ) {
         this._targetNode.setAnchorPoint( value );
-        // Genie.gizmoNode.followTarget( this._targetNode );
+        Genie.GizmoController.updateGizmoByTarget( this._targetNode );
     },
 
     // override
@@ -56,8 +56,7 @@ Genie.Command.ContentSize = Genie.Command.Base.extend({
     // override
     setCommandOnMainView : function( value ) {
         this._targetNode.setContentSize( value );
-        // Genie.gizmoNode.refreshContentSize( this._targetNode );
-        // Genie.gizmoNode.followTarget( this._targetNode );
+        Genie.GizmoController.updateGizmoByTarget( this._targetNode );
     },
 
     // override

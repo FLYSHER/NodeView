@@ -42,11 +42,11 @@ var Renderer_main = {
         ipcRenderer.on('fileDropEventReply', this.onFileDropReply.bind(this) );
 
         ipcRenderer.on('undo', function(){
-            Genie.ToolController.undo();
+            Genie.CommandManager.undo();
         });
 
         ipcRenderer.on( 'redo', function(){
-            Genie.ToolController.redo();
+            Genie.CommandManager.redo();
         })
     },
 

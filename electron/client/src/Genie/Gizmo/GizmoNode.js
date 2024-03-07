@@ -119,7 +119,6 @@ Genie.GizmoNode = Genie.HierarchyProtectNode.extend({
 
         var trans = this.getParentToNodeTransform();
         bb = cc.rectApplyAffineTransform(bb, trans);
-        cc.log("[check] bb  > ", bb );
 
         var origin  = cc.p( bb.x, bb.y ),
             dest    = cc.p( bb.x + bb.width, bb.y + bb.height );
@@ -152,7 +151,7 @@ Genie.GizmoNode = Genie.HierarchyProtectNode.extend({
 
                     // 드레그로 인한 위치 변경은 커맨드 사용하지 않는다.
                     // mainView 값 변경
-                    Genie.GizmoController.followTargetNode( selectNode );
+                    Genie.GizmoController.updateGizmoByTarget( selectNode );
                     selectNode.setPosition( localPos );
 
                     // insperctor 값 변경
@@ -212,152 +211,28 @@ Genie.GizmoNode = Genie.HierarchyProtectNode.extend({
         this.setPosition( localPos );
     },
 
-    // initTouchListener : function() {
-    //
-    //     var self = this;
-    //     cc.eventManager.addListener({
-    //         event: cc.EventListener.MOUSE,
-    //         onMouseDown : function( event ) {
-    //             var pt      = event.getLocation();
-    //             var target  = event.getCurrentTarget();
-    //             var rect    = target.getBoundingBox();
-    //             var worldTM = target.getNodeToWorldTransform();
-    //             var worldRect = cc.rectApplyAffineTransform( rect, worldTM );
-    //             var result  = cc.rectContainsPoint( worldRect, pt );
-    //             result && self.setDrag( true );
-    //             if( result ) {
-    //                 self.setDrag( true );
-    //                 self._dragBeginWorldPt = pt;
-    //                 self.setDragBeginTargetWorldPos();
-    //                 event.stopPropagation();
-    //             }
-    //             return result;
-    //         },
-    //         onMouseMove: function( event ) {
-    //             if( self.isDrag() && self._currTargetNode ) {
-    //                 var diffPos  = self.getDiffPt();
-    //                 var pt2      = cc.pSub( event.getLocation(), diffPos );
-    //                 var localPos = self._currTargetNode.getParent().convertToNodeSpace( pt2 );
-    //
-    //                 // mainView 값 변경
-    //                 self._currTargetNode.setPosition( localPos );
-    //                 self.followTarget( self._currTargetNode );
-    //
-    //                 // inspector 값 변경
-    //                 var transComp = self._currTargetNode.getComponent( Genie.ComponentName.TRANSFORM );
-    //                 transComp && transComp.refreshPositionValue( localPos );
-    //             }
-    //         },
-    //         onMouseUp: function( event ) {
-    //             if( self.isDrag() && self._currTargetNode ) {
-    //                 self.setDrag( false );
-    //
-    //                 var pt          = event.getLocation();
-    //                 var diffPos     = self.getDiffPt();
-    //                 var pt2         = cc.pSub( pt, diffPos );
-    //
-    //                 var srcLocalPos     = self._currTargetNode.getParent().convertToNodeSpace( self.getDragBeginTargetWorldPos() );
-    //                 var destLocalPos    = self._currTargetNode.getParent().convertToNodeSpace( pt2 );
-    //
-    //                 var src     = cc.p( Math.round( srcLocalPos.x ), Math.round( srcLocalPos.y ) );
-    //                 var dest    = cc.p( Math.round( destLocalPos.x ), Math.round( destLocalPos.y ) );
-    //
-    //                 var moveDelta = cc.pDistance( srcLocalPos, self._currTargetNode.getPosition() );
-    //                 if( moveDelta > 1.0 ) {
-    //                     Genie.CommandManager.execute( new Genie.Command.TransformPosition( self._currTargetNode, {
-    //                         src     : src,
-    //                         dest    : dest
-    //                     } ) );
-    //                 }
-    //             }
-    //         },
-    //
-    //     }, this._drawNode );
-    // },
-
-    refreshContentSize : function( node ) {
-        this._drawCSizeNode.clear();
-
-        var c_size  = node.getContentSize();
-        var apps    = node.getAnchorPointInPoints();
-
-        var origin  = cc.p( 0, 0 );
-        var dest    = cc.p( c_size.width, c_size.height );
-
-        origin  = cc.pSub( origin, apps );
-        dest    = cc.pSub( dest, apps );
-
-        if( node.isIgnoreAnchorPointForPosition() ) {
-            origin = cc.pAdd( origin, apps );
-            dest = cc.pAdd( dest, apps );
-        }
-
-        this._drawCSizeNode.drawRect( origin, dest, cc.color( 0, 0, 0, 0), 2, cc.color( 200, 200,0, 200 ) );
+    refreshBoundingBox : function() {
+        this._drawBoundingBox();
     },
 
-    // setTargetNode : function( node ) {
-    //     if( this._currTargetNode === node ) {
-    //         cc.log("GizmoNode.setTargetNode > same node!" );
-    //         return;
+    // refreshContentSize : function( node ) {
+    //     this._drawCSizeNode.clear();
+    //
+    //     var c_size  = node.getContentSize();
+    //     var apps    = node.getAnchorPointInPoints();
+    //
+    //     var origin  = cc.p( 0, 0 );
+    //     var dest    = cc.p( c_size.width, c_size.height );
+    //
+    //     origin  = cc.pSub( origin, apps );
+    //     dest    = cc.pSub( dest, apps );
+    //
+    //     if( node.isIgnoreAnchorPointForPosition() ) {
+    //         origin = cc.pAdd( origin, apps );
+    //         dest = cc.pAdd( dest, apps );
     //     }
     //
-    //     var worldPos;
-    //     if( node instanceof ccui.Widget ) {
-    //         worldPos = node.getWorldPosition();
-    //     }
-    //     else {
-    //         var parent = node.getParent();
-    //         parent = !!parent ? parent : node;
-    //         worldPos = parent.convertToWorldSpace( node.getPosition() );
-    //     }
-    //
-    //     this.setPosition( worldPos );
-    //     this.refreshContentSize( node );
-    //
-    //     this._currTargetNode = node;
-    // },
-
-    // setDrag : function( drag ) {
-    //     this._isDrag = drag;
-    // },
-    //
-    // isDrag : function() {
-    //     return this._isDrag;
-    // },
-    //
-    // getDragBeginWorldPt : function() {
-    //     return this._dragBeginWorldPt;
-    // },
-    //
-    // setDragBeginTargetWorldPos : function() {
-    //     var worldPos,
-    //         targetNode = this._currTargetNode;
-    //
-    //     if( targetNode ) {
-    //         if( targetNode instanceof ccui.Widget ) {
-    //             worldPos = targetNode.getWorldPosition();
-    //         }
-    //         else {
-    //             var parent = targetNode.getParent();
-    //             parent = !!parent ? parent : targetNode;
-    //             worldPos = parent.convertToWorldSpace( targetNode.getPosition() );
-    //         }
-    //
-    //         this._dragBeginTargetWorldPos = worldPos;
-    //     }
-    // },
-    //
-    // getDragBeginTargetWorldPos : function() {
-    //     return this._dragBeginTargetWorldPos;
-    // },
-    //
-    // getDiffPt : function() {
-    //     return cc.pSub( this._dragBeginWorldPt, this._dragBeginTargetWorldPos );
-    // },
-    //
-    // followTarget : function( targetNode ) {
-    //     var worldPos = Genie.Utils.getNodeWorldPosition( targetNode );
-    //     this.setPosition( worldPos );
+    //     this._drawCSizeNode.drawRect( origin, dest, cc.color( 0, 0, 0, 0), 2, cc.color( 200, 200,0, 200 ) );
     // },
 
 });
