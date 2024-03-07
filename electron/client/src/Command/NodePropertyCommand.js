@@ -93,6 +93,7 @@ Genie.Command.NodeVisible = Genie.Command.Base.extend({
     // override
     setCommandOnMainView : function( value ) {
         this._targetNode.setVisible( value );
+        Genie.GizmoController.updateGizmoByTarget( this._targetNode );
     },
 
     // override

@@ -44,7 +44,7 @@ Genie.GizmoNode = Genie.HierarchyProtectNode.extend({
     },
 
     onExit : function() {
-        this.targetNode     = null;
+        this.targetNode = null;
         this._super();
     },
 
@@ -130,8 +130,9 @@ Genie.GizmoNode = Genie.HierarchyProtectNode.extend({
         this.rectDrawNode.setContentSize( this.rectOptions.size );
         var touchComp = new Genie.Component.Touch();
         touchComp.onTriggerEvent = this.onMouseEvent.bind( this );
-
         this.rectDrawNode.addComponent( touchComp );
+
+        this.touchComp = touchComp;
     },
 
     onMouseEvent : function( eventName, pt ) {
@@ -139,7 +140,7 @@ Genie.GizmoNode = Genie.HierarchyProtectNode.extend({
         switch ( eventName ) {
             case 'down':
                 cc.log("gizmoNode.down");
-                Genie.GizmoController.setDragStart( pt,  Genie.Utils.getNodeWorldPosition(this.targetNode));
+                Genie.GizmoController.setDragStart( pt, Genie.Utils.getNodeWorldPosition(this.targetNode) );
                 break;
             case 'move':
                 if( Genie.GizmoController.isDragGizmoCtrlRect() === true ) {
@@ -192,12 +193,20 @@ Genie.GizmoNode = Genie.HierarchyProtectNode.extend({
         }
 
         this.targetNode = node;
-        this.refreshPosition();
-        this.drawGizmo();
+        this.refreshGizmo();
     },
 
     getTargetNode : function() {
         return this.targetNode;
+    },
+
+    refreshGizmo : function() {
+        var visible = this.targetNode.isVisible();
+        visible = visible && Genie.Utils.isAncestorVisible( this.targetNode );
+        this.setVisible( visible );
+
+        this.refreshPosition();
+        this.drawGizmo();
     },
 
     refreshPosition : function() {
@@ -210,29 +219,5 @@ Genie.GizmoNode = Genie.HierarchyProtectNode.extend({
         var localPos = parent.convertToNodeSpace( worldPos );
         this.setPosition( localPos );
     },
-
-    refreshBoundingBox : function() {
-        this._drawBoundingBox();
-    },
-
-    // refreshContentSize : function( node ) {
-    //     this._drawCSizeNode.clear();
-    //
-    //     var c_size  = node.getContentSize();
-    //     var apps    = node.getAnchorPointInPoints();
-    //
-    //     var origin  = cc.p( 0, 0 );
-    //     var dest    = cc.p( c_size.width, c_size.height );
-    //
-    //     origin  = cc.pSub( origin, apps );
-    //     dest    = cc.pSub( dest, apps );
-    //
-    //     if( node.isIgnoreAnchorPointForPosition() ) {
-    //         origin = cc.pAdd( origin, apps );
-    //         dest = cc.pAdd( dest, apps );
-    //     }
-    //
-    //     this._drawCSizeNode.drawRect( origin, dest, cc.color( 0, 0, 0, 0), 2, cc.color( 200, 200,0, 200 ) );
-    // },
 
 });

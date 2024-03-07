@@ -24,8 +24,7 @@ Genie.GizmoController = {
     updateGizmoByTarget : function( node ) {
         var gizmo = this.getGizmoByTargetNode( node );
         if( gizmo ) {
-            gizmo.refreshPosition();
-            gizmo.refreshBoundingBox();
+            gizmo.refreshGizmo();
         }
     },
 

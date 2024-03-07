@@ -106,4 +106,20 @@ Genie.Utils = {
 
         return moveNames;
     },
+
+    isAncestorVisible : function( node ){
+        if ( !node ){
+            cc.log('isVisibleInScene  node not exist', node  );
+            return false;
+        }
+        if( node.getParent() !== null ){
+            if( node.getParent().isVisible() === true )
+                return Genie.Utils.isAncestorVisible(node.getParent());
+            else
+                return false;
+        }
+        else{
+            return node.isVisible();
+        }
+    }
 }
