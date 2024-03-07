@@ -12,5 +12,3 @@ Genie.ComponentName = {
 Genie.NodeTag = {
     GIZMO : 1000,
 }
-
-Genie.GIZMO_ORDER = 9999;

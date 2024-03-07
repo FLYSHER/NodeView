@@ -33,7 +33,7 @@ Genie.GizmoLayer = cc.LayerColor.extend({
 
     initPreviewArea : function() {
         this.previewNode = new Genie.PreviewNode();
-        this.addChild( this.previewNode );
+        this.addChild( this.previewNode, 10 );
     },
 
     onMouseEvent : function( eventName, pt ) {
@@ -54,8 +54,8 @@ Genie.GizmoLayer = cc.LayerColor.extend({
                     // 드레그로 인한 위치 변경은 커맨드 사용하지 않는다.
 
                     // mainView 값 변경
-                    Genie.GizmoController.updateGizmoByTarget( selectNode );
                     selectNode.setPosition( localPos );
+                    Genie.GizmoController.updateGizmoByTarget( selectNode );
 
                     // insperctor 값 변경
                     var transComp = selectNode.getComponent( Genie.ComponentName.TRANSFORM );
