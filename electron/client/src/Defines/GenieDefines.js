@@ -6,5 +6,7 @@ Genie.ComponentName = {
     UI_IMAGE_VIEW   : 'component.uiImageView',
     UI_BITMAP_FONT  : 'component.uiBMFontView',
     UI_TEXT_VIEW    : 'component.uiTextView',
-    ARMATURE_VIEW   : 'component.armatureView'
+    ARMATURE_VIEW   : 'component.armatureView',
+    POPUP           : 'component.popup',
+    CODE            : 'component.code',
 }

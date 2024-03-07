@@ -1,7 +1,7 @@
 Genie.Component.Popup = Genie.Component.InspectorBase.extend({
     ctor : function () {
         this._super();
-        this.setName( "Popup" );
+        this.setName( Genie.ComponentName.POPUP );
     },
 
     onEnter : function () {
@@ -80,13 +80,13 @@ Genie.Component.Popup = Genie.Component.InspectorBase.extend({
         this.input_uiName.ondrop = this.onDrop.bind(this);
         this.input_arName.ondrop = this.onDrop.bind(this);
 
-        this.btn_show = HtmlHelper.createIconButton( rootDiv, {
+        this.btn_show = HtmlHelper.createIconButtonAttrib( rootDiv, 'show popup', {
             className : 'fa-solid fa-eye',
         }, this.onclick.bind(this) );
 
-        this.btn_hide = HtmlHelper.createIconButton( rootDiv, {
+        this.btn_hide = HtmlHelper.createIconButtonAttrib( rootDiv, 'hide popup', {
             className : 'fa-solid fa-eye-slash',
-        }, this.onclick.bind(this) )
+        }, this.onclick.bind(this) );
 
 
         this.div_arGroup = null;

@@ -40,6 +40,7 @@
         "src/Components/Cocos/UILabelBMFontComponent.js",
         "src/Components/Cocos/UIButtonComponent.js",
         "src/Components/Custom/PopupComponent.js",
+        "src/Components/Custom/CodeComponent.js",
         "src/Components/Custom/ARGroupComponent.js",
         "src/Components/Custom/EmptyComponent.js",
 
