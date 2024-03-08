@@ -385,6 +385,14 @@ var HtmlHelper = {
         return HtmlHelper.createCheckbox( div, "", checked, readyonly, onchange );
     },
 
+    createIconButtonAttrib : function ( parent, propertyName, iconInfoObj, onclick) {
+        var div = HtmlHelper.createDiv( parent, 'component_lineDiv' );
+        HtmlHelper.createLabel( div, propertyName, 'component_propertyLabel' );
+        var iconBtn = HtmlHelper.createIconButton( div, iconInfoObj, onclick );
+        iconBtn.style.width = '60px';
+        return iconBtn;
+    },
+
     createColorAttrib : function( parent, propertyName, placeholder, onchange) {
         var div = HtmlHelper.createDiv( parent, 'component_lineDiv' );
         HtmlHelper.createLabel( div, propertyName, 'component_propertyLabel');
