@@ -143,6 +143,7 @@ var Renderer_hierarchy = {
                 this.deleteTreeNode( node.__instanceId );
             }
 
+            Genie.GizmoController.detachGizmoByTargetNode( targetNode );
             targetNode.removeFromParent();
 
             this.onRefreshTree();

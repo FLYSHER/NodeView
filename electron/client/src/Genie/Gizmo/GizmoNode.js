@@ -34,6 +34,7 @@ Genie.GizmoNode = Genie.HierarchyProtectNode.extend({
         this.axisDrawNode   = null;
         this.rectDrawNode   = null;
         this.bbDrawNode     = null;
+        this.contentSizeDrawNode = null;
 
         this.targetNode     = null;
     },
@@ -60,12 +61,16 @@ Genie.GizmoNode = Genie.HierarchyProtectNode.extend({
 
         this.bbDrawNode = new cc.DrawNode();
         this.rootNode.addChild( this.bbDrawNode );
+
+        this.contentSizeDrawNode = new cc.DrawNode();
+        this.rootNode.addChild( this.contentSizeDrawNode );
     },
 
     drawGizmo : function() {
         this._drawAxis();
         this._drawControlRect();
         this._drawBoundingBox();
+        this._drawContentSize(); // todo 컨텐트 사이즈와 바운딩 박스 차이를 보기 위해 그림. 나중에 별 이슈 없으면 둘중 하나를 삭제
     },
 
     _drawAxis : function() {
@@ -115,15 +120,47 @@ Genie.GizmoNode = Genie.HierarchyProtectNode.extend({
         this.bbDrawNode.clear();
 
         var loc_node = this.targetNode;
-        var bb       = loc_node.getBoundingBoxToWorld();
+        var bb, tm;
 
-        var trans = this.getParentToNodeTransform();
-        bb = cc.rectApplyAffineTransform(bb, trans);
+        if( this.targetNode instanceof ccs.Armature ) {
+            var c_size = this.targetNode.getContentSize();
+            var apps   = this.targetNode.getAnchorPoint();
+
+            bb = cc.rect( -c_size.width * apps.x, -c_size.height * apps.y, c_size.width, c_size.height );
+            tm = this.targetNode.getNodeToWorldTransform();
+            bb = cc.rectApplyAffineTransform( bb, tm );
+        }
+        else {
+            bb      = loc_node.getBoundingBoxToWorld();
+        }
+
+        tm = this.getParentToNodeTransform();
+        bb = cc.rectApplyAffineTransform(bb, tm);
 
         var origin  = cc.p( bb.x, bb.y ),
             dest    = cc.p( bb.x + bb.width, bb.y + bb.height );
 
         this.bbDrawNode.drawRect( origin, dest, this.bbOptions.fillColor, this.bbOptions.width, this.bbOptions.lineColor );
+    },
+
+    _drawContentSize : function() {
+        this.contentSizeDrawNode.clear();
+
+        var node    = this.targetNode;
+        var c_size  = node.getContentSize();
+        var apps    = node.getAnchorPointInPoints();
+
+        var origin  = cc.p( 0, 0 );
+        var dest    = cc.p( c_size.width, c_size.height );
+
+        origin  = cc.pSub( origin, apps );
+        dest    = cc.pSub( dest, apps );
+
+        if( node.isIgnoreAnchorPointForPosition() ) {
+            origin = cc.pAdd( origin, apps );
+            dest = cc.pAdd( dest, apps );
+        }
+        this.contentSizeDrawNode.drawRect( origin, dest, cc.color( 0, 0, 0, 0), 2, cc.color( 0, 200,200, 200 ) );
     },
 
     _initTouchComponent : function() {
