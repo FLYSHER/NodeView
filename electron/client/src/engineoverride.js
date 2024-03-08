@@ -10,6 +10,26 @@ cc.LabelTTF.prototype.setFontName = function( fontName ) {
     this._setUpdateTextureDirty();
 };
 
+cc.LabelTTF.prototype.setString = function (text) {
+    text = String(text);
+    if (this._originalText !== text) {
+        this._originalText = text + "";
+
+        // 텍스트 갱신이 필요한 경우에만 로직 실행
+        this._updateString();
+
+        // 렌더링 상태 갱신을 위한 호출
+        this._setUpdateTextureDirty();
+        this._renderCmd.setDirtyFlag(cc.Node._dirtyFlags.transformDirty);
+
+        setTimeout( function() {
+            if( this._fontName.indexOf( "LotusEden-Bold" ) !== -1 ) {
+                this.setFontName( "LotusEden-Bold" );
+            }
+        }.bind( this ), 1 );
+    }
+};
+
 sp._atlasLoader = {
     spAtlasFile:null,
     setAtlasFile:function(spAtlasFile){
