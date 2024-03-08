@@ -119,6 +119,7 @@ Genie.Component.Code.Builder = cc.Class.extend({
         this._uiTextures = [];
         this._uiWidgetTree = [];
         this._fntSet = new Set();
+        this._movData = [];
 
         return this;
     },
@@ -175,6 +176,7 @@ Genie.Component.Code.Builder = cc.Class.extend({
 
     _parseAR : function ( data ) {
         this._arTexturesPng = data['config_png_path'];
+        this._movData = data['animation_data'][0]['mov_data'];
     },
 
     // 선언부, 리소스 참조
@@ -195,7 +197,7 @@ Genie.Component.Code.Builder = cc.Class.extend({
         let assetSet = new Set( this._uiTexturesPng.concat(this._arTexturesPng) );
         assetSet.forEach((path) => {
             header += `${tab}${path.replace('.png', '')}_png : 'image/${path}',\n`;
-            header += `${tab}${path.replace('.png', '')}_plist : 'image/${path.replace('.png', 'plist')}',\n\n`;
+            header += `${tab}${path.replace('.png', '')}_plist : 'image/${path.replace('.png', '.plist')}',\n\n`;
         });
 
         // 폰트 추가 (fnt, png)
@@ -222,10 +224,8 @@ Genie.Component.Code.Builder = cc.Class.extend({
 
         // initProperties
         body += `${tab}_initProperties : function () {\n`;
-        if (this._uiAddr)
-            body += `${tab}${tab}this._uiRoot = null;\n`;
-        if (this._arAddr)
-            body += `${tab}${tab}this._ar = null;\n`;
+        !!this._uiAddr && (body += `${tab}${tab}this._uiRoot = null;\n`);
+        !!this._arAddr && (body += `${tab}${tab}this._ar = null;\n`);
         const scanWidgetTree = ( obj, depth ) => {
             var children = obj['children'];
             for( var i = 0; i < children.length; i++ ){
@@ -242,6 +242,40 @@ Genie.Component.Code.Builder = cc.Class.extend({
         }
         body += `${tab}},\n\n`;
 
+        // initPopup
+        body += `${tab}initPopup : function () {\n` +
+            `${tab}${tab}this._initProperties();\n`;
+        !!this._uiAddr && (body += `${tab}${tab}this._initUI();\n`);
+        !!this._arAddr && (body += `${tab}${tab}this._initAR();\n`);
+        body += `${tab}},\n\n`;
+
+        // initUI
+        if (this._uiAddr) {
+            body += `${tab}_initUI : function () {\n` +
+                `${tab}${tab}this._uiRoot = this.addUIChildOnCenter(${this._contentsName}.Res.${this._viewName}.${this._uiAddr.replace('.ExportJson', '')}, this._uiWidgets);\n` +
+                `${tab}${tab}SoundControl.getInstance().playEffect(loungeCommon.CommonPopup);\n`;
+
+            // todo init UI
+
+            body += `${tab}},\n\n`;
+        }
+
+        // initAR
+        if (this._arAddr) {
+            body += `${tab}_initAR : function () {\n` +
+                `${tab}${tab}this._ar = this.addARChildOnCenter(${this._contentsName}.Res.${this._viewName}.${this._arAddr});\n`;
+
+            body += `${tab}${tab}/** animation track\n`;
+            this._movData.forEach((data, index) => {
+                body += `${tab}${tab} * ${index + 1}. ${data.name}\n`;
+            });
+            body += `${tab}${tab} */\n`;
+            if (this._movData.find((data) => data.name === 'loop') && this._movData.find((data) => data.name === 'open')) {
+                body += `${tab}${tab}this._ar && RockN.ARUtil.playOnceAndLoop(this._ar, 'open', 'loop');\n`
+            }
+
+            body += `${tab}},\n\n`;
+        }
         body += `});\n`;
         return body;
     },
