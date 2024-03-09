@@ -24,6 +24,8 @@
         "src/Utils/GenieARUtils.js",
         "src/Utils/ScreenUtils.js",
         "src/Utils/HtmlHelper.js",
+        "src/Genie/DebugView/DebugView.js",
+        "src/Genie/DebugView/DebugViewNode.js",
 
         "src/GenieResourceLoader/GenieResourceLoader.js",
 
@@ -36,6 +38,7 @@
         "src/Components/Cocos/ArmatureComponent.js",
         "src/Components/Cocos/BoneComponent.js",
         "src/Components/Cocos/UITextComponent.js",
+        "src/Components/Cocos/UIScrollViewComponent.js",
         "src/Components/Cocos/UIImageViewComponent.js",
         "src/Components/Cocos/UILabelBMFontComponent.js",
         "src/Components/Cocos/UIButtonComponent.js",
@@ -59,5 +62,7 @@
         "src/Genie/Gizmo/GizmoNode.js",
         "src/Genie/Gizmo/GizmoLayer.js",
         "src/ToolLayer/PreviewNode.js"
+
+
     ]
 }

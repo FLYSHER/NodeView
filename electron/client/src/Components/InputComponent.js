@@ -426,3 +426,61 @@ Genie.Component.Touch = Genie.Component.Base.extend({
 
 });
 
+Genie.Component.DragNode = Genie.Component.Touch.extend({
+
+    ctor: function () {
+        this._super();
+        this.setName("RockN.Component.DragNode");
+    },
+
+    initProperties : function (){
+
+        this._super();
+        this._dragBegin = false;
+        this._posDragStart = null;
+    },
+    onDeactivate: function (){
+        this._super();
+
+    },
+    _checkOwnersEvent : function(touchEventName, pt) {
+
+        var owner = this._owner;
+        if (owner && touchEventName==="move" )
+        {
+            if (this._dragBegin && this._posDragStart!=null)
+            {
+                var ptDelta = cc.pSub( pt, this._posTouchWhenDragBegin);
+                var newWorldPos= cc.pAdd(this._posDragStart, ptDelta);
+                var pos = owner.parent.convertToNodeSpace(newWorldPos);
+                owner.setPosition(pos);
+            }
+        }
+
+        return this._super(touchEventName, pt);
+    },
+
+
+
+    onTriggerEvent : function (touchEventName, pt){
+
+        var owner = this._owner;
+
+        if (owner != null)
+        {
+            switch (touchEventName)
+            {
+                case "up": {
+                    this._dragBegin = false;
+                    this._posDragStart = null;
+                }break;
+
+                case "down": {
+                    this._dragBegin = true;
+                    this._posDragStart = owner.convertToWorldSpace(cc.p(0,0));
+                    this._posTouchWhenDragBegin = pt;
+                }break;
+            }
+        }
+    },
+});

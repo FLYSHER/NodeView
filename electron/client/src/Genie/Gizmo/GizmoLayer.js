@@ -6,13 +6,18 @@ Genie.GizmoLayer = cc.LayerColor.extend({
         this._super( cc.color( 150, 0, 0, 50 ));
 
         this.initPreviewArea();
+        this.initDebugView();
 
         this.onResize();
         ScreenUtil.addResizeListener( this.onResize, this );
     },
 
     initProperty : function() {
-
+        this.Local_Order = {
+            GIZMO : 1,
+            PREVIEW : 10,
+            DEBUG_VIEW : 20,
+        }
     },
 
     onEnter : function() {
@@ -87,6 +92,15 @@ Genie.GizmoLayer = cc.LayerColor.extend({
         }
 
         return null;
-    }
+    },
+
+    //region [debug view ]
+    initDebugView : function () {
+        var debugViw = new Genie.Test.DebugViewNode();
+        this.addChild( debugViw, this.Local_Order.DEBUG_VIEW );
+
+        debugViw.setPosition( 100, 100 );
+    },
+    //endregion
 
 });

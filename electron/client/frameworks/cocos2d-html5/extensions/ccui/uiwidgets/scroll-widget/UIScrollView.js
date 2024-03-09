@@ -114,6 +114,7 @@ ccui.ScrollView = ccui.Layout.extend(/** @lends ccui.ScrollView# */{
      * @override
      */
     onEnter: function () {
+        this.addComponent( new Genie.Component.UIScrollView() );
         ccui.Layout.prototype.onEnter.call(this);
         this.scheduleUpdate();
     },
