@@ -2,6 +2,15 @@ Genie.Component.Popup = Genie.Component.InspectorBase.extend({
     ctor : function () {
         this._super();
         this.setName( Genie.ComponentName.POPUP );
+
+        this.uiFileName = '';
+        this.arFileName = '';
+        this.div_arGroup = null;
+        this.moveNames   = null;
+        this.openTrack   = null;
+        this.loopTrack   = null;
+        this.ar          = null;
+        this.uiRoot      = null;
     },
 
     onEnter : function () {
@@ -29,9 +38,9 @@ Genie.Component.Popup = Genie.Component.InspectorBase.extend({
     },
 
     initPopup : function () {
-        var owner = this.getOwner();
-        var uiFileName = this.input_uiName.value;
-        var arFileName = this.input_arName.value;
+        const owner = this.getOwner();
+        const uiFileName = this.uiFileName;
+        const arFileName = this.arFileName;
 
         if ( this.checkerAR ) {
             if( this.ar ) {
@@ -74,8 +83,8 @@ Genie.Component.Popup = Genie.Component.InspectorBase.extend({
         rootDiv.appendChild( titleBar );
         this.rootDiv = rootDiv;
 
-        this.input_uiName = HtmlHelper.createOneLongTextInput( rootDiv, "UIFileName", "", false, this.onchangeFile.bind(this));
-        this.input_arName = HtmlHelper.createOneLongTextInput( rootDiv, "ARFileName", "", false, this.onchangeFile.bind(this));
+        this.input_uiName = HtmlHelper.createOneLongTextInput( rootDiv, "UIFileName", this.uiFileName, false, this.onchangeFile.bind(this));
+        this.input_arName = HtmlHelper.createOneLongTextInput( rootDiv, "ARFileName", this.arFileName, false, this.onchangeFile.bind(this));
 
         this.input_uiName.ondrop = this.onDrop.bind(this);
         this.input_arName.ondrop = this.onDrop.bind(this);
@@ -88,15 +97,10 @@ Genie.Component.Popup = Genie.Component.InspectorBase.extend({
             className : 'fa-solid fa-eye-slash',
         }, this.onclick.bind(this) );
 
-
-        this.div_arGroup = null;
-        this.moveNames   = null;
-        this.openTrack   = null;
-        this.loopTrack   = null;
-        this.ar          = null;
-        this.uiRoot      = null;
-        this.checkerAR   = false;
-        this.checkerUI   = false;
+        this.checkerAR   = !!this.arFileName;
+        this.checkerUI   = !!this.uiFileName;
+        this.checkerUI && this.refreshUIGroup();
+        this.checkerAR && this.refreshARGroup();
     },
 
     refreshARGroup : function () {
@@ -173,6 +177,7 @@ Genie.Component.Popup = Genie.Component.InspectorBase.extend({
                 if( fileType === Genie.ToolFileType.UIFile ) {
                     this.checkerUI = this.input_uiName.value !== assetName;
                     this.input_uiName.value = assetName;
+                    this.uiFileName = assetName;
                     this.refreshUIGroup();
                 }
                 break;
@@ -181,6 +186,7 @@ Genie.Component.Popup = Genie.Component.InspectorBase.extend({
                 if( fileType === Genie.ToolFileType.ARMATURE ) {
                     this.checkerAR = this.input_arName.value !== assetName;
                     this.input_arName.value = assetName;
+                    this.arFileName = assetName;
                     this.moveNames = Genie.Utils.getMovNamesFromExportJson( assetName );
                     this.refreshARGroup();
                 }
