@@ -24,8 +24,6 @@ function createWindow () {
   // and load the index.html of the app.
   mainWindow.loadFile('client/index.html');
 
-  // Open the DevTools.
-  mainWindow.webContents.openDevTools();
   return mainWindow;
 }
 
