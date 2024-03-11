@@ -18,6 +18,8 @@ Genie.GizmoLayer = cc.LayerColor.extend({
             PREVIEW : 10,
             DEBUG_VIEW : 20,
         }
+
+        this.debugView = null;
     },
 
     onEnter : function() {
@@ -28,6 +30,9 @@ Genie.GizmoLayer = cc.LayerColor.extend({
     onResize : function () {
         var size = cc.winSize;
         this.setContentSize( size.width, size.height );
+
+        this.debugView.setPosition( 0, cc.winSize.height - 100 );
+        this.debugView.updateWinSize();
     },
 
     initTouchListener : function() {
@@ -50,8 +55,10 @@ Genie.GizmoLayer = cc.LayerColor.extend({
                 }
                 break;
             case 'move':
+                // debugView
+                this.debugView.updateMousePt( pt );
+
                 if( Genie.GizmoController.isDragGizmoCtrlRect() === true ) {
-                    cc.log("gizmoLayer.move");
                     var delta           = cc.pSub( pt, Genie.GizmoController.getDeltaInTargetPt() );
                     var selectNode      = Genie.ToolController.getSelectNode();
                     var localPos        = selectNode.getParent().convertToNodeSpace( delta );
@@ -98,8 +105,8 @@ Genie.GizmoLayer = cc.LayerColor.extend({
     initDebugView : function () {
         var debugViw = new Genie.Test.DebugViewNode();
         this.addChild( debugViw, this.Local_Order.DEBUG_VIEW );
-
-        debugViw.setPosition( 100, 100 );
+        debugViw.setPosition( 0, cc.winSize.height - 100 );
+        this.debugView = debugViw;
     },
     //endregion
 

@@ -218,7 +218,7 @@ Genie.Test.TestWindowFrame = ccui.Layout.extend({
         this._title = title || "TEST WINDOW";
         this.setName("Genie.Test.TestWindowFrame " + this._title);
 
-        this.TITLE_HIEGHT = 40;
+        this.TITLE_HIEGHT = 20;
         this._textFontSize = textFontSize ||20;
         this.initTestWindowFrame(width || 300, height || 400, onclose );
     },
@@ -231,7 +231,7 @@ Genie.Test.TestWindowFrame = ccui.Layout.extend({
         this.setBackGroundColorOpacity(100);
 
         //title
-        var label = new ccui.Text(this._title, "Arial", 26);
+        var label = new ccui.Text(this._title, "Arial", 15 );
         label.setTextHorizontalAlignment(cc.TEXT_ALIGNMENT_CENTER);
         label.setContentSize(width, this.TITLE_HIEGHT);
         label.setTextColor(cc.color.WHITE);
@@ -244,8 +244,8 @@ Genie.Test.TestWindowFrame = ccui.Layout.extend({
         button.setTouchEnabled(true);
         button.setPressedActionEnabled(true);
         button.setTitleText("[X]");
-        button.setContentSize(32,32);
-        button.setTitleFontSize(30);
+        button.setContentSize(22,22);
+        button.setTitleFontSize(18);
         button.setAnchorPoint(1,1);
         button.setTitleColor(cc.color.WHITE);
 

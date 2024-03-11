@@ -1,5 +1,5 @@
 Genie.Component.Touch = Genie.Component.Base.extend({
-    SHOW_DEBUG_DRAW_HITRECT : true,
+    SHOW_DEBUG_DRAW_HITRECT : false,
 
     ctor: function () {
         this._super();

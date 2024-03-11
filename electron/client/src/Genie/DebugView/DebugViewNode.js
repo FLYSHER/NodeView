@@ -14,14 +14,27 @@ Genie.Test.DebugViewNode = cc.Node.extend({
     initProperties : function() {
         this.frameWindow    = null;
         this.item_mousePt   = null;
+        this.item_winSize   = null;
     },
 
     initUI : function() {
         var debugViewFrame = new Genie.Test.TestWindowFrame(" DebugView ", 200, 100);
         this.addChild( debugViewFrame );
 
+        // 윈도우 사이즈
+        this.item_winSize = debugViewFrame.addCommand( this.getWinSizeString( cc.winSize ), null );
+
+        // 마우스 위치
         var strMousePt = this.getMousePtString( cc.p(0,0) );
         this.item_mousePt = debugViewFrame.addCommand(strMousePt, null);
+    },
+
+    getWinSizeString : function( size ) {
+        return "w : " + parseInt( size.width ) + " , h : " + parseInt( size.height );
+    },
+
+    updateWinSize : function() {
+        this.item_winSize.setTitleText( this.getWinSizeString( cc.winSize ) );
     },
 
     getMousePtString : function( pt ) {
@@ -29,6 +42,8 @@ Genie.Test.DebugViewNode = cc.Node.extend({
     },
 
     updateMousePt : function( pt ) {
-        this.item_mousePt.setString( this.getMousePtString( pt ) );
+        this.item_mousePt.setTitleText( this.getMousePtString( pt ) );
     },
+
+
 });
