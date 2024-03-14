@@ -12,6 +12,7 @@ var Renderer_hierarchy = {
         PopupComponent      : "Popup",      // 컴포넌트 이름과 같아야 함.
         ARGroupComponent    : "ARGroup",    //
         CodeComponent       : "Code",
+        EmptyComponent      : "Empty",
     },
 
     init : function( rootLayer ) {
@@ -94,6 +95,7 @@ var Renderer_hierarchy = {
         var addComponentSubMenu = this._jstreeConfig["contextmenu"]["items"]["addComponent"]["submenu"];
         this._addSubMenu( addComponentSubMenu, this.MenuPrefix.PopupComponent, this.onAddComponentByMenu, this );
         this._addSubMenu( addComponentSubMenu, this.MenuPrefix.CodeComponent, this.onAddComponentByMenu, this );
+        this._addSubMenu( addComponentSubMenu, this.MenuPrefix.EmptyComponent, this.onAddComponentByMenu, this );
         // this._addSubMenu( addComponentSubMenu, this.MenuPrefix.ARGroupComponent, this.onAddComponentByMenu, this )
     },
 

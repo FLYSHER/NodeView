@@ -246,13 +246,14 @@ var HtmlHelper = {
         component_option_icon.style.paddingRight = '10px';
         component_option_icon.style.float = 'left';
 
-        const option_addComponent = HtmlHelper.createComponentMenuOption('Add Component', () => {
-            component_option_icon.className = component_menu_div.style.maxHeight === '0px' ? 'fa-solid fa-caret-down' : 'fa-solid fa-caret-right';
-            component_menu_div.style.maxHeight = component_menu_div.style.maxHeight === '0px' ? '150px' : '0px';
-        });
-
-        option_addComponent.appendChild(component_option_icon);
-        option_addComponent.appendChild(component_menu_div);
+        // component Add 임시 삭제 24.03.14
+        // const option_addComponent = HtmlHelper.createComponentMenuOption('Add Component', () => {
+        //     component_option_icon.className = component_menu_div.style.maxHeight === '0px' ? 'fa-solid fa-caret-down' : 'fa-solid fa-caret-right';
+        //     component_menu_div.style.maxHeight = component_menu_div.style.maxHeight === '0px' ? '150px' : '0px';
+        // });
+        //
+        // option_addComponent.appendChild(component_option_icon);
+        // option_addComponent.appendChild(component_menu_div);
 
         const option_removeComponent = HtmlHelper.createComponentMenuOption('Remove this Component', () => {
             const target = Renderer_hierarchy.getTargetNode();
@@ -300,7 +301,7 @@ var HtmlHelper = {
             menu_div.style.maxHeight = '0px';
         });
 
-        menu_div.appendChild( option_addComponent );
+        //menu_div.appendChild( option_addComponent );
         menu_div.appendChild( option_removeComponent );
         menu_div.appendChild( option_moveUp );
         menu_div.appendChild( option_moveDown );
