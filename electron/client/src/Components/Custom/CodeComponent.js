@@ -12,7 +12,15 @@ const tab = '    ';
 Genie.Component.Code = Genie.Component.InspectorBase.extend({
     ctor : function () {
         this._super();
+        this._initProperties();
         this.setName( Genie.ComponentName.CODE );
+    },
+
+    _initProperties : function () {
+        this.contentsName = 'RNCTest';
+        this.viewName = 'SampleView';
+        this.fileNameUI = '';
+        this.fileNameAR = '';
     },
 
     drawInspector : function () {
@@ -35,11 +43,6 @@ Genie.Component.Code = Genie.Component.InspectorBase.extend({
         this.el_inputAR.ondrop = this.ondropAR.bind(this);
 
         this.el_exportCodeBtn = HtmlHelper.createIconButtonAttrib( rootDiv, 'export code', { className: 'fa-solid fa-copy' }, this.onExportCodeBtnClick.bind(this) );
-
-        this.contentsName = 'RNCTest';
-        this.viewName = 'SampleView';
-        this.fileNameUI = '';
-        this.fileNameAR = '';
     },
 
     onchange : function (event) {
@@ -114,11 +117,16 @@ Genie.Component.Code.Builder = cc.Class.extend({
         this._viewName = '';
         this._uiAddr = '';
         this._arAddr = '';
+
         this._uiTexturesPng = [];
         this._arTexturesPng = [];
         this._uiTextures = [];
         this._uiWidgetTree = [];
+
         this._fntSet = new Set();
+        this._buttonSet = new Set();
+        this._exitButton = '';
+
         this._movData = [];
 
         return this;
@@ -144,14 +152,18 @@ Genie.Component.Code.Builder = cc.Class.extend({
         return this;
     },
 
-    findFntPath : function ( obj ) {
+    traversalObj : function ( obj ) {
         var children = obj['children'];
         for( var i = 0; i < children.length; i++ ) {
-            if (children[i]["classname"] ===  "LabelBMFont") {
+            if (children[i]['classname'] ===  'LabelBMFont') {
                 this._fntSet.add( children[i]['options']['fileNameData']['path'] );
             }
+            if (children[i]['classname'] === 'Button') {
+                this._buttonSet.add( children[i]['options']['name'] );
+            }
+
             if (children[i]["children"].length > 0) {
-                this.findFntPath( children[i] );
+                this.traversalObj( children[i] );
             }
         }
     },
@@ -171,7 +183,21 @@ Genie.Component.Code.Builder = cc.Class.extend({
         this._uiTextures = data['textures'];
         this._uiWidgetTree = data['widgetTree'];
 
-        this.findFntPath(this._uiWidgetTree);
+        this._fntSet.clear();
+        this._buttonSet.clear();
+        this.traversalObj(this._uiWidgetTree);
+
+        this._initButton();
+    },
+
+    _initButton : function () {
+        if (!this._exitButton) {
+            this._buttonSet.forEach((value) => {
+                if (value.toLowerCase().includes('exit') || value.toLowerCase().includes('close')) {
+                    this._exitButton = value;
+                }
+            });
+        }
     },
 
     _parseAR : function ( data ) {
@@ -255,7 +281,15 @@ Genie.Component.Code.Builder = cc.Class.extend({
                 `${tab}${tab}this._uiRoot = this.addUIChildOnCenter(${this._contentsName}.Res.${this._viewName}.${this._uiAddr.replace('.ExportJson', '')}, this._uiWidgets);\n` +
                 `${tab}${tab}SoundControl.getInstance().playEffect(loungeCommon.CommonPopup);\n`;
 
-            // todo init UI
+            if (this._exitButton) {
+                body += `\n${tab}${tab}this.addExitButtonInCommonWay(this._uiWidgets.${this._exitButton});\n`;
+            }
+
+            this._buttonSet.forEach((name) => {
+                if (name !== this._exitButton) {
+                    body += `${tab}${tab}this.addWidgetClickListener(this._uiWidgets.${name}, this.onclick_${Genie.Utils.camelize(name.replaceAll('btn', ''))}, globalCommon,Click);\n`;
+                }
+            });
 
             body += `${tab}},\n\n`;
         }
@@ -276,6 +310,16 @@ Genie.Component.Code.Builder = cc.Class.extend({
 
             body += `${tab}},\n\n`;
         }
+
+        // onclickFunc
+        this._buttonSet.forEach((name) => {
+            if (name !== this._exitButton) {
+                body += `${tab}onclick_${Genie.Utils.camelize(name.replaceAll('btn', ''))} : function ( sender ) {\n` +
+                    `${tab}${tab}// todo onclick func\n` +
+                    `${tab}},\n\n`;
+            }
+        });
+
         body += `});\n`;
         return body;
     },
