@@ -68,6 +68,13 @@ const template = [
       },
       {
         role: 'ToggleDevTools'
+      },
+      {
+        label : "sentry undefined error test",
+        click : function () {
+          myUndefinedFunction();
+          console.log("[sentry] send undefined error on sentry");
+        }
       }
     ]
   },
