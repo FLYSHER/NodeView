@@ -6,10 +6,9 @@
   "scripts": {
     "start": "electron .",
     "dev": "nodemon --exec electron  .",
-    "deploy:win": "webpack --config webpack.config.js && electron-builder --windows nsis:ia32 --publish never && npm run sentry:sourcemaps",
-    "deploy:mac": "webpack --config webpack.config.js && electron-builder --mac --publish never && npm run sentry:sourcemaps",
-    "deploy:mac-nosign": "webpack --config webpack.config.js && electron-builder --mac --config -c.mac.identity=null && npm run sentry:sourcemaps",
-    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org taegyunhan --project electron ./dist/ && sentry-cli sourcemaps upload --org taegyunhan --project electron ./dist/"
+    "deploy:win": "webpack --config webpack.config.js && electron-builder --windows nsis:ia32 --publish never",
+    "deploy:mac": "webpack --config webpack.config.js && electron-builder --mac --publish never",
+    "deploy:mac-nosign": "webpack --config webpack.config.js && electron-builder --mac --config -c.mac.identity=null"
   },
   "repository": {
     "type": "git",
@@ -25,14 +24,13 @@
   "author": "GitHub",
   "license": "CC0-1.0",
   "devDependencies": {
+    "@sentry/webpack-plugin": "^2.15.0",
     "electron": "^18.3.15",
     "electron-builder": "^23.0.3",
     "webpack": "^5.90.3",
-    "webpack-cli": "^5.1.4",
-    "@sentry/webpack-plugin": "^2.15.0"
+    "webpack-cli": "^5.1.4"
   },
   "dependencies": {
-    "@sentry/cli": "^2.30.2",
     "@sentry/electron": "^4.20.0",
     "animation-timeline-js": "^2.3.0",
     "electron-localshortcut": "^3.2.1",

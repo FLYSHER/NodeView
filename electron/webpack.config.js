@@ -32,9 +32,15 @@ const common_config = {
       authToken: process.env.SENTRY_AUTH_TOKEN,
       org: "taegyunhan",
       project: "electron",
-      sourcemaps: {
-        filesToDeleteAfterUpload: '**/*.js.map' // 보안을 위해서 sentry에 올린 뒤에 소스맵을 삭제한다.
+      // sourcemaps: {
+      //   filesToDeleteAfterUpload: '**/*.js.map' // 보안을 위해서 sentry에 올린 뒤에 소스맵을 삭제한다.
+      // },
+      release: {
+        name: "NodeView-flysher-@1.0.0",
+        dist: "test dist",
       },
+      include: './dist',
+      ignore: ['node_modules'],
     }),
   ],
 };
@@ -46,7 +52,7 @@ module.exports = [
         index: './main_electron.js',
       },
       output: {
-        filename: '[name]-bundle.js',
+        filename: '[name]-main-bundle.js',
         path: path.resolve(__dirname, 'dist'),
       },
     }),
@@ -56,7 +62,7 @@ module.exports = [
         index: './renderer_main.js',
       },
       output: {
-        filename: '[name]-bundle.js',
+        filename: '[name]-renderer-bundle.js',
         path: path.resolve(__dirname, 'dist'),
       },
     }),
