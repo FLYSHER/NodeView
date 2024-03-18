@@ -25,7 +25,6 @@ const common_config = {
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],
   },
-  //todo 'hidden-source-map', 소스맵으로 올릴 경우 sentry에서 모든 코드를 공개하기 때문에 추후 조치 필요
   devtool: 'source-map',
   plugins: [
     // Put the Sentry Webpack plugin after all other plugins
