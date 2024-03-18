@@ -6,9 +6,9 @@
   "scripts": {
     "start": "electron .",
     "dev": "nodemon --exec electron  .",
-    "deploy:win": "electron-builder --windows nsis:ia32 --publish never && npm run sentry:sourcemaps",
-    "deploy:mac": "electron-builder --mac --publish never && npm run sentry:sourcemaps",
-    "deploy:mac-nosign": "electron-builder --mac --config -c.mac.identity=null && npm run sentry:sourcemaps",
+    "deploy:win": "webpack --config webpack.config.js && electron-builder --windows nsis:ia32 --publish never && npm run sentry:sourcemaps",
+    "deploy:mac": "webpack --config webpack.config.js && electron-builder --mac --publish never && npm run sentry:sourcemaps",
+    "deploy:mac-nosign": "webpack --config webpack.config.js && electron-builder --mac --config -c.mac.identity=null && npm run sentry:sourcemaps",
     "sentry:sourcemaps": "sentry-cli sourcemaps inject --org taegyunhan --project electron ./dist/ && sentry-cli sourcemaps upload --org taegyunhan --project electron ./dist/"
   },
   "repository": {
@@ -26,7 +26,9 @@
   "license": "CC0-1.0",
   "devDependencies": {
     "electron": "^18.3.15",
-    "electron-builder": "^23.0.3"
+    "electron-builder": "^23.0.3",
+    "webpack": "^5.90.3",
+    "webpack-cli": "^5.1.4"
   },
   "dependencies": {
     "@sentry/cli": "^2.30.2",
