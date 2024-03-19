@@ -1,5 +1,5 @@
 {
-  "name": "NodeView(flysher)",
+  "name": "genietool",
   "version": "1.0.0",
   "description": "A minimal Electron application",
   "main": "main_electron.js",
@@ -38,16 +38,16 @@
     "image-data-uri": "^2.0.1"
   },
   "build": {
-    "productName": "NodeView",
-    "appId": "net.flysher.nodeview",
+    "productName": "genietool",
+    "appId": "net.flysher.genietool",
     "publish": {
       "provider": "github"
     },
     "asar": true,
     "protocols": {
-      "name": "NodeView",
+      "name": "genietool",
       "schemes": [
-        "nodeview"
+        "genietool"
       ]
     },
     "mac": {
@@ -57,7 +57,7 @@
       "icon": "./build/icons/icon.icns"
     },
     "dmg": {
-      "title": "NodeView",
+      "title": "genietool",
       "icon": "./build/icons/icon.icns"
     },
     "win": {

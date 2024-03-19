@@ -52,7 +52,7 @@ module.exports = [
         index: './main_electron.js',
       },
       output: {
-        filename: 'main_electron.js',
+        filename: '[name].js',
         path: path.resolve(__dirname, 'dist'),
       },
     }),
@@ -62,7 +62,7 @@ module.exports = [
         index: './renderer_main.js',
       },
       output: {
-        filename: 'electron-renderer.js',
+        filename: '[name].js',
         path: path.resolve(__dirname, 'dist'),
       },
     }),
