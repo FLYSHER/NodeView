@@ -16,7 +16,8 @@ const common_config = {
           use: 'ts-loader',
           include: [
               path.resolve(__dirname, ''),
-              path.resolve(__dirname, 'client')
+              path.resolve(__dirname, 'client'),
+              path.resolve(__dirname, 'client/src/*'),
           ]
         }
     ],
