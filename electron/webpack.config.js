@@ -1,4 +1,3 @@
-const { sentryWebpackPlugin } = require("@sentry/webpack-plugin");
 const path = require('path');
 
 // webpack 적용 시에도 main, renderer 따로 적용이 필요함.
@@ -26,25 +25,6 @@ const common_config = {
     extensions: ['.tsx', '.ts', '.js'],
   },
   devtool: 'source-map',
-  // plugins: [
-  //   // Put the Sentry Webpack plugin after all other plugins
-  //   sentryWebpackPlugin({
-  //     authToken: process.env.SENTRY_AUTH_TOKEN,
-  //     org: "taegyunhan",
-  //     project: "electron",
-  //     // sourcemaps: {
-  //     //   filesToDeleteAfterUpload: '**/*.js.map' // 보안을 위해서 sentry에 올린 뒤에 소스맵을 삭제한다.
-  //     // },
-  //     release: {
-  //       name: "NodeView-flysher-@1.0.0",
-  //       dist: "test dist",
-  //     },
-  //     include: './dist',
-  //     ignore: ['node_modules'],
-  //     debug: true,
-  //     //filename: '[name]-[contenthash].js.map',
-  //   }),
-  // ],
 };
 
 module.exports = [
