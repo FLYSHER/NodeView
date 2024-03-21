@@ -1,5 +1,5 @@
 // Modules to control application life and create native browser window
-const {app, BrowserWindow, Menu, dialog, globalShortcut } = require('electron');
+const {app, BrowserWindow, Menu, dialog, globalShortcut, ipcMain } = require('electron');
 const path = require('path');
 const loadManager = require('./LoadManager');
 const log = require('electron-log/main');
@@ -68,6 +68,38 @@ const template = [
       },
       {
         role: 'ToggleDevTools'
+      },
+      {
+        label: 'New Window',
+        click : function () {
+          //https://tinydew4.gitbooks.io/electron-ko/content/api/browser-window.html
+          console.log("[CHECK]");
+          let win = new BrowserWindow({
+            width: 800,
+            height: 600,
+            webPreferences: {
+              webSecurity: false,
+              nodeIntegration: true,
+              contextIsolation: false,
+              enableRemoteModule: true,
+            }});
+
+          win.on('close', () => {
+            console.log("close");
+            win = null
+          })
+          win.on('ready-to-show',()=>{
+            console.log("cccccc");
+            win.webContents.send('channel1', ["sssss"]);
+          });
+          // Or load a local HTML file
+          win.loadFile('index2.html')
+          win.webContents.openDevTools();
+          ipcMain.on("onTest2",(evt, payload) => {
+            console.log('on ipcMain event:: ', payload);
+          });
+        }
+
       },
       {
         label : "sentry undefined error test",
