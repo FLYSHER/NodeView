@@ -1,5 +1,5 @@
-const { sentryRendererInit } = require('../../sentryRenderer');
-sentryRendererInit();
+// const { sentryRendererInit } = require('../../sentryRenderer');
+// sentryRendererInit();
 
 /**
  * Created by flysherdev11 on 2017. 6. 20..

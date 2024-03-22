@@ -1,5 +1,5 @@
-const { sentryRendererInit } = require('../../../sentryRenderer');
-sentryRendererInit();
+// const { sentryRendererInit } = require('../../../sentryRenderer');
+// sentryRendererInit();
 
 var MainViewLayer = cc.LayerColor.extend({
     ctor: function () {

@@ -1,5 +1,5 @@
-const { sentryRendererInit } = require('../../sentryRenderer');
-sentryRendererInit();
+// const { sentryRendererInit } = require('../../sentryRenderer');
+// sentryRendererInit();
 
 var res = {
     HelloWorld_png : "res/HelloWorld.png",

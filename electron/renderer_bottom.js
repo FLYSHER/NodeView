@@ -1,5 +1,5 @@
-const { sentryRendererInit } = require('./sentryRenderer');
-sentryRendererInit();
+// const { sentryRendererInit } = require('./sentryRenderer');
+// sentryRendererInit();
 
 var timelineModule = require('animation-timeline-js');
 const log = require('electron-log/main');
