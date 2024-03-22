@@ -1,3 +1,6 @@
+const { sentryRendererInit } = require('../../../sentryRenderer');
+sentryRendererInit();
+
 var EVT = EVT || {};
 
 EVT.MAIN_VIEW = {

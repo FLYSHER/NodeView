@@ -34,6 +34,7 @@ module.exports = [
       target: 'electron-main',
       entry: {
         main_electron: './main_electron.js',
+        LoadManager: './LoadManager.js',
       },
       output: {
         filename: '[name].js',
@@ -43,6 +44,7 @@ module.exports = [
     Object.assign({}, common_config, {
       target: 'electron-renderer',
       entry: {
+        // renderer
         renderer_main: './renderer_main.js',
         renderer_assets: './renderer_assets.js',
         renderer_bottom: './renderer_bottom.js',
@@ -50,7 +52,72 @@ module.exports = [
         renderer_inspector: './renderer_inspector.js',
         renderer_timeline: './renderer_timeline.js',
 
-        command: './client/src/Command/Command.js',
+        // command
+        Command: './client/src/Command/Command.js',
+        CommandManager: './client/src/Command/CommandManager.js',
+        NodePropertyCommand: './client/src/Command/NodePropertyCommand.js',
+        TransformCommand: './client/src/Command/TransformCommand.js',
+        UIImageViewCommand: './client/src/Command/UIImageViewCommand.js',
+        UILabelBMFontCommand: './client/src/Command/UILabelBMFontCommand.js',
+        UITextCommand: './client/src/Command/UITextCommand.js',
+
+        // cocos comp
+        ArmatureComponent: './client/src/Components/Cocos/ArmatureComponent.js',
+        BoneComponent: './client/src/Components/Cocos/BoneComponent.js',
+        NodePropertyComponent: './client/src/Components/Cocos/NodePropertyComponent.js',
+        TransformComponent: './client/src/Components/Cocos/TransformComponent.js',
+        UIActionComponent: './client/src/Components/Cocos/UIActionComponent.js',
+        UIButtonComponent: './client/src/Components/Cocos/UIButtonComponent.js',
+        UIImageViewComponent: './client/src/Components/Cocos/UIImageViewComponent.js',
+        UILabelBMFontComponent: './client/src/Components/Cocos/UILabelBMFontComponent.js',
+        UIRootComponent: './client/src/Components/Cocos/UIRootComponent.js',
+        UIScrollViewComponent: './client/src/Components/Cocos/UIScrollViewComponent.js',
+        UITextComponent: './client/src/Components/Cocos/UITextComponent.js',
+
+        // custom comp
+        ARGroupComponent: './client/src/Components/Custom/ARGroupComponent.js',
+        CodeComponent: './client/src/Components/Custom/CodeComponent.js',
+        EmptyComponent: './client/src/Components/Custom/EmptyComponent.js',
+        PopupComponent: './client/src/Components/Custom/PopupComponent.js',
+
+        GenieComponent: './client/src/Components/GenieComponent.js',
+        InputComponent: './client/src/Components/InputComponent.js',
+
+        // define
+        eventDefines: './client/src/Defines/eventDefines.js',
+        GenieDefines: './client/src/Defines/GenieDefines.js',
+
+        // genie
+        DebugView: './client/src/Genie/DebugView/DebugView.js',
+        DebugViewNode: './client/src/Genie/DebugView/DebugViewNode.js',
+
+        GizmoController: './client/src/Genie/Gizmo/GizmoController.js',
+        GizmoLayer: './client/src/Genie/Gizmo/GizmoLayer.js',
+        GizmoNode: './client/src/Genie/Gizmo/GizmoNode.js',
+
+        PopupBaseNode: './client/src/Genie/Popup/PopupBaseNode.js',
+
+        HierarchyProtectNode: './client/src/Genie/HierarchyProtectNode.js',
+        ToolController: './client/src/Genie/ToolController.js',
+
+        GenieResourceLoader: './client/src/GenieResourceLoader/GenieResourceLoader.js',
+
+        // tool layer
+        MainScene: './client/src/ToolLayer/MainScene.js',
+        MainViewLayer: './client/src/ToolLayer/MainViewLayer.js',
+        PreviewNode: './client/src/ToolLayer/PreviewNode.js',
+
+        // utils
+        GenieARUtils: './client/src/Utils/GenieARUtils.js',
+        GenieUtils: './client/src/Utils/GenieUtils.js',
+        HtmlHelper: './client/src/Utils/HtmlHelper.js',
+        ScreenUtils: './client/src/Utils/ScreenUtils.js',
+
+        // app
+        app: './client/src/app.js',
+        loader: './client/src/loader.js',
+        resource: './client/src/resource.js',
+        eventDispatcher: './client/src/eventDispatcher.js',
       },
       output: {
         filename: '[name].js',

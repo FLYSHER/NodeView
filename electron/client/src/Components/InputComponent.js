@@ -1,3 +1,9 @@
+const { sentryRendererInit } = require('../../../sentryRenderer');
+sentryRendererInit();
+
+var Genie = Genie || {};
+Genie.Component = Genie.Component || {};
+
 Genie.Component.Touch = Genie.Component.Base.extend({
     SHOW_DEBUG_DRAW_HITRECT : false,
 

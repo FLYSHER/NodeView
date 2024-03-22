@@ -1,4 +1,9 @@
-//
+const { sentryRendererInit } = require('../../../sentryRenderer');
+sentryRendererInit();
+
+var Genie = Genie || {};
+Genie.Command = Genie.Command || {};
+
 Genie.Command.TransformPosition = Genie.Command.Base.extend({
     ctor : function( targetNode, args ) {
         this._super( 'TransformPosition', targetNode, args );

@@ -1,3 +1,9 @@
+const { sentryRendererInit } = require('../../../sentryRenderer');
+sentryRendererInit();
+
+var Genie = Genie || {};
+Genie.Component = Genie.Component || {};
+
 Genie.CommandManager = {
     commands        : [],
     _currentIndex   : -1,

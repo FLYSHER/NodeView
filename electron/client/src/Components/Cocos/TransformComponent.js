@@ -1,3 +1,9 @@
+const { sentryRendererInit } = require('../../../../sentryRenderer');
+sentryRendererInit();
+
+var Genie = Genie || {};
+Genie.Component = Genie.Component || {};
+
 // 기본 노드 프로퍼티
 Genie.Component.Transform = Genie.Component.InspectorBase.extend({
     ctor : function () {

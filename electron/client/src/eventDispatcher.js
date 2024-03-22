@@ -1,3 +1,6 @@
+const { sentryRendererInit } = require('../../sentryRenderer');
+sentryRendererInit();
+
 var EventPackage = cc.Class.extend({
     callback: null,
     target: null,

@@ -1,3 +1,8 @@
+const { sentryRendererInit } = require('../../../../sentryRenderer');
+sentryRendererInit();
+
+var Genie = Genie || {};
+Genie.Component = Genie.Component || {};
 /**
  * author : taegyun.han
  * date : 24.03.07 ~
