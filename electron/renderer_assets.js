@@ -1,3 +1,6 @@
+const { sentryRendererInit } = require('./sentryRenderer');
+sentryRendererInit();
+
 /**
  * Assset 패널 관리
  */

@@ -1,3 +1,6 @@
+const { sentryRendererInit } = require('./sentryRenderer');
+sentryRendererInit();
+
 var timelineModule = require('animation-timeline-js');
 
 var Renderer_timeline = {

@@ -33,21 +33,28 @@ module.exports = [
     Object.assign({}, common_config, {
       target: 'electron-main',
       entry: {
-        index: './main_electron.js',
+        main_electron: './main_electron.js',
       },
       output: {
-        filename: 'main_electron.js',
-        path: path.resolve(__dirname, 'dist'),
+        filename: '[name].js',
+        path: path.resolve(__dirname, 'dist/sourcemap'),
       },
     }),
     Object.assign({}, common_config, {
       target: 'electron-renderer',
       entry: {
-        index: './renderer_main.js',
+        renderer_main: './renderer_main.js',
+        renderer_assets: './renderer_assets.js',
+        renderer_bottom: './renderer_bottom.js',
+        renderer_hierarchy: './renderer_hierarchy.js',
+        renderer_inspector: './renderer_inspector.js',
+        renderer_timeline: './renderer_timeline.js',
+
+        command: './client/src/Command/Command.js',
       },
       output: {
-        filename: 'renderer_main.js',
-        path: path.resolve(__dirname, 'dist'),
+        filename: '[name].js',
+        path: path.resolve(__dirname, 'dist/sourcemap'),
       },
     }),
 ];
