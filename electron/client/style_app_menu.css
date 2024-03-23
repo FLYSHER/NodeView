@@ -1,0 +1,43 @@
+
+body {
+    background-color: #444;
+    color: #eee;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+/* 사이드 메뉴 스타일 */
+.side-menu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 200px;
+    height: 100%;
+    background-color: #333;
+    color: #fff;
+    padding-top: 60px; /* 상단 여백 */
+}
+
+/* 메뉴 아이템 스타일 */
+.menu-item {
+    padding: 10px 20px;
+    border-bottom: 1px solid #555;
+    cursor: pointer;
+}
+
+/* 메뉴 아이템 호버 효과 */
+.menu-item:hover {
+    background-color: #555;
+}
+
+/* 본문 스타일 */
+.main-content {
+    margin-left: 200px; /* 사이드 메뉴의 너비만큼 왼쪽으로 밀어줌 */
+    padding: 20px;
+}
+
+/* 숨김 스타일 */
+.hidden {
+    display: none;
+}

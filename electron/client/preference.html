@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style_app_menu.css">
+    <title>Preference</title>
+</head>
+<body>
+<!-- 사이드 메뉴 -->
+<div class="side-menu">
+    <div class="menu-item" onclick="Preference.showContent('asset')"> Asset </div>
+    <div class="menu-item" onclick="Preference.showContent('temp')" >Temp</div>
+</div>
+
+<!-- 본문 내용 -->
+<div class="main-content">
+    <div id="assetContent">
+        <!-- 에셋 경로 -->
+        <div>
+            <label for="asset-path"> asset path </label>
+            <input type="text" id="asset-path" readonly style="width: 400px">
+            <button onclick="Preference.openFolder()"> ... </button>
+        </div>
+    </div>
+    <div id="tempContent" class="hidden"> Temp Content </div>
+</div>
+
+<script src="./preference.js"></script>
+
+</body>
+</html>

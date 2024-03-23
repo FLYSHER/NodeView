@@ -2,7 +2,7 @@
  *
  * @type {{prefixMajorVersion: string, prefixRelativeSourcePath: string}}
  */
-var fs          = require('fs' ),
+var fs     = require('fs' ),
     path   = require( "path" );
 
 
@@ -391,7 +391,36 @@ module.exports = {
                 return ret.substr(1);
         }
         return "";
+    },
+
+    // 필터 걸어 특정 폴더 내 모든 파일 리스트 가져오기
+    getAllFilesInFolderWithFilter : function( folderPath, excludedFolders =[], fileFilter ) {
+        let fileList = [];
+
+        // 폴더 내의 파일 및 디렉터리를 읽기
+        fs.readdirSync(folderPath).forEach(file => {
+            // 제외할 폴더를 검사하여 제외하고자 하는 폴더는 건너뜁니다.
+            if (excludedFolders.includes(file)) {
+                return;
+            }
+
+            // 파일 경로 생성
+            const filePath = path.join(folderPath, file);
+
+            // 파일 상태 확인
+            const stats = fs.statSync(filePath);
+
+            // 디렉터리인 경우 재귀적으로 파일 목록을 가져옵니다.
+            if (stats.isDirectory()) {
+                fileList = fileList.concat( this.getAllFilesInFolderWithFilter(filePath, excludedFolders, fileFilter));
+            } else if (stats.isFile()) {
+                // 파일이 숨김 파일이 아니고, 필터가 존재하지 않거나 정규표현식과 일치하는 경우에만 fileList에 추가합니다.
+                if (!file.startsWith('.') && (!fileFilter || file.match(fileFilter))) {
+                    fileList.push(filePath);
+                }
+            }
+        });
+
+        return fileList;
     }
-
-
 };

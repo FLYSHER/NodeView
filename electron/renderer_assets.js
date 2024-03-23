@@ -1,5 +1,6 @@
 // const { sentryRendererInit } = require('./sentryRenderer');
 // sentryRendererInit();
+// const { ipcRenderer } = require('electron');
 
 /**
  * Assset 패널 관리
@@ -115,8 +116,8 @@ var Renderer_assets = {
         if( cc.path.extname( id ) === ".plist" ) {
             this.addAssetToHierarchy( id, parentID, { resType : resType } )
 
-            var frameConfig = cc.spriteFrameCache._frameConfigCache[path];
-            var frames = frameConfig.frames;
+            // var frameConfig = cc.spriteFrameCache._frameConfigCache[path];
+            // var frames = frameConfig.frames;
 
             for( var key in frames ) {
                 this.addAssetToHierarchy( key, basename, { resType : Genie.ResType.SPRITE } );
@@ -152,3 +153,12 @@ var Renderer_assets = {
         $(`#assets`).jstree("refresh");
     },
 }
+
+window.addEventListener('message', function( event ){
+    console.log("received from child > ", event.data );
+});
+
+// 부모 렌더러에서 메시지 수신
+window.ipcRenderer.receive('message-to-renderer', (event, message) => {
+    console.log('자식 메인프로세스로부터 부모 렌더러에서 받은 메시지:', message);
+});

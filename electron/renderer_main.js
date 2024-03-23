@@ -50,7 +50,11 @@ var Renderer_main = {
 
         ipcRenderer.on( 'redo', function(){
             Genie.CommandManager.redo();
-        })
+        });
+
+        ipcRenderer.on('message-to-renderer', function(event, message) {
+            console.log('자식 메인프로세스로부터 부모 렌더러에서 받은 메시지:', message);
+        });
     },
 
     /**
