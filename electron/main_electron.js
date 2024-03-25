@@ -16,7 +16,6 @@ function createWindow () {
     // 현재 화면 정보 가져오기
     const { width, height } = screen.getPrimaryDisplay().workAreaSize;
 
-
     // Create the browser window.
     const window = new BrowserWindow({
         width: width,
@@ -24,8 +23,8 @@ function createWindow () {
         webPreferences: {
             webSecurity: false,
             preload: path.join(__dirname, 'preload.js'),
+            contextIsolation: false,
             nodeIntegration: true,
-            contextIsolation: false
         }
     });
 
@@ -47,8 +46,8 @@ function createPreferenceWindow( parentWnd ) {
       modal   : true,
       webPreferences: {
           preload: path.join(__dirname, 'preload.js'),
-          contextIsolation: true, // context isolation 활성화
-          nodeIntegration: false // node.js 인터페이스 비활성화
+          contextIsolation: false, // context isolation 활성화
+          nodeIntegration: true // node.js 인터페이스 비활성화
       }
   });
 
@@ -195,11 +194,15 @@ ipcMain.on('open-dialog', (event) => {
             const excludedFolders = [''];
             const fileFilter = /\.(jpg|png|fnt|exportJson|plist)$/; // 이미지 파일 필터 (예: jpg, png, gif)
 
-            // var files = fileUtil.getAllFilesInFolderWithFilter(folderPath,excludedFolders, fileFilter);
+            var files = fileUtil.getAllFilesInFolderWithFilter(folderPath,excludedFolders, fileFilter);
             // console.log( files );
             // event.sender.send('selected-path', result.filePaths[0] ); // 선택한 파일 또는 폴더의 경로를 렌더러 프로세스로 전달
-            console.log( result.filePaths[0] );
-            event.sender.send('test_event', result.filePaths[0] ); // 선택한 파일 또는 폴더의 경로를 렌더러 프로세스로 전달
+            // console.log( result.filePaths[0] );
+
+            event.sender.send('select_assetPath', {
+                assetPath   : result.filePaths[0],
+                assets      : files
+            } ); // 선택한 파일 또는 폴더의 경로를 렌더러 프로세스로 전달
         }
     }).catch((err) => {
         console.log(err);
@@ -207,11 +210,9 @@ ipcMain.on('open-dialog', (event) => {
 });
 
 // 자식 창으로부터의 메시지 수신
-ipcMain.on('message-from-child', (event, message) => {
-    console.log('부모 창에서 받은 메시지:', message );
-
-    // 받은 메시지를 다시 부모 렌더러에 전달
-    mainWindow.webContents.send("message-to-renderer", message );
+ipcMain.on('message_from_child', (event, message) => {
+    console.log('자식 창에서 받은 메시지:', message );
+    mainWindow.webContents.send('message_from_main', message);
 });
 
 

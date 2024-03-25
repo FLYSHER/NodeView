@@ -8,6 +8,7 @@
 var Renderer_assets = {
     treeDataArr : [],
     Tag         : "[AssetView] ",
+    assetPathList : [],
 
     init : function() {
         $("#assets").jstree({
@@ -37,6 +38,19 @@ var Renderer_assets = {
 
         // 에셋 검색 시
         $('#assets_findInput').change( this.onchangeInputFind );
+    },
+
+    addAssetPath : function( strPath ) {
+        var findIdx = this.assetPathList.findIndex( function(item){
+            return item === strPath;
+        });
+        if( findIdx < 0 ) {
+            this.assetPathList.push( strPath );
+        }
+    },
+
+    getAssetPathList : function() {
+        return this.assetPathList;
     },
 
     // 트리 선택 노드 변경시
@@ -81,10 +95,21 @@ var Renderer_assets = {
      */
     addAsset : function( path, resType /* Genie.ResType */ ) {
         console.log("*** add addAsset  **** ", path );
-        var dirName  = cc.path.dirname( path);
-        var basename =  cc.path.basename( path );
 
-        var i, id, parentID, arrDir;
+        // path 경로 처리
+        var i, assetPath;
+        for( i = 0; i < this.assetPathList.length; ++i ) {
+            assetPath = this.assetPathList[i] + "/";
+            if( path.includes( assetPath) ) {
+                path = path.split( assetPath)[1];
+                break;
+            }
+        }
+
+        var dirName  = cc.path.dirname( path);
+        var basename = cc.path.basename( path );
+
+        var id, parentID, arrDir;
         // step1. folder 체크 및 추가
         if( dirName.length === 0 ) { // empty string
             parentID = '#';
@@ -119,9 +144,9 @@ var Renderer_assets = {
             // var frameConfig = cc.spriteFrameCache._frameConfigCache[path];
             // var frames = frameConfig.frames;
 
-            for( var key in frames ) {
-                this.addAssetToHierarchy( key, basename, { resType : Genie.ResType.SPRITE } );
-            }
+            // for( var key in frames ) {
+            //     this.addAssetToHierarchy( key, basename, { resType : Genie.ResType.SPRITE } );
+            // }
         }
         else {
             this.addAssetToHierarchy( id, parentID, { resType : resType } );
@@ -153,12 +178,12 @@ var Renderer_assets = {
         $(`#assets`).jstree("refresh");
     },
 }
-
-window.addEventListener('message', function( event ){
-    console.log("received from child > ", event.data );
-});
-
-// 부모 렌더러에서 메시지 수신
-window.ipcRenderer.receive('message-to-renderer', (event, message) => {
-    console.log('자식 메인프로세스로부터 부모 렌더러에서 받은 메시지:', message);
-});
+//
+// window.addEventListener('message', function( event ){
+//     console.log("received from child > ", event.data );
+// });
+//
+// // 부모 렌더러에서 메시지 수신
+// window.ipcRenderer.receive('message-to-renderer', (event, message) => {
+//     console.log('자식 메인프로세스로부터 부모 렌더러에서 받은 메시지:', message);
+// });

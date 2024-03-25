@@ -1,3 +1,5 @@
+var { ipcRenderer } = require('electron');
+
 var Preference = Preference || {};
 
 Preference.init = function() {
@@ -19,28 +21,16 @@ Preference.showContent = function ( contentId ) {
     selectedContent.classList.remove('hidden');
 }
 
+//
 Preference.openFolder = function() {
-    // window.electronAPI.openDialog();
-    window.ipcRenderer.send('open-dialog');
+    ipcRenderer.send('open-dialog');
 }
 
+ipcRenderer.on( 'select_assetPath', function( event, args ) {
+    console.log(" on event : select_assetPath");
 
-window.ipcRenderer.receive( 'selected-path', function( args ){
-    console.log("received event selected-path > ", args );
-    const parentWnd = window.opener;
-    console.log( "parentWnd ", parentWnd );
-    if( parentWnd ) {
-        parentWnd.postMessage("message i am child", args );
-    }
-});
-// event from main-process
-
-window.ipcRenderer.receive( 'test_event', function( args ){
-    console.log("received event test_event > ", args );
-
-    // 부모창에 메시지 보내자.
-    window.ipcRenderer.send("message-from-child", args);
-});
+    ipcRenderer.send("message_from_child", args );
+})
 
 // 초기화
 Preference.init();

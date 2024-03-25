@@ -52,8 +52,13 @@ var Renderer_main = {
             Genie.CommandManager.redo();
         });
 
-        ipcRenderer.on('message-to-renderer', function(event, message) {
-            console.log('자식 메인프로세스로부터 부모 렌더러에서 받은 메시지:', message);
+        ipcRenderer.on('message_from_main', function( event, args ){
+            Renderer_assets.addAssetPath( args.assetPath );
+            var i, assetList = args.assets;
+            for( i = 0 ; i < assetList.length; ++i ) {
+                Renderer_assets.addAsset( assetList[i] );
+            }
+
         });
     },
 
