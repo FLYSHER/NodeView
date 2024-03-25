@@ -13,7 +13,7 @@ Genie.PreviewNode = cc.Node.extend({
     },
 
     initProperties : function () {
-        this._renderTexture = null;
+        this._root    = null;
         this._spriteNode    = null;
         this._rtSize        = cc.size( 400, 300 );
         this._lockRTScale   = false;
@@ -26,19 +26,19 @@ Genie.PreviewNode = cc.Node.extend({
     },
 
     initRenderTexture : function() {
-        this._renderTexture = new cc.RenderTexture( this._rtSize.width, this._rtSize.height, cc.Texture2D.PIXEL_FORMAT_RGBA8888, gl.DEPTH_STENCIL );
-        this.addChild( this._renderTexture );
+        this._root = new cc.Node();
+        this.addChild( this._root );
+        this._root.setContentSize(this._rtSize);
 
-        // 렌더텍스쳐에 그릴 스프라이트 노드
         this._spriteNode = new cc.Sprite();
-        this._spriteNode.setPosition( Genie.Utils.getScreenCenterPos() );
+        this._root.addChild( this._spriteNode );
 
         // 렌더텍스쳐 프레임
         var origin  = cc.p( -this._rtSize.width/2, -this._rtSize.height/2 ),
             dest    = cc.p( this._rtSize.width/2, this._rtSize.height/2 );
         this._frameNode = new cc.DrawNode();
         this._frameNode.drawRect( origin, dest, cc.color( 0, 0, 0, 0 ), 2, cc.color( 255, 100, 0 ) );
-        this.addChild( this._frameNode );
+        this._root.addChild( this._frameNode );
 
         this._initTouchComponent();
 
@@ -50,7 +50,7 @@ Genie.PreviewNode = cc.Node.extend({
         var touchComp = new Genie.Component.Touch();
         touchComp.setCustomHitRectCenterOffsetPt( cc.p( -this._rtSize.width/2,-this._rtSize.height/2 ) );
         touchComp.setCustomHitRectSize( this._rtSize.width, this._rtSize.height );
-        this._renderTexture.addComponent( touchComp );
+        this._root.addComponent( touchComp );
 
         touchComp.onTriggerEvent = function( touchEventName, pt ) {
             switch ( touchEventName ) {
@@ -62,20 +62,13 @@ Genie.PreviewNode = cc.Node.extend({
     },
 
     _adjustSpriteSize   : function( resType ) {
-        if( resType === Genie.ResType.SPRITE ) {
-            var w = this._spriteNode.getContentSize().width,
-                h = this._spriteNode.getContentSize().height;
-
-            var rate_w = parseFloat(cc.winSize.width / w).toFixed(2),
-                rate_h = parseFloat(cc.winSize.height / h).toFixed(2);
-
+        if( resType === Genie.ResType.SPRITE
+            || resType === Genie.ResType.TEXTURE) {
+            var rate_w = this._rtSize.width/ this._spriteNode.getContentSize().width;
+            var rate_h = this._rtSize.height/ this._spriteNode.getContentSize().height;
             var loc_scale = Math.min( rate_w, rate_h );
-            this._spriteNode.setScale( loc_scale * 0.8 );
+            this._spriteNode.setScale(loc_scale);
         }
-        else {
-            this._spriteNode.setScale( 1.0);
-        }
-
     },
 
     playPreviewSize : function() {
@@ -83,7 +76,7 @@ Genie.PreviewNode = cc.Node.extend({
             return;
         }
 
-        var currScale = this._renderTexture.getScale();
+        var currScale = this._root.getScale();
         var targetScale;
         if( currScale > 1.0 ) {
             targetScale = 1.0;
@@ -100,7 +93,7 @@ Genie.PreviewNode = cc.Node.extend({
         var self = this,
             dl = 0.2;
 
-        this._renderTexture.runAction( cc.sequence(
+        this._root.runAction( cc.sequence(
             cc.callFunc( function () { self._lockRTScale = true; }, this ),
             cc.spawn(
                 cc.scaleTo( dl, targetScale ).easing( cc.easeSineInOut() ),
@@ -108,14 +101,6 @@ Genie.PreviewNode = cc.Node.extend({
             ),
             cc.callFunc( function () { self._lockRTScale = false; }, this )
         ));
-
-        this._frameNode.runAction( cc.sequence(
-            cc.spawn(
-                cc.scaleTo( dl, targetScale ).easing( cc.easeSineInOut() ),
-                cc.moveTo( dl, targetPos ).easing( cc.easeSineInOut() )
-            ),
-        ));
-
     },
 
     renderToRenderTexture : function( event ) {
@@ -142,10 +127,6 @@ Genie.PreviewNode = cc.Node.extend({
 
         if( validCheck ) {
             this._adjustSpriteSize( resType );
-
-            this._renderTexture.beginWithClear( 40, 40, 40 );
-            this._spriteNode.visit();
-            this._renderTexture.end();
         }
 
     },
@@ -155,13 +136,12 @@ Genie.PreviewNode = cc.Node.extend({
         var preview_margin = cc.p( 10, 10 );
         var loc_x = cc.winSize.width - (this._rtSize.width * targetScale)/2  - preview_margin.x;
         var loc_y = (this._rtSize.height * targetScale )/2 +  preview_margin.y;
-        this._renderTexture.setPosition( cc.p( loc_x, loc_y ) );
-
-        this._frameNode.setPosition( loc_x, loc_y);
+        this._root.setPosition(cc.p( loc_x, loc_y ) );
+        this._spriteNode.setPosition(cc.p(0,0));
     },
 
     onResize : function() {
-        var loc_scale = this._renderTexture.getScale();
+        var loc_scale = this._root.getScale();
         this.reposition( loc_scale );
     },
 
