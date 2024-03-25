@@ -4,7 +4,7 @@ const path = require('path');
 const loadManager = require('./LoadManager');
 const log = require('electron-log/main');
 const localShortcut = require('electron-localshortcut');
-const { sentryMainInit } = require('./sentryMain');
+const { sentryMainInit } = require('./sentry');
 sentryMainInit();
 
 function createWindow () {

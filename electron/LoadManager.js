@@ -1,4 +1,4 @@
-const { sentryMainInit } = require('./sentryMain');
+const { sentryMainInit } = require('./sentry');
 sentryMainInit();
 
 const { ipcMain } = require('electron');
