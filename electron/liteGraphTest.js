@@ -7,24 +7,52 @@ var init = function (){
 
     var canvas = new LGraphCanvas("#mycanvas", graph);
 
-    var node_const = LiteGraph.createNode("events/timer");
-    node_const.pos = [200,200];
+    var node_const = LiteGraph.createNode("action/start");
+    node_const.pos = [100,100];
     graph.add(node_const);
     // node_const.setValue(4.5);
 
-    var node_watch = LiteGraph.createNode("events/log");
-    node_watch.pos = [500,200];
-    graph.add(node_watch);
+    var targetCCNode = LiteGraph.createNode("action/targetCCNode");
+    targetCCNode.pos = [400,100];
+    graph.add(targetCCNode);
+    node_const.connect(0, targetCCNode, 0 );
 
-    node_const.connect(0, node_watch, 0 );
+    //
+    // var scquence = LiteGraph.createNode("action/scquence");
+    // scquence.pos = [200,300];
+    // graph.add(scquence);
+    // targetCCNode.connect(0, scquence, 0 );
+    //
+    var moveTo = LiteGraph.createNode("action/moveTo");
+    moveTo.pos = [100,200];
+    graph.add(moveTo);
+    targetCCNode.connect(0, moveTo, 0 );
+
+    var scaleTo = LiteGraph.createNode("action/scaleTo");
+    scaleTo.pos = [100,400];
+    graph.add(scaleTo);
+    targetCCNode.connect(0, scaleTo, 0 );
+
+    var moveTo2 = LiteGraph.createNode("action/moveTo");
+    moveTo2.pos = [400,200];
+    graph.add(moveTo2);
+    moveTo.connect(0, moveTo2, 0 );
+
+
+    var end =  LiteGraph.createNode("action/end");
+    end.pos = [400,400];
+    graph.add(end);
+    moveTo2.connect(0, end, 0 );
+
 
     // graph.start();
     mainGraph = graph;
 
     $('#button_start').on( 'click',function (){
-        mainGraph.runStep(1, true);
+        //     mainGraph.runStep(1, true);
+        window.opener
+        console.log("[CHECK]")
     });
-
 }
 //register in the system
 // LiteGraph.clearRegisteredTypes();
@@ -33,48 +61,184 @@ var init = function (){
 var ActionNode = {};
 ActionNode.start = function (){
     this.addOutput("start","startnode");
-    this.addProperty("Name", "actionName");
-    this.widget = this.addWidget("text", "Name", "actionName", "Name");
+    this.addProperty("Name", "actionName","text");
+    var self = this;
+    this.widget = this.addWidget("text", "Name", "actionName",    function(v) {
+        self.properties.Name = v;
+    });
+
     this.onExecute = function()
     {
-        let actionName = this.getInputOrProperty("Name")
-        this.setOutputData( 0, actionName );
+        var actionNameProperty = this.getInputOrProperty("Name"); // this.getInputOrProperty("Name")
+        var actionObj = {
+            name : actionNameProperty
+        }
+        this.setOutputData( 0, actionObj );
     }
 }
-
 ActionNode.start.title =  "Start";
 
 ActionNode.targetCCNode = function (){
     this.addInput("start","startnode");
-    this.addProperty("NodeName", "targetNodeName");
-    this.widget = this.addWidget("text", "targetNodeName", "actionName", "Name");
+    this.property_CCNodeName = this.addProperty("NodeName", "targetNodeName","text");
+    var self = this;
+    this.widget = this.addWidget("text", "NodeName", "targetNodeName",function(v) {
+        self.property_CCNodeName = v;
+    },this.property_CCNodeName);
 
     this.addOutput("run","action");
     this.onExecute = function()
     {
-        // let inputs = this.inputs;
-        // if(inputs.length > 0) {
-        //     let actionName = this.getInputData(0);
-        //     this.setOutputData(0, null);
-        // }
+        let inputs = this.inputs;
+        if(inputs.length > 0) {
+            var targetNameProperty = this.getInputOrProperty("NodeName"); // this.getInputOrProperty("Name")
+            let actionObj = this.getInputData(0);
+            if(actionObj){
+                actionObj.targetNode = targetNameProperty;
+            }
+            console.log("[CHECK] targetCCNode ", inputs, actionObj);
+            this.setOutputData(0, actionObj);
+        }
     }
 }
 ActionNode.targetCCNode.title =  "TargetCCNode";
 
-// cc.sequence(cc.moveTo(0.5, 10,10))
-ActionNode.scquence = function (){
-    this.addInput("In","action");
-    this.addOutput("Next","action");
-    this.onExecute = function()
-    {
-        let inputs = this.inputs;
-        if(inputs.length > 0) {
-            let actionName = this.getInputData(0);
-            this.setOutputData(0, null);
+//Node : processFunction 한개
+//   { order : 2  //실행순서
+//     inputs : [ {name: 'In', type: 'action', link: 2} ]
+//     outputs : [ {name: 'Next', type: 'action', links: null}]
+//     properties : { time :1 }    //Node가 가지고있는 속성값 GUI(widgets)연결해야 컨트롤 할수 있다.
+//     properties_info [ {name: 'time', type: undefined, default_value: 1}]
+//     title : "MoveTo"
+//     type : "action/moveTo"
+//     widgets [ {type: 'number', name: 'time', value: 1, callback: undefined, options: {…}, …} ] //
+//   }
+//slot : Node에서 입력 또는 나가는 칸(그래프가 그려지는)
+var ActionType = {
+    spawn : "spawn",
+    moveTo : "moveTo",
+    scaleTo : "scaleTo"
+}
+ActionNodeCommonOnExecute = function (actionNode) {
+
+    var actionInfo = {
+        order : actionNode.order,
+        type : actionNode.title,
+        properties : actionNode.properties,
+        actionInfoList : null//swap
+    }
+    var actionObj = actionNode.getInputData(0);
+    if(actionObj){
+        if(!actionObj.infos)
+            actionObj.infos = [];
+
+        //만약 inNode에서 links가 여러개라면 배여롤 저장
+        var isSpawn = false;
+        var prevNode = actionNode.getInputNode(0);
+        if(prevNode) {
+            isSpawn = (prevNode.outputs[0].links.length > 1);
+        }
+        if(isSpawn){
+            var spawnInfo =  null;
+            if(actionObj.infos.length > 0){
+                var lastInfo = actionObj.infos[actionObj.infos.length - 1];
+                if(lastInfo.type === ActionType.spawn){
+                    spawnInfo = lastInfo;
+                }
+            }
+            if(spawnInfo === null){
+                spawnInfo = {
+                    order : actionInfo.order,
+                    type : ActionType.spawn,
+                    actionInfo : [],
+                }
+                actionObj.infos.push(spawnInfo);
+            }
+            spawnInfo.actionInfo.push(actionInfo);
+        }
+        else {
+            actionObj.infos.push(actionInfo);
         }
     }
+
+    actionNode.setOutputData(0, actionObj);//아웃풋데이터로 넘김(0번슬롯)
 }
-ActionNode.scquence.title =  "Scquence";
+
+ActionNode.moveTo = function (){
+    this.addInput("In","action");
+    this.addOutput("Next","action");
+
+    var self = this;
+    this.addProperty("time", 1.0,"number");
+    this.addProperty("XPos",   0,"number");
+    this.addProperty("YPos",   0,"number");
+    this.addWidget("number", "time", this.properties.time,function(v) {
+        self.properties.time = v;
+    });
+    this.addWidget("number", "XPos", this.properties.XPos,function(v) {
+        self.properties.XPos = v;
+    });
+    this.addWidget("number", "YPos", this.properties.YPos,function(v) {
+        self.properties.YPos = v;
+    });
+    this.onExecute = ActionNodeCommonOnExecute.bind(this, this);
+
+    // this.onExecute = function()
+    // {
+    //     //'[{"name":"Next","type":"action","links":[3,4],"slot_index":0}]'
+    //     let inputs = this.inputs;
+    //     let outputs = this.outputs;
+    //     if(outputs && outputs.length >0 && outputs[0].links && outputs[0].links.length > 0) {
+    //         // mainGraph.getOutputLinkID()
+    //         var nodes = this.getOutputNodes(0);
+    //         var link_id = outputs[0].links[0];
+    //         var link = mainGraph.links[link_id];
+    //         if (link) {
+    //             var target_node = this.graph.getNodeById(link.target_id);
+    //             //nodes === target_node;
+    //         }
+    //     }
+    //     if(inputs.length > 0) {
+    //         let time = this.getInputData(0);
+    //
+    //         console.log("[CHECK] moveTo ", inputs, time);
+    //         this.setOutputData(0, null);
+    //     }
+    // }
+}
+ActionNode.moveTo.title =  ActionType.moveTo;
+
+ActionNode.scaleTo = function (){
+    this.addInput("In","action");
+    this.addOutput("Next","action");
+
+    var self = this;
+    this.addProperty("time", 1.0,"number");
+    this.addProperty("XScale",   0,"number");
+    this.addProperty("YScale",   0,"number");
+    this.addWidget("number", "time", this.properties.time,function(v) {
+        self.properties.time = v;
+    });
+    this.addWidget("number", "XScale", this.properties.XScale,function(v) {
+        self.properties.XScale = v;
+    });
+    this.addWidget("number", "YScale", this.properties.YScale,function(v) {
+        self.properties.YScale = v;
+    });
+    this.onExecute = ActionNodeCommonOnExecute.bind(this, this);
+
+}
+ActionNode.scaleTo.title =  ActionType.scaleTo;
+
+ActionNode.end = function (){
+    this.addInput("In","action");
+    this.onExecute = function (){
+        var actionObj = this.getInputData(0);
+        var str = JSON.stringify(actionObj);
+        console.log("[CHECK] output ", str);
+    }
+}
+ActionNode.end.title = "end";
 
 for(var key in ActionNode){
     LiteGraph.registerNodeType("action/" +key, ActionNode[key]);
@@ -110,8 +274,8 @@ TimerEvent.prototype.onDrawBackground = function() {
     this.boxcolor = this.triggered
         ? TimerEvent.on_color
         : TimerEvent.off_color;
-    this.color  = this.triggered? "#FF0000" : LiteGraph.NODE_DEFAULT_COLOR;
-    // this.triggered = false;
+    this.color  = this.triggered? "#f66363" : LiteGraph.NODE_DEFAULT_COLOR;
+    this.triggered = false;
 };
 
 TimerEvent.prototype.onExecute = function() {
