@@ -47,13 +47,25 @@ var init = function (){
 
     // graph.start();
     mainGraph = graph;
-
-    $('#button_start').on( 'click',function (){
+    $('#button_start').on('click', function () {
         //     mainGraph.runStep(1, true);
         window.opener
         console.log("[CHECK]")
     });
+
 }
+document.addEventListener('readystatechange', event => {
+    console.log("document readystatechange" + event.target.readyState);
+    // When HTML/DOM elements are ready:
+    if (event.target.readyState === "interactive") {   //does same as:  ..addEventListener("DOMContentLoaded"..
+
+    }
+
+    // When window loaded ( external resources are loaded too- `css`,`src`, etc...)
+    if (event.target.readyState === "complete") {
+
+    }
+});
 //register in the system
 // LiteGraph.clearRegisteredTypes();
 
