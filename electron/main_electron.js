@@ -1,5 +1,5 @@
 // Modules to control application life and create native browser window
-const {app, BrowserWindow, Menu, dialog, globalShortcut } = require('electron');
+const {app, BrowserWindow, Menu, dialog, globalShortcut, screen} = require('electron');
 const path = require('path');
 const loadManager = require('./LoadManager');
 const log = require('electron-log/main');
@@ -8,10 +8,13 @@ const { sentryMainInit } = require('./sentry');
 sentryMainInit();
 
 function createWindow () {
+  // 현재 화면 정보 가져오기
+  const { width, height } = screen.getPrimaryDisplay().workAreaSize;
+
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: width,
+    height: height,
     webPreferences: {
       webSecurity: false,
       preload: path.join(__dirname, 'preload.js'),
