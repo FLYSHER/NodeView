@@ -50,7 +50,46 @@ var Renderer_main = {
 
         ipcRenderer.on( 'redo', function(){
             Genie.CommandManager.redo();
-        })
+        });
+
+        this._initAssetAreaEvent();
+    },
+
+    // 에셋 영역 관련 이벤트 처리
+    _initAssetAreaEvent : function() {
+
+        $('#assets').on("dragover", function(event){
+            event.preventDefault();
+            event.stopPropagation();
+        });
+
+        // 에셋 영역에 파일 드랍
+        // MainProcess 에서 파일로드를 위해 드랍된 파일 경로를 MainProcess 로 보낸다.
+        $('#assets').on("drop", function(event){
+            event.preventDefault();
+            event.stopPropagation();
+
+            var arrFilePaths = [];
+            for (var i=0;i < event.originalEvent.dataTransfer.files.length; i++) {
+                arrFilePaths.push(event.originalEvent.dataTransfer.files[i].path);
+            }
+            ipcRenderer.send( 'file_dropped_on_asset', arrFilePaths );
+        });
+
+        // 메인 프로세스로 보내 파일로드한 다음 로드된 파일 정보를 다시 받음.
+        var self = this;
+        ipcRenderer.on('file_loaded_from_asset', function( event, payload ){
+
+            self.loadResources( payload )
+                .then( function(){
+                    console.log(" *** complete load asset on Asset View *** ");
+                })
+                .catch( function( err ){
+                    console.log("Error > ", error );
+                });
+
+        });
+
     },
 
     /**
@@ -86,7 +125,6 @@ var Renderer_main = {
      * 리소스 캐싱 및 로드
      * 마지막 프로미스를 리턴한다.
      */
-
     loadResources : function( payload ) {
 
         // 리소스 비동기 로드 및 캐싱
