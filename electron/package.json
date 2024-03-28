@@ -6,7 +6,7 @@
   "scripts": {
     "start": "electron .",
     "dev": "nodemon --exec electron  .",
-    "webpack:build": "webpack --config webpack.config.js && npm run sentry:sourcemaps",
+    "webpack:build": "webpack --config webpack.config.js",
     "deploy:win": "electron-builder --windows nsis:ia32 --publish never",
     "deploy:mac": "electron-builder --mac --publish never",
     "deploy:mac-nosign": "electron-builder --mac --config -c.mac.identity=null",
