@@ -10,7 +10,7 @@
     "deploy:win": "electron-builder --windows nsis:ia32 --publish never",
     "deploy:mac": "electron-builder --mac --publish never",
     "deploy:mac-nosign": "electron-builder --mac --config -c.mac.identity=null",
-    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org taegyunhan --project electron ./dist/sourcemap && sentry-cli sourcemaps upload --org taegyunhan --project electron --release=${npm_package_name}@${npm_package_version} ./dist/sourcemap"
+    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org taegyunhan --project electron ./dist/sourcemap && sentry-cli sourcemaps upload --org taegyunhan --project electron ./dist/sourcemap"
   },
   "repository": {
     "type": "git",
