@@ -41,6 +41,14 @@ module.exports = [
       output: {
         filename: '[name].js',
         path: path.resolve(__dirname, 'dist/sourcemap'),
+        sourceMapFilename: 'main_electron.js.map',
+        // devtoolModuleFilenameTemplate: info => {
+        //   let path ='';
+        //   if (info.resourcePath.startsWith('./')) {
+        //     path = 'app:///' + info.resourcePath.slice(2);
+        //   }
+        //   return path;
+        // }
       },
     }),
     Object.assign({}, common_config, {
@@ -124,6 +132,7 @@ module.exports = [
       output: {
         filename: '[name].js',
         path: path.resolve(__dirname, 'dist/sourcemap'),
+        sourceMapFilename: 'renderer_main.js.map',
       },
       plugins: [
         new HtmlWebpackPlugin({
