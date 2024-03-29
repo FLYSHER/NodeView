@@ -27,7 +27,7 @@ const common_config = {
   },
   resolve: {
     extensions: ['.tsx', '.ts', '.js', '.jsx'],
-    modules: [path.resolve(__dirname, './'), 'node_modules'],
+    modules: [path.resolve(__dirname, ''), 'node_modules'],
   },
   devtool: 'source-map',
 };
@@ -42,13 +42,13 @@ module.exports = [
         filename: '[name].js',
         path: path.resolve(__dirname, 'dist/sourcemap'),
         sourceMapFilename: 'main_electron.js.map',
-        // devtoolModuleFilenameTemplate: info => {
-        //   let path ='';
-        //   if (info.resourcePath.startsWith('./')) {
-        //     path = 'app:///' + info.resourcePath.slice(2);
-        //   }
-        //   return path;
-        // }
+        devtoolModuleFilenameTemplate: info => {
+          let path ='';
+          if (info.resourcePath.startsWith('./')) {
+            path = 'app:///' + info.resourcePath.slice(2);
+          }
+          return path;
+        }
       },
     }),
     Object.assign({}, common_config, {

@@ -1,6 +1,3 @@
-const { sentryMainInit } = require('./sentry');
-sentryMainInit();
-
 const { ipcMain } = require('electron');
 const path = require("path");
 const fileUtil  = require('./FileUtil');
