@@ -7,14 +7,13 @@ Genie.Component.ArmatureView = Genie.Component.InspectorBase.extend({
     ctor : function() {
         this._super();
         this.setName( Genie.ComponentName.ARMATURE_VIEW );
-        this._currTrackIdx = 0;
     },
 
     //override
     drawInspector : function() {
-        // var owner = this.getOwner();
-        // var armature        = this.getOwner();
-        // var armatureData    = this.getOwner().getArmatureData();
+        var owner = this.getOwner();
+        var armature        = this.getOwner();
+        var armatureData    = this.getOwner().getArmatureData();
         var animationData   = this.getOwner().getAnimation().getAnimationData();
         var movementNames   = animationData.movementNames;
 
@@ -57,6 +56,9 @@ Genie.Component.ArmatureView = Genie.Component.InspectorBase.extend({
         // movement group
         this.drawMovementData( rootDiv );
 
+        // 참조하는 파일들 리스트
+        this.drawRelativeData( rootDiv );
+
         // time line
         var arFileName = this.getOwner().getName();
         Renderer_timeline.setAnimationTimeline(arFileName + ".ExportJson", this.getSelectedMovName());
@@ -81,6 +83,31 @@ Genie.Component.ArmatureView = Genie.Component.InspectorBase.extend({
         this.mov_dl     = HtmlHelper.createOneShortTextInput( div_group, "duration", dl, true );
         this.mov_sc     = HtmlHelper.createOneShortTextInput( div_group, "speedScale", sc, true, this.onchange.bind(this) );
         this.mov_loop   = HtmlHelper.createCheckboxAttrib( div_group, 'loop', loop, true );
+    },
+
+    drawRelativeData : function( rootDiv ) {
+        var div_group = HtmlHelper.createDiv( rootDiv, 'component_groupDiv' );
+        HtmlHelper.createLabel( div_group, "relativeData", "component_groupTitleLabel" );
+
+        var configFilePath = this.getOwner().getName() + ".ExportJson";
+        var relativeData = ccs.armatureDataManager.getRelativeData( configFilePath );
+
+        // sample
+        // relativeData = {
+        //     animations : ['70bonusAR'],
+        //     armatures  : ['70bonusAR'],
+        //     plistFiles : ['image/70MainAtlas.plist'],
+        //     textures   : ['sl_70BonusSym_03', 'sl_70BonusSym_04', 'sl_70BonusSym_05'] // 사용하는 스프라이트 명
+        // }
+
+        var pngFiles = [];
+        relativeData.plistFiles.forEach( function(item){
+            pngFiles.push( item.replace(".plist", ".png") ) ;
+        });
+
+        var atlasFiles = pngFiles.concat( relativeData.plistFiles );
+        var li_plist = HtmlHelper.createFolderItem( 'Atlas', atlasFiles );
+        div_group.appendChild( li_plist );
     },
 
     setMovementData : function( movementData ) {

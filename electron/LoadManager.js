@@ -104,7 +104,7 @@ var LoadManager  = {
         }
     },
 
-
+    //
     loadFiles : function (files)
     {
         let filesImport = [];
@@ -115,7 +115,6 @@ var LoadManager  = {
             fileFinder.addSearchPath("image");
             fileFinder.addSearchPath("binary/image");
             fileFinder.addSearchPath("../image");
-
 
             if (path.extname(files[i]).toLowerCase()===".exportjson")
             {
@@ -169,27 +168,6 @@ var LoadManager  = {
         }
 
         filesImport = this.getUniqueValuesArray(filesImport);
-
-        //
-        // // replyInputValue 송신 또는 응답
-        // //evt.reply('fileDropEventReply', "1223231");
-        // var baseFolder = path.dirname(files[0]);
-        // var searchPaths = [
-        //     path.join(baseFolder, "image"),
-        //     path.join(baseFolder, "binary/image")
-        // ];
-        //
-        // var filesImport = []
-        // searchPaths.forEach(function(folder){
-        //
-        //     if (fileUtil.exists(folder))
-        //     {
-        //         var arrayOfFiles = fileUtil.getAllFiles(folder);
-        //         filesImport = filesImport.concat(arrayOfFiles);
-        //     }
-        // });
-        //console.log("filesImport.length=" + filesImport.length);
-
 
         let promises = [];
         let dependentsFiles = [];
@@ -252,18 +230,173 @@ var LoadManager  = {
 
     },
 
-    init : function (mainWindow){
+    loadFiles2 : function( files ) {
+        console.log("** LoadManager.loadFiles2 ** ");
+        let i, extName, filePath,
+            targetFiles     = [],
+            dependentFiles = [];
 
+        for( i = 0; i < files.length; ++i ) {
+            filePath    = files[i];
+            extName     = path.extname( filePath ).toLowerCase();
+
+            if( extName === '.exportjson' || extName === '.plist' || extName === ".fnt" ) {
+                if( extName === '.exportjson' ) {
+                    targetFiles.push( filePath );
+                }
+
+                let loc_dependenceList = this.getDependentsFiles( filePath );
+                dependentFiles = dependentFiles.concat( loc_dependenceList );
+            }
+        }
+
+        // 중복 제거
+        this.getUniqueValuesArray( targetFiles );
+        this.getUniqueValuesArray( dependentFiles );
+
+        console.log("   > targetFiles " , targetFiles );
+        console.log("   > dependentsFiles " , dependentFiles );
+
+        // 렌더러에 보낼 파일정보 리스트
+        let targetFileInfoList      = [];
+        let dependenceFileInfoList  = [];
+
+        //
+        let promises = [];
+
+        let fileInfo;
+        for( i = 0; i < targetFiles.length; ++i ) {
+            fileInfo = this.getMetaFileInfo( targetFiles[i] );
+            targetFileInfoList.push( fileInfo );
+        }
+
+        for( i = 0; i < dependentFiles.length; ++i ) {
+            extName = path.extname( dependentFiles[i] ).toLowerCase();
+            if( extName === ".png" ) {
+                promises.push( this.getTextureFileInfoAsync( dependentFiles[i] ) );
+            }
+            else {
+                fileInfo = this.getMetaFileInfo( dependentFiles[i] );
+                dependenceFileInfoList.push( fileInfo );
+            }
+        }
+
+        let mainWindow = this._mainWindow;
+        Promise.all( promises )
+            .then( function( resultArray ){
+                dependenceFileInfoList = dependenceFileInfoList.concat( resultArray );
+            })
+            .then( function (){
+
+                // renderer 에 이벤트 보냄
+                mainWindow.webContents.send( 'file_loaded_from_asset', {
+                    targetFiles     : targetFileInfoList,
+                    dependentFiles  : dependenceFileInfoList
+                });
+            })
+            .catch( function( error ){
+                console.log("Error : ", error );
+            });
+    },
+
+    // exportjson , plist, fnt 의 경우 디펜던시 파일 가져온다.
+    getDependentsFiles : function( filePath ) {
+        let extName = path.extname( filePath ).toLowerCase();
+        let rawData, jsonObj, xmlDoc, loc_dependencyFiles;
+
+        let baseFolder = path.dirname( filePath );
+        let fileFinder = new FileFinder(baseFolder);
+        fileFinder.addSearchPath("image");
+        fileFinder.addSearchPath("binary/image");
+        fileFinder.addSearchPath("../image");
+
+        if( extName === '.exportjson' ) {
+            rawData = fs.readFileSync( filePath, "utf8");
+            jsonObj = JSON.parse( rawData );
+
+            // texture resources
+            loc_dependencyFiles = jsonObj['config_file_path'] ? jsonObj['config_file_path'] : jsonObj['textures'];
+            if( loc_dependencyFiles ) {
+                loc_dependencyFiles.forEach( function( item ){
+                    if (fileFinder.pushFile(item))
+                    {
+                        if (item.endsWith(".plist")) {
+                            fileFinder.pushFile(item.replace(".plist", ".png"))
+                        }
+                    }
+                });
+            }
+
+            // font file
+            let arrFntFiles = [];
+            this.parseWidgetTreeRecursively(jsonObj["widgetTree"], arrFntFiles);
+            arrFntFiles = this.getUniqueValuesArray( arrFntFiles );
+            arrFntFiles.forEach(function(item){
+                fileFinder.pushFile(item);
+            });
+        }
+        else if( extName === ".plist") {
+            fileFinder.pushFile( filePath );
+            fileFinder.pushFile( filePath.replace(".plist", ".png") );
+        }
+        else if( extName === ".fnt" ) {
+            fileFinder.pushFile( filePath );
+            fileFinder.pushFile( filePath.replace(".fnt", ".png") );
+        }
+
+        return fileFinder.getFileList();
+    },
+
+    getMetaFileInfo : function( filePath ) {
+        let extName = path.extname( filePath ).toLowerCase();
+        let content = null;
+        if( extName === ".exportjson" ||
+            extName === ".plist" ||
+            extName === ".fnt" ) {
+
+            content = fs.readFileSync( filePath, "utf-8" );
+        }
+
+        return {
+            filePath: filePath,
+            content : content
+        }
+    },
+
+    getTextureFileInfoAsync : function( filePath ) {
+        return new Promise( function ( resolve, reject){
+            let extName = path.extname( filePath ).toLowerCase();
+            let fileInfo = {
+                filePath: filePath,
+                content : null
+            };
+
+            if( extName === ".png" ) {
+                imageDataURI.encodeFromFile(filePath).then( function( res ){
+                    fileInfo.content = res;
+                    resolve( fileInfo );
+                })
+            }
+            else {
+                reject( "ext name must be .png " );
+            }
+        });
+    },
+
+    init : function (mainWindow){
         this._mainWindow = mainWindow;
-        console.log("LoadManager inited");
+
         // onInputValue 이벤트 수신
         ipcMain.on('fileDropEvent', (evt, payload) => {
             LoadManager.loadFiles(payload);
-        })
+        });
+
+        ipcMain.on( 'file_dropped_on_asset', function( evt, payload ){
+            console.log("ipcMain > file_dropped_on_asset", payload);
+            LoadManager.loadFiles2( payload );
+        });
     }
 
 }
-
-
 
 module.exports = LoadManager;

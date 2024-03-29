@@ -22,6 +22,7 @@
 
         "src/Utils/GenieUtils.js",
         "src/Utils/GenieARUtils.js",
+        "src/Utils/GenieUIUtils.js",
         "src/Utils/ScreenUtils.js",
         "src/Utils/HtmlHelper.js",
         "src/Genie/DebugView/DebugView.js",
@@ -34,6 +35,7 @@
 
         "src/Components/Cocos/TransformComponent.js",
         "src/Components/Cocos/NodePropertyComponent.js",
+        "src/Components/Cocos/UIRootComponent.js",
         "src/Components/Cocos/UIActionComponent.js",
         "src/Components/Cocos/ArmatureComponent.js",
         "src/Components/Cocos/BoneComponent.js",

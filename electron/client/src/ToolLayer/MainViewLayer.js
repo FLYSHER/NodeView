@@ -47,6 +47,7 @@ var MainViewLayer = cc.LayerColor.extend({
         uiRoot.setAnchorPoint( 0.5, 0.5 );
         uiRoot.setPosition( cc.winSize.width/2, cc.winSize.height/2 );
         uiRoot.setName( basename );
+        uiRoot.addComponent(  new Genie.Component.UIRoot( fileName ) );
         uiRoot.addComponent(  new Genie.Component.UIActionView( fileName ) );
         this.addChild( uiRoot );
 
