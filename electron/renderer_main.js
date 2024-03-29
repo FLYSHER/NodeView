@@ -30,15 +30,23 @@ var Renderer_main = {
 
                 console.log("cocos renderer drop");
 
-                var arrFilePaths = [];
-                for (var i=0;i < evt.dataTransfer.files.length; i++)
-                {
-                    arrFilePaths.push(evt.dataTransfer.files[i].path);
+
+                var droppedAssetName = evt.dataTransfer.getData("assetName");
+                if( droppedAssetName ) { // 내부 렌더러로부터 파일 드랍 이루어졌을 경우 처리
+                    var fileEntry = {
+                        name    : droppedAssetName,
+                        content :  JSON.stringify(cc.loader.getRes( droppedAssetName ))
+                    };
+                    Genie.ResourceLoader.createToolFileNode( fileEntry );
                 }
-
-                console.log(" *** event *** : drop > ", arrFilePaths );
-                ipcRenderer.send('fileDropEvent', arrFilePaths);
-
+                else {                   // 외부 파일로부터 파일 드랍 이루어졌을 경우 처리
+                    var arrFilePaths = [];
+                    for (var i=0;i < evt.dataTransfer.files.length; i++) {
+                        arrFilePaths.push(evt.dataTransfer.files[i].path);
+                    }
+                    // console.log(" *** event *** : drop > ", arrFilePaths );
+                    ipcRenderer.send('fileDropEvent', arrFilePaths);
+                }
             }, false);
 
         // main process 와 통신
@@ -53,6 +61,7 @@ var Renderer_main = {
         });
 
         this._initAssetAreaEvent();
+        this._initHierarchyAreaEvent();
     },
 
     // 에셋 영역 관련 이벤트 처리
@@ -90,6 +99,28 @@ var Renderer_main = {
 
         });
 
+    },
+
+    _initHierarchyAreaEvent : function() {
+        $('#hierarchy').on("dragover", function(event){
+            event.preventDefault();
+            event.stopPropagation();
+        });
+
+        // 에셋 -> 계층구조 영역에 파일 드랍
+        $('#hierarchy').on("drop", function(event){
+            event.preventDefault();
+            event.stopPropagation();
+
+            var droppedAssetName = event.originalEvent.dataTransfer.getData("assetName");
+            if( droppedAssetName ) { // 내부 렌더러로부터 파일 드랍 이루어졌을 경우 처리
+                var fileEntry = {
+                    name    : droppedAssetName,
+                    content :  JSON.stringify(cc.loader.getRes( droppedAssetName ))
+                };
+                Genie.ResourceLoader.createToolFileNode( fileEntry );
+            }
+        });
     },
 
     /**
