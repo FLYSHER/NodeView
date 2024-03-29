@@ -56,11 +56,11 @@ module.exports = [
       entry: {
         // renderer
         renderer_main: './renderer_main.js',
-        // renderer_assets: './renderer_assets.js',
-        // renderer_bottom: './renderer_bottom.js',
-        // renderer_hierarchy: './renderer_hierarchy.js',
-        // renderer_inspector: './renderer_inspector.js',
-        // renderer_timeline: './renderer_timeline.js',
+        renderer_assets: './renderer_assets.js',
+        renderer_bottom: './renderer_bottom.js',
+        renderer_hierarchy: './renderer_hierarchy.js',
+        renderer_inspector: './renderer_inspector.js',
+        renderer_timeline: './renderer_timeline.js',
         //
         // // command
         // Command: './client/src/Command/Command.js',
@@ -132,7 +132,7 @@ module.exports = [
       output: {
         filename: '[name].js',
         path: path.resolve(__dirname, 'dist/sourcemap'),
-        sourceMapFilename: 'renderer_main.js.map',
+        sourceMapFilename: '[name].js.map',
       },
       plugins: [
         new HtmlWebpackPlugin({
