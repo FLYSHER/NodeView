@@ -109,7 +109,9 @@ module.exports = [
 
         // utils
         GenieARUtils: './client/src/Utils/GenieARUtils.js',
+        GenieUIUtils: './client/src/Utils/GenieUIUtils.js',
         GenieUtils: './client/src/Utils/GenieUtils.js',
+
         HtmlHelper: './client/src/Utils/HtmlHelper.js',
         ScreenUtils: './client/src/Utils/ScreenUtils.js',
 
