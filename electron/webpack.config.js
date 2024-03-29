@@ -16,18 +16,18 @@ const common_config = {
         {
           test: /\.tsx?$/,
           use: 'ts-loader',
-          // include: [
-          //     path.resolve(__dirname, ''),
-          //     path.resolve(__dirname, 'client'),
-          //     path.resolve(__dirname, 'client/src/*'),
-          // ]
-          exclude: /node_modules/,
+          include: [
+              path.resolve(__dirname, ''),
+              path.resolve(__dirname, 'client'),
+              path.resolve(__dirname, 'client/src/*'),
+          ]
+          // exclude: /node_modules/,
         }
     ],
   },
   resolve: {
     extensions: ['.tsx', '.ts', '.js', '.jsx'],
-    modules: [path.resolve(__dirname, ''), 'node_modules'],
+    modules: [path.resolve(__dirname, './'), 'node_modules'],
   },
   devtool: 'source-map',
 };
@@ -56,11 +56,12 @@ module.exports = [
       entry: {
         // renderer
         renderer_main: './renderer_main.js',
-        renderer_assets: './renderer_assets.js',
-        renderer_bottom: './renderer_bottom.js',
-        renderer_hierarchy: './renderer_hierarchy.js',
-        renderer_inspector: './renderer_inspector.js',
-        renderer_timeline: './renderer_timeline.js',
+        main: './client/main.js',
+        // renderer_assets: './renderer_assets.js',
+        // renderer_bottom: './renderer_bottom.js',
+        // renderer_hierarchy: './renderer_hierarchy.js',
+        // renderer_inspector: './renderer_inspector.js',
+        // renderer_timeline: './renderer_timeline.js',
         //
         // // command
         // Command: './client/src/Command/Command.js',
