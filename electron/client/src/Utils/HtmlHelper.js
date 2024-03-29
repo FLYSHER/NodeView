@@ -257,7 +257,10 @@ var HtmlHelper = {
             listItems[i].addEventListener('click', function(){
                 console.log(this.textContent);
                 var searchString = cc.path.basename(this.textContent);
-                $('#assets').jstree('search', searchString);
+                // $('#assets').jstree('search', searchString);
+                Renderer_assets.findAssetFromOtherArea( searchString );
+
+
             });
 
         }
@@ -518,8 +521,10 @@ var HtmlHelper = {
             HtmlHelper.createOneLongTextInput( parent, "textureName", textureName, true );
             var input_frameName = HtmlHelper.createOneLongTextInput( parent, "frameName", spriteName, true );
             input_frameName.onclick = function( event ) {
+                // var searchString = event.target.value;
+                // $('#assets').jstree('search', searchString);
                 var searchString = event.target.value;
-                $('#assets').jstree('search', searchString);
+                Renderer_assets.findAssetFromOtherArea( searchString )
             }
 
             var originSize = spriteFrame.getOriginalSize();

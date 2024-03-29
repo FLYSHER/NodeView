@@ -151,4 +151,11 @@ var Renderer_assets = {
         $("#assets").jstree(true).settings.core.data = this.treeDataArr;
         $(`#assets`).jstree("refresh");
     },
+
+    // 다른 영역에서 에셋 트리구조내에서 find 기능 호출
+    // find input 에 해당 파일명 자동 입력 및 find
+    findAssetFromOtherArea : function ( fileBaseName ) {
+        $('#assets_findInput').val(fileBaseName);
+        $('#assets').jstree('search', fileBaseName);
+    },
 }
