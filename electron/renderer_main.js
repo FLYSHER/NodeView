@@ -1,6 +1,6 @@
 const { ipcRenderer } = require('electron');
-// const { sentryRendererInit } = require('./sentryRenderer');
-// sentryRendererInit();
+const { sentryRendererInit } = require('./sentry');
+sentryRendererInit();
 
 class FileEntry {
 
