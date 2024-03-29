@@ -84,7 +84,7 @@ var Renderer_main = {
                 .then( function(){
                     console.log(" *** complete load asset on Asset View *** ");
                 })
-                .catch( function( err ){
+                .catch( function( error ){
                     console.log("Error > ", error );
                 });
 

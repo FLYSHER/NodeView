@@ -211,6 +211,72 @@ var HtmlHelper = {
         return div_comp;
     },
 
+    createFolderItem : function(folderName, items ) {
+        // li 엘리먼트 생성
+        const li = document.createElement('li');
+        li.style.listStyleType = 'none';
+        li.style.color = "#DEDEDE";
+
+        // 폴더 토글 버튼 (+)
+        const toggleButton = document.createElement('span');
+        toggleButton.classList.add('folder-toggle');
+        toggleButton.textContent = '+';
+        li.appendChild(toggleButton);
+
+        // 폴더 이름
+        const folderText = document.createTextNode(folderName);
+        li.appendChild(folderText);
+
+        // 하위 리스트 생성
+        const sublist = document.createElement('ul');
+        sublist.style.listStyleType = 'none';
+        sublist.style.margin = '2px';
+        sublist.classList.add('folder-sublist');
+
+        // 하위 아이템 생성 및 추가
+        items.forEach(itemName => {
+            const item = document.createElement('li');
+            item.textContent = itemName;
+            sublist.appendChild(item);
+        });
+        li.appendChild(sublist);
+
+        // 각각의 아이템에 클릭 이벤트 추가
+        var listItems= sublist.getElementsByTagName('li');
+        var i;
+        for( i = 0; i < listItems.length; ++i ) {
+            listItems[i].addEventListener('mouseover', function(){
+
+                var selectedItems = sublist.querySelectorAll('.hover_listItem');
+                selectedItems.forEach(function(selectedItem) {
+                    selectedItem.classList.remove('hover_listItem');
+                });
+                this.classList.add('hover_listItem');
+            });
+
+            listItems[i].addEventListener('click', function(){
+                console.log(this.textContent);
+                var searchString = cc.path.basename(this.textContent);
+                $('#assets').jstree('search', searchString);
+            });
+
+        }
+
+        // 폴더 토글 버튼 클릭 이벤트 추가
+        toggleButton.addEventListener('click', function() {
+            sublist.classList.toggle('folder-sublist');
+
+            // 아이콘 변경 (+, -)
+            if (sublist.classList.contains('folder-sublist')) {
+                toggleButton.textContent = '+';
+            } else {
+                toggleButton.textContent = '-';
+            }
+        });
+
+        return li;
+    },
+
     createComponentMenu : function () {
         const menu_container = document.createElement('div');
 
