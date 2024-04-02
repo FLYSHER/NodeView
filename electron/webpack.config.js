@@ -1,7 +1,5 @@
 const path = require('path');
-// const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { sentryWebpackPlugin } = require("@sentry/webpack-plugin");
-// const fs = require('fs');
 
 // webpack 적용 시에도 main, renderer 따로 적용이 필요함.
 console.log("[taegyun][webpack] __dirname : ", __dirname);
@@ -35,6 +33,14 @@ const common_config = {
       authToken: process.env.SENTRY_AUTH_TOKEN,
       org: "taegyunhan",
       project: "electron",
+      release: {
+        name: "genietool@1.0.5",
+        deploy: {
+          env: 'production',
+          name: 'my_deploy',
+          cleanArtifacts: true
+        }
+      }
     }),
   ],
 };
