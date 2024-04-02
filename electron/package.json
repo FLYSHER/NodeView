@@ -86,7 +86,7 @@
       "./client/frameworks/**/*",
       "./client/res/**/*",
       "./client/src/**/*",
-      "./dist/sourcemap"
+      "./dist/sourcemap/*"
     ]
   }
 }
