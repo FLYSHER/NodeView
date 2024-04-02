@@ -56,7 +56,6 @@ module.exports = [
       entry: {
         // renderer
         renderer_main: './renderer_main.js',
-        // main: './client/main.js',
         // renderer_assets: './renderer_assets.js',
         // renderer_bottom: './renderer_bottom.js',
         // renderer_hierarchy: './renderer_hierarchy.js',
