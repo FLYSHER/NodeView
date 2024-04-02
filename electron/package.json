@@ -2,7 +2,7 @@
   "name": "genietool",
   "version": "1.0.4",
   "description": "A minimal Electron application",
-  "main": "main_electron.js",
+  "main": "dist/sourcemap/main_electron.js",
   "scripts": {
     "start": "electron .",
     "dev": "nodemon --exec electron  .",
