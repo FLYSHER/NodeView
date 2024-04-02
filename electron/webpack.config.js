@@ -1,5 +1,6 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const { sentryWebpackPlugin } = require("@sentry/webpack-plugin");
 const fs = require('fs');
 
 // webpack 적용 시에도 main, renderer 따로 적용이 필요함.
@@ -30,6 +31,13 @@ const common_config = {
     modules: [path.resolve(__dirname, ''), 'node_modules'],
   },
   devtool: 'source-map',
+  plugins: [
+    sentryWebpackPlugin({
+      authToken: process.env.SENTRY_AUTH_TOKEN,
+      org: "taegyunhan",
+      project: "electron",
+    }),
+  ],
 };
 
 module.exports = [
@@ -42,13 +50,13 @@ module.exports = [
         filename: '[name].js',
         path: path.resolve(__dirname, 'dist/sourcemap'),
         sourceMapFilename: 'main_electron.js.map',
-        devtoolModuleFilenameTemplate: info => {
-          let path ='';
-          if (info.resourcePath.startsWith('./')) {
-            path = 'app:///' + info.resourcePath.slice(2);
-          }
-          return path;
-        }
+        // devtoolModuleFilenameTemplate: info => {
+        //   let path ='';
+        //   if (info.resourcePath.startsWith('./')) {
+        //     path = 'app:///' + info.resourcePath.slice(2);
+        //   }
+        //   return path;
+        // }
       },
     }),
     Object.assign({}, common_config, {
@@ -134,19 +142,19 @@ module.exports = [
         path: path.resolve(__dirname, 'dist/sourcemap'),
         sourceMapFilename: '[name].js.map',
       },
-      plugins: [
-        new HtmlWebpackPlugin({
-          filename: 'index.html',
-          template: path.resolve(__dirname, './client/index.html'),
-
-          minify: {
-            collapseWhitespace: true,
-            removeAttributeQuotes: true,
-            removeComments: true,
-          },
-          isBrowser: false,
-          isDevelopment: false,
-        })
-      ],
+      // plugins: [
+      //   new HtmlWebpackPlugin({
+      //     filename: 'index.html',
+      //     template: path.resolve(__dirname, './client/index.html'),
+      //
+      //     minify: {
+      //       collapseWhitespace: true,
+      //       removeAttributeQuotes: true,
+      //       removeComments: true,
+      //     },
+      //     isBrowser: false,
+      //     isDevelopment: false,
+      //   })
+      // ],
     }),
 ];
