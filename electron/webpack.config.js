@@ -1,6 +1,6 @@
 const path = require('path');
 // const HtmlWebpackPlugin = require('html-webpack-plugin');
-//const { sentryWebpackPlugin } = require("@sentry/webpack-plugin");
+const { sentryWebpackPlugin } = require("@sentry/webpack-plugin");
 // const fs = require('fs');
 
 // webpack 적용 시에도 main, renderer 따로 적용이 필요함.
@@ -30,13 +30,13 @@ const common_config = {
     modules: [path.resolve(__dirname, ''), 'node_modules'],
   },
   devtool: 'source-map',
-  // plugins: [
-  //   sentryWebpackPlugin({
-  //     authToken: process.env.SENTRY_AUTH_TOKEN,
-  //     org: "taegyunhan",
-  //     project: "electron",
-  //   }),
-  // ],
+  plugins: [
+    sentryWebpackPlugin({
+      authToken: process.env.SENTRY_AUTH_TOKEN,
+      org: "taegyunhan",
+      project: "electron",
+    }),
+  ],
 };
 
 module.exports = [
