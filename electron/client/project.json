@@ -36,6 +36,7 @@
         "src/Components/Cocos/TransformComponent.js",
         "src/Components/Cocos/NodePropertyComponent.js",
         "src/Components/Cocos/UIRootComponent.js",
+        "src/Components/Cocos/UILayoutComponent.js",
         "src/Components/Cocos/UIActionComponent.js",
         "src/Components/Cocos/ArmatureComponent.js",
         "src/Components/Cocos/BoneComponent.js",

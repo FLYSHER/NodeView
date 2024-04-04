@@ -74,13 +74,13 @@ var HtmlHelper = {
     createSliderInput : function(  parent, placeHolder, min, max, className, readOnly, onchange ) {
         var el_input = document.createElement('input');
         el_input.type   = "range";
+        el_input.min    = min; // 초기 세팅은 문자열이어야 함. ex) "0"
+        el_input.max    = max; // 초기 세팅은 문자열이어야 함. ex) "100"
         el_input.value  = placeHolder;
-        el_input.min    = min;
-        el_input.max    = max;
         el_input.readOnly   = !!readOnly;
         el_input.className  = className;
 
-        onchange && el_input.addEventListener( "change", onchange );
+        onchange && el_input.addEventListener( "input", onchange );
         parent.appendChild(el_input);
         return el_input;
     },
@@ -570,7 +570,16 @@ var HtmlHelper = {
     createSliderAttrib : function( parent, propertyName, placeholder, min, max, readonly, onchange ) {
         var div = HtmlHelper.createDiv( parent, 'component_lineDiv' );
         HtmlHelper.createLabel( div, propertyName, 'component_propertyLabel');
-        return HtmlHelper.createSliderInput( div, placeholder, min, max,'component_attribSlider', readonly, onchange );
+        var input_slider = HtmlHelper.createSliderInput( div, placeholder, min, max,'component_attribSlider', readonly, onchange );
+        var input_text   = HtmlHelper.createTextInput( div, placeholder, 'component_shortTextInput', true, null );
+        return {
+            slider  : input_slider,
+            text    : input_text
+        };
+    },
+
+    createOpacityAttrib : function( parent, propertyName, placeholder, readOnly, onchange ) {
+        return this.createSliderAttrib( parent, propertyName, placeholder, "0", "255",readOnly, onchange )
     },
     // endregion
 

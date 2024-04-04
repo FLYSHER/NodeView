@@ -37,6 +37,9 @@ Genie.Component.UIRoot = Genie.Component.InspectorBase.extend({
 
         var fileName = this.getOwner().getName() + ".ExportJson";
         var json     = cc.loader.getRes( fileName );
+        if( !json ) {
+            return;
+        }
 
         // atlas
         var textures    = json['textures'];

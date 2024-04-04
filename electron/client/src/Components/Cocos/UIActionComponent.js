@@ -25,6 +25,10 @@ Genie.Component.UIActionView = Genie.Component.InspectorBase.extend({
         var titleBar = HtmlHelper.createComponentBar(this.getName(), iconObj);
         rootDiv.appendChild( titleBar );
 
+        if( !this._jsonName ) {
+            return;
+        }
+
         var actionList = ccs.actionManager.getActionList( this._jsonName );
 
         var div_uiAction = HtmlHelper.createDiv( rootDiv, 'component_lineDiv');

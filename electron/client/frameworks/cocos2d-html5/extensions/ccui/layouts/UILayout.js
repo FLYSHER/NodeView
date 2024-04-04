@@ -101,6 +101,8 @@ ccui.Layout = ccui.Widget.extend(/** @lends ccui.Layout# */{
 
         this._clippingRect = cc.rect(0, 0, 0, 0);
         this._backGroundImageColor = cc.color(255, 255, 255, 255);
+
+        this.addComponent( new Genie.Component.UILayout() );
     },
 
     /**

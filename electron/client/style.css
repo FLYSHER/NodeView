@@ -622,6 +622,11 @@ input[readonly] {
     cursor: pointer;
 }
 
+.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
 /**{*/
 /*    !*border: solid 1px #e51313;*!*/
 /*}*/

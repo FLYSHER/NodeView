@@ -25,8 +25,13 @@ Genie.Component.Transform = Genie.Component.InspectorBase.extend({
         rootDiv.appendChild( titleBar );
 
         // position
-        var loc_pos = owner.getPosition();
-        this.input_pos = HtmlHelper.createPointAttrib( rootDiv, "position",  [ parseFloat( loc_pos.x ).toFixed(0), parseFloat(loc_pos.y).toFixed(0)], [false, false], this.onchange.bind(this) );
+        var loc_pos     = owner.getPosition();
+        this.input_pos  = HtmlHelper.createPointAttrib( rootDiv, "position",  [ parseFloat( loc_pos.x ).toFixed(0), parseFloat(loc_pos.y).toFixed(0)], [false, false], this.onchange.bind(this) );
+
+        var loc_parent      = this.input_pos.x.parentNode;
+        this.button_center  = HtmlHelper.createIconButton( loc_parent, { className: 'fa-solid fa-align-center' }, this.onchange.bind(this) );
+
+        // <i className="fa-solid fa-align-center"></i>
 
         // rotation
         HtmlHelper.createOneShortTextInput( rootDiv, "rotation", owner.getRotation(), true );
@@ -59,6 +64,12 @@ Genie.Component.Transform = Genie.Component.InspectorBase.extend({
                 loc_src  = cc.p( owner.getScaleX(), owner.getScaleY() );
                 loc_dest = ( event.target === this.input_scale.x ) ? cc.p( value, loc_src.y ) : cc.p( loc_src.x, value );
                 this.onchange_scaleValue( loc_src, loc_dest );
+                break;
+            case this.button_center:
+                var center = Genie.Utils.getScreenCenterPos();
+                loc_src  = cc.p( Math.round( owner.x ) , Math.round( owner.y ) );
+                loc_dest = cc.p( Math.round( center.x ) , Math.round( center.y ) );
+                this.onchange_positionValue( loc_src, loc_dest );
                 break;
         }
 

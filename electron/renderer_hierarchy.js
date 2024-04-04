@@ -16,6 +16,8 @@ var Renderer_hierarchy = {
         ARGroupComponent    : "ARGroup",    //
         CodeComponent       : "Code",
         EmptyComponent      : "Empty",
+        UI_ROOT             : "UI Root",
+        UI_Layout           : "UI Layout",
     },
 
     init : function( rootLayer ) {
@@ -27,6 +29,7 @@ var Renderer_hierarchy = {
         cc.eventManager.addCustomListener('onRenameTreeNode', this.renameTreeNode.bind(this) );
     },
 
+    //region [ jsTree ]
     _initJSTree : function() {
         // root node 생성 ( main layer )
         this.addTreeNode(
@@ -51,6 +54,10 @@ var Renderer_hierarchy = {
                 "items" : {
                     "addNode"       : {
                         "label"     : "add Node",
+                        "submenu"   : {}
+                    },
+                    "addUI"         : {
+                        "label"     : "add UI",
                         "submenu"   : {}
                     },
                     "addComponent"  : {
@@ -88,12 +95,14 @@ var Renderer_hierarchy = {
         $('#hierarchy_findInput').change( this.onchangeInputFind );
     },
 
-    //region [ jsTree ]
-
     _initContextMenu : function() {
         var addNodeSubMenu = this._jstreeConfig["contextmenu"]["items"]["addNode"]["submenu"];
         this._addSubMenu( addNodeSubMenu, this.MenuPrefix.Node, this.onAddNodeByMenu, this );
         this._addSubMenu( addNodeSubMenu, this.MenuPrefix.Sprite, this.onAddNodeByMenu, this );
+
+        var addUISubMenu = this._jstreeConfig["contextmenu"]["items"]["addUI"]["submenu"];
+        this._addSubMenu( addUISubMenu, this.MenuPrefix.UI_ROOT, this.onAddUIByMenu, this );
+        this._addSubMenu( addUISubMenu, this.MenuPrefix.UI_Layout, this.onAddUIByMenu, this );
 
         var addComponentSubMenu = this._jstreeConfig["contextmenu"]["items"]["addComponent"]["submenu"];
         this._addSubMenu( addComponentSubMenu, this.MenuPrefix.PopupComponent, this.onAddComponentByMenu, this );
@@ -118,6 +127,27 @@ var Renderer_hierarchy = {
             this.addTreeNode( newNode.__instanceId, parentNodeId, "newNode", newNode );
             $(`#hierarchy`).jstree("refresh");
         }
+    },
+
+    onAddUIByMenu : function( obj ) {
+        var currNodeId  = parseInt( obj.reference.prevObject[0].id );
+        var currNode    = this.nodeInstanceIDMap[ currNodeId ];
+        var ui_name     = obj.item.label; // ex) ui_root, ui_layout ...
+        var uiNode;
+        if( currNode ) {
+            switch ( ui_name ) {
+                case this.MenuPrefix.UI_ROOT:
+                    uiNode = new ccui.Layout();
+                    uiNode.addComponent( new Genie.Component.UIRoot );
+                    uiNode.addComponent( new Genie.Component.UIActionView );
+                    currNode.addChild( uiNode );
+
+                    this.addTreeNode( uiNode.__instanceId, currNodeId, "default", uiNode );
+                    break;
+            }
+        }
+
+        $(`#hierarchy`).jstree("refresh");
     },
 
     onAddComponentByMenu : function( obj ) {
