@@ -33,16 +33,18 @@ Genie.Component.UILayout = Genie.Component.InspectorBase.extend({
         HtmlHelper.createLabel( div_group, "clipping", "component_groupTitleLabel" );
         var owner = this.getOwner();
 
+        this.el_clipping = {};
+
         var clippingOptions = [
             'CLIPPING_STENCIL',
             'CLIPPING_SCISSOR'
         ];
-        HtmlHelper.createSelectMenuAttrib( div_group, "clippingType", clippingOptions[owner.getClippingType()], clippingOptions, this.onchange.bind(this) );
-        this.clippingEnabled = HtmlHelper.createCheckboxAttrib( div_group, 'clippingEnabled', owner.isClippingEnabled(), false, this.onchange.bind(this)  );
+        this.el_clipping.clippingType =  HtmlHelper.createSelectMenuAttrib( div_group, "clippingType", clippingOptions[owner.getClippingType()], clippingOptions, this.onchangeInClippingGroup.bind(this) );
+        this.el_clipping.enabled      = HtmlHelper.createCheckboxAttrib( div_group, 'clippingEnabled', owner.isClippingEnabled(), false, this.onchangeInClippingGroup.bind(this)  );
 
         var clippingRect = owner._getClippingRect();
-        HtmlHelper.createPointAttrib( div_group, 'rect_xy', [clippingRect.x, clippingRect.y], [true, true], null );
-        HtmlHelper.createSizeAttrib( div_group, 'rect_wh', [clippingRect.width, clippingRect.height], [true, true], null );
+        this.el_clipping.rect_xy =  HtmlHelper.createPointAttrib( div_group, 'rect_xy', [clippingRect.x, clippingRect.y], [true, true], null );
+        this.el_clipping.rect_wh =  HtmlHelper.createSizeAttrib( div_group, 'rect_wh', [clippingRect.width, clippingRect.height], [true, true], null );
     },
 
     drawBackgroundImageGroup : function() {
@@ -101,42 +103,12 @@ Genie.Component.UILayout = Genie.Component.InspectorBase.extend({
         this.setBGColorAttribByColorType( colorType );
     },
 
-    refreshAllAttribute : function() {
-        // var owner = this.getOwner();
-        // var imgType = [
-        //     'LOCAL_TEXTURE',
-        //     'PLIST_TEXTURE'
-        // ];
-        //
-        // var strRenderingType = [
-        //     "SIMPLE",
-        //     "SLICED"
-        // ];
-        //
-        // this.cb_ignoreSize.checked              = owner.isIgnoreContentAdaptWithSize();
-        // this.input_customSize.width.value       = owner.getCustomSize().width;
-        // this.input_customSize.height.value      = owner.getCustomSize().height;
-        // this.input_texFileName.value            = owner._textureFile;
-        // this.input_texType.value                = imgType[owner._imageTexType];
-        // this.input_imgTextureSize.width.value   = owner.getVirtualRendererSize().width;
-        // this.input_imgTextureSize.height.value  = owner.getVirtualRendererSize().height;
-        //
-        // // renderer group
-        // this.input_renderingType.value      = strRenderingType[owner.getVirtualRenderer().getRenderingType()];
-        // this.size_contentSize.width.value   = owner.getVirtualRenderer().width;
-        // this.size_contentSize.height.value  = owner.getVirtualRenderer().height;
-        //
-        // // sprite view
-        // if( this.div_spritePreview ) {
-        //     this.div_spritePreview.remove();
-        //     this.div_spritePreview = null;
-        // }
-        //
-        // this.div_spritePreview =  HtmlHelper.createDiv( this.rootDiv, 'component_groupDiv' );
-        // HtmlHelper.createLabel( this.div_spritePreview, "SpriteFrame", "component_groupTitleLabel" );
-        //
-        // var textureName = Genie.Utils.getSpriteFrameTextureName( owner._textureFile );
-        // HtmlHelper.createSpritePreviewAttrib( this.div_spritePreview, owner._textureFile, textureName );
+    refreshClippingAttribute : function() {
+        var clippingRect = this.getOwner()._getClippingRect();
+        this.el_clipping.rect_xy.x = clippingRect.x;
+        this.el_clipping.rect_xy.y = clippingRect.y;
+        this.el_clipping.rect_wh.width = clippingRect.width;
+        this.el_clipping.rect_wh.height = clippingRect.height;
     },
 
     refreshBGImageAttribute : function() {
@@ -172,14 +144,36 @@ Genie.Component.UILayout = Genie.Component.InspectorBase.extend({
         }
     },
 
-
-
     onchange : function ( event ) {
         var owner = this.getOwner();
         switch ( event.target ) {
             case this.cb_ignoreSize:
                 break;
             default:
+                break;
+        }
+    },
+
+    onchangeInClippingGroup : function( event ) {
+        var owner = this.getOwner();
+        switch ( event.target ) {
+            case this.el_clipping.clippingType:
+                var currType    = owner.getClippingType();
+                var targetType  = parseInt( event.target.value );
+                if( currType === targetType ) {
+                    return;
+                }
+                Genie.CommandManager.execute( new Genie.Command.UILayoutClippingType( owner, {
+                    src     : currType,
+                    dest    : targetType
+                }) );
+                break;
+            case this.el_clipping.enabled:
+                var checked = event.target.checked;
+                Genie.CommandManager.execute( new Genie.Command.UILayoutClippingEnabled( owner, {
+                    src     : owner.isClippingEnabled(),
+                    dest    : checked
+                }) );
                 break;
         }
     },
@@ -242,7 +236,13 @@ Genie.Component.UILayout = Genie.Component.InspectorBase.extend({
                 var strEndHex = this.el_bgColor.endColor.value;
                 var endColor  = cc.color( strEndHex.slice( 1 ) );
 
-                owner.setBackGroundColor( startColor, endColor );
+                var colorType = owner.getBackGroundColorType();
+                if( colorType === ccui.Layout.BG_COLOR_SOLID ) {
+                    owner.setBackGroundColor( startColor );
+                }
+                else {
+                    owner.setBackGroundColor( startColor, endColor );
+                }
                 break;
 
             case this.el_bgColor.opacityObj.slider:
@@ -284,13 +284,4 @@ Genie.Component.UILayout = Genie.Component.InspectorBase.extend({
         event.preventDefault();
     },
 
-    refreshIgnoreSize : function( value ) {
-        this.cb_ignoreSize.checked = value;
-        this.refreshAllAttribute();
-    },
-
-    refreshTextureFileName : function( value ) {
-        this.input_texFileName.value = value;
-        this.refreshAllAttribute();
-    },
 });

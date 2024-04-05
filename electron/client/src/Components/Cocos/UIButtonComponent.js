@@ -28,9 +28,10 @@ Genie.Component.UIButtonView = Genie.Component.InspectorBase.extend({
         HtmlHelper.createCheckboxAttrib( rootDiv, "pressAction", owner.pressedActionEnabled, false, this.onchange.bind(this) );
         HtmlHelper.createCheckboxAttrib( rootDiv, "scale9Enabled", owner._scale9Enabled, false, this.onchange.bind(this) );
 
-        HtmlHelper.createOneLongTextInput( rootDiv, "normalFileName", owner._normalFileName, false, this.onchange.bind(this));
-        HtmlHelper.createOneLongTextInput( rootDiv, "clickedFileName", owner._clickedFileName, false, this.onchange.bind(this));
-        HtmlHelper.createOneLongTextInput( rootDiv, "disabledFileName", owner._disabledFileName, false, this.onchange.bind(this));
+        this.el_state = {};
+        this.el_state.normal    = HtmlHelper.createOneLongTextInput( rootDiv, "normalFileName", owner._normalFileName, false, this.onchange.bind(this));
+        this.el_state.clicked   = HtmlHelper.createOneLongTextInput( rootDiv, "clickedFileName", owner._clickedFileName, false, this.onchange.bind(this));
+        this.el_state.disabled  = HtmlHelper.createOneLongTextInput( rootDiv, "disabledFileName", owner._disabledFileName, false, this.onchange.bind(this));
 
         // sprite group
         var renderer = owner.getVirtualRenderer();
@@ -38,9 +39,25 @@ Genie.Component.UIButtonView = Genie.Component.InspectorBase.extend({
 
     },
 
+    onDrop : function( event ) {
+        var sprName = event.dataTransfer.getData("assetName");
+
+        switch ( event ) {
+            case this.el_state.normal:
+                this.getOwner().loadTexture()
+                break;
+            case this.el_state.clicked:
+                break;
+            case this.el_state.disabled:
+                break;
+        }
+    },
+
     onchange : function ( event ) {
         var owner = this.getOwner();
-        var value, strValue = event.target.value;
+        switch ( event.target ) {
+
+        }
 
     },
 

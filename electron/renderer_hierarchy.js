@@ -16,8 +16,13 @@ var Renderer_hierarchy = {
         ARGroupComponent    : "ARGroup",    //
         CodeComponent       : "Code",
         EmptyComponent      : "Empty",
+
         UI_ROOT             : "UI Root",
         UI_Layout           : "UI Layout",
+        UI_Image            : "UI Image",
+        UI_Button           : "UI Button",
+        UI_BMFont           : "UI BITMAP Font",
+        UI_TEXT             : "UI True Type Font"
     },
 
     init : function( rootLayer ) {
@@ -103,6 +108,10 @@ var Renderer_hierarchy = {
         var addUISubMenu = this._jstreeConfig["contextmenu"]["items"]["addUI"]["submenu"];
         this._addSubMenu( addUISubMenu, this.MenuPrefix.UI_ROOT, this.onAddUIByMenu, this );
         this._addSubMenu( addUISubMenu, this.MenuPrefix.UI_Layout, this.onAddUIByMenu, this );
+        this._addSubMenu( addUISubMenu, this.MenuPrefix.UI_Image, this.onAddUIByMenu, this );
+        this._addSubMenu( addUISubMenu, this.MenuPrefix.UI_Button, this.onAddUIByMenu, this );
+        this._addSubMenu( addUISubMenu, this.MenuPrefix.UI_BMFont, this.onAddUIByMenu, this );
+        this._addSubMenu( addUISubMenu, this.MenuPrefix.UI_TEXT, this.onAddUIByMenu, this );
 
         var addComponentSubMenu = this._jstreeConfig["contextmenu"]["items"]["addComponent"]["submenu"];
         this._addSubMenu( addComponentSubMenu, this.MenuPrefix.PopupComponent, this.onAddComponentByMenu, this );
@@ -133,7 +142,7 @@ var Renderer_hierarchy = {
         var currNodeId  = parseInt( obj.reference.prevObject[0].id );
         var currNode    = this.nodeInstanceIDMap[ currNodeId ];
         var ui_name     = obj.item.label; // ex) ui_root, ui_layout ...
-        var uiNode;
+        var uiNode, uiWidget;
         if( currNode ) {
             switch ( ui_name ) {
                 case this.MenuPrefix.UI_ROOT:
@@ -144,6 +153,37 @@ var Renderer_hierarchy = {
 
                     this.addTreeNode( uiNode.__instanceId, currNodeId, "default", uiNode );
                     break;
+
+                case this.MenuPrefix.UI_Layout:
+                    uiWidget = new ccui.Layout();
+                    currNode.addChild( uiWidget );
+                    this.addTreeNode( uiWidget.__instanceId, currNodeId, "panel", uiWidget );
+                    break;
+
+                case this.MenuPrefix.UI_Image:
+                    uiWidget = new ccui.ImageView();
+                    currNode.addChild( uiWidget );
+                    this.addTreeNode( uiWidget.__instanceId, currNodeId, "image", uiWidget );
+                    break;
+
+                case this.MenuPrefix.UI_Button:
+                    uiWidget = new ccui.Button();
+                    currNode.addChild( uiWidget );
+                    this.addTreeNode( uiWidget.__instanceId, currNodeId, "button", uiWidget );
+                    break;
+
+                case this.MenuPrefix.UI_BMFont:
+                    uiWidget = new ccui.LabelBMFont();
+                    currNode.addChild( uiWidget );
+                    this.addTreeNode( uiWidget.__instanceId, currNodeId, "bm font", uiWidget );
+                    break;
+
+                case this.MenuPrefix.UI_TEXT:
+                    uiWidget = new ccui.Text();
+                    currNode.addChild( uiWidget );
+                    this.addTreeNode( uiWidget.__instanceId, currNodeId, "ttf", uiWidget );
+                    break;
+
             }
         }
 

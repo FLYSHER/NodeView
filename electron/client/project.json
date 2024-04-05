@@ -52,6 +52,7 @@
 
         "src/Command/Command.js",
         "src/Command/TransformCommand.js",
+        "src/Command/UILayoutCommand.js",
         "src/Command/UITextCommand.js",
         "src/Command/UILabelBMFontCommand.js",
         "src/Command/UIImageViewCommand.js",
