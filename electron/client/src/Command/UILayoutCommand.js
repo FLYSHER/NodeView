@@ -10,7 +10,7 @@ Genie.Command.UILayoutClippingType = Genie.Command.Base.extend({
     },
 
     // override
-    setCommandOnMainView : function( value ) {
+    setCommandOnMainView : function( value /* args.src or args.dest */  ) {
         this._targetNode.setClippingType( value );
         Genie.GizmoController.updateGizmoByTarget( this._targetNode );
     },

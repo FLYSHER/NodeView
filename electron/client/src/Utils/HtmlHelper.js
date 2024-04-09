@@ -472,6 +472,20 @@ var HtmlHelper = {
         return HtmlHelper.createColorInput( div, placeholder, 'component_shortTextInput',  onchange );
     },
 
+    // 각각의 이벤트는 외부에서..
+    createLongInputAndIconButton : function( parent, propertyName, placeholder, readOnly, iconInfoObj  ) {
+        var div = HtmlHelper.createDiv( parent, 'component_lineDiv' );
+        HtmlHelper.createLabel( div, propertyName, 'component_propertyLabel');
+        var el_input    = HtmlHelper.createTextInput( div, placeholder, 'component_longTextInput', readOnly);
+        var el_button   = HtmlHelper.createIconButton( div, iconInfoObj );
+        el_button.style.width = '30px';
+
+        return {
+            el_input : el_input,
+            el_button: el_button
+        }
+    },
+
     createScale9RendererGroup : function( parent, scale9Renderer, change ) {
         var strRenderingType = [
             "SIMPLE",
@@ -495,6 +509,11 @@ var HtmlHelper = {
 
         var textureName = Genie.Utils.getSpriteFrameTextureName( frameName);
         HtmlHelper.createSpritePreviewAttrib( div_sprite, frameName, textureName );
+
+        return {
+            div_renderer : div_renderer,
+            spriteName   : frameName,
+        };
     },
 
     createTexturePreviewAttrib : function( parent, src ) {
