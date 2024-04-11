@@ -1,3 +1,6 @@
+// const { sentryRendererInit } = require('../../../sentryRenderer');
+// sentryRendererInit();
+
 /**
  * Created by flysherdev11 on 2023. 3. 2..
  */

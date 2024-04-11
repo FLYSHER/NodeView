@@ -1,3 +1,8 @@
+// const { sentryRendererInit } = require('../../../sentryRenderer');
+// sentryRendererInit();
+
+var Genie = Genie || {};
+
 Genie.ARUtil= {
 
     getARNameFromFileName : function(ARfileName){

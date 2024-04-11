@@ -1,3 +1,6 @@
+// const { sentryRendererInit } = require('../../../../sentryRenderer');
+// sentryRendererInit();
+
 var Genie = Genie || {};
 Genie.Node = Genie.Node || {};
 

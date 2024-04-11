@@ -1,16 +1,16 @@
 {
   "name": "genietool",
-  "version": "1.0.0",
+  "version": "1.0.5",
   "description": "A minimal Electron application",
-  "main": "main_electron.js",
+  "main": "dist/sourcemap/main_electron.js",
   "scripts": {
     "start": "electron .",
     "dev": "nodemon --exec electron  .",
-    "webpack:build": "webpack --config webpack.config.js && npm run sentry:sourcemaps",
+    "webpack:build": "webpack --config webpack.config.js",
     "deploy:win": "electron-builder --windows nsis:ia32 --publish never",
     "deploy:mac": "electron-builder --mac --publish never",
     "deploy:mac-nosign": "electron-builder --mac --config -c.mac.identity=null",
-    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org taegyunhan --project electron --release NodeView-flysher-@1.0.0 ./dist && sentry-cli sourcemaps upload --org taegyunhan --project electron --release NodeView-flysher-@1.0.0 ./dist"
+    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org taegyunhan --project electron ./dist/sourcemap && sentry-cli sourcemaps upload --org taegyunhan --project electron ./dist/sourcemap"
   },
   "repository": {
     "type": "git",
@@ -28,15 +28,18 @@
   "devDependencies": {
     "electron": "^18.3.15",
     "electron-builder": "^23.0.3",
-    "webpack": "^5.90.3",
+    "webpack": "^5.91.0",
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
     "@sentry/cli": "^2.30.2",
     "@sentry/electron": "^4.20.0",
+    "@sentry/integrations": "^7.108.0",
+    "@sentry/webpack-plugin": "^2.16.0",
     "animation-timeline-js": "^2.3.0",
     "electron-localshortcut": "^3.2.1",
     "electron-log": "^5.0.0",
+    "html-webpack-plugin": "^5.6.0",
     "image-data-uri": "^2.0.1"
   },
   "build": {
@@ -83,7 +86,8 @@
       "./client/*",
       "./client/frameworks/**/*",
       "./client/res/**/*",
-      "./client/src/**/*"
+      "./client/src/**/*",
+      "./dist/sourcemap/*"
     ]
   }
 }

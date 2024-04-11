@@ -1,3 +1,6 @@
+// const { sentryRendererInit } = require('../../sentryRenderer');
+// sentryRendererInit();
+
 var res = {
     HelloWorld_png : "res/HelloWorld.png",
     RobotoCondensedBold : "res/fonts/RobotoCondensed-Bold.ttf"

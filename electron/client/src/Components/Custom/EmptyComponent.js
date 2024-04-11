@@ -1,3 +1,9 @@
+// const { sentryRendererInit } = require('../../../../sentryRenderer');
+// sentryRendererInit();
+
+var Genie = Genie || {};
+Genie.Component = Genie.Component || {};
+
 Genie.Component.Empty = Genie.Component.InspectorBase.extend({
     ctor : function () {
         this._super();
@@ -20,6 +26,7 @@ Genie.Component.Empty = Genie.Component.InspectorBase.extend({
         var titleBar = HtmlHelper.createComponentBar(this.getName(), iconObj);
         rootDiv.appendChild(titleBar);
         this.rootDiv = rootDiv;
+        MyTestError1();
     },
 
 });

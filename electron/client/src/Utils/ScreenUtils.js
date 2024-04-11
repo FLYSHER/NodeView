@@ -1,3 +1,6 @@
+// const { sentryRendererInit } = require('../../../sentryRenderer');
+// sentryRendererInit();
+
 /**
  * 스크린과 관련된 함수 모음
  * @namespace

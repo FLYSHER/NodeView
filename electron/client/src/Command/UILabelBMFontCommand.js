@@ -1,3 +1,8 @@
+// const { sentryRendererInit } = require('../../../sentryRenderer');
+// sentryRendererInit();
+
+var Genie = Genie || {};
+Genie.Command = Genie.Command || {};
 
 Genie.Command.UILabelBMFontText = Genie.Command.Base.extend({
     ctor : function( targetNode, args ) {

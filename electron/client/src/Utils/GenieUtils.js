@@ -1,6 +1,16 @@
+// const { sentryRendererInit } = require('../../../sentryRenderer');
+// sentryRendererInit();
+
 var Genie = Genie || {};
 
 Genie.Utils = {
+    //배열 중복제거
+    getUniqueValuesArray : function( arr ) {
+        return arr.filter( function( value, index, self ) {
+            return self.indexOf( value ) === index;
+        } );
+    },
+
     drawAllComponentInspector : function( node ) {
         var components = node._componentContainer._components;
         var comp;

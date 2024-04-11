@@ -1,3 +1,8 @@
+// const { sentryRendererInit } = require('../../../../sentryRenderer');
+// sentryRendererInit();
+
+var Genie = Genie || {};
+Genie.Component = Genie.Component || {};
 Genie.Component.ARGroup = Genie.Component.InspectorBase.extend({
     ctor : function() {
         this._super();

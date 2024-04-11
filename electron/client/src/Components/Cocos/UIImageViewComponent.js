@@ -1,3 +1,9 @@
+// const { sentryRendererInit } = require('../../../../sentryRenderer');
+// sentryRendererInit();
+
+var Genie = Genie || {};
+Genie.Component = Genie.Component || {};
+
 // 소유자의 타입이 uiWidget 이어야 함.
 Genie.Component.UIImageView = Genie.Component.InspectorBase.extend({
     ctor : function() {
@@ -34,8 +40,10 @@ Genie.Component.UIImageView = Genie.Component.InspectorBase.extend({
         this.input_texFileName = HtmlHelper.createOneLongTextInput( rootDiv, 'textureFile', owner._textureFile, false );
         this.input_texFileName.ondrop = this.onDrop.bind(this);
         this.input_texFileName.onclick = function( event ) {
+            // var searchString = event.target.value;
+            // $('#assets').jstree('search', searchString);
             var searchString = event.target.value;
-            $('#assets').jstree('search', searchString);
+            Renderer_assets.findAssetFromOtherArea( searchString )
         }
 
         // texture type

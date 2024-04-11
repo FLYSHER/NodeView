@@ -1,3 +1,8 @@
+// const { sentryRendererInit } = require('../../../../sentryRenderer');
+// sentryRendererInit();
+
+var Genie = Genie || {};
+Genie.Component = Genie.Component || {};
 // 소유자의 타입이 uiWidget 이어야 함.
 Genie.Component.BoneView = Genie.Component.InspectorBase.extend({
     ctor : function() {
@@ -100,8 +105,10 @@ Genie.Component.BoneView = Genie.Component.InspectorBase.extend({
         var display = decoDisplay.getDisplay();
         var input_displayName =  HtmlHelper.createOneLongTextInput( div_group, '  displayName', display._displayName, true );
         input_displayName.onclick = function( event ) {
+            // var searchString = event.target.value;
+            // $('#assets').jstree('search', searchString);
             var searchString = event.target.value;
-            $('#assets').jstree('search', searchString);
+            Renderer_assets.findAssetFromOtherArea( searchString )
         }
 
         // display sub group

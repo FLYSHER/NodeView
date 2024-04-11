@@ -1,7 +1,7 @@
 const path = require('path');
+const { sentryWebpackPlugin } = require("@sentry/webpack-plugin");
 
 // webpack 적용 시에도 main, renderer 따로 적용이 필요함.
-
 console.log("[taegyun][webpack] __dirname : ", __dirname);
 
 const common_config = {
@@ -16,36 +16,57 @@ const common_config = {
           use: 'ts-loader',
           include: [
               path.resolve(__dirname, ''),
-              path.resolve(__dirname, 'client')
+              path.resolve(__dirname, 'client'),
+              path.resolve(__dirname, 'client/src/*'),
           ]
+          // exclude: /node_modules/,
         }
     ],
   },
   resolve: {
-    extensions: ['.tsx', '.ts', '.js'],
+    extensions: ['.tsx', '.ts', '.js', '.jsx'],
+    modules: [path.resolve(__dirname, ''), 'node_modules'],
   },
   devtool: 'source-map',
+  plugins: [
+    sentryWebpackPlugin({
+      authToken: process.env.SENTRY_AUTH_TOKEN,
+      org: "taegyunhan",
+      project: "electron",
+      release: {
+        name: "genietool@1.0.5",
+        deploy: {
+          env: 'production',
+          name: 'my_deploy',
+          cleanArtifacts: true
+        }
+      }
+    }),
+  ],
 };
 
 module.exports = [
     Object.assign({}, common_config, {
       target: 'electron-main',
       entry: {
-        index: './main_electron.js',
+        main_electron: './main_electron.js',
       },
       output: {
-        filename: '[name]-main-bundle.js',
-        path: path.resolve(__dirname, 'dist'),
+        filename: '[name].js',
+        path: path.resolve(__dirname, 'dist/sourcemap'),
+        // sourceMapFilename: 'main_electron.js.map',
       },
     }),
     Object.assign({}, common_config, {
       target: 'electron-renderer',
       entry: {
-        index: './renderer_main.js',
+        // renderer
+        renderer_main: './renderer_main.js',
       },
       output: {
-        filename: '[name]-renderer-bundle.js',
-        path: path.resolve(__dirname, 'dist'),
+        filename: '[name].js',
+        path: path.resolve(__dirname, 'dist/sourcemap'),
+        // sourceMapFilename: '[name].js.map',
       },
     }),
 ];
