@@ -917,6 +917,7 @@ LiteGraph.registerNodeType("circleci/executor", ExecutorNode);
 //endregion
 var eventfun = null;
 if(isDebug === false) {
+    const { ipcRenderer } = require('electron');
     ipcRenderer.on('channel1', (event, ...args) => {
         //do something with message
         console.log("cccc "+ event + args);
@@ -924,6 +925,8 @@ if(isDebug === false) {
         ipcRenderer.send('onTest2', ["end"]); //ipcMain쪽으로 onTest2 이벤트를 보냄 ipcMain.on("onTest2" ..)통해 받음
     });
 
+    //ipcMain : back쪽에서 electron데이타 처리
+    //ipcRenderer : 는 BrowserWindow 쪽 그래서 ipcRenderer.send가 아니고 loadManager._mainWindow.webContents.send 로 처리
     eventfun = function (eventName, data, receiveCallback){
         switch (eventName){
             case "request_nodeTree":
