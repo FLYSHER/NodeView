@@ -62,6 +62,10 @@ var Renderer_main = {
             Genie.CommandManager.redo();
         });
 
+        ipcRenderer.on("getHierarchy", function (){
+            ipcRenderer.send('nodeHierarchy',[Renderer_hierarchy.hierarchyData]);
+        }.bind(this));
+
         this._initAssetAreaEvent();
         this._initHierarchyAreaEvent();
     },

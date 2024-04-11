@@ -98,10 +98,22 @@ const template = [
             win.webContents.send('channel1', ["sssss"]);
           });
           // Or load a local HTML file
+          win.webContents.openDevTools();
           win.loadFile('index2.html')
           win.webContents.openDevTools();
           ipcMain.on("onTest2",(evt, payload) => {
             console.log('on ipcMain event:: ', payload);
+          });
+
+          ipcMain.on("nodeHierarchy",(evt, payload) => {
+            console.log("ipcMain > getHierarchy ", payload);
+            win.webContents.send('request_nodeTree', payload);
+          });
+
+          ipcMain.on("request_nodeTree",(evt, payload) => {
+            console.log("ipcMain > request_nodeTree", payload);
+            loadManager._mainWindow.webContents.send('getHierarchy');
+            console.log("ipcMain > request_nodeTree end", payload);
           });
         }
 

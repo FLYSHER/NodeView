@@ -1,7 +1,8 @@
 //https://github.com/jagenjo/litegraph.js
-var isDebug = true;
+var isDebug = false;
 
 var mainGraph = null;
+var mainGraphCanvas = null;
 var init = function (){
     var graph = new LGraph();
 
@@ -12,10 +13,10 @@ var init = function (){
     graph.add(node_const);
     // node_const.setValue(4.5);
 
-    var targetCCNode = LiteGraph.createNode("action/targetCCNode");
-    targetCCNode.pos = [400,100];
-    graph.add(targetCCNode);
-    node_const.connect(0, targetCCNode, 0 );
+    // var targetCCNode = LiteGraph.createNode("action/targetCCNode");
+    // targetCCNode.pos = [400,100];
+    // graph.add(targetCCNode);
+    // node_const.connect(0, targetCCNode, 0 );
 
     //
     // var scquence = LiteGraph.createNode("action/scquence");
@@ -26,12 +27,12 @@ var init = function (){
     var moveTo = LiteGraph.createNode("action/moveTo");
     moveTo.pos = [100,200];
     graph.add(moveTo);
-    targetCCNode.connect(0, moveTo, 0 );
+    node_const.connect(0, moveTo, 0 );
 
     var scaleTo = LiteGraph.createNode("action/scaleTo");
     scaleTo.pos = [100,400];
     graph.add(scaleTo);
-    targetCCNode.connect(0, scaleTo, 0 );
+    node_const.connect(0, scaleTo, 0 );
 
     var moveTo2 = LiteGraph.createNode("action/moveTo");
     moveTo2.pos = [400,200];
@@ -47,10 +48,11 @@ var init = function (){
 
     // graph.start();
     mainGraph = graph;
+    mainGraphCanvas = canvas;
     $('#button_start').on('click', function () {
-        //     mainGraph.runStep(1, true);
-        window.opener
-        console.log("[CHECK]")
+        // mainGraph.runStep(1, true);
+        // console.log("[CHECK]")
+        eventfun("request_nodeTree");
     });
 
 }
@@ -72,7 +74,7 @@ document.addEventListener('readystatechange', event => {
 //Action Node Class
 var ActionNode = {};
 ActionNode.start = function (){
-    this.addOutput("start","startnode");
+    this.addOutput("start","action");
     this.addProperty("Name", "actionName","text");
     var self = this;
     this.widget = this.addWidget("text", "Name", "actionName",    function(v) {
@@ -126,6 +128,7 @@ ActionNode.targetCCNode.title =  "TargetCCNode";
 //     widgets [ {type: 'number', name: 'time', value: 1, callback: undefined, options: {…}, …} ] //
 //   }
 //slot : Node에서 입력 또는 나가는 칸(그래프가 그려지는)
+//LGraphCanvas.prototype.drawNodeWidgets
 var ActionType = {
     spawn : "spawn",
     moveTo : "moveTo",
@@ -241,9 +244,404 @@ ActionNode.scaleTo = function (){
 
 }
 ActionNode.scaleTo.title =  ActionType.scaleTo;
+// success : function(data) {
+//     tmp7 += "<div style='width:600px;'>";
+//     tmp7 +="<br/>";
+//     tmp7 +="<div id='diagTree' style='width:200px; height:300px; float:left; background-color:white;'>";
+//     tmp7 +="<br/>";
+//     tmp7 +="<div id='notetree' style='text-align: left'>";
+//     tmp7 +="</div>";
+//     tmp7 +="</div>";
+//     tmp7 +="<div style='width:400px; height:300px; float:left; background-color:white;'></div>";
+//     tmp7 += "</div>";
+//     var typelist = '<ul class="notetypelist">';
+//     $.each(data, function(key, val){
+//         typelist += "<li id='"+data[key].technicalid+"' name='nttype'"+counter+"' value='" + data[key].note_type + "'>" +techtype + "</li>";
+//     });
+//     typelist += '</ul>';
+//     $("#notetree").jstree();
+//     //$('#notetree').html(typelist);
+//     $('#notetree').jstree(true).settings.core.data = typelist;
+//     $('#notetree').jstree(true).refresh();
+// }
+
+// var newDiv = $(document.createElement('div'));
+// // $(newDiv).html(tmp7);
+// // $(newDiv).dialog({});
+
+function ContextMenu(values, options) {
+    options = options || {};
+    this.options = options;
+    var root =  document.createElement("div");
+    root.className = "litegraph litecontextmenu litemenubar-panel";
+    if (options.className) {
+        root.className += " " + options.className;
+    }
+    root.style.minWidth = 100;
+    root.style.minHeight = 100;
+    root.style.pointerEvents = "none";
+    setTimeout(function() {
+        root.style.pointerEvents = "auto";
+    }, 100); //delay so the mouse up event is not caught by this element
+    this.root = root;
+    //scrollView
+    root.style.overflow = "auto";
+    root.style.height = "200";
+    root.style.width = "200";
+
+    ////JSTree
+    this.hierarchyData = [];
+    this.addTreeNode  = function( id, parentID, text, realNode  ) {
+        if( this.isExistNode( id, parentID ) ) {
+            return;
+        }
+        this.hierarchyData.push({
+            "id"        : id,
+            "parent"    : parentID,
+            "text"      : text
+        });
+    };
+    this.isExistNode = function( id, parentID ) {
+        var findOjb = this.hierarchyData.find( function (item){
+            return ( item.parent === parentID && item.id === id );
+        })
+
+        return !!findOjb;
+    },
+    this.onRefreshTree = function() {
+        this.jsTreeRoot.jstree(true).settings.core.data = this.hierarchyData;
+        this.jsTreeRoot.jstree("refresh");
+    },
+
+    this.addTreeNode(1,
+"#",
+    "Root");
+
+    var id = 1;
+    for(var n = 0; n < 30; n++) {
+        this.addTreeNode(id + 1,
+            id,
+            "Child" + id);
+        id = id +1;
+    }
+    this.addTreeNode(id,
+        1,
+        "Child1" + id);
+
+
+    this._jstreeConfig = {
+            'core' : {
+                'themes' : {
+                    "name": "default-dark",
+                    "dots": false,
+                    "icons": false
+                },
+                'data' : [
+                ]
+            },
+            "plugins": [ "contextmenu"],
+            "contextmenu" : {
+                "items" : function (jsTreeNode) {
+                    var obj = {};
+                    obj[ "OpenTree" ] = {
+                        "label" : "OpenTree",
+                        "action" : function (obj) {
+                            var n =   this.jsTreeRoot.jstree(true).get_node(obj.reference);
+                            this.jsTreeRoot.jstree("open_all", n.id);
+                            this.jsTreeRoot.jstree("refresh");
+                        }.bind(this)
+                    };
+                    obj[ "CloseTree" ] = {
+                        "label" : "CloseTree",
+                        "action" : function (obj) {
+                            var n =   this.jsTreeRoot.jstree(true).get_node(obj.reference);
+                            this.jsTreeRoot.jstree("close_all", n.id);
+                            this.jsTreeRoot.jstree("refresh");
+                        }.bind(this)
+                    };
+                    return obj;
+                }.bind(this)
+            },
+            // "search": {
+            //     "case_sensitive": false,
+            //     "show_only_matches": true
+            // }
+        };
+
+    var jsTreeRoot = $(this.root); ///document.createElement("jstreeRoot"); // $('#jstreetest');//
+    // jsTreeRoot.className = 'jstree-icon jstree-themeicon';
+    // root = root.appendChild(jsTreeRoot);
+    jsTreeRoot.jstree( this._jstreeConfig );
+    jsTreeRoot.on("show_contextmenu.jstree", function (e, reference, element){
+        // var $node = $('#'+reference.node.id),
+        //     $menu = $('.vakata-context').first(),
+        //     nodeTop = $node.offset().top,
+        //     menuTop = nodeTop + $node.height() - $menu.height(),
+        //     menuLeft = 200,
+        //     $subMenu = $menu.find('ul'),
+
+        $('.vakata-context').css('z-index', 9999);
+    })
+    jsTreeRoot.on("select_node.jstree", function (e, data) {
+        if (options.callback) {
+            var r = options.callback.call(
+                this,
+                data.node.text,
+                options);
+
+            if (this.root.parentNode) {
+                this.root.parentNode.removeChild(this.root);
+            }
+        }
+    }.bind(this));
+
+    jsTreeRoot.bind("open_node.jstree close_node.jstree", function (e,data) {
+        // var currentNode = data.node;
+        // if(e.type === "open_node") {
+        //    jsTreeRoot.jstree("refresh");
+        // }
+    })
+    this.jsTreeRoot = jsTreeRoot;
+
+    this.onRefreshTree();
+
+    //insert before checking position
+    var root_document = document;
+    if (options.event) {
+        root_document = options.event.target.ownerDocument;
+    }
+    if (!root_document) {
+        root_document = document;
+    }
+
+    if( root_document.fullscreenElement )
+        root_document.fullscreenElement.appendChild(root);
+    else
+        root_document.body.appendChild(root);
+
+    //compute best position
+    var left = options.left || 0;
+    var top = options.top || 0;
+    if (options.event) {
+        left = options.event.clientX - 10;
+        top = options.event.clientY - 10;
+        if (options.title) {
+            top -= 20;
+        }
+
+        if (options.parentMenu) {
+            var rect = options.parentMenu.root.getBoundingClientRect();
+            left = rect.left + rect.width;
+        }
+
+        var body_rect = document.body.getBoundingClientRect();
+        var root_rect = root.getBoundingClientRect();
+        if(body_rect.height == 0)
+            console.error("document.body height is 0. That is dangerous, set html,body { height: 100%; }");
+
+        if (body_rect.width && left > body_rect.width - root_rect.width - 10) {
+            left = body_rect.width - root_rect.width - 10;
+        }
+        if (body_rect.height && top > body_rect.height - root_rect.height - 10) {
+            top = body_rect.height - root_rect.height - 10;
+        }
+    }
+
+    root.style.left = left + "px";
+    root.style.top = top + "px";
+
+    if (options.scale) {
+        root.style.transform = "scale(" + options.scale + ")";
+    }
+}
 
 ActionNode.end = function (){
     this.addInput("In","action");
+    var widget = {
+        type: "custom",
+        name: "testBtn",
+        value: "testBtn",
+        options : {
+            values : ['red', 'green']
+        },
+        mouse(event, pos, node){
+            var w = this;
+            var x = pos[0];
+            var y = pos[1];
+            var deltaX = event.deltaX || event.deltax || 0;
+            var old_value = w.value;
+            var width = node.size[0];
+            var widget_height = w.computeSize ? w.computeSize(width)[1] : LiteGraph.NODE_WIDGET_HEIGHT;
+            var widget_width = w.width || width;
+
+            var ref_window = mainGraphCanvas.getCanvasWindow();
+            function inner_value_change(widget, value) {
+                if(widget.type == "number"){
+                    value = Number(value);
+                }
+                widget.value = value;
+                if ( widget.options && widget.options.property && node.properties[widget.options.property] !== undefined ) {
+                    node.setProperty( widget.options.property, value );
+                }
+                if (widget.callback) {
+                    widget.callback(widget.value, that, node, pos, event);
+                }
+            }
+
+            if (event.type == LiteGraph.pointerevents_method+"move" && w.type == "number") {
+                if(deltaX)
+                    w.value += deltaX * 0.1 * (w.options.step || 1);
+                if ( w.options.min != null && w.value < w.options.min ) {
+                    w.value = w.options.min;
+                }
+                if ( w.options.max != null && w.value > w.options.max ) {
+                    w.value = w.options.max;
+                }
+            }
+            else if (event.type == LiteGraph.pointerevents_method+"down") {
+                eventfun("request_nodeTree" ,
+                     function (data){
+                        cc.log("[CHECK] request_nodeTree ", data);
+                     });
+                var values = w.options.values;
+                if (values && values.constructor === Function) {
+                    values = w.options.values(w, node);
+                }
+                var values_list = null;
+
+                if( w.type != "number")
+                    values_list = values.constructor === Array ? values : Object.keys(values);
+
+                var delta = x < 40 ? -1 : x > widget_width - 40 ? 1 : 0;
+                if (delta) { //clicked in arrow, used for combos
+                    var index = -1;
+                    this.last_mouseclick = 0; //avoids dobl click event
+                    if(values.constructor === Object)
+                        index = values_list.indexOf( String( w.value ) ) + delta;
+                    else
+                        index = values_list.indexOf( w.value ) + delta;
+                    if (index >= values_list.length) {
+                        index = values_list.length - 1;
+                    }
+                    if (index < 0) {
+                        index = 0;
+                    }
+                    if( values.constructor === Array )
+                        w.value = values[index];
+                    else
+                        w.value = index;
+                } else { //combo clicked
+                    var text_values = values != values_list ? Object.values(values) : values;
+                    var menu = new ContextMenu(//new LiteGraph.ContextMenu( //new ContextMenu(
+                        text_values, {
+                            scale: Math.max(1, mainGraphCanvas.ds.scale),
+                            event: event,
+                            className: "dark",
+                            callback: inner_clicked.bind(w)
+                        },
+                        ref_window);
+
+
+                    function inner_clicked(v, option, event) {
+                        if(values != values_list)
+                            v = text_values.indexOf(v);
+                        this.value = v;
+                        inner_value_change(this, v);
+
+                        mainGraphCanvas.dirty_canvas = true;
+                        return false;
+                    }
+                }
+            } //end mousedown
+            else if(event.type == LiteGraph.pointerevents_method+"up" && w.type == "number") {
+                var delta = x < 40 ? -1 : x > widget_width - 40 ? 1 : 0;
+                if (event.click_time < 200 && delta == 0) {
+                    this.prompt("Value",w.value,function(v) {
+                            // check if v is a valid equation or a number
+                            if (/^[0-9+\-*/()\s]+|\d+\.\d+$/.test(v)) {
+                                try {//solve the equation if possible
+                                    v = eval(v);
+                                } catch (e) { }
+                            }
+                            this.value = Number(v);
+                            inner_value_change(this, this.value);
+                        }.bind(w),
+                        event);
+                }
+            }
+
+            if( old_value != w.value )
+                setTimeout(
+                    function() {
+                        inner_value_change(this, this.value);
+                    }.bind(w),
+                    20
+                );
+            mainGraphCanvas.dirty_canvas = true;
+        },
+        draw(ctx, node, widget_width, y, widget_height) {
+            console.log("[CHECK] aaa");
+            var margin = 15;
+            var w = this;
+            var show_text = mainGraphCanvas.ds.scale > 0.5;
+
+            var outline_color = LiteGraph.WIDGET_OUTLINE_COLOR;
+            var background_color = LiteGraph.WIDGET_BGCOLOR;
+            var text_color = LiteGraph.WIDGET_TEXT_COLOR;
+            var secondary_text_color = LiteGraph.WIDGET_SECONDARY_TEXT_COLOR;
+            var H = LiteGraph.NODE_WIDGET_HEIGHT;
+
+            ctx.textAlign = "left";
+            ctx.strokeStyle = outline_color;
+            ctx.fillStyle = background_color;
+            ctx.beginPath();
+            if(show_text)
+                ctx.roundRect(margin, y, widget_width - margin * 2, H, [H * 0.5] );
+            else
+                ctx.rect(margin, y, widget_width - margin * 2, H );
+            ctx.fill();
+            if (show_text) {
+                if(!w.disabled)
+                    ctx.stroke();
+                ctx.fillStyle = text_color;
+                if(!w.disabled)
+                {
+                    ctx.beginPath();
+                    ctx.moveTo(margin + 16, y + 5);
+                    ctx.lineTo(margin + 6, y + H * 0.5);
+                    ctx.lineTo(margin + 16, y + H - 5);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.moveTo(widget_width - margin - 16, y + 5);
+                    ctx.lineTo(widget_width - margin - 6, y + H * 0.5);
+                    ctx.lineTo(widget_width - margin - 16, y + H - 5);
+                    ctx.fill();
+                }
+                ctx.fillStyle = secondary_text_color;
+                ctx.fillText(w.label || w.name, margin * 2 + 5, y + H * 0.7);
+                ctx.fillStyle = text_color;
+                ctx.textAlign = "right";
+
+                var v = w.value;
+                if( w.options.values )
+                {
+                    var values = w.options.values;
+                    if( values.constructor === Function )
+                        values = values();
+                    if(values && values.constructor !== Array)
+                        v = values[ w.value ];
+                }
+                ctx.fillText(
+                    v,
+                    widget_width - margin * 2 - 20,
+                    y + H * 0.7
+                );
+            }
+        },
+    };
+
+    this.addCustomWidget(widget);
+    this.setSize( this.computeSize() );
     this.onExecute = function (){
         var actionObj = this.getInputData(0);
         var str = JSON.stringify(actionObj);
@@ -517,16 +915,32 @@ LiteGraph.registerNodeType("circleci/executor", ExecutorNode);
 // });
 //*/
 //endregion
-
-if(!isDebug) {
-    const {ipcRenderer, ipcMain} = require('electron');
+var eventfun = null;
+if(isDebug === false) {
     ipcRenderer.on('channel1', (event, ...args) => {
         //do something with message
         console.log("cccc "+ event + args);
         init();
         ipcRenderer.send('onTest2', ["end"]); //ipcMain쪽으로 onTest2 이벤트를 보냄 ipcMain.on("onTest2" ..)통해 받음
     });
+
+    eventfun = function (eventName, data, receiveCallback){
+        switch (eventName){
+            case "request_nodeTree":
+                ipcRenderer.on(eventName, (event, ...args) => {
+                    //do something with message
+                    console.log("eventName ", eventName , args);
+                    receiveCallback && receiveCallback(args);
+                });
+                ipcRenderer.send(eventName);
+            break;
+        }
+    }
 }
 else {
+    eventfun = function (eventName, data){
+        return null;
+    }
+
     init();
 }
