@@ -7,7 +7,7 @@ Genie.Component = Genie.Component || {};
 Genie.Component.UIScrollView = Genie.Component.InspectorBase.extend({
     ctor : function() {
         this._super();
-        this.setName( "UIScrollView" );
+        this.setName( Genie.ComponentName.UI_SCROLL_VIEW );
     },
 
     //override

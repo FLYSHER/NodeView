@@ -7,7 +7,7 @@ Genie.Component = Genie.Component || {};
 Genie.Component.UIButtonView = Genie.Component.InspectorBase.extend({
     ctor : function() {
         this._super();
-        this.setName( "UIButtonView" );
+        this.setName( Genie.ComponentName.UI_BUTTON_VIEW );
     },
 
     //override

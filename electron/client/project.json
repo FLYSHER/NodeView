@@ -41,6 +41,7 @@
         "src/Components/Cocos/BoneComponent.js",
         "src/Components/Cocos/UITextComponent.js",
         "src/Components/Cocos/UIScrollViewComponent.js",
+        "src/Components/Cocos/UIPageViewComponent.js",
         "src/Components/Cocos/UIImageViewComponent.js",
         "src/Components/Cocos/UILabelBMFontComponent.js",
         "src/Components/Cocos/UIButtonComponent.js",

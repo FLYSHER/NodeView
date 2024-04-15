@@ -8,7 +8,7 @@ Genie.Component = Genie.Component || {};
 Genie.Component.UIActionView = Genie.Component.InspectorBase.extend({
     ctor : function( jsonName ) {
         this._super();
-        this.setName( "UIAction" );
+        this.setName( Genie.ComponentName.UI_ACTION_VIEW );
 
         this._jsonName = jsonName;
     },

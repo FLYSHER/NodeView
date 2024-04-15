@@ -7,7 +7,7 @@ Genie.Component = Genie.Component || {};
 Genie.Component.BoneView = Genie.Component.InspectorBase.extend({
     ctor : function() {
         this._super();
-        this.setName('BoneView');
+        this.setName(Genie.ComponentName.BONE_VIEW);
     },
 
     onEnter : function() {

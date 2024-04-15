@@ -4,7 +4,7 @@
   "description": "A minimal Electron application",
   "main": "dist/sourcemap/main_electron.js",
   "scripts": {
-    "start": "electron .",
+    "start": "electron . main_electron.js",
     "dev": "nodemon --exec electron  .",
     "webpack:build": "webpack --config webpack.config.js",
     "deploy:win": "electron-builder --windows nsis:ia32 --publish never",
