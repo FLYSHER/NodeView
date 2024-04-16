@@ -61,10 +61,6 @@ var Renderer_hierarchy = {
                         "label"     : "delete Node",
                         "action"    : self.onDeleteNodeByMenu.bind(self)
                     },
-                    "deleteComponent" : {
-                        "label"     : "delete Component",
-                        "submenu"   : {}
-                    },
                 }
             },
             "plugins": ["search", "contextmenu"],
