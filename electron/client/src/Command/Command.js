@@ -75,6 +75,11 @@ Genie.Command.Base = cc.Class.extend({
 
         switch ( commandType ) {
             case Genie.CommandType.EXECUTE:
+                cc.eventManager.dispatchCustomEvent(EVT.COMMAND_LOG.EXECUTE, {
+                    log_title : log_title,
+                    target : targetName,
+                    log : strValue,
+                });
                 if( !this._commandDiv ) {
                     this._commandDiv = HtmlHelper.createCommandLog( parent, log_title, targetName, strValue );
                 }

@@ -139,4 +139,9 @@ Genie.Utils = {
             return index === 0 ? match.toLowerCase() : match.toUpperCase();
         });
     },
+
+    fixStringLength : function (str, length) {
+        const whitespace = (' ').repeat(length);
+        return (str + whitespace).substring(0, length);
+    },
 }

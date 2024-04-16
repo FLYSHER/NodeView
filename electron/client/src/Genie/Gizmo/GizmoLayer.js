@@ -10,6 +10,7 @@ Genie.GizmoLayer = cc.LayerColor.extend({
 
         this.initPreviewArea();
         this.initDebugView();
+        this.initCommandLogView();
 
         this.onResize();
         ScreenUtil.addResizeListener( this.onResize, this );
@@ -20,9 +21,11 @@ Genie.GizmoLayer = cc.LayerColor.extend({
             GIZMO : 1,
             PREVIEW : 10,
             DEBUG_VIEW : 20,
+            COMMAND_LOG_VIEW : 20,
         }
 
         this.debugView = null;
+        this.commandLogView = null;
     },
 
     onEnter : function() {
@@ -108,9 +111,20 @@ Genie.GizmoLayer = cc.LayerColor.extend({
     initDebugView : function () {
         var debugViw = new Genie.Test.DebugViewNode();
         this.addChild( debugViw, this.Local_Order.DEBUG_VIEW );
-        debugViw.setPosition( 0, cc.winSize.height - 100 );
+        debugViw.setPosition( 0, cc.winSize.height - Genie.Offset.DEBUG_VIEW_SIZE.HEIGHT );
         this.debugView = debugViw;
     },
     //endregion
 
+    //region [command log view]
+    initCommandLogView() {
+        const commandLogView = new Genie.Test.CommandLogViewNode();
+        this.addChild( commandLogView, this.Local_Order.COMMAND_LOG_VIEW );
+        commandLogView.setPosition(
+            Genie.Offset.DEBUG_VIEW_SIZE.WIDTH,
+            cc.winSize.height - Genie.Offset.COMMAND_LOG_VIEW_SIZE.HEIGHT,
+        );
+        this.commandLogView = commandLogView;
+    },
+    //endregion
 });

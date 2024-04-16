@@ -10,5 +10,11 @@ EVT.MAIN_VIEW = {
 }
 
 EVT.TOOL = {
-    SELECT_NODE     : "evt.tool.selectNode"
+    SELECT_NODE     : "evt.tool.selectNode",
+}
+
+EVT.COMMAND_LOG = {
+    EXECUTE : "evt.command_log.execute",
+    UNDO    : "evt.command_log.undo",
+    REDO    : "evt.command_log.redo",
 }

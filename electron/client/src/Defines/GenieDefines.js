@@ -18,8 +18,19 @@ Genie.ComponentName = {
     UI_PAGE_VIEW    : 'uiPageView',
     POPUP           : 'popup',
     CODE            : 'code',
-}
+};
 
 Genie.NodeTag = {
     GIZMO : 1000,
-}
+};
+
+Genie.Offset = {
+    DEBUG_VIEW_SIZE : {
+        WIDTH : 200,
+        HEIGHT : 100,
+    },
+    COMMAND_LOG_VIEW_SIZE : {
+        WIDTH : 700,
+        HEIGHT : 100,
+    },
+};
