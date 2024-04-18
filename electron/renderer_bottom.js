@@ -1,6 +1,3 @@
-// const { sentryRendererInit } = require('./sentryRenderer');
-// sentryRendererInit();
-
 var timelineModule = require('animation-timeline-js');
 const log = require('electron-log/main');
 
@@ -35,8 +32,6 @@ var Renderer_bottom = {
             case "bottom_timeline":
                 this.setTimelineVisible( true );
                 break;
-            // case "bottom_timeline":
-            //     break;
         }
     },
 
