@@ -113,7 +113,7 @@ Genie.GizmoNode = Genie.HierarchyProtectNode.extend({
 
         var RECT_SIZE = cc.p( this.rectOptions.size.width, this.rectOptions.size.height );
         this.rectDrawNode.drawRect( cc.p( 0, 0 ), RECT_SIZE, this.rectOptions.fillColor, this.rectOptions.width, this.rectOptions.lineColor );
-
+        this.rectDrawNode.setPosition( cc.p(5, 5) );
     },
 
     _drawBoundingBox : function() {
@@ -177,6 +177,7 @@ Genie.GizmoNode = Genie.HierarchyProtectNode.extend({
         switch ( eventName ) {
             case 'down':
                 cc.log("gizmoNode.down");
+                cc.game.canvas.style.cursor = 'pointer';
                 Genie.GizmoController.setDragStart( pt, Genie.Utils.getNodeWorldPosition(this.targetNode) );
                 break;
             case 'move':
@@ -220,6 +221,7 @@ Genie.GizmoNode = Genie.HierarchyProtectNode.extend({
                         } ) );
                     }
                 }
+                cc.game.canvas.style.cursor = 'auto';
                 break;
         }
     },

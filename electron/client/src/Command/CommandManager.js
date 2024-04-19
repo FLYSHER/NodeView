@@ -70,4 +70,11 @@ Genie.CommandManager = {
         }
         this.commands = [];
     },
+
+    onclick : function ( command ) {
+        if (this.commands.length <= 0 || this._currentIndex >= this.commands.length) {
+            return;
+        }
+        command.execute();
+    }
 };

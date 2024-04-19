@@ -76,6 +76,9 @@ Genie.Command.Base = cc.Class.extend({
                 if( !this._commandDiv ) {
                     this._commandDiv = HtmlHelper.createCommandLog( parent, log_title, targetName, strValue );
                     container.scrollTop = this._commandDiv.offsetTop - container.offsetTop;
+                    this._commandDiv.onclick = () => {
+                        Genie.CommandManager.onclick( this );
+                    };
                 }
                 break;
             case Genie.CommandType.REDO:
