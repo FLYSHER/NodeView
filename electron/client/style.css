@@ -37,7 +37,8 @@ canvas {
 
 body {
     background: var(--background);
-    height: 100vh;
+    height: 99vh;
+    overflow: hidden;
 }
 
 h1,
@@ -102,8 +103,8 @@ code {
     display: grid;
     gap: 2px;
 
-    grid-template-columns: 3fr 1fr 1fr;
-    grid-template-rows   : 1fr;
+    grid-template-columns: 2.5fr 1fr 1fr;
+    grid-template-rows   : auto auto;
 }
 
 button:active {
@@ -115,13 +116,15 @@ button:active {
     /*background-color: #95B8E7;*/
 }
 
-#cocosView_gridItem, #subView_gridItem, #hierarchy_gridItem, #assets_gridItem, #inspector_gridItem {
+#cocosView_gridItem, #subView_gridItem, #hierarchy_gridItem, #assets_gridItem, #inspector_gridItem, #log_gridItem {
     border-radius: 3px;
     border: solid 1px #a8a5a5;
 }
 
 #cocosView_gridItem {
     height: 98vh;
+    grid-column: 1 / 2;
+    grid-row: 1 / 3;
 }
 
 #cocosView {
@@ -138,10 +141,6 @@ button:active {
     display: flex;
 }
 
-#bottom_history {
-    display: inline;
-}
-
 #div_command_log {
     background-color: #222222;
     overflow-y: scroll;
@@ -152,7 +151,9 @@ button:active {
 }
 
 #second_column {
-    height: 98vh;
+    height: 87vh;
+    grid-column: 2 / 3;
+    grid-row: 1 / 2;
 }
 
 #hierarchy_gridItem {
@@ -184,10 +185,12 @@ button:active {
 }
 
 #inspector_gridItem {
-    height: 98vh;
+    height: 87vh;
+    grid-column: 3 / 4;
+    grid-row: 1 / 2;
 }
 
-#inspector_bar_root{
+#inspector_bar_root {
     min-height: 30px;
     height: 3%;
 }
@@ -195,6 +198,85 @@ button:active {
 #inspector {
     height: 97%;
     overflow: scroll;
+}
+
+#log_gridItem {
+    height: 10vh;
+    grid-column: 2 / 4;
+    grid-row : 2 / 3;
+}
+
+#log_bar_root {
+    min-height: 30px;
+    height: 25%;
+    align-items: center;
+}
+
+#log_view {
+    height: 75%;
+    overflow: scroll;
+}
+
+#log_buttons {
+    float: right;
+    height: 100%;
+
+    display: grid;
+    gap: 5px;
+
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows   : auto auto;
+    margin-right: 4px;
+}
+
+.log_button {
+    min-width: 40px;
+    margin-top: 4px;
+
+    position: relative;
+    color: #444242;
+    z-index: 2;
+    padding: 0;
+}
+
+.log_button:hover {
+    border: none;
+}
+
+.log_button:before,
+.log_button:after {
+    position: absolute;
+    content: "";
+    width: 0;
+    height: 0;
+    border: 2px solid;
+    z-index: -1;
+    transition: all 0.3s ease;
+}
+
+.log_button:before {
+    top: 0;
+    left: 0;
+    border-bottom-color: transparent;
+    border-right-color: transparent;
+    border-top-color: #444242;
+    border-left-color: #444242;
+}
+
+.log_button:after{
+    bottom: 0;
+    right: 0;
+    border-top-color: transparent;
+    border-left-color: transparent;
+    border-bottom-color: #444242;
+    border-right-color: #444242;
+}
+
+.log_button:hover:before,
+.log_button:hover:after {
+    border-color: #444242;
+    height: 100%;
+    width: 100%;
 }
 
 .component_title {
@@ -550,10 +632,15 @@ input[readonly] {
     background-color: #363636;
 }
 
+#timeline_bar_root {
+    min-height: 30px;
+    height: 10%;
+}
+
 .timeline_toolbar {
     padding-left: 44px;
     max-height: 36px;
-    height: 36px;
+    height: 5px;
     position: relative;
     overflow: hidden;
     display: flex;

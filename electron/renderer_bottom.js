@@ -9,12 +9,12 @@ var Renderer_bottom = {
 
     init : function() {
 
-        $('#button_tab_command').on( 'click', this.openTab.bind(this, 'bottom_history' ) );
+        //$('#button_tab_command').on( 'click', this.openTab.bind(this, 'bottom_history' ) );
         $('#button_tab_timeline').on( 'click', this.openTab.bind(this, 'bottom_timeline' ) );
 
-        this.openTab('bottom_history');
+        //this.openTab('bottom_history');
     },
-
+    // todo : 추후 개선 때 활용
     openTab : function( tabName ) {
         var i,
             tabContents = document.getElementsByClassName("bottom_content");
@@ -35,6 +35,7 @@ var Renderer_bottom = {
         }
     },
 
+    // todo : 추후 개선 때 활용
     setTimelineVisible : function( visible ) {
         var strDisplay = visible === true ? "flex" : "none";
         document.getElementById( "timeline_content" ).style.display = strDisplay;

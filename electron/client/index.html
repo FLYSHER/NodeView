@@ -48,6 +48,7 @@
     <script src="../renderer_assets.js"></script>
     <script src="../renderer_timeline.js"></script>
     <script src="../renderer_bottom.js"></script>
+    <script src="../renderer_log.js"></script>
     <script src="../renderer_main.js"></script>
 
 </head>
@@ -59,12 +60,17 @@
             <canvas id="gameCanvas" ></canvas>
         </div>
         <div id="bottomView">
+            <!--
             <div class="tab">
                 <button id="button_tab_command" class="tab_button"> command </button>
                 <button id="button_tab_timeline" class="tab_button"> timeline </button>
             </div>
             <div id="bottom_history" class="bottom_content" >
                 <div id="div_command_log"> </div>
+            </div>
+            -->
+            <div class="frameBar_div" id="timeline_bar_root">
+                <label class="frameBar_label"> Timeline </label>
             </div>
             <div class="timeline_toolbar"></div>
             <div id="timeline_content">
@@ -115,6 +121,27 @@
 
     </div>
 
+    <div id="log_gridItem">
+        <div class="frameBar_div" id="log_bar_root">
+            <label class="frameBar_label"> Log </label>
+            <div id="log_buttons">
+                <button class="log_button" id="log_undo" title="실행 취소">
+                    <i class="fa-solid fa-rotate-left"></i>
+                </button>
+
+                <button class="log_button" id="log_redo" title="재실행">
+                    <i class="fa-solid fa-rotate-right"></i>
+                </button>
+
+                <button class="log_button" id="log_clear" title="로그 초기화">
+                    <i class="fa-solid fa-trash-can"></i>
+                </button>
+            </div>
+        </div>
+        <div id="log_view">
+            <div id="div_command_log"> </div>
+        </div>
+    </div>
 </div>
 
 <script src="frameworks/cocos2d-html5/CCBoot.js"></script>

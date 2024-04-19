@@ -25,7 +25,6 @@
         "src/Utils/GenieUIUtils.js",
         "src/Utils/ScreenUtils.js",
         "src/Utils/HtmlHelper.js",
-        "src/Genie/DebugView/CommandLogView.js",
         "src/Genie/DebugView/DebugView.js",
         "src/Genie/DebugView/DebugViewNode.js",
 

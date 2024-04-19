@@ -1,6 +1,3 @@
-// const { sentryRendererInit } = require('../../../sentryRenderer');
-// sentryRendererInit();
-
 var Genie = Genie || {};
 Genie.LayerType = {
     MAIN    : 0,
@@ -32,6 +29,7 @@ var MainScene = cc.Scene.extend({
         /** view init **/
         Renderer_main.init();
         Renderer_bottom.init();
+        Renderer_log.init();
         Renderer_timeline.init();
         Renderer_assets.init();
         Renderer_inspector.init();

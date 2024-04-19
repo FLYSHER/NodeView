@@ -1,6 +1,3 @@
-// const { sentryRendererInit } = require('../../../sentryRenderer');
-// sentryRendererInit();
-
 var MainViewLayer = cc.LayerColor.extend({
     ctor: function () {
         this._super( cc.color( 50, 50, 50, 50 ));
