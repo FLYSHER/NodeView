@@ -1,7 +1,3 @@
-// const { sentryRendererInit } = require('../../../sentryRenderer');
-// sentryRendererInit();
-
-
 var HtmlHelper = {
 
     createDiv : function( parent, className ) {

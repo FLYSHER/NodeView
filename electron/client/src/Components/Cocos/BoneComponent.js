@@ -1,6 +1,3 @@
-// const { sentryRendererInit } = require('../../../../sentryRenderer');
-// sentryRendererInit();
-
 var Genie = Genie || {};
 Genie.Component = Genie.Component || {};
 // 소유자의 타입이 uiWidget 이어야 함.

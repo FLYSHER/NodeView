@@ -1,6 +1,3 @@
-// const { sentryRendererInit } = require('../../../sentryRenderer');
-// sentryRendererInit();
-
 Genie.Command = Genie.Command || {};
 
 Genie.CommandType = {

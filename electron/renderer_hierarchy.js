@@ -1,6 +1,3 @@
-// const { sentryRendererInit } = require('./sentryRenderer');
-// sentryRendererInit();
-
 var Renderer_hierarchy = {
     Tag                 : "[ Renderer_hierarchy ] ",
     hierarchyData       : [],
