@@ -8,6 +8,7 @@ var Renderer_timeline = {
         this.timeline       = null;
 
         this.playing                = false;
+        this.loop                   = false;
         this.trackTimelineMovement  = false;
 
         this.initTimeline();
@@ -195,23 +196,24 @@ var Renderer_timeline = {
 
     },
 
-    playTrack : function() {
+    playTrack : function(loop) {
         this.pauseTrack();
 
         this.playing = true;
+        this.loop = !!loop;
         this.trackTimelineMovement = true;
 
         if( this.timeline ) {
             this.timeline.setTime( 0 );
-            this.moveTimelineIntoTheBounds();
-            this.timeline.setOptions({ timelineDraggable:false});
+            this.timeline.setOptions({ timelineDraggable:false, zoom:this.timeline.getZoom() });
         }
     },
 
     pauseTrack : function() {
         this.playing = false;
+        this.loop = false;
         this.timeline && this.timeline.setOptions({
-            timelineDraggable: true
+            timelineDraggable: true, zoom:this.timeline.getZoom()
         });
     },
 
@@ -241,7 +243,7 @@ var Renderer_timeline = {
                     this.moveTimelineIntoTheBounds();
 
                     if( this.timeline.getTime() >= this.mov_totalFrame * this.msPerFrame ) {
-                        this.pauseTrack();
+                        this.loop ? this.playTrack(this.loop) : this.pauseTrack();
                     }
 
                 }

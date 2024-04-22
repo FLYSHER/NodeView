@@ -160,7 +160,7 @@ Genie.Component.ArmatureView = Genie.Component.InspectorBase.extend({
                 var moveIdx     = parseInt( this.select_track.value );
                 var loop        = this.mov_loop.checked;
                 owner.getAnimation().playWithIndex( moveIdx, -1, loop );
-                Renderer_timeline.playTrack();
+                Renderer_timeline.playTrack(loop);
                 break;
             case this.btn_stop:
                 owner.getAnimation().stop();
