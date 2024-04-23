@@ -7,6 +7,8 @@ Genie.GizmoController = {
     dragStartTargetPt   : cc.p( 0, 0 ),
     dragStartPt         : cc.p( 0, 0 ),
     dragGizmoCtrlRect   : false,
+    dragGizmoCtrlX      : false,
+    dragGizmoCtrlY      : false,
 
     //region [ 타겟노드에 기즈모 세팅 관련 ]
     getGizmoByTargetNode : function( node ) {
@@ -83,8 +85,28 @@ Genie.GizmoController = {
     //region [ 기즈모 타겟 노드 드레그 ]
 
     // 기즈모 컨트롤 RECT 드래그 컨트롤 시작 시
-    setDragStart : function( dragStartPt, dragStartTargetPt ) {
+    setDragRectStart : function( dragStartPt, dragStartTargetPt ) {
         this.dragGizmoCtrlRect  = true;
+        this.dragGizmoCtrlX  = false;
+        this.dragGizmoCtrlY  = false;
+        this._setDragStart( dragStartPt, dragStartTargetPt );
+    },
+
+    setDragXStart : function( dragStartPt, dragStartTargetPt ) {
+        this.dragGizmoCtrlRect  = false;
+        this.dragGizmoCtrlX  = true;
+        this.dragGizmoCtrlY  = false;
+        this._setDragStart( dragStartPt, dragStartTargetPt );
+    },
+
+    setDragYStart : function( dragStartPt, dragStartTargetPt ) {
+        this.dragGizmoCtrlRect  = false;
+        this.dragGizmoCtrlX  = false;
+        this.dragGizmoCtrlY  = true;
+        this._setDragStart( dragStartPt, dragStartTargetPt );
+    },
+
+    _setDragStart : function( dragStartPt, dragStartTargetPt ) {
         this.dragStartPt        = dragStartPt;
         this.dragStartTargetPt  = dragStartTargetPt;
         this.deltaInTargetPt    = cc.pSub( this.dragStartPt, this.dragStartTargetPt );
@@ -92,6 +114,8 @@ Genie.GizmoController = {
 
     setDragEnd  : function () {
         this.dragGizmoCtrlRect = false;
+        this.dragGizmoCtrlX = false;
+        this.dragGizmoCtrlY = false;
     },
 
     getDeltaInTargetPt : function() {
@@ -104,6 +128,14 @@ Genie.GizmoController = {
 
     isDragGizmoCtrlRect : function() {
         return this.dragGizmoCtrlRect;
+    },
+
+    isDragGizmoCtrlX : function() {
+        return this.dragGizmoCtrlX;
+    },
+
+    isDragGizmoCtrlY : function() {
+        return this.dragGizmoCtrlY;
     },
     //endregion
 
