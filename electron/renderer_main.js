@@ -62,6 +62,21 @@ var Renderer_main = {
             Genie.CommandManager.redo();
         });
 
+        canvas.addEventListener('keydown', function(event) {
+            const key = event.key.toLowerCase();
+            switch (key) {
+                case 'q': // 이동 gizmo
+                    cc.log("[keyEvent] q");
+                    break;
+                case 'w': // 회전 gizmo
+                    cc.log("[keyEvent] w");
+                    break;
+                case 'e': // 스케일 gizmo
+                    cc.log("[keyEvent] e");
+                    break;
+            }
+        });
+
         this._initAssetAreaEvent();
         this._initHierarchyAreaEvent();
     },

@@ -101,27 +101,35 @@ Genie.GizmoNode = Genie.HierarchyProtectNode.extend({
 
         // axis-x
         var COLOR = this.axisOptions.color_axisX;
-        this.axisXDrawNode.drawSegment( cc.p( 0,0 ), cc.p( LINE_LENGTH, 0 ), AXIS_WIDTH, COLOR );
-
         // arrow-x
-        var triangle = [
-            cc.p( LINE_LENGTH, -ARROW_LENGTH/2),
-            cc.p( LINE_LENGTH, ARROW_LENGTH/2),
-            cc.p( LINE_LENGTH + ARROW_LENGTH, 0 )
+        var points = [
+            cc.p( LINE_LENGTH + ARROW_LENGTH, 0 ),
+            cc.p( LINE_LENGTH - 5, ARROW_LENGTH / 2 ),
+
+            cc.p( LINE_LENGTH, AXIS_WIDTH / 2 ),
+            cc.p( 0, AXIS_WIDTH / 2 ),
+            cc.p( 0, -AXIS_WIDTH / 2 ),
+            cc.p( LINE_LENGTH, -AXIS_WIDTH / 2 ),
+
+            cc.p( LINE_LENGTH - 5, -ARROW_LENGTH / 2 ),
         ]
-        this.axisXDrawNode.drawPoly( triangle, COLOR, 1, COLOR );
+        this.axisXDrawNode.drawPoly( points, COLOR, 1, COLOR );
 
         // axis-y
         COLOR = this.axisOptions.color_axisY;
-        this.axisYDrawNode.drawSegment( cc.p( 0,0 ), cc.p( 0, LINE_LENGTH ), AXIS_WIDTH, COLOR );
-
         // arrow-y
-        triangle = [
-            cc.p( -ARROW_LENGTH/2, LINE_LENGTH ),
-            cc.p( ARROW_LENGTH/2, LINE_LENGTH ),
-            cc.p( 0, LINE_LENGTH + ARROW_LENGTH )
+        points = [
+            cc.p( 0, LINE_LENGTH + ARROW_LENGTH ),
+            cc.p( -ARROW_LENGTH / 2, LINE_LENGTH - 5 ),
+
+            cc.p(-AXIS_WIDTH / 2, LINE_LENGTH ),
+            cc.p(-AXIS_WIDTH / 2, 0 ),
+            cc.p(AXIS_WIDTH / 2, 0 ),
+            cc.p(AXIS_WIDTH / 2, LINE_LENGTH ),
+
+            cc.p( ARROW_LENGTH / 2, LINE_LENGTH - 5),
         ]
-        this.axisYDrawNode.drawPoly( triangle, COLOR, 1, COLOR );
+        this.axisYDrawNode.drawPoly( points, COLOR, 1, COLOR );
 
         this.axisCenterDrawNode.drawDot( cc.p( 0, 0), 2, cc.color( 200, 200, 200, 200) );
     },
@@ -196,7 +204,7 @@ Genie.GizmoNode = Genie.HierarchyProtectNode.extend({
         offset && comp.setCustomHitRectCenterOffsetPt( offset );
         comp.onTriggerEvent = handler.bind( this );
         target.addComponent( comp );
-
+        // comp.drawDebugingHitRectOnParent();
         return comp;
     },
 
@@ -270,9 +278,9 @@ Genie.GizmoNode = Genie.HierarchyProtectNode.extend({
 
                     var transComp = selectNode.getComponent( Genie.ComponentName.TRANSFORM );
                     if (type === 'x')
-                        transComp && transComp.refreshPositionValue( localPos.x, selectNode.getPosition().y );
+                        transComp && transComp.refreshPositionValue( cc.p( localPos.x, selectNode.getPosition().y ) );
                     else if (type === 'y')
-                        transComp && transComp.refreshPositionValue( selectNode.getPosition().x, localPos.y );
+                        transComp && transComp.refreshPositionValue( cc.p( selectNode.getPosition().x, localPos.y ) );
                     else
                         transComp && transComp.refreshPositionValue( localPos );
                 }
