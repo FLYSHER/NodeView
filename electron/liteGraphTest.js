@@ -1,12 +1,54 @@
 //https://github.com/jagenjo/litegraph.js
-var isDebug = false;
+var isDebug = true;
 
 var mainGraph = null;
 var mainGraphCanvas = null;
+var CanvasProperty = {
+
+}
+var htmlUtil = {}
+htmlUtil.CreateButton = function(name, icon_url, callback) {
+    var button = document.createElement("button");
+    if (icon_url) {
+        button.innerHTML = "<img src='" + icon_url + "'/> ";
+    }
+    button.classList.add("btn");
+    button.innerHTML += name;
+    if(callback)
+        button.addEventListener("click", callback );
+    return button;
+};
+
+var createMenu = function (root){
+    var id = "playnode_button";
+    var name = " Play";
+    var icon_url = null;
+    var container = ".header-right";
+    var callback = null;
+    var button  =htmlUtil.CreateButton(name, icon_url, callback);
+    button.id = id;
+    root.querySelector(container).appendChild(button);
+
+    id = "playstepnode_button";
+    name = " Step";
+    icon_url = null;
+    container = ".header-right";
+    callback = null;
+    button  =htmlUtil.CreateButton(name, icon_url, callback);
+    button.id = id;
+    root.querySelector(container).appendChild(button);
+}
+
 var init = function (){
     var graph = new LGraph();
 
     var canvas = new LGraphCanvas("#mycanvas", graph);
+    var root = document;
+    createMenu(root);
+    // this.tools = root.querySelector(".tools");
+    // this.content = root.querySelector(".content");
+    // this.footer = root.querySelector(".footer");
+
 
     var node_const = LiteGraph.createNode("action/start");
     node_const.pos = [100,100];
@@ -49,10 +91,22 @@ var init = function (){
     // graph.start();
     mainGraph = graph;
     mainGraphCanvas = canvas;
+
+    // var mainMenuoptions = {
+    //     callback: null,
+    //     event : 'CustomEvent'
+    // };
+    // var ref_window = mainGraphCanvas.getCanvasWindow();
+    // LiteGraph.ContextMenu( ["Top", "Bottom", "Left", "Right"], mainMenuoptions);
+
+
     $('#button_start').on('click', function () {
         // mainGraph.runStep(1, true);
         // console.log("[CHECK]")
-        eventfun("request_nodeTree");
+        // eventfun("request_nodeTree" , null,
+        //     function (args){
+        //         console.log("request_nodeTree : ", args);
+        //     });
     });
 
 }
@@ -244,32 +298,8 @@ ActionNode.scaleTo = function (){
 
 }
 ActionNode.scaleTo.title =  ActionType.scaleTo;
-// success : function(data) {
-//     tmp7 += "<div style='width:600px;'>";
-//     tmp7 +="<br/>";
-//     tmp7 +="<div id='diagTree' style='width:200px; height:300px; float:left; background-color:white;'>";
-//     tmp7 +="<br/>";
-//     tmp7 +="<div id='notetree' style='text-align: left'>";
-//     tmp7 +="</div>";
-//     tmp7 +="</div>";
-//     tmp7 +="<div style='width:400px; height:300px; float:left; background-color:white;'></div>";
-//     tmp7 += "</div>";
-//     var typelist = '<ul class="notetypelist">';
-//     $.each(data, function(key, val){
-//         typelist += "<li id='"+data[key].technicalid+"' name='nttype'"+counter+"' value='" + data[key].note_type + "'>" +techtype + "</li>";
-//     });
-//     typelist += '</ul>';
-//     $("#notetree").jstree();
-//     //$('#notetree').html(typelist);
-//     $('#notetree').jstree(true).settings.core.data = typelist;
-//     $('#notetree').jstree(true).refresh();
-// }
 
-// var newDiv = $(document.createElement('div'));
-// // $(newDiv).html(tmp7);
-// // $(newDiv).dialog({});
-
-function ContextMenu(values, options) {
+function ContextMenu(options) {
     options = options || {};
     this.options = options;
     var root =  document.createElement("div");
@@ -290,44 +320,47 @@ function ContextMenu(values, options) {
     root.style.width = "200";
 
     ////JSTree
-    this.hierarchyData = [];
-    this.addTreeNode  = function( id, parentID, text, realNode  ) {
-        if( this.isExistNode( id, parentID ) ) {
-            return;
-        }
-        this.hierarchyData.push({
-            "id"        : id,
-            "parent"    : parentID,
-            "text"      : text
-        });
-    };
-    this.isExistNode = function( id, parentID ) {
-        var findOjb = this.hierarchyData.find( function (item){
-            return ( item.parent === parentID && item.id === id );
-        })
+    this.hierarchyData = options.hierarchyData? options.hierarchyData : [];
 
-        return !!findOjb;
-    },
+    // this.addTreeNode  = function( id, parentID, text, realNode  ) {
+    //     if( this.isExistNode( id, parentID ) ) {
+    //         return;
+    //     }
+    //     this.hierarchyData.push({
+    //         "id"        : id,
+    //         "parent"    : parentID,
+    //         "text"      : text
+    //     });
+    // };
+
+    // this.isExistNode = function( id, parentID ) {
+    //     var findOjb = this.hierarchyData.find( function (item){
+    //         return ( item.parent === parentID && item.id === id );
+    //     })
+    //
+    //     return !!findOjb;
+    // },
+
     this.onRefreshTree = function() {
         this.jsTreeRoot.jstree(true).settings.core.data = this.hierarchyData;
         this.jsTreeRoot.jstree("refresh");
     },
 
-    this.addTreeNode(1,
-"#",
-    "Root");
-
-    var id = 1;
-    for(var n = 0; n < 30; n++) {
-        this.addTreeNode(id + 1,
-            id,
-            "Child" + id);
-        id = id +1;
-    }
-    this.addTreeNode(id,
-        1,
-        "Child1" + id);
-
+//     this.addTreeNode(1,
+// "#",
+//     "Root");
+//
+//     var id = 1;
+//     for(var n = 0; n < 30; n++) {
+//         this.addTreeNode(id + 1,
+//             id,
+//             "Child" + id);
+//         id = id +1;
+//     }
+//     this.addTreeNode(id,
+//         1,
+//         "Child1" + id);
+//
 
     this._jstreeConfig = {
             'core' : {
@@ -386,7 +419,7 @@ function ContextMenu(values, options) {
         if (options.callback) {
             var r = options.callback.call(
                 this,
-                data.node.text,
+                data.node, //  { id: 1521, parent: 1407, text: 'cbShare' }
                 options);
 
             if (this.root.parentNode) {
@@ -460,120 +493,60 @@ ActionNode.end = function (){
     var widget = {
         type: "custom",
         name: "testBtn",
-        value: "testBtn",
+        value: "",
+        data : null,
         options : {
             values : ['red', 'green']
         },
         mouse(event, pos, node){
-            var w = this;
+            var w = this; //widget
             var x = pos[0];
             var y = pos[1];
             var deltaX = event.deltaX || event.deltax || 0;
-            var old_value = w.value;
+            var old_data = w.data;
             var width = node.size[0];
             var widget_height = w.computeSize ? w.computeSize(width)[1] : LiteGraph.NODE_WIDGET_HEIGHT;
             var widget_width = w.width || width;
 
             var ref_window = mainGraphCanvas.getCanvasWindow();
-            function inner_value_change(widget, value) {
-                if(widget.type == "number"){
-                    value = Number(value);
-                }
-                widget.value = value;
-                if ( widget.options && widget.options.property && node.properties[widget.options.property] !== undefined ) {
-                    node.setProperty( widget.options.property, value );
-                }
+            function inner_value_change(widget, text, data) {
+                widget.value = text;
+                widget.data = data;
                 if (widget.callback) {
-                    widget.callback(widget.value, that, node, pos, event);
+                    widget.callback(text, data, that, node, pos, event);
                 }
             }
 
-            if (event.type == LiteGraph.pointerevents_method+"move" && w.type == "number") {
-                if(deltaX)
-                    w.value += deltaX * 0.1 * (w.options.step || 1);
-                if ( w.options.min != null && w.value < w.options.min ) {
-                    w.value = w.options.min;
-                }
-                if ( w.options.max != null && w.value > w.options.max ) {
-                    w.value = w.options.max;
-                }
+            if (event.type === LiteGraph.pointerevents_method+"move") {
             }
-            else if (event.type == LiteGraph.pointerevents_method+"down") {
-                eventfun("request_nodeTree" ,
+            else if (event.type === LiteGraph.pointerevents_method+"down") {
+                eventfun(eventType.nodeTree , null,
                      function (data){
-                        cc.log("[CHECK] request_nodeTree ", data);
+                         var menu = new ContextMenu(//new LiteGraph.ContextMenu( //new ContextMenu(
+                             {
+                                 scale: Math.max(1, mainGraphCanvas.ds.scale),
+                                 event: event,
+                                 className: "dark",
+                                 callback: inner_clicked.bind(w),
+                                 hierarchyData : data[0]
+                             },
+                             ref_window);
                      });
-                var values = w.options.values;
-                if (values && values.constructor === Function) {
-                    values = w.options.values(w, node);
-                }
-                var values_list = null;
 
-                if( w.type != "number")
-                    values_list = values.constructor === Array ? values : Object.keys(values);
-
-                var delta = x < 40 ? -1 : x > widget_width - 40 ? 1 : 0;
-                if (delta) { //clicked in arrow, used for combos
-                    var index = -1;
-                    this.last_mouseclick = 0; //avoids dobl click event
-                    if(values.constructor === Object)
-                        index = values_list.indexOf( String( w.value ) ) + delta;
-                    else
-                        index = values_list.indexOf( w.value ) + delta;
-                    if (index >= values_list.length) {
-                        index = values_list.length - 1;
-                    }
-                    if (index < 0) {
-                        index = 0;
-                    }
-                    if( values.constructor === Array )
-                        w.value = values[index];
-                    else
-                        w.value = index;
-                } else { //combo clicked
-                    var text_values = values != values_list ? Object.values(values) : values;
-                    var menu = new ContextMenu(//new LiteGraph.ContextMenu( //new ContextMenu(
-                        text_values, {
-                            scale: Math.max(1, mainGraphCanvas.ds.scale),
-                            event: event,
-                            className: "dark",
-                            callback: inner_clicked.bind(w)
-                        },
-                        ref_window);
-
-
-                    function inner_clicked(v, option, event) {
-                        if(values != values_list)
-                            v = text_values.indexOf(v);
-                        this.value = v;
-                        inner_value_change(this, v);
-
-                        mainGraphCanvas.dirty_canvas = true;
-                        return false;
-                    }
+                function inner_clicked(v, option, event) {
+                    inner_value_change(this, v.text, v);
+                    mainGraphCanvas.dirty_canvas = true;
+                    return false;
                 }
             } //end mousedown
-            else if(event.type == LiteGraph.pointerevents_method+"up" && w.type == "number") {
-                var delta = x < 40 ? -1 : x > widget_width - 40 ? 1 : 0;
-                if (event.click_time < 200 && delta == 0) {
-                    this.prompt("Value",w.value,function(v) {
-                            // check if v is a valid equation or a number
-                            if (/^[0-9+\-*/()\s]+|\d+\.\d+$/.test(v)) {
-                                try {//solve the equation if possible
-                                    v = eval(v);
-                                } catch (e) { }
-                            }
-                            this.value = Number(v);
-                            inner_value_change(this, this.value);
-                        }.bind(w),
-                        event);
-                }
+            else if(event.type === LiteGraph.pointerevents_method+"up") {
+
             }
 
-            if( old_value != w.value )
+            if( old_data != w.data && w.data != null )
                 setTimeout(
                     function() {
-                        inner_value_change(this, this.value);
+                        inner_value_change(this,this.data.text, this.data);
                     }.bind(w),
                     20
                 );
@@ -604,19 +577,6 @@ ActionNode.end = function (){
                 if(!w.disabled)
                     ctx.stroke();
                 ctx.fillStyle = text_color;
-                if(!w.disabled)
-                {
-                    ctx.beginPath();
-                    ctx.moveTo(margin + 16, y + 5);
-                    ctx.lineTo(margin + 6, y + H * 0.5);
-                    ctx.lineTo(margin + 16, y + H - 5);
-                    ctx.fill();
-                    ctx.beginPath();
-                    ctx.moveTo(widget_width - margin - 16, y + 5);
-                    ctx.lineTo(widget_width - margin - 6, y + H * 0.5);
-                    ctx.lineTo(widget_width - margin - 16, y + H - 5);
-                    ctx.fill();
-                }
                 ctx.fillStyle = secondary_text_color;
                 ctx.fillText(w.label || w.name, margin * 2 + 5, y + H * 0.7);
                 ctx.fillStyle = text_color;
@@ -641,6 +601,9 @@ ActionNode.end = function (){
     };
 
     this.addCustomWidget(widget);
+    this.addWidget("button","play","", function(v){
+        console.log("play");
+    });
     this.setSize( this.computeSize() );
     this.onExecute = function (){
         var actionObj = this.getInputData(0);
@@ -916,6 +879,9 @@ LiteGraph.registerNodeType("circleci/executor", ExecutorNode);
 //*/
 //endregion
 var eventfun = null;
+var eventType = {
+    nodeTree : "request_nodeTree",
+}
 if(isDebug === false) {
     const { ipcRenderer } = require('electron');
     ipcRenderer.on('channel1', (event, ...args) => {
@@ -925,16 +891,21 @@ if(isDebug === false) {
         ipcRenderer.send('onTest2', ["end"]); //ipcMain쪽으로 onTest2 이벤트를 보냄 ipcMain.on("onTest2" ..)통해 받음
     });
 
+
+
+
     //ipcMain : back쪽에서 electron데이타 처리
     //ipcRenderer : 는 BrowserWindow 쪽 그래서 ipcRenderer.send가 아니고 loadManager._mainWindow.webContents.send 로 처리
     eventfun = function (eventName, data, receiveCallback){
         switch (eventName){
-            case "request_nodeTree":
-                ipcRenderer.on(eventName, (event, ...args) => {
+            case eventType.nodeTree:
+                var listenerFunc = (event, ...args) => {
                     //do something with message
+                    ipcRenderer.removeListener(eventName, listenerFunc);
                     console.log("eventName ", eventName , args);
                     receiveCallback && receiveCallback(args);
-                });
+                }
+                ipcRenderer.on(eventName, listenerFunc);
                 ipcRenderer.send(eventName);
             break;
         }

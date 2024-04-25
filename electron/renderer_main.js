@@ -63,7 +63,7 @@ var Renderer_main = {
         });
 
         ipcRenderer.on("getHierarchy", function (){
-            ipcRenderer.send('nodeHierarchy',[Renderer_hierarchy.hierarchyData]);
+            ipcRenderer.send('nodeHierarchy',Renderer_hierarchy.hierarchyData);
         }.bind(this));
 
         this._initAssetAreaEvent();
