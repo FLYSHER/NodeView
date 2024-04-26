@@ -5,9 +5,17 @@ Genie.GizmoNode = Genie.HierarchyProtectNode.extend({
         this.initProperty();
         this._super();
         this.initGizmo();
+        this.setMode( this.mode.MOVE );
     },
 
     initProperty : function() {
+        this.mode = {
+            MOVE   : 0,
+            ROTATE : 1,
+            SCALE  : 2,
+        };
+
+        this.currMode = this.mode.MOVE;
 
         this.axisOptions = {
             line_length : 100,
@@ -19,6 +27,15 @@ Genie.GizmoNode = Genie.HierarchyProtectNode.extend({
             touchSizeY  : cc.size( 40, 110 ),
             touchOffsetX: cc.p( 25, -20 ),
             touchOffsetY: cc.p( -20, 25 ),
+        };
+
+        this.rotateOptions = {
+            radius : 130,
+            touchSize : cc.size( 280, 280 ),
+            touchOffset : cc.p( -140, -140 ),
+            line_width : 4,
+            color : cc.color( 0, 0, 255, 100 ),
+            center : cc.p( 0, 0 ),
         };
 
         this.rectOptions = {
@@ -39,15 +56,36 @@ Genie.GizmoNode = Genie.HierarchyProtectNode.extend({
         this.axisCenterDrawNode  = null;
         this.axisXDrawNode       = null;
         this.axisYDrawNode       = null;
+        this.rotateDrawNode      = null;
+        this.scaleXDrawNode      = null;
+        this.scaleYDrawNode      = null;
         this.rectDrawNode        = null;
         this.bbDrawNode          = null;
         this.contentSizeDrawNode = null;
 
-        this.touchCompRect  = null;
-        this.touchCompX     = null;
-        this.touchCompY     = null;
+        this.touchCompRect   = null;
+        this.touchCompX      = null;
+        this.touchCompY      = null;
+        this.touchCompRotate = null;
+        this.touchCompSX     = null;
+        this.touchCompSY     = null;
 
-        this.targetNode     = null;
+        this.targetNode      = null;
+    },
+
+    setMode : function (mode) {
+        this.currMode = mode;
+        const isMove = mode === this.mode.MOVE,
+            isRotate = mode === this.mode.ROTATE,
+            isScale = mode === this.mode.SCALE;
+
+        this.axisXDrawNode.setVisible(isMove);
+        this.axisYDrawNode.setVisible(isMove);
+
+        this.rotateDrawNode.setVisible(isRotate);
+
+        this.scaleXDrawNode.setVisible(isScale);
+        this.scaleYDrawNode.setVisible(isScale);
     },
 
     onEnter : function() {
@@ -64,28 +102,28 @@ Genie.GizmoNode = Genie.HierarchyProtectNode.extend({
         this.rootNode = new cc.Node();
         this.addChild( this.rootNode );
 
-        this.axisCenterDrawNode = new cc.DrawNode();
-        this.rootNode.addChild( this.axisCenterDrawNode );
+        this.axisCenterDrawNode = this._addDrawNodeOnRootNode();
+        this.axisXDrawNode = this._addDrawNodeOnRootNode();
+        this.axisYDrawNode = this._addDrawNodeOnRootNode();
+        this.rectDrawNode = this._addDrawNodeOnRootNode();
+        this.rotateDrawNode = this._addDrawNodeOnRootNode();
+        this.scaleXDrawNode = this._addDrawNodeOnRootNode();
+        this.scaleYDrawNode = this._addDrawNodeOnRootNode();
+        this.bbDrawNode = this._addDrawNodeOnRootNode();
+        this.contentSizeDrawNode = this._addDrawNodeOnRootNode();
+    },
 
-        this.axisXDrawNode = new cc.DrawNode();
-        this.rootNode.addChild( this.axisXDrawNode );
-
-        this.axisYDrawNode = new cc.DrawNode();
-        this.rootNode.addChild( this.axisYDrawNode );
-
-        this.rectDrawNode = new cc.DrawNode();
-        this.rootNode.addChild( this.rectDrawNode );
-
-        this.bbDrawNode = new cc.DrawNode();
-        this.rootNode.addChild( this.bbDrawNode );
-
-        this.contentSizeDrawNode = new cc.DrawNode();
-        this.rootNode.addChild( this.contentSizeDrawNode );
+    _addDrawNodeOnRootNode : function () {
+        const drawNode = new cc.DrawNode();
+        this.rootNode.addChild( drawNode );
+        return drawNode;
     },
 
     drawGizmo : function() {
         this._drawAxis();
         this._drawControlRect();
+        this._drawRotate();
+        this._drawScale();
         this._drawBoundingBox();
         this._drawContentSize(); // todo 컨텐트 사이즈와 바운딩 박스 차이를 보기 위해 그림. 나중에 별 이슈 없으면 둘중 하나를 삭제
     },
@@ -142,6 +180,60 @@ Genie.GizmoNode = Genie.HierarchyProtectNode.extend({
         this.rectDrawNode.setPosition( cc.p( -20, -20 ) );
     },
 
+    _drawRotate : function () {
+        this.rotateDrawNode.clear();
+
+        var RADIUS      = this.rotateOptions.radius,
+            CENTER      = this.rotateOptions.center,
+            LINE_WIDTH  = this.rotateOptions.line_width,
+            COLOR       = this.rotateOptions.color;
+
+        this.rotateDrawNode.drawCircle( CENTER, RADIUS, 0, 360, false, LINE_WIDTH, COLOR );
+    },
+
+    _drawScale : function () {
+        this.scaleXDrawNode.clear();
+        this.scaleYDrawNode.clear();
+
+        var LINE_LENGTH     = this.axisOptions.line_length,
+            ARROW_LENGTH    = this.axisOptions.arrow_length,
+            AXIS_WIDTH      = this.axisOptions.axis_width;
+
+        var COLOR = this.axisOptions.color_axisX;
+
+        var points = [
+            cc.p( LINE_LENGTH + ARROW_LENGTH, 0 ),
+            cc.p( LINE_LENGTH + ARROW_LENGTH, ARROW_LENGTH / 2 ),
+            cc.p( LINE_LENGTH, ARROW_LENGTH / 2 ),
+
+            cc.p( LINE_LENGTH, AXIS_WIDTH / 2 ),
+            cc.p( 0, AXIS_WIDTH / 2 ),
+            cc.p( 0, -AXIS_WIDTH / 2 ),
+            cc.p( LINE_LENGTH, -AXIS_WIDTH / 2 ),
+
+            cc.p( LINE_LENGTH, -ARROW_LENGTH / 2 ),
+            cc.p( LINE_LENGTH + ARROW_LENGTH, -ARROW_LENGTH / 2 ),
+
+        ]
+        this.scaleXDrawNode.drawPoly( points, COLOR, 1, COLOR );
+
+        COLOR = this.axisOptions.color_axisY;
+        points = [
+            cc.p( 0, LINE_LENGTH + ARROW_LENGTH ),
+            cc.p( -ARROW_LENGTH / 2, LINE_LENGTH + ARROW_LENGTH ),
+            cc.p( -ARROW_LENGTH / 2, LINE_LENGTH ),
+
+            cc.p(-AXIS_WIDTH / 2, LINE_LENGTH ),
+            cc.p(-AXIS_WIDTH / 2, 0 ),
+            cc.p(AXIS_WIDTH / 2, 0 ),
+            cc.p(AXIS_WIDTH / 2, LINE_LENGTH ),
+
+            cc.p( ARROW_LENGTH / 2, LINE_LENGTH ),
+            cc.p( ARROW_LENGTH / 2, LINE_LENGTH + ARROW_LENGTH ),
+        ]
+        this.scaleYDrawNode.drawPoly( points, COLOR, 1, COLOR );
+    },
+
     _drawBoundingBox : function() {
         this.bbDrawNode.clear();
 
@@ -190,13 +282,20 @@ Genie.GizmoNode = Genie.HierarchyProtectNode.extend({
     },
 
     _initTouchComponent : function() {
-        var touchCompRect = new Genie.Component.Touch();
-        var touchCompX = new Genie.Component.Touch();
-        var touchCompY = new Genie.Component.Touch();
+        var touchCompRect = new Genie.Component.Touch(),
+            touchCompX = new Genie.Component.Touch(),
+            touchCompY = new Genie.Component.Touch(),
+            touchRotate = new Genie.Component.Touch(),
+            touchScaleX = new Genie.Component.Touch(),
+            touchScaleY = new Genie.Component.Touch();
 
-        this.touchCompRect = this._insertTouchComp(this.rectDrawNode, touchCompRect, this.onMouseEventRect, this.rectOptions.size, this.rectOptions.offset);
-        this.touchCompX    = this._insertTouchComp(this.axisXDrawNode, touchCompX, this.onMouseEventX, this.axisOptions.touchSizeX, this.axisOptions.touchOffsetX);
-        this.touchCompY    = this._insertTouchComp(this.axisYDrawNode, touchCompY, this.onMouseEventY, this.axisOptions.touchSizeY, this.axisOptions.touchOffsetY);;
+        this.touchCompRect   = this._insertTouchComp(this.rectDrawNode, touchCompRect, this.onMouseEventRect, this.rectOptions.size, this.rectOptions.offset);
+        this.touchCompX      = this._insertTouchComp(this.axisXDrawNode, touchCompX, this.onMouseEventX, this.axisOptions.touchSizeX, this.axisOptions.touchOffsetX);
+        this.touchCompY      = this._insertTouchComp(this.axisYDrawNode, touchCompY, this.onMouseEventY, this.axisOptions.touchSizeY, this.axisOptions.touchOffsetY);
+        this.touchCompRotate = this._insertTouchComp(this.rotateDrawNode, touchRotate, this.onMouseEventRotate, this.rotateOptions.touchSize, this.rotateOptions.touchOffset);
+        this.touchCompSX     = this._insertTouchComp(this.scaleXDrawNode, touchScaleX, this.onMouseEventX, this.axisOptions.touchSizeX, this.axisOptions.touchOffsetX );
+        this.touchCompSY      = this._insertTouchComp(this.scaleYDrawNode, touchScaleY, this.onMouseEventY, this.axisOptions.touchSizeY, this.axisOptions.touchOffsetY);
+
     },
 
     _insertTouchComp : function (target, comp, handler, size, offset) {
@@ -212,16 +311,24 @@ Genie.GizmoNode = Genie.HierarchyProtectNode.extend({
         this._onMouseEvent.call(this, 'rect', eventName, pt);
     },
 
-    onMouseEventX: function(eventName, pt) {
+    onMouseEventX: function( eventName, pt ) {
         this._onMouseEvent.call(this, 'x', eventName, pt);
     },
 
-    onMouseEventY: function(eventName, pt) {
+    onMouseEventY: function( eventName, pt ) {
         this._onMouseEvent.call(this, 'y', eventName, pt);
+    },
+
+    onMouseEventRotate : function ( eventName, pt ) {
+        this._onMouseEvent.call(this, 'rotate', eventName, pt);
     },
 
     _onMouseEvent(type, eventName, pt) {
         var delta, selectNode, touchComp, size, offset, isValid;
+        var isMove   = this.currMode === this.mode.MOVE,
+            isRotate = this.currMode === this.mode.ROTATE,
+            isScale  = this.currMode === this.mode.SCALE;
+
         switch (type) {
             case 'rect':
                 touchComp          = this.touchCompRect;
@@ -229,14 +336,19 @@ Genie.GizmoNode = Genie.HierarchyProtectNode.extend({
                 offset             = this.rectOptions.offset;
                 break;
             case 'x':
-                touchComp          = this.touchCompX;
+                touchComp          = isMove ? this.touchCompX : this.touchCompSX;
                 size               = this.axisOptions.touchSizeX;
                 offset             = this.axisOptions.touchOffsetX;
                 break;
             case 'y':
-                touchComp          = this.touchCompY;
+                touchComp          = isMove ? this.touchCompY : this.touchCompSY;
                 size               = this.axisOptions.touchSizeY;
                 offset             = this.axisOptions.touchOffsetY;
+                break;
+            case 'rotate':
+                touchComp          = this.touchCompRotate;
+                size               = this.rotateOptions.touchSize;
+                offset             = this.rotateOptions.touchOffset;
                 break;
             default:
                 return;
@@ -245,12 +357,21 @@ Genie.GizmoNode = Genie.HierarchyProtectNode.extend({
         switch (eventName) {
             case 'down':
                 cc.game.canvas.style.cursor = 'pointer';
+                var args = {
+                    dragStartPt: pt,
+                    dragStartTargetPt: Genie.Utils.getNodeWorldPosition( this.targetNode ),
+                    dragStartScaleX: this.targetNode.getScaleX(),
+                    dragStartScaleY: this.targetNode.getScaleY(),
+                    dragStartRotation: this.targetNode.getRotation(),
+                };
                 if (type === 'x')
-                    Genie.GizmoController.setDragXStart( pt, Genie.Utils.getNodeWorldPosition( this.targetNode ) );
+                    Genie.GizmoController.setDragXStart( args );
                 else if (type === 'y')
-                    Genie.GizmoController.setDragYStart( pt, Genie.Utils.getNodeWorldPosition( this.targetNode ) );
-                else
-                    Genie.GizmoController.setDragRectStart( pt, Genie.Utils.getNodeWorldPosition( this.targetNode ) );
+                    Genie.GizmoController.setDragYStart( args );
+                else if (type === 'rect')
+                    Genie.GizmoController.setDragRectStart( args );
+                else if (type === 'rotate')
+                    Genie.GizmoController.setDragRotateStart( args );
                 touchComp.setCustomHitRectSize( cc.game.canvas.width * 4, cc.game.canvas.height * 4 );
                 touchComp.setCustomHitRectCenterOffsetPt( cc.p( -cc.game.canvas.width * 2, -cc.game.canvas.height * 2 ) );
                 break;
@@ -259,8 +380,10 @@ Genie.GizmoNode = Genie.HierarchyProtectNode.extend({
                     isValid = Genie.GizmoController.isDragGizmoCtrlX();
                 else if (type === 'y')
                     isValid = Genie.GizmoController.isDragGizmoCtrlY();
-                else
+                else if (type === 'rect')
                     isValid = Genie.GizmoController.isDragGizmoCtrlRect();
+                else if (type === 'rotate')
+                    isValid = Genie.GizmoController.isDragGizmoCtrlRotate();
 
                 if ( isValid ) {
                     delta = cc.pSub(pt, Genie.GizmoController.getDeltaInTargetPt());
@@ -271,18 +394,55 @@ Genie.GizmoNode = Genie.HierarchyProtectNode.extend({
                     if (type === 'y')
                         delta.x = selectNode.getPosition().x;
 
-                    var localPos = selectNode.getParent().convertToNodeSpace( delta );
-
                     Genie.GizmoController.updateGizmoByTarget( selectNode );
-                    selectNode.setPosition( localPos );
 
                     var transComp = selectNode.getComponent( Genie.ComponentName.TRANSFORM );
-                    if (type === 'x')
-                        transComp && transComp.refreshPositionValue( cc.p( localPos.x, selectNode.getPosition().y ) );
-                    else if (type === 'y')
-                        transComp && transComp.refreshPositionValue( cc.p( selectNode.getPosition().x, localPos.y ) );
-                    else
-                        transComp && transComp.refreshPositionValue( localPos );
+                    if (isMove) {
+                        var localPos = selectNode.getParent().convertToNodeSpace( delta );
+                        selectNode.setPosition( localPos );
+                        if (type === 'x')
+                            transComp && transComp.refreshPositionValue( cc.p( localPos.x, selectNode.getPosition().y ) );
+                        else if (type === 'y')
+                            transComp && transComp.refreshPositionValue( cc.p( selectNode.getPosition().x, localPos.y ) );
+                        else
+                            transComp && transComp.refreshPositionValue( localPos );
+                    } else if (isScale) {
+                        var diff = cc.pSub(delta, selectNode.getPosition());
+                        var currScaleX = Genie.GizmoController.getDragStartScaleX(),
+                            currScaleY = Genie.GizmoController.getDragStartScaleY();
+
+                        if (diff.x < 0)
+                            diff.x = Genie.Utils.minMaxScaling(diff.x, -1700, 0, 0, currScaleX);
+                        else
+                            diff.x = Genie.Utils.minMaxScaling(diff.x, 0, 1700, currScaleX, currScaleX * 5);
+
+                        if (diff.y < 0)
+                            diff.y = Genie.Utils.minMaxScaling(diff.y, -1000, 0, 0, currScaleY);
+                        else
+                            diff.y = Genie.Utils.minMaxScaling(diff.y, 0, 1000, currScaleY, currScaleY * 5);
+
+                        if (type === 'x') {
+                            transComp && transComp.refreshScaleValue(cc.p(diff.x, selectNode.getScaleY()));
+                            selectNode.setScaleX(diff.x);
+                        } else if (type === 'y') {
+                            transComp && transComp.refreshScaleValue(cc.p(selectNode.getScaleX(), diff.y));
+                            selectNode.setScaleY(diff.y);
+                        } else {
+                            transComp && transComp.refreshScaleValue(diff);
+                            selectNode.setScaleX(diff.x);
+                            selectNode.setScaleY(diff.y);
+                        }
+                    } else if (isRotate) {
+                        var originAngle = Genie.GizmoController.getDragStartRotation();
+                        var deltaAngle = Genie.Utils.calculateAngleOfTwoSegments(
+                            Genie.GizmoController.getDragStartTargetPt(),
+                            delta,
+                            Genie.GizmoController.getDragStartTargetPt(),
+                            Genie.GizmoController.getDragStartPt()
+                        );
+                        selectNode.setRotation((originAngle + deltaAngle) % 360);
+                        transComp && transComp.refreshRotationValue((originAngle + deltaAngle) % 360);
+                    }
                 }
                 break;
             case 'up':
@@ -290,8 +450,11 @@ Genie.GizmoNode = Genie.HierarchyProtectNode.extend({
                     isValid = Genie.GizmoController.isDragGizmoCtrlX();
                 else if (type === 'y')
                     isValid = Genie.GizmoController.isDragGizmoCtrlY();
-                else
+                else if (type === 'rect')
                     isValid = Genie.GizmoController.isDragGizmoCtrlRect();
+                else if (type === 'rotate')
+                    isValid = Genie.GizmoController.isDragGizmoCtrlRotate();
+
                 if ( isValid ) {
                     Genie.GizmoController.setDragEnd();
 
@@ -303,26 +466,59 @@ Genie.GizmoNode = Genie.HierarchyProtectNode.extend({
                     if (type === 'y')
                         delta.x = selectNode.getPosition().x;
 
-                    var dragStartTargetPt = Genie.GizmoController.getDragStartTargetPt();
-                    var srcLocalPos = selectNode.getParent().convertToNodeSpace(dragStartTargetPt);
-                    var destLocalPos = selectNode.getParent().convertToNodeSpace(delta);
+                    var src, dest;
+                    if (isMove) {
+                        var dragStartTargetPt = Genie.GizmoController.getDragStartTargetPt();
+                        var srcLocalPos = selectNode.getParent().convertToNodeSpace(dragStartTargetPt);
+                        var destLocalPos = selectNode.getParent().convertToNodeSpace(delta);
 
-                    var src = cc.p(Math.round(srcLocalPos.x), Math.round(srcLocalPos.y));
-                    var dest;
-                    if (type === 'x')
-                        dest = cc.p(Math.round(destLocalPos.x), Math.round(srcLocalPos.y));
-                    else if (type === 'y')
-                        dest = cc.p(Math.round(srcLocalPos.x), Math.round(destLocalPos.y));
-                    else
-                        dest = cc.p(Math.round(destLocalPos.x), Math.round(destLocalPos.y));
+                        src = cc.p(Math.round(srcLocalPos.x), Math.round(srcLocalPos.y));
+                        if (type === 'x')
+                            dest = cc.p(Math.round(destLocalPos.x), Math.round(srcLocalPos.y));
+                        else if (type === 'y')
+                            dest = cc.p(Math.round(srcLocalPos.x), Math.round(destLocalPos.y));
+                        else if (type === 'rect')
+                            dest = cc.p(Math.round(destLocalPos.x), Math.round(destLocalPos.y));
 
-                    var moveDelta = cc.pDistance(srcLocalPos, selectNode.getPosition());
-                    if (moveDelta > 1.0) {
-                        Genie.CommandManager.execute(new Genie.Command.TransformPosition(selectNode, {
-                            src: src,
-                            dest: dest
-                        }));
+                        var moveDelta = cc.pDistance(srcLocalPos, selectNode.getPosition());
+                        if (moveDelta > 1.0) {
+                            Genie.CommandManager.execute(new Genie.Command.TransformPosition(selectNode, {
+                                src: src,
+                                dest: dest
+                            }));
+                        }
+                    } else if (isScale) {
+                        var dragStartScaleX = Genie.GizmoController.getDragStartScaleX(),
+                            dragStartScaleY = Genie.GizmoController.getDragStartScaleY(),
+                            destScaleX      = selectNode.getScaleX(),
+                            destScaleY      = selectNode.getScaleY();
+
+                        if (type === 'x')
+                            destScaleY = dragStartScaleY;
+                        else if (type === 'y')
+                            destScaleX = dragStartScaleX;
+
+                        var scaleDelta = cc.pDistance(cc.p(dragStartScaleX, dragStartScaleY), cc.p(destScaleX, destScaleY));
+                        if (scaleDelta >= 0.01) {
+                            src = cc.p(Math.round(dragStartScaleX * 100) / 100, Math.round(dragStartScaleY * 100) / 100);
+                            dest = cc.p(Math.round(destScaleX * 100) / 100, Math.round(destScaleY * 100) / 100);
+                            Genie.CommandManager.execute(new Genie.Command.TransformScale(selectNode, {
+                                src: src,
+                                dest: dest
+                            }));
+                        }
+                    } else if (isRotate) {
+                        var rotateDelta = Math.abs(selectNode.getRotation() - Genie.GizmoController.getDragStartRotation());
+                        if (rotateDelta >= 1) {
+                            src = Genie.GizmoController.getDragStartRotation();
+                            dest = parseInt(selectNode.getRotation());
+                            Genie.CommandManager.execute(new Genie.Command.TransformRotation(selectNode, {
+                                src: src,
+                                dest: dest
+                            }));
+                        }
                     }
+
                     cc.game.canvas.style.cursor = 'auto';
                     touchComp.setCustomHitRectSize( size );
                     touchComp.setCustomHitRectCenterOffsetPt( offset );

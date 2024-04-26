@@ -53,7 +53,35 @@ Genie.Command.TransformScale = Genie.Command.Base.extend({
 
     // 로그 뷰에 command 처리
     setCommandOnLogView : function( commandType, value ) {
-        var strText = cc.formatStr( "move  > x: %d, y: %d ", value.x, value.y );
+        var strText = cc.formatStr( "scale  > x: %d, y: %d ", value.x, value.y );
+        this.setCommandLog( commandType, this._targetNode.getName(), strText );
+    },
+});
+
+Genie.Command.TransformRotation = Genie.Command.Base.extend({
+    ctor : function( targetNode, args ) {
+        this._super( 'TransformRotation', targetNode, args );
+    },
+
+    // main view 에 command 처리
+    setCommandOnMainView : function( value ) {
+        this._targetNode.setRotation( value );
+        Genie.GizmoController.updateGizmoByTarget( this._targetNode );
+    },
+
+    // 인스펙터 에 command 처리
+    setCommandOnInspector : function( value ) {
+        var component = this._targetNode.getComponent( Genie.ComponentName.TRANSFORM );
+        if( !component ) {
+            return;
+        }
+
+        component.refreshRotationValue( value );
+    },
+
+    // 로그 뷰에 command 처리
+    setCommandOnLogView : function( commandType, value ) {
+        var strText = cc.formatStr( "rotate  > degree: %d", value );
         this.setCommandLog( commandType, this._targetNode.getName(), strText );
     },
 });

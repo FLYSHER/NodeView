@@ -66,13 +66,13 @@ var Renderer_main = {
             const key = event.key.toLowerCase();
             switch (key) {
                 case 'q': // 이동 gizmo
-                    cc.log("[keyEvent] q");
+                    Genie.GizmoController.showMoveGizmo();
                     break;
                 case 'w': // 회전 gizmo
-                    cc.log("[keyEvent] w");
+                    Genie.GizmoController.showRotateGizmo();
                     break;
                 case 'e': // 스케일 gizmo
-                    cc.log("[keyEvent] e");
+                    Genie.GizmoController.showScaleGizmo();
                     break;
             }
         });

@@ -141,4 +141,36 @@ Genie.Utils = {
         const whitespace = (' ').repeat(length);
         return (str + whitespace).substring(0, length);
     },
+
+    /**
+    * min ~ max 의 값을 newMin ~ newMax 의 값으로 압축 및 확장 스케일링 해주는 함수
+    * */
+    minMaxScaling : function (value, min, max, newMin, newMax) {
+        return (value - min) * (newMax - newMin) / (max - min) + newMin;
+    },
+
+    /**
+     * 선분 2개가 이루는 각도를 반환합니다.
+     */
+    calculateAngleOfTwoSegments : function (seg1Start, seg1End, seg2Start, seg2End) {
+        var seg1DirectionX = seg1End.x - seg1Start.x,
+            seg1DirectionY = seg1End.y - seg1Start.y;
+
+        var seg2DirectionX = seg2End.x - seg2Start.x,
+            seg2DirectionY = seg2End.y - seg2Start.y;
+
+        var dotProduct = seg1DirectionX * seg2DirectionX + seg1DirectionY * seg2DirectionY;
+        var seg1Length = Math.sqrt(seg1DirectionX * seg1DirectionX + seg1DirectionY * seg1DirectionY),
+            seg2Length = Math.sqrt(seg2DirectionX * seg2DirectionX + seg2DirectionY * seg2DirectionY);
+
+        var angle = Math.acos(dotProduct / (seg1Length * seg2Length));
+        angle = cc.radiansToDegrees(angle);
+
+        var crossProduct = seg1DirectionX * seg2DirectionY - seg1DirectionY * seg2DirectionX;
+
+        if (crossProduct < 0) {
+            angle = 360 - angle;
+        }
+        return angle;
+    },
 }

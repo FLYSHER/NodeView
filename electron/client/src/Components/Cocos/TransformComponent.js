@@ -26,7 +26,7 @@ Genie.Component.Transform = Genie.Component.InspectorBase.extend({
         this.input_pos = HtmlHelper.createPointAttrib( rootDiv, "position",  [ parseFloat( loc_pos.x ).toFixed(0), parseFloat(loc_pos.y).toFixed(0)], [false, false], this.onchange.bind(this) );
 
         // rotation
-        HtmlHelper.createOneShortTextInput( rootDiv, "rotation", owner.getRotation(), true );
+        this.input_rotation = HtmlHelper.createOneShortTextInput( rootDiv, "rotation", owner.getRotation(), true );
 
         // scale
         var loc_scale = cc.p( owner.getScaleX(), owner.getScaleY() );
@@ -94,8 +94,8 @@ Genie.Component.Transform = Genie.Component.InspectorBase.extend({
     },
 
     refreshPositionValue : function( value ) {
-        this.input_pos.x.value = parseInt(value.x);
-        this.input_pos.y.value = parseInt(value.y);
+        this.input_pos.x.value = parseInt(value.x).toString();
+        this.input_pos.y.value = parseInt(value.y).toString();
     },
 
     refreshScaleValue : function( value ) {
@@ -103,4 +103,7 @@ Genie.Component.Transform = Genie.Component.InspectorBase.extend({
         this.input_scale.y.value = parseFloat(value.y).toFixed(2);
     },
 
+    refreshRotationValue : function( value ) {
+        this.input_rotation.value = parseInt(value).toString();
+    },
 });
