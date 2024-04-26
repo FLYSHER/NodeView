@@ -30,9 +30,9 @@ Genie.GizmoNode = Genie.HierarchyProtectNode.extend({
         };
 
         this.rotateOptions = {
-            radius : 130,
-            touchSize : cc.size( 280, 280 ),
-            touchOffset : cc.p( -140, -140 ),
+            radius : 50,
+            touchSize : cc.size( 120, 120 ),
+            touchOffset : cc.p( -60, -60 ),
             line_width : 4,
             color : cc.color( 0, 0, 255, 100 ),
             center : cc.p( 0, 0 ),
