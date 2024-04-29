@@ -86,6 +86,10 @@ Genie.GizmoController = {
     },
     //endregion
 
+    hideGizmo : function () {
+        this._setGizmoMode(-1);
+    },
+
     showMoveGizmo : function () {
         this._setGizmoMode(0);
     },

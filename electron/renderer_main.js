@@ -65,13 +65,16 @@ var Renderer_main = {
         canvas.addEventListener('keydown', function(event) {
             const key = event.key.toLowerCase();
             switch (key) {
-                case 'q': // 이동 gizmo
+                case 'q': // gizmo 숨기기
+                    Genie.GizmoController.hideGizmo();
+                    break;
+                case 'w': // 이동 gizmo
                     Genie.GizmoController.showMoveGizmo();
                     break;
-                case 'w': // 회전 gizmo
+                case 'e': // 회전 gizmo
                     Genie.GizmoController.showRotateGizmo();
                     break;
-                case 'e': // 스케일 gizmo
+                case 'r': // 스케일 gizmo
                     Genie.GizmoController.showScaleGizmo();
                     break;
             }

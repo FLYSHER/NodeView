@@ -10,6 +10,7 @@ Genie.GizmoNode = Genie.HierarchyProtectNode.extend({
 
     initProperty : function() {
         this.mode = {
+            HIDE   : -1,
             MOVE   : 0,
             ROTATE : 1,
             SCALE  : 2,
@@ -75,17 +76,20 @@ Genie.GizmoNode = Genie.HierarchyProtectNode.extend({
 
     setMode : function (mode) {
         this.currMode = mode;
-        const isMove = mode === this.mode.MOVE,
+        const isHide = mode === this.mode.HIDE,
+            isMove = mode === this.mode.MOVE,
             isRotate = mode === this.mode.ROTATE,
             isScale = mode === this.mode.SCALE;
 
-        this.axisXDrawNode.setVisible(isMove);
-        this.axisYDrawNode.setVisible(isMove);
+        this.axisXDrawNode.setVisible(!isHide && isMove);
+        this.axisYDrawNode.setVisible(!isHide && isMove);
 
-        this.rotateDrawNode.setVisible(isRotate);
+        this.rotateDrawNode.setVisible(!isHide && isRotate);
 
-        this.scaleXDrawNode.setVisible(isScale);
-        this.scaleYDrawNode.setVisible(isScale);
+        this.scaleXDrawNode.setVisible(!isHide && isScale);
+        this.scaleYDrawNode.setVisible(!isHide && isScale);
+
+        this.rectDrawNode.setVisible(!isHide);
     },
 
     onEnter : function() {
