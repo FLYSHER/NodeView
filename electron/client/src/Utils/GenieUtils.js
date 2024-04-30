@@ -173,4 +173,18 @@ Genie.Utils = {
         }
         return angle;
     },
+
+    /**
+     *  백터의 길이를 최소 길이로 연장해서 반환
+     */
+    extendVectorToMinimumLength : function (vector, minLength) {
+        var length = Math.sqrt(vector.x * vector.x + vector.y * vector.y);
+        if (length < minLength) {
+            var scaleFactor = minLength / length;
+            return cc.p(vector.x * scaleFactor, vector.y * scaleFactor);
+        } else {
+            return vector;
+        }
+    },
+
 }

@@ -437,15 +437,21 @@ Genie.GizmoNode = Genie.HierarchyProtectNode.extend({
                             selectNode.setScaleY(diff.y);
                         }
                     } else if (isRotate) {
+                        var deltaVector = cc.p(delta.x - Genie.GizmoController.getDragStartTargetPt().x, delta.y - Genie.GizmoController.getDragStartTargetPt().y);
+                        var extendedVector = Genie.Utils.extendVectorToMinimumLength(deltaVector, 1000);
+
                         var originAngle = Genie.GizmoController.getDragStartRotation();
                         var deltaAngle = Genie.Utils.calculateAngleOfTwoSegments(
                             Genie.GizmoController.getDragStartTargetPt(),
-                            delta,
+                            cc.pAdd(delta, extendedVector),
                             Genie.GizmoController.getDragStartTargetPt(),
                             Genie.GizmoController.getDragStartPt()
                         );
-                        selectNode.setRotation((originAngle + deltaAngle) % 360);
-                        transComp && transComp.refreshRotationValue((originAngle + deltaAngle) % 360);
+                        var newAngle = (originAngle + deltaAngle) % 360;
+                        if (!isNaN(newAngle)) {
+                            selectNode.setRotation(newAngle);
+                            transComp && transComp.refreshRotationValue(newAngle);
+                        }
                     }
                 }
                 break;
