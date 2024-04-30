@@ -55,6 +55,7 @@
         "src/Command/UITextCommand.js",
         "src/Command/UILabelBMFontCommand.js",
         "src/Command/UIImageViewCommand.js",
+        "src/Command/UIScrollViewCommand.js",
         "src/Command/NodePropertyCommand.js",
         "src/Command/CommandManager.js",
 

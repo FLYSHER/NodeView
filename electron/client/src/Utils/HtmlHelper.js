@@ -37,7 +37,7 @@ var HtmlHelper = {
         el_checkbox.type = "checkbox";
         name && ( el_checkbox.name = name );
         el_checkbox.checked = checked;
-        el_checkbox.readOnly = !!readOnly;
+        el_checkbox.disabled = !!readOnly;
 
         onchange && el_checkbox.addEventListener( "change", onchange );
 
@@ -448,10 +448,10 @@ var HtmlHelper = {
         return resultObj;
     },
 
-    createCheckboxAttrib : function( parent, propertyName, checked, readyonly, onchange ) {
+    createCheckboxAttrib : function( parent, propertyName, checked, readonly, onchange ) {
         var div = HtmlHelper.createDiv( parent, 'component_lineDiv' );
         HtmlHelper.createLabel( div, propertyName, "component_propertyLabel" );
-        return HtmlHelper.createCheckbox( div, "", checked, readyonly, onchange );
+        return HtmlHelper.createCheckbox( div, "", checked, readonly, onchange );
     },
 
     createIconButtonAttrib : function ( parent, propertyName, iconInfoObj, onclick) {
