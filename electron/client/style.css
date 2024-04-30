@@ -122,10 +122,29 @@ button:active {
 }
 
 #cocosView_gridItem {
-    height: 98vh;
+    height: 95vh;
     grid-column: 1 / 2;
     grid-row: 1 / 3;
 }
+
+#topView {
+    flex: none;
+    height: 30px;
+    background: #444242;
+}
+
+#gizmo_buttons {
+    float: right;
+    height: 100%;
+
+    display: grid;
+    gap: 5px;
+
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-template-rows   : auto auto;
+    margin-right: 4px;
+}
+
 
 #cocosView {
     height: 65%;

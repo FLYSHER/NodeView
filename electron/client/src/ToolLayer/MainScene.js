@@ -30,6 +30,7 @@ var MainScene = cc.Scene.extend({
         Renderer_main.init();
         Renderer_bottom.init();
         Renderer_log.init();
+        Renderer_top.init();
         Renderer_timeline.init();
         Renderer_assets.init();
         Renderer_inspector.init();

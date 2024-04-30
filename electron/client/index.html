@@ -49,6 +49,7 @@
     <script src="../renderer_timeline.js"></script>
     <script src="../renderer_bottom.js"></script>
     <script src="../renderer_log.js"></script>
+    <script src="../renderer_top.js"></script>
     <script src="../renderer_main.js"></script>
 
 </head>
@@ -56,6 +57,26 @@
 
 <div class="grid_container" >
     <div id="cocosView_gridItem">
+        <div id="topView">
+            <label class="frameBar_label">gizmo</label>
+            <div id="gizmo_buttons">
+                <button class="log_button" id="gizmo_hide" title="기즈모 숨김(q)">
+                    <i class="fa-solid fa-eye-slash"></i>
+                </button>
+
+                <button class="log_button" id="gizmo_move" title="기즈모 이동(w)">
+                    <i class="fa-sharp fa-solid fa-arrows-up-down-left-right"></i>
+                </button>
+
+                <button class="log_button" id="gizmo_rotate" title="기즈모 회전(e)">
+                    <i class="fa-solid fa-rotate"></i>
+                </button>
+
+                <button class="log_button" id="gizmo_scale" title="기즈모 확장(r)">
+                    <i class="fa-solid fa-expand"></i>
+                </button>
+            </div>
+        </div>
         <div id="cocosView">
             <canvas id="gameCanvas" ></canvas>
         </div>
