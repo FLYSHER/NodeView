@@ -202,7 +202,8 @@ Genie.Component.ArmatureView = Genie.Component.InspectorBase.extend({
 
         owner.getAnimation().play( name );
         owner.getAnimation().gotoAndPause( loc_frame );
-
+        Renderer_timeline.setTimeByFrame(loc_frame);
+        Renderer_timeline.moveTimelineIntoTheBounds();
         this.input_gotoAndPause.value = loc_frame;
     },
 

@@ -250,4 +250,8 @@ var Renderer_timeline = {
             }
         }.bind(this), playStep )
     },
+
+    setTimeByFrame : function (frame) {
+        this.timeline.setTime(frame * this.msPerFrame);
+    },
 }
