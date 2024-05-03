@@ -1,5 +1,5 @@
 // Modules to control application life and create native browser window
-const {app, BrowserWindow, Menu, dialog, globalShortcut, screen} = require('electron');
+const {app, BrowserWindow, Menu, dialog, screen} = require('electron');
 const path = require('path');
 const loadManager = require('./LoadManager');
 const log = require('electron-log/main');
@@ -73,16 +73,20 @@ const template = [
       },
       {
         role: 'ToggleDevTools'
-      },
-      {
-        label : "sentry undefined error test",
-        click : function () {
-          myUndefinedFunction();
-          console.log("[sentry] send undefined error on sentry");
-        }
       }
     ]
   },
+  {
+    role: 'Help',
+    submenu: [
+      {
+        label: 'Learn More',
+        click: function () {
+          require('electron').shell.openExternal('https://www.notion.so/playlinks/Genie-Tool-c663cc8dbb554081b3d3fc7535ca54bf');
+        }
+      }
+    ]
+  }
 ]
 const menu = Menu.buildFromTemplate(template);
 Menu.setApplicationMenu(menu);

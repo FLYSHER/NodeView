@@ -133,6 +133,10 @@ button:active {
     background: #444242;
 }
 
+#gizmo_label {
+    float: right;
+}
+
 #gizmo_buttons {
     float: right;
     height: 100%;
