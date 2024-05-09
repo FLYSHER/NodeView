@@ -4,6 +4,9 @@ var Renderer_top = {
         $('#gizmo_move').on( 'click', this.move.bind(this) );
         $('#gizmo_rotate').on( 'click', this.rotate.bind(this) );
         $('#gizmo_scale').on( 'click', this.scale.bind(this) );
+
+        $('#zoom_in').on( 'click', this.zoomIn.bind(this) );
+        $('#zoom_out').on( 'click', this.zoomOut.bind(this) );
     },
 
     hide : function () {
@@ -20,5 +23,13 @@ var Renderer_top = {
 
     scale : function () {
         Genie.GizmoController.showScaleGizmo();
+    },
+
+    zoomIn : function () {
+        Genie.MainScene.zoomIn();
+    },
+
+    zoomOut : function () {
+        Genie.MainScene.zoomOut();
     },
 };

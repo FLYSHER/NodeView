@@ -1,6 +1,6 @@
 var MainViewLayer = cc.LayerColor.extend({
     ctor: function () {
-        this._super( cc.color( 50, 50, 50, 50 ));
+        this._super( cc.color( 50, 50, 50, 0 ));
         this.setName("mainLayer");
 
         var size = cc.winSize;

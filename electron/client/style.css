@@ -149,6 +149,28 @@ button:active {
     margin-right: 4px;
 }
 
+#zoom_label {
+    float: right;
+    display: inline-block;
+
+    font-weight: bold;
+    width: 160px;
+    color: var(--text);
+    background: var(--heading-background);
+    margin: 5px;
+}
+
+#zoom_buttons {
+    float: right;
+    height: 100%;
+
+    display: grid;
+    gap: 5px;
+
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows   : auto auto;
+    margin-right: 100px;
+}
 
 #cocosView {
     height: 65%;

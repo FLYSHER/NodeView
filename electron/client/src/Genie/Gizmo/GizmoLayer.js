@@ -3,7 +3,7 @@ var Genie = Genie || {};
 Genie.GizmoLayer = cc.LayerColor.extend({
     ctor : function() {
         this.initProperty();
-        this._super( cc.color( 150, 0, 0, 50 ));
+        this._super( cc.color( 150, 0, 0, 0 ) );
 
         this.initPreviewArea();
         this.initDebugView();
