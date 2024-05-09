@@ -17,6 +17,7 @@ Genie.GizmoNode = Genie.HierarchyProtectNode.extend({
         };
 
         this.currMode = this.mode.MOVE;
+        this._isHide  = false;
 
         this.axisOptions = {
             line_length : 100,
@@ -75,21 +76,31 @@ Genie.GizmoNode = Genie.HierarchyProtectNode.extend({
     },
 
     setMode : function (mode) {
-        this.currMode = mode;
-        const isHide = mode === this.mode.HIDE,
-            isMove = mode === this.mode.MOVE,
-            isRotate = mode === this.mode.ROTATE,
-            isScale = mode === this.mode.SCALE;
+        const isHide = mode === this.mode.HIDE;
 
-        this.axisXDrawNode.setVisible(!isHide && isMove);
-        this.axisYDrawNode.setVisible(!isHide && isMove);
+        if (isHide) {
+            this._isHide = !this._isHide;
+            const button = document.getElementById('gizmo_hide');
 
-        this.rotateDrawNode.setVisible(!isHide && isRotate);
+            button.setAttribute('title', this._isHide ? '기즈모 보임(q)' : '기즈모 숨김(q)');
+            button.querySelector('i').setAttribute('class', this._isHide ? 'fa-solid fa-eye': 'fa-solid fa-eye-slash');
+        }
+        else
+            this.currMode = mode;
 
-        this.scaleXDrawNode.setVisible(!isHide && isScale);
-        this.scaleYDrawNode.setVisible(!isHide && isScale);
+        const isMove = this.currMode === this.mode.MOVE,
+              isRotate = this.currMode === this.mode.ROTATE,
+              isScale = this.currMode === this.mode.SCALE;
 
-        this.rectDrawNode.setVisible(!isHide);
+        this.axisXDrawNode.setVisible(!this._isHide && isMove);
+        this.axisYDrawNode.setVisible(!this._isHide && isMove);
+
+        this.rotateDrawNode.setVisible(!this._isHide && isRotate);
+
+        this.scaleXDrawNode.setVisible(!this._isHide && isScale);
+        this.scaleYDrawNode.setVisible(!this._isHide && isScale);
+
+        this.rectDrawNode.setVisible(!this._isHide);
     },
 
     onEnter : function() {
