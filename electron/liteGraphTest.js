@@ -24,7 +24,10 @@ var createMenu = function (root){
     var name = " Play";
     var icon_url = null;
     var container = ".header";
-    var callback = null;
+    var callback =  function () {
+        mainGraph.runStep(1, true);
+         console.log("[CHECK]")
+    };
     var button  =htmlUtil.CreateButton(name, icon_url, callback);
     button.id = id;
     root.querySelector(container).appendChild(button);
@@ -43,8 +46,7 @@ var init = function (){
     var graph = new LGraph();
 
     var canvas = new LGraphCanvas("#mycanvas", graph);
-    var root = document;
-    createMenu(root);
+
     // this.tools = root.querySelector(".tools");
     // this.content = root.querySelector(".content");
     // this.footer = root.querySelector(".footer");
@@ -53,19 +55,7 @@ var init = function (){
     var node_const = LiteGraph.createNode("action/start");
     node_const.pos = [100,100];
     graph.add(node_const);
-    // node_const.setValue(4.5);
 
-    // var targetCCNode = LiteGraph.createNode("action/targetCCNode");
-    // targetCCNode.pos = [400,100];
-    // graph.add(targetCCNode);
-    // node_const.connect(0, targetCCNode, 0 );
-
-    //
-    // var scquence = LiteGraph.createNode("action/scquence");
-    // scquence.pos = [200,300];
-    // graph.add(scquence);
-    // targetCCNode.connect(0, scquence, 0 );
-    //
     var moveTo = LiteGraph.createNode("action/moveTo");
     moveTo.pos = [100,200];
     graph.add(moveTo);
@@ -92,6 +82,9 @@ var init = function (){
     mainGraph = graph;
     mainGraphCanvas = canvas;
 
+    var root = document;
+    createMenu(root);
+
     // var mainMenuoptions = {
     //     callback: null,
     //     event : 'CustomEvent'
@@ -100,14 +93,14 @@ var init = function (){
     // LiteGraph.ContextMenu( ["Top", "Bottom", "Left", "Right"], mainMenuoptions);
 
 
-    $('#button_start').on('click', function () {
-        // mainGraph.runStep(1, true);
-        // console.log("[CHECK]")
-        // eventfun("request_nodeTree" , null,
-        //     function (args){
-        //         console.log("request_nodeTree : ", args);
-        //     });
-    });
+    // $('#button_start').on('click', function () {
+    //     // mainGraph.runStep(1, true);
+    //     // console.log("[CHECK]")
+    //     // eventfun("request_nodeTree" , null,
+    //     //     function (args){
+    //     //         console.log("request_nodeTree : ", args);
+    //     //     });
+    // });
 
 }
 document.addEventListener('readystatechange', event => {
@@ -146,31 +139,6 @@ ActionNode.start = function (){
 }
 ActionNode.start.title =  "Start";
 
-ActionNode.targetCCNode = function (){
-    this.addInput("start","startnode");
-    this.property_CCNodeName = this.addProperty("NodeName", "targetNodeName","text");
-    var self = this;
-    this.widget = this.addWidget("text", "NodeName", "targetNodeName",function(v) {
-        self.property_CCNodeName = v;
-    },this.property_CCNodeName);
-
-    this.addOutput("run","action");
-    this.onExecute = function()
-    {
-        let inputs = this.inputs;
-        if(inputs.length > 0) {
-            var targetNameProperty = this.getInputOrProperty("NodeName"); // this.getInputOrProperty("Name")
-            let actionObj = this.getInputData(0);
-            if(actionObj){
-                actionObj.targetNode = targetNameProperty;
-            }
-            console.log("[CHECK] targetCCNode ", inputs, actionObj);
-            this.setOutputData(0, actionObj);
-        }
-    }
-}
-ActionNode.targetCCNode.title =  "TargetCCNode";
-
 //Node : processFunction 한개
 //   { order : 2  //실행순서
 //     inputs : [ {name: 'In', type: 'action', link: 2} ]
@@ -194,12 +162,11 @@ ActionNodeCommonOnExecute = function (actionNode) {
         order : actionNode.order,
         type : actionNode.title,
         properties : actionNode.properties,
-        actionInfoList : null//swap
     }
     var actionObj = actionNode.getInputData(0);
     if(actionObj){
-        if(!actionObj.infos)
-            actionObj.infos = [];
+        if(!actionObj.actionList)
+            actionObj.actionList = [];
 
         //만약 inNode에서 links가 여러개라면 배여롤 저장
         var isSpawn = false;
@@ -209,8 +176,8 @@ ActionNodeCommonOnExecute = function (actionNode) {
         }
         if(isSpawn){
             var spawnInfo =  null;
-            if(actionObj.infos.length > 0){
-                var lastInfo = actionObj.infos[actionObj.infos.length - 1];
+            if(actionObj.actionList.length > 0){
+                var lastInfo = actionObj.actionList[actionObj.actionList.length - 1];
                 if(lastInfo.type === ActionType.spawn){
                     spawnInfo = lastInfo;
                 }
@@ -219,14 +186,14 @@ ActionNodeCommonOnExecute = function (actionNode) {
                 spawnInfo = {
                     order : actionInfo.order,
                     type : ActionType.spawn,
-                    actionInfo : [],
+                    actionList : [],
                 }
-                actionObj.infos.push(spawnInfo);
+                actionObj.actionList.push(spawnInfo);
             }
-            spawnInfo.actionInfo.push(actionInfo);
+            spawnInfo.actionList.push(actionInfo);
         }
         else {
-            actionObj.infos.push(actionInfo);
+            actionObj.actionList.push(actionInfo);
         }
     }
 
@@ -238,17 +205,17 @@ ActionNode.moveTo = function (){
     this.addOutput("Next","action");
 
     var self = this;
-    this.addProperty("time", 1.0,"number");
+    this.addProperty("duration", 1.0,"number");
     this.addProperty("XPos",   0,"number");
     this.addProperty("YPos",   0,"number");
-    this.addWidget("number", "time", this.properties.time,function(v) {
-        self.properties.time = v;
+    this.addWidget("number", "duration", this.properties.duration,function(v) {
+        self.properties.duration = v;
     });
     this.addWidget("number", "XPos", this.properties.XPos,function(v) {
-        self.properties.XPos = v;
+        self.properties.x = v;
     });
     this.addWidget("number", "YPos", this.properties.YPos,function(v) {
-        self.properties.YPos = v;
+        self.properties.y = v;
     });
     this.onExecute = ActionNodeCommonOnExecute.bind(this, this);
 
@@ -282,17 +249,17 @@ ActionNode.scaleTo = function (){
     this.addOutput("Next","action");
 
     var self = this;
-    this.addProperty("time", 1.0,"number");
+    this.addProperty("duration", 1.0,"number");
     this.addProperty("XScale",   0,"number");
     this.addProperty("YScale",   0,"number");
-    this.addWidget("number", "time", this.properties.time,function(v) {
-        self.properties.time = v;
+    this.addWidget("number", "duration", this.properties.duration,function(v) {
+        self.properties.duration = v;
     });
-    this.addWidget("number", "XScale", this.properties.XScale,function(v) {
-        self.properties.XScale = v;
+    this.addWidget("number", "XScale", this.properties.x,function(v) {
+        self.properties.x = v;
     });
-    this.addWidget("number", "YScale", this.properties.YScale,function(v) {
-        self.properties.YScale = v;
+    this.addWidget("number", "YScale", this.properties.y,function(v) {
+        self.properties.y = v;
     });
     this.onExecute = ActionNodeCommonOnExecute.bind(this, this);
 
@@ -606,12 +573,113 @@ ActionNode.end = function (){
     });
     this.setSize( this.computeSize() );
     this.onExecute = function (){
+        // {"name":"actionName","infos":[{"order":1,"type":"spawn","actionInfo":[{"order":1,"type":"moveTo","properties":{"time":1,"XPos":0,"YPos":0},"actionInfoList":null},{"order":2,"type":"scaleTo","properties":{"time":1,"XScale":0,"YScale":0},"actionInfoList":null}]},{"order":3,"type":"moveTo","properties":{"time":1,"XPos":0,"YPos":0},"actionInfoList":null}]}
         var actionObj = this.getInputData(0);
         var str = JSON.stringify(actionObj);
+        this.widgets[0].value;
+        this.widgets[0].data;
         console.log("[CHECK] output ", str);
     }
 }
 ActionNode.end.title = "end";
+
+var ActionParser = {};
+ActionParser.GetCocosAction = function (infodata){
+    if(infoData.actionList){ //ActionParser.CreateSequenceAction
+
+    }
+    else { //ActionParser.CreateBaseAction
+
+    }
+}
+
+ActionParser.CreateSequenceAction = function (infodata){
+    var actionArray = [];
+    for (var i = 0; i < infodata.length; i++) {
+        var subAction = ActionParser.CreateBaseAction(attr.children[i],runTargetNode, isJSStr);
+        if(cc.isArray(subAction)){
+            actionArray = actionArray.concat(subAction);
+        }
+        else {
+            actionArray.push(subAction);
+        }
+    }
+}
+
+ActionParser.CreateBaseAction = function (type,param){
+    var action = null;
+    switch(attr.data.type) {
+        case "moveTo":
+            action = cc.moveTo(Number(param.duration), cc.p(Number(param.x), Number(param.y)));
+            break;
+        case "moveBy":
+            action = cc.moveBy(Number(param.duration), cc.p(Number(param.x), Number(param.y)));
+            break;
+        case "scaleTo":
+            action = cc.scaleTo(Number(param.duration), Number(param.x), Number(param.y));
+            break;
+        case "scaleBy":
+            action = cc.scaleBy(Number(param.duration), Number(param.x), Number(param.y));
+            break;
+        case "rotateTo":
+            action = cc.rotateTo(Number(param.duration), Number(param.x), Number(param.y));
+            break;
+        case "rotateBy":
+            action = cc.rotateBy(Number(param.duration), Number(param.x), Number(param.y));
+            break;
+        case "skewTo":
+            action = cc.skewTo(Number(param.duration), Number(param.x), Number(param.y));
+            break;
+        case "skewBy":
+            action = cc.skewBy(Number(param.duration), Number(param.x), Number(param.y));
+            break;
+        case "fadeIn":
+            action = cc.fadeIn(Number(param.duration));
+            break;
+        case "fadeOut":
+            action = cc.fadeOut(Number(param.duration));
+            break;
+        case "jumpTo":
+            action = cc.jumpTo(Number(param.duration), cc.p(Number(param.x), Number(param.y)), Number(param.height), Number(param.jumps));
+            break;
+        case "jumpBy":
+            action = cc.jumpBy(Number(param.duration), cc.p(Number(param.x), Number(param.y)), Number(param.height), Number(param.jumps));
+            break;
+        case "blink":
+            action = cc.blink(Number(param.duration), Number(param.blinks));
+            break;
+        case "tintTo":
+            action = cc.tintTo(Number(param.duration), Number(param.r), Number(param.g), Number(param.b));
+            break;
+        case "tintBy":
+            action = cc.tintBy(Number(param.duration), Number(param.r), Number(param.g), Number(param.b));
+            break;
+        case "show":
+            action = cc.show();
+            break;
+        case "hide":
+            action = cc.hide();
+            break;
+        case "place":
+            action = cc.place(cc.p(Number(param.x), Number(param.y)));
+            break;
+        case "flipX":
+            action = cc.flipX(eval(param.flip));
+            break;
+        case "flipY":
+            action = cc.flipY(eval(param.flip));
+            break;
+    }
+}
+ActionParser.parser = function (json){
+
+    for(var n = 0; n < json.actionInfo.length; n++){
+
+    }
+
+    var action = cc.sequence();
+
+}
 
 for(var key in ActionNode){
     LiteGraph.registerNodeType("action/" +key, ActionNode[key]);
@@ -619,235 +687,6 @@ for(var key in ActionNode){
 
 //cc.runAction(cc.sequence())
 
-//Show value inside the debug console
-function TimerEvent() {
-    this.addProperty("interval", 1000); //this.properties.interval = 1000;
-    this.addProperty("event", "tick"); //this.properties.event = tick;
-    this.addOutput("on_tick", LiteGraph.EVENT);
-    this.time = 0;
-    this.last_interval = 1000;
-    this.triggered = false;
-}
-
-TimerEvent.title = "Timer";
-TimerEvent.desc = "Sends an event every N milliseconds";
-
-TimerEvent.prototype.onStart = function() {
-    this.time = 0;
-};
-
-TimerEvent.prototype.getTitle = function() {
-    return "Timer: " + this.last_interval.toString() + "ms";
-};
-
-TimerEvent.on_color = "#AAA";
-TimerEvent.off_color = "#222";
-
-TimerEvent.prototype.onDrawBackground = function() {
-    this.boxcolor = this.triggered
-        ? TimerEvent.on_color
-        : TimerEvent.off_color;
-    this.color  = this.triggered? "#f66363" : LiteGraph.NODE_DEFAULT_COLOR;
-    this.triggered = false;
-};
-
-TimerEvent.prototype.onExecute = function() {
-    var dt = this.graph.elapsed_time * 1000; //in ms
-
-    var trigger = this.time == 0;
-
-    this.time += dt;
-    this.last_interval = Math.max(
-        1,
-        this.getInputOrProperty("interval") | 0
-    );
-
-    if (
-        !trigger &&
-        (this.time < this.last_interval || isNaN(this.last_interval))
-    ) {
-        if (this.inputs && this.inputs.length > 1 && this.inputs[1]) {
-            this.setOutputData(1, false);
-        }
-        return;
-    }
-
-    this.triggered = true;
-    this.time = this.time % this.last_interval;
-    console.log("[CHECK] " +this.properties.event + " : " + this.properties.interval);
-    this.trigger("on_tick", this.properties.event);
-    // if (this.inputs && this.inputs.length > 1 && this.inputs[1]) {
-    //     this.setOutputData(1, true);
-    // }
-};
-
-TimerEvent.prototype.onGetInputs = function() {
-    return [["interval", "number"]];
-};
-
-TimerEvent.prototype.onGetOutputs = function() {
-    return [["tick", "boolean"]];
-};
-
-LiteGraph.registerNodeType("events/timer", TimerEvent);
-
-//Show value inside the debug console
-function LogEvent() {
-    this.size = [60, 30];
-    this.addInput("event", LiteGraph.ACTION);
-}
-
-LogEvent.title = "Log Event";
-LogEvent.desc = "Log event in console";
-
-LogEvent.prototype.onAction = function(action, param, options) {
-    console.log(action, param);
-};
-
-LiteGraph.registerNodeType("events/log", LogEvent);
-
-//region
-//node constructor class
-function MyAddNode()
-{
-    this.addInput("A","number");
-    this.addInput("B","number");
-    this.addOutput("A+B","number");
-    this.properties = { precision: 1 };
-}
-//name to show
-MyAddNode.title = "Sum";
-//function to call when the node is executed
-MyAddNode.prototype.onExecute = function()
-{
-    var A = this.getInputData(0);
-    if( A === undefined )
-        A = 0;
-    var B = this.getInputData(1);
-    if( B === undefined )
-        B = 0;
-    this.setOutputData( 0, A + B );
-}
-
-function sum(a,b,c)
-{
-    return a+b+c;
-}
-
-LiteGraph.registerNodeType("basic/sum", MyAddNode );
-LiteGraph.wrapFunctionAsNode("math/sum",sum, ["Boolen","Number"],"Number");
-
-//////////////ex////////////
-let baseConfig = {version:2.1, workflows:{}, jobs:{}};
-// Workflow node.
-function WorkflowNode() {
-    this.addInput("Job 1", "job");
-    this.addOutput("Workflow", "workflow")
-    this.addProperty("Name", "build");
-    this.widget = this.addWidget("text", "Name", "build", "Name");
-}
-WorkflowNode.title = "Workflow";
-WorkflowNode.prototype.onExecute = function() {
-    let inputs = this.inputs;
-    if (this.getInputData(inputs.length - 1) != undefined) {
-        this.addInput(`Job ${inputs.length + 1}`, "job")
-    }
-    let thisWorkflowConfig = baseConfig;
-    thisWorkflowConfig["workflows"][this.getInputOrProperty("Name")] = {};
-    for (let i = 0; i < inputs.length; i++) {
-        let val = this.getInputData(i);
-        for (var y in val) {
-            thisWorkflowConfig["jobs"][y] = val[y];
-            if (!thisWorkflowConfig["workflows"][this.getInputOrProperty("Name")]["jobs"]) {
-                thisWorkflowConfig["workflows"][this.getInputOrProperty("Name")]["jobs"] = [];
-            }
-            thisWorkflowConfig["workflows"][this.getInputOrProperty("Name")]["jobs"].push(y);
-        }
-    }
-    this.setOutputData(0, thisWorkflowConfig);
-}
-LiteGraph.registerNodeType("circleci/workflow", WorkflowNode);
-
-// Job node.
-function JobNode() {
-    this.addInput("Executor", "executor");
-    this.addProperty("Name", "build");
-    this.widget = this.addWidget("text", "Name", "build", "Name");
-    this.addInput("Step 1", "step");
-    this.addOutput("Job", "job");
-}
-JobNode.title = "Job";
-JobNode.prototype.onExecute = function() {
-    let inputs = this.inputs;
-    // Step inputs start @ 1.
-    if (this.getInputData(inputs.length - 1) != undefined) {
-        this.addInput(`Step ${inputs.length}`, "step")
-    }
-    let exec = this.getInputData(0);
-    let jobStruct = {[this.getInputOrProperty("Name")]: {"steps": []}};
-    for (var v in exec) {
-        jobStruct[this.getInputOrProperty("Name")][v] = exec[v];
-    }
-    if (this.getInputData(1)) {
-        for (let i = 1; i < inputs.length - 1; i++) {
-            debugger;
-            let val = this.getInputData(i);
-            if (typeof val == "object") {
-                for (var v in val) {
-                    debugger;
-                    jobStruct[this.getInputOrProperty("Name")]["steps"].push({[v]: val[v]});
-                }
-            }
-            else { jobStruct[this.getInputOrProperty("Name")]["steps"].push(val); }
-        }
-    }
-    this.setOutputData(0, jobStruct);
-}
-LiteGraph.registerNodeType("circleci/job", JobNode);
-
-// Checkout node.
-function CheckoutNode() {
-    this.addProperty("Command", "checkout");
-    this.addOutput("Step", "step");
-}
-CheckoutNode.title = "Checkout";
-CheckoutNode.prototype.onExecute = function() {
-    this.setOutputData(0, this.getInputOrProperty("Command"));
-}
-LiteGraph.registerNodeType("circleci/checkout", CheckoutNode);
-
-// Step node.
-function StepNode() {
-    this.addProperty("Run Command", "string");
-    this.widget = this.addWidget("text", "Run Command", "", "Run Command");
-    this.addOutput("Step", "step");
-}
-StepNode.title = "Run Command";
-StepNode.prototype.onExecute = function() {
-    this.setOutputData(0, {run: this.getInputOrProperty("Run Command")});
-}
-
-LiteGraph.registerNodeType("circleci/run", StepNode);
-
-// Executor node.
-function ExecutorNode() {
-    this.addProperty("Type", "executorType");
-    this.widget = this.addWidget("text", "Type", "", "Type");
-    this.addProperty("Image", "executorImagemage");
-    this.widget = this.addWidget("text", "Image", "", "Image");
-    this.addOutput("Executor", "executor"); //이름 타입
-}
-ExecutorNode.title = "Executor";
-ExecutorNode.prototype.onExecute = function() {
-    let execImg = this.getInputOrProperty("Image");
-    let execType = this.getInputOrProperty("Type");
-
-    let execObj = {[execType]: [{image: execImg}]};
-    this.setOutputData(0, execObj);
-}
-
-LiteGraph.registerNodeType("circleci/executor", ExecutorNode);
-//endregion
 
 //regrion Save Load
 // /*
@@ -877,7 +716,7 @@ LiteGraph.registerNodeType("circleci/executor", ExecutorNode);
 //     setTimeout( function(){ URL.revokeObjectURL( url ); }, 1000*60 ); //wait one minute to revoke url
 // });
 //*/
-//endregion
+
 var eventfun = null;
 var eventType = {
     nodeTree : "request_nodeTree",
