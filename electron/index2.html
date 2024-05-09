@@ -1,18 +1,23 @@
 <html>
 <head>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.8/themes/default-dark/style.min.css" />
+<!--  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.8/themes/default-dark/style.min.css" />-->
   <link rel="stylesheet" type="text/css" href="litegraph/css/litegraph.css">
-  <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
-  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-  <script type="text/javascript" src="litegraph/build/litegraph.js"></script>
-  <script>if (window.module) module = window.module;</script>
+  <link rel="stylesheet" type="text/css" href="litegraph/css/litegraph-editor.css">
 </head>
 <body style='width:100%; height:100%'>
-<button id="button_start" class="tab_button"> timeline </button>
-<div class='header'><div class='header header-left'></div><div class='header header-right'></div></div>
-<div class='content'><div class='editor-area'><canvas id='mycanvas' width='1024' height='720' style='border: 1px solid'></canvas></div></div>
-<div class='footer'><div class='footer footer-left'></div><div class='footer footer-right'></div></div>
-<script type="text/javascript" src="liteGraphTest.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/jstree.min.js"></script>
+    <button id="button_start" class="btn"> timeline </button>
+    <div class="litegraph-editor">
+        <div class='header'></div>
+        <div class='content litegraph'><div class='editor-area'><canvas id='mycanvas' width='1024' height='720' style='border: 1px solid'></canvas></div></div>
+        <div class='footer'></div>
+    </div>
+
+    <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script type="text/javascript" src="litegraph/build/litegraph.js"></script>
+    <script>if (window.module) module = window.module;</script>
+    <script type="text/javascript" src="liteGraphTest.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/jstree.min.js"></script>
+
 </body>
 </html>
