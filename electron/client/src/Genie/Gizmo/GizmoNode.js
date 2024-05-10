@@ -414,7 +414,7 @@ Genie.GizmoNode = Genie.HierarchyProtectNode.extend({
 
                     var transComp = selectNode.getComponent( Genie.ComponentName.TRANSFORM );
                     if (isMove) {
-                        var localPos = selectNode.getParent().convertToNodeSpace( delta );
+                        var localPos = delta;
                         var transPos = localPos;
 
                         if (type === 'x')
