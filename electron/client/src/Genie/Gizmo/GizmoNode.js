@@ -77,13 +77,15 @@ Genie.GizmoNode = Genie.HierarchyProtectNode.extend({
 
     setMode : function (mode) {
         const isHide = mode === this.mode.HIDE;
+        const SELECT_COLOR = '#9ed067', DEFAULT_COLOR = '#ffffff';
 
         if (isHide) {
             this._isHide = !this._isHide;
-            const button = document.getElementById('gizmo_hide');
+            const buttonHide = document.getElementById('gizmo_hide');
 
-            button.setAttribute('title', this._isHide ? '기즈모 보임(q)' : '기즈모 숨김(q)');
-            button.querySelector('i').setAttribute('class', this._isHide ? 'fa-solid fa-eye': 'fa-solid fa-eye-slash');
+            buttonHide.setAttribute('title', this._isHide ? '기즈모 보임(q)' : '기즈모 숨김(q)');
+            buttonHide.querySelector('i').setAttribute('class', this._isHide ? 'fa-solid fa-eye': 'fa-solid fa-eye-slash');
+            buttonHide.style.backgroundColor = this._isHide ? SELECT_COLOR: DEFAULT_COLOR;
         }
         else
             this.currMode = mode;
@@ -92,6 +94,16 @@ Genie.GizmoNode = Genie.HierarchyProtectNode.extend({
               isRotate = this.currMode === this.mode.ROTATE,
               isScale = this.currMode === this.mode.SCALE;
 
+        // 버튼 시각화 업데이트
+        const buttonMove = document.getElementById('gizmo_move'),
+            buttonRotate = document.getElementById('gizmo_rotate'),
+            buttonScale = document.getElementById('gizmo_scale');
+
+        buttonMove.style.backgroundColor = isMove ? SELECT_COLOR: DEFAULT_COLOR;
+        buttonRotate.style.backgroundColor = isRotate ? SELECT_COLOR: DEFAULT_COLOR;
+        buttonScale.style.backgroundColor = isScale ? SELECT_COLOR: DEFAULT_COLOR;
+
+        // 기즈모 visible 설정
         this.axisXDrawNode.setVisible(!this._isHide && isMove);
         this.axisYDrawNode.setVisible(!this._isHide && isMove);
 
