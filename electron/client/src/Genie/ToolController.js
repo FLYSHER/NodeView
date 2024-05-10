@@ -2,6 +2,7 @@ var Genie = Genie || {};
 
 Genie.ToolController = {
     arrSelectedNode : [],
+    screenScale : 1.0,
 
     reset : function() {
         this.arrSelectedNode.length = 0;
@@ -57,5 +58,13 @@ Genie.ToolController = {
         if( findIdx >= 0 ) {
             this.arrSelectedNode.splice( findIdx, 1 );
         }
+    },
+
+    setScreenScale : function (scale) {
+        this.screenScale = scale;
+    },
+
+    getScreenScale : function () {
+        return this.screenScale;
     },
 }

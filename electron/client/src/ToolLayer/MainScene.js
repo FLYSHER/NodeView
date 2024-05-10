@@ -95,6 +95,7 @@ var MainScene = cc.Scene.extend({
             Genie.GizmoController.updateGizmoByTarget( selectNode );
 
             document.getElementById('zoom_label').innerHTML = 'screen size : ' + parseInt((scale * 100).toString()) + '%';
+            Genie.ToolController.setScreenScale(scale);
         }
     },
 

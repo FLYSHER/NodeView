@@ -372,12 +372,13 @@ Genie.GizmoNode = Genie.HierarchyProtectNode.extend({
         switch (eventName) {
             case 'down':
                 cc.game.canvas.style.cursor = 'pointer';
+                selectNode = Genie.ToolController.getSelectNode();
                 var args = {
                     dragStartPt: pt,
-                    dragStartTargetPt: Genie.Utils.getNodeWorldPosition( this.targetNode ),
-                    dragStartScaleX: this.targetNode.getScaleX(),
-                    dragStartScaleY: this.targetNode.getScaleY(),
-                    dragStartRotation: this.targetNode.getRotation(),
+                    dragStartTargetPt: Genie.Utils.getNodeWorldPosition( selectNode ),
+                    dragStartScaleX: selectNode.getScaleX(),
+                    dragStartScaleY: selectNode.getScaleY(),
+                    dragStartRotation: selectNode.getRotation(),
                 };
                 if (type === 'x')
                     Genie.GizmoController.setDragXStart( args );
@@ -414,13 +415,16 @@ Genie.GizmoNode = Genie.HierarchyProtectNode.extend({
                     var transComp = selectNode.getComponent( Genie.ComponentName.TRANSFORM );
                     if (isMove) {
                         var localPos = selectNode.getParent().convertToNodeSpace( delta );
-                        selectNode.setPosition( localPos );
+                        var transPos = localPos;
+
                         if (type === 'x')
-                            transComp && transComp.refreshPositionValue( cc.p( localPos.x, selectNode.getPosition().y ) );
+                            transPos = cc.p( localPos.x, parseFloat(Genie.GizmoController.getDragStartTargetPt().y.toFixed(2)) );
                         else if (type === 'y')
-                            transComp && transComp.refreshPositionValue( cc.p( selectNode.getPosition().x, localPos.y ) );
-                        else
-                            transComp && transComp.refreshPositionValue( localPos );
+                            transPos = cc.p( parseFloat(Genie.GizmoController.getDragStartTargetPt().x.toFixed(2)), localPos.y );
+
+                        transComp && transComp.refreshPositionValue( Genie.MainScene.mainViewLayer.convertToNodeSpace(transPos) );
+                        selectNode.setPosition( Genie.MainScene.mainViewLayer.convertToNodeSpace(transPos) );
+
                     } else if (isScale) {
                         var diff = cc.pSub(delta, selectNode.getPosition());
                         var currScaleX = Genie.GizmoController.getDragStartScaleX(),
