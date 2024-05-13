@@ -190,8 +190,25 @@ var HtmlHelper = {
         label.innerText =  componentName;
         div_comp.appendChild( label );
 
-        const menu_container = HtmlHelper.createComponentMenu();
+        const windowIcon = document.createElement('i');
+        windowIcon.className = 'fa-solid fa-window-minimize';
+        windowIcon.style.color = '#d0b8f4';
+        windowIcon.style.float = 'right';
+        windowIcon.style.paddingRight = '10px';
+        windowIcon.style.margin = '5px';
+        windowIcon.addEventListener('click', function () {
+            const contents = div_comp.parentElement.children;
 
+            $.each(contents, (index, item) => {
+                if (index !== 0) {
+                    item.style.display = item.style.display === 'none' ? 'block' : 'none';
+                }
+            });
+
+            windowIcon.className = windowIcon.className === 'fa-solid fa-window-minimize' ? 'fa-solid fa-window-maximize' : 'fa-solid fa-window-minimize';
+        });
+
+        const menu_container = HtmlHelper.createComponentMenu();
         const menu_icon = document.createElement('i');
         menu_icon.className = 'fa-solid fa-ellipsis-vertical';
         menu_icon.style.color = '#d0b8f4';
@@ -202,6 +219,7 @@ var HtmlHelper = {
         menu_icon.addEventListener('click', menu_container._onclick);
 
         div_comp.appendChild( menu_icon );
+        div_comp.appendChild( windowIcon );
         div_comp.appendChild( menu_container );
 
         return div_comp;

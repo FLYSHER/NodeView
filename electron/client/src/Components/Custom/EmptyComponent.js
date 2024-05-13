@@ -23,7 +23,6 @@ Genie.Component.Empty = Genie.Component.InspectorBase.extend({
         var titleBar = HtmlHelper.createComponentBar(this.getName(), iconObj);
         rootDiv.appendChild(titleBar);
         this.rootDiv = rootDiv;
-        MyTestError1();
     },
 
 });
