@@ -4,7 +4,7 @@ Genie.Component = Genie.Component || {};
 Genie.Component.Empty = Genie.Component.InspectorBase.extend({
     ctor : function () {
         this._super();
-        this.setName( 'Empty' );
+        this.setName( Genie.ComponentName.EMPTY );
     },
 
     checkValid : function() {

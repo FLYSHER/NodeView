@@ -323,9 +323,20 @@ var HtmlHelper = {
         // option_addComponent.appendChild(component_option_icon);
         // option_addComponent.appendChild(component_menu_div);
 
-        const option_removeComponent = HtmlHelper.createComponentMenuOption('Remove this Component', () => {
+        const option_removeComponent = HtmlHelper.createComponentMenuOption('Remove this custom Component', () => {
             const target = Renderer_hierarchy.getTargetNode();
             const componentName = $(menu_div.parentElement.parentElement).children('span')[0].outerText;
+
+            const customCompNames = [
+                Genie.ComponentName.POPUP,
+                Genie.ComponentName.CODE,
+                Genie.ComponentName.EMPTY
+            ];
+
+            if (!customCompNames.includes(componentName)) {
+                menu_div.style.maxHeight = '0px';
+                return;
+            }
 
             if (target && componentName) {
                 target.removeComponent(componentName);

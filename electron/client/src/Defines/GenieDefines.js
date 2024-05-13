@@ -15,6 +15,7 @@ Genie.ComponentName = {
     UI_PAGE_VIEW    : 'uiPageView',
     POPUP           : 'popup',
     CODE            : 'code',
+    EMPTY           : 'empty',
 };
 
 Genie.NodeTag = {
