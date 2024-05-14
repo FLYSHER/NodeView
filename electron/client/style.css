@@ -104,7 +104,7 @@ code {
     gap: 2px;
 
     grid-template-columns: 3fr 1fr 1fr;
-    grid-template-rows   : auto auto;
+    grid-template-rows   : auto auto auto;
 }
 
 button:active {
@@ -202,31 +202,41 @@ button:active {
 }
 
 #hierarchy_gridItem {
-    height: 50%;
+    height: 49.75%;
+    display: flex;
+    flex-direction: column;
 }
 
 #hierarchy_bar_root {
     min-height: 30px;
+    max-height: 35px;
     height: 6%;
 }
 
 #hierarchy {
-    height: 94%;
+    flex: 1;
     overflow: scroll;
 }
 
 #assets_gridItem {
-    height : 50%;
+    height : 49.75%;
+    display: flex;
+    flex-direction: column;
 }
 
 #assets_bar_root{
     min-height: 30px;
+    max-height: 35px;
     height: 6%;
 }
 
 #assets {
-    height: 94%;
+    flex: 1;
     overflow: scroll;
+}
+
+#hierarchy_asset_gridLine {
+    height: 0.5%;
 }
 
 #inspector_gridItem {
