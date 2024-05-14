@@ -3,6 +3,7 @@ var Genie = Genie || {};
 Genie.LayoutController = {
     logLineDragStart : false,
     HALineDragStart : false,
+    inspectorLineDragStart : false,
 
     startLogLineDrag : function () {
         this.logLineDragStart = true;
@@ -26,5 +27,17 @@ Genie.LayoutController = {
 
     endHALineDrag : function () {
         this.HALineDragStart = false;
+    },
+
+    startInspectorLineDragStart : function () {
+        this.inspectorLineDragStart = true;
+    },
+
+    isInspectorLineDragStart : function () {
+        return this.inspectorLineDragStart;
+    },
+
+    endInspectorLineDragStart : function () {
+        this.inspectorLineDragStart = false;
     },
 }
