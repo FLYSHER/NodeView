@@ -63,6 +63,7 @@
         "src/ToolLayer/MainViewLayer.js",
         "src/Genie/HierarchyProtectNode.js",
         "src/Genie/ToolController.js",
+        "src/Genie/LayoutController.js",
         "src/Genie/Gizmo/GizmoController.js",
         "src/Genie/Gizmo/GizmoNode.js",
         "src/Genie/Gizmo/GizmoLayer.js",

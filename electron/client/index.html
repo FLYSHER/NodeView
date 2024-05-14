@@ -50,12 +50,13 @@
     <script src="../renderer_bottom.js"></script>
     <script src="../renderer_log.js"></script>
     <script src="../renderer_top.js"></script>
+    <script src="../renderer_layout.js"></script>
     <script src="../renderer_main.js"></script>
 
 </head>
 <body>
 
-<div class="grid_container" >
+<div class="grid_container" id="grid_container" >
     <div id="cocosView_gridItem">
         <div id="topView">
             <div id="gizmo_buttons">
@@ -151,7 +152,9 @@
         </div>
 
     </div>
+    <div id="log_gridLine">
 
+    </div>
     <div id="log_gridItem">
         <div class="frameBar_div" id="log_bar_root">
             <label class="frameBar_label"> Log </label>

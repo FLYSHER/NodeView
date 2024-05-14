@@ -34,6 +34,7 @@ var MainScene = cc.Scene.extend({
         Renderer_timeline.init();
         Renderer_assets.init();
         Renderer_inspector.init();
+        Renderer_layout.init();
         Renderer_hierarchy.init( this.mainViewLayer );
 
         // 마우스 휠 이벤트 추가
