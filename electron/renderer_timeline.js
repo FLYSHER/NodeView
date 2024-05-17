@@ -264,6 +264,7 @@ var Renderer_timeline = {
             const canvasEl = timelineDiv.querySelector('canvas');
             if (canvasEl) {
                 canvasEl.style.minWidth = '0px';
+                // 임시 우측 버퍼 120 px
                 canvasEl.style.width = (width - 120) + 'px';
             }
         }

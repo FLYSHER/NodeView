@@ -119,14 +119,13 @@ var Renderer_layout = {
                     const inspectorWidth = (other - newSecondColumnWidth).toFixed(2) + 'fr';
 
                     if (1.9 <= width && width <= 3.7) {
-                        if (newWidth < cc.view.getFrameSize().height * ScreenUtil.minWHRatio) {
-                            return;
-                        }
-                        cc.view.setFrameSize(newWidth, cc.view.getFrameSize().height);
-                        cc.view._adjustSizeKeepCanvasSize();
+                        if (newWidth >= parentDiv.clientHeight * 0.65 / ScreenUtil.minWHRatio) {
+                            cc.view.setFrameSize(newWidth, cc.view.getFrameSize().height);
+                            cc.view._adjustSizeKeepCanvasSize();
 
-                        Renderer_timeline.handleContentSize(newWidth);
-                        parentDiv.style.gridTemplateColumns = cocosViewWidth + ' auto ' + secondColumnWidth + ' auto ' + inspectorWidth;
+                            Renderer_timeline.handleContentSize(newWidth);
+                            parentDiv.style.gridTemplateColumns = cocosViewWidth + ' auto ' + secondColumnWidth + ' auto ' + inspectorWidth;
+                        }
                     }
                 }
             }
