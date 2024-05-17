@@ -62,6 +62,45 @@ var Renderer_main = {
             Genie.CommandManager.redo();
         });
 
+        ipcRenderer.on('save-current-layout-as-default', function () {
+            try {
+                const config = Renderer_layout.loadConfig();
+
+                const hierarchy = document.getElementById('hierarchy_gridItem');
+                const assets = document.getElementById('assets_gridItem');
+
+                const logView = document.getElementById('log_gridItem');
+                const secondColumn = document.getElementById('second_column');
+                const inspector = document.getElementById('inspector_gridItem');
+
+                const gridContainer = document.getElementById('grid_container');
+
+                if (config.layout_option) {
+                    config.layout_option.hierarchy_gridItem.height = hierarchy.style.height;
+                    config.layout_option.assets_gridItem.height = assets.style.height;
+
+                    config.layout_option.log_gridItem.height = logView.style.height;
+                    config.layout_option.second_column.height = secondColumn.style.height;
+                    config.layout_option.inspector_gridItem.height = inspector.style.height;
+
+                    config.layout_option.grid_container.grid_template_column = gridContainer.style.gridTemplateColumns;
+
+                    Renderer_layout.saveConfig(config);
+                    ipcRenderer.send('save-current-layout-as-default', 'Successfully updated the config.json file.');
+                }
+            } catch (error) {
+                ipcRenderer.send('save-current-layout-as-default', 'Something went wrong..');
+            }
+        });
+
+        ipcRenderer.on('reload-default-layout', function () {
+            Renderer_layout.reload();
+        });
+
+        ipcRenderer.on('reset-layout-setting', function () {
+            Renderer_layout.reset();
+        });
+
         canvas.addEventListener('keydown', function(event) {
             const key = event.key.toLowerCase();
             switch (key) {

@@ -1,8 +1,150 @@
+const fs = require('fs');
+const path=  require('path');
+
 var Renderer_layout = {
     init : function () {
+        this._adjustConfig( false );
+
+        this._initCocosViewGridLineHandler();
         this._initLogGridLineHandler();
         this._initHAGridLineHandler();
         this._initInspectorGridLineHandler();
+    },
+
+    loadConfig : function () {
+        const configPath = path.join(__dirname, 'config.json');
+
+        try {
+            const configData = fs.readFileSync(configPath, 'utf-8');
+            return JSON.parse(configData);
+        } catch(error) {
+            cc.warn("failed to load config data", error);
+            return null;
+        }
+    },
+
+    saveConfig : function (config) {
+        const configPath = path.join(__dirname, 'config.json');
+        fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf-8');
+    },
+
+    _adjustConfig : function ( reset ) {
+        const config = this.loadConfig();
+        let layoutOption = config ? config.layout_option : null;
+
+        if ( reset ) {
+            layoutOption = config.backup.layout_option;
+            config.layout_option = layoutOption;
+            this.saveConfig(config);
+        }
+
+        const hierarchy = document.getElementById('hierarchy_gridItem');
+        const assets = document.getElementById('assets_gridItem');
+
+        const logView = document.getElementById('log_gridItem');
+        const secondColumn = document.getElementById('second_column');
+        const inspector = document.getElementById('inspector_gridItem');
+
+        const gridContainer = document.getElementById('grid_container');
+
+        if (layoutOption) {
+            hierarchy.style.height = layoutOption.hierarchy_gridItem.height;
+            assets.style.height = layoutOption.assets_gridItem.height;
+
+            logView.style.height = layoutOption.log_gridItem.height;
+            secondColumn.style.height = layoutOption.second_column.height;
+            inspector.style.height = layoutOption.inspector_gridItem.height;
+
+            gridContainer.style.gridTemplateColumns = layoutOption.grid_container.grid_template_column;
+        }
+    },
+
+    reload : function () {
+        this._adjustConfig( false );
+    },
+
+    reset : function () {
+        this._adjustConfig( true );
+    },
+
+    _initCocosViewGridLineHandler : function () {
+        const gridLine = document.getElementById('cocosView_gridLine');
+        const secondColumn = document.getElementById('second_column');
+        const cocosViewGridItem = document.getElementById('cocosView_gridItem');
+        const cocosView = document.getElementById('cocosView');
+        const parentDiv = document.getElementById('grid_container');
+
+
+        gridLine.addEventListener('mouseenter', function (event) {
+            gridLine.style.cursor = 'col-resize';
+        });
+
+        gridLine.addEventListener('mouseleave', function (event) {
+            gridLine.style.cursor = 'auto';
+        });
+
+        gridLine.addEventListener('mousedown', function (event) {
+            document.body.style.cursor = 'col-resize';
+            cc._canvas.style.pointerEvents = 'none';
+            Genie.LayoutController.startCocosLineDrag();
+            const startX = event.clientX;
+            const startWidth = parseFloat(window.getComputedStyle(cocosViewGridItem).width);
+
+            document.addEventListener('mousemove', handleDrag);
+            document.addEventListener('mouseup', function () {
+                document.removeEventListener('mousemove', handleDrag);
+                document.body.style.cursor = 'auto';
+                cc._canvas.style.pointerEvents = 'auto';
+                Genie.LayoutController.endCocosLineDrag();
+            });
+
+            function handleDrag(event) {
+                if (Genie.LayoutController.isCocosLineDrag()) {
+                    const deltaX = event.clientX - startX;
+                    const newWidth = startWidth + deltaX;
+
+                    const MAX_FR = 5;
+                    const width = (newWidth / parentDiv.clientWidth * MAX_FR).toFixed(2);
+                    const other = MAX_FR - width;
+
+                    const prevWidth = parseFloat(parentDiv.style.gridTemplateColumns.split(' ')[0].replace('fr', ''));
+                    const prevOther = MAX_FR - prevWidth;
+
+                    const cocosViewWidth = width + 'fr';
+                    const newSecondColumnWidth = (parseFloat(parentDiv.style.gridTemplateColumns.split(' ')[2].replace('fr', '')) * other / prevOther).toFixed(2);
+                    const secondColumnWidth = newSecondColumnWidth + 'fr'
+                    const inspectorWidth = (other - newSecondColumnWidth).toFixed(2) + 'fr';
+
+                    cc.log("[taegyun] info: ",newWidth, cocosViewWidth, secondColumnWidth, inspectorWidth,
+                        parseFloat(cocosViewWidth.replace('fr', '')) +
+                        parseFloat(secondColumnWidth.replace('fr', '')) +
+                        parseFloat(inspectorWidth.replace('fr', '')));
+
+                    if (1.9 <= width && width <= 3.7) {
+                        if (newWidth < cc.view.getFrameSize().height * ScreenUtil.minWHRatio) {
+                            return;
+                        }
+                        cc.view.setFrameSize(newWidth, cc.view.getFrameSize().height);
+                        cc.view._adjustSizeKeepCanvasSize();
+
+                        const timelineContent = document.getElementById('timeline_content');
+                        timelineContent.style.width = newWidth + 'px';
+
+                        const timelineDiv = document.getElementById('timeline');
+                        if (timelineDiv) {
+                            const canvasEl = timelineDiv.querySelector('canvas');
+                            if (canvasEl) {
+                                canvasEl.style.minWidth = '0px';
+                                canvasEl.style.width = (newWidth - 120) + 'px';
+                                Renderer_timeline.handleContentSize();
+                            }
+                        }
+
+                        parentDiv.style.gridTemplateColumns = cocosViewWidth + ' auto ' + secondColumnWidth + ' auto ' + inspectorWidth;
+                    }
+                }
+            }
+        });
     },
 
     _initLogGridLineHandler : function () {
@@ -85,11 +227,11 @@ var Renderer_layout = {
                     const deltaY = startY - event.clientY;
                     const newHeight = startHeight + deltaY;
 
-                    const height = ((newHeight / parentDiv.clientHeight) * 97).toFixed(2);
+                    const height = ((newHeight / parentDiv.clientHeight) * 99.9).toFixed(2);
                     const assetsHeight = height + '%';
-                    const hierarchyHeight = (99.5 - height).toFixed(2) + '%';
+                    const hierarchyHeight = (99.9 - height).toFixed(2) + '%';
 
-                    if (0 <= height && height <= 99.5) {
+                    if (0 <= height && height <= 99.9) {
                         hierarchy.style.height = hierarchyHeight;
                         assets.style.height = assetsHeight;
                     }
@@ -100,8 +242,8 @@ var Renderer_layout = {
 
     _initInspectorGridLineHandler : function () {
         const gridLine = document.getElementById('inspector_gridLine');
+        const secondColumn = document.getElementById('second_column');
         const inspector = document.getElementById('inspector_gridItem');
-        const cocosView = document.getElementById('cocosView_gridItem');
         const parentDiv = document.getElementById('grid_container');
 
         gridLine.addEventListener('mouseenter', function (event) {
@@ -114,7 +256,7 @@ var Renderer_layout = {
 
         gridLine.addEventListener('mousedown', function (event) {
             document.body.style.cursor = 'col-resize';
-            Genie.LayoutController.startInspectorLineDragStart();
+            Genie.LayoutController.startInspectorLineDrag();
             const startX = event.clientX;
             const startWidth = parseFloat(window.getComputedStyle(inspector).width);
 
@@ -122,20 +264,23 @@ var Renderer_layout = {
             document.addEventListener('mouseup', function () {
                 document.removeEventListener('mousemove', handleDrag);
                 document.body.style.cursor = 'auto';
-                Genie.LayoutController.endInspectorLineDragStart();
+                Genie.LayoutController.endInspectorLineDrag();
             });
 
             function handleDrag(event) {
-                if (Genie.LayoutController.isInspectorLineDragStart()) {
+                if (Genie.LayoutController.isInspectorLineDrag()) {
                     const deltaX = startX - event.clientX;
                     const newWidth = startWidth + deltaX;
 
-                    const width = ((newWidth / (parentDiv.clientWidth - cocosView.clientWidth)) * 2).toFixed(2);
+                    const MAX_FR = 5;
+                    const localFR = MAX_FR - parseFloat(parentDiv.style.gridTemplateColumns.split(' ')[0].replace('fr', ''));
+                    const width = ((newWidth / (secondColumn.clientWidth + inspector.clientWidth)) * localFR).toFixed(2);
                     const inspectorWidth = width + 'fr';
-                    const secondColumnWidth = (2 - width).toFixed(2) + 'fr';
+                    const secondColumnWidth = (localFR - width).toFixed(2) + 'fr';
+                    const cocosViewWidth =  (MAX_FR - localFR) + 'fr';
 
-                    if (0 <= width && width <= 100) {
-                        parentDiv.style.gridTemplateColumns = '3fr ' + secondColumnWidth + ' auto ' + inspectorWidth;
+                    if (0.4 <= width && width <= 4.8) {
+                        parentDiv.style.gridTemplateColumns = cocosViewWidth + ' auto ' + secondColumnWidth + ' auto ' + inspectorWidth;
                     }
                 }
             }

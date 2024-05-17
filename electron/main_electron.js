@@ -77,6 +77,32 @@ const template = [
     ]
   },
   {
+    label: 'View',
+    submenu: [
+      {
+        label: 'Save Current Layout As Default',
+        click: function () {
+          const window = BrowserWindow.getAllWindows()[0];
+          window.webContents.send('save-current-layout-as-default');
+        },
+      },
+      {
+        label: 'Reload Default Layout',
+        click: function () {
+          const window = BrowserWindow.getAllWindows()[0];
+          window.webContents.send('reload-default-layout');
+        }
+      },
+      {
+        label: 'Reset Layout Setting',
+        click : function () {
+          const window = BrowserWindow.getAllWindows()[0];
+          window.webContents.send('reset-layout-setting');
+        }
+      }
+    ]
+  },
+  {
     role: 'Help',
     submenu: [
       {
@@ -115,7 +141,6 @@ app.whenReady().then(() => {
   });
 
   loadManager.init(mainWindow);
-
 
   // log
   log.initialize({

@@ -190,7 +190,7 @@ cc.game.onStart = function(){
 
     // var newPolicy = new cc.ResolutionPolicy(new ToolContainerStrategy, new ToolContentStrategy);
     var newPolicy = new cc.ResolutionPolicy(new ToolContainerStrategy, cc.ContentStrategy.FIXED_WIDTH );
-    cc.view.setDesignResolutionSize(1700, 860, newPolicy);
+    cc.view.setDesignResolutionSize(2000, 860, newPolicy);
 
     // The game will be resized when browser size change
     cc.view.resizeWithBrowserSize(true);

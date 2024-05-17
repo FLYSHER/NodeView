@@ -1,0 +1,47 @@
+{
+  "version": "1.0.5",
+  "layout_option": {
+    "hierarchy_gridItem": {
+      "height": "49.9%"
+    },
+    "assets_gridItem": {
+      "height": "49.9%"
+    },
+    "log_gridItem": {
+      "height": "9.9vh"
+    },
+    "second_column": {
+      "height": "87vh"
+    },
+    "inspector_gridItem": {
+      "height": "87.2vh"
+    },
+    "grid_container": {
+      "totalFrame": "5fr",
+      "grid_template_column": "3fr auto 1fr auto 1fr"
+    }
+  },
+  "backup": {
+    "layout_option": {
+      "hierarchy_gridItem": {
+        "height": "49.9%"
+      },
+      "assets_gridItem": {
+        "height": "49.9%"
+      },
+      "log_gridItem": {
+        "height": "9.9vh"
+      },
+      "second_column": {
+        "height": "87vh"
+      },
+      "inspector_gridItem": {
+        "height": "87.2vh"
+      },
+      "grid_container": {
+        "totalFrame": "5fr",
+        "grid_template_column": "3fr auto 1fr auto 1fr"
+      }
+    }
+  }
+}

@@ -1,6 +1,7 @@
 var Genie = Genie || {};
 
 Genie.LayoutController = {
+    cocosLineDragStart : false,
     logLineDragStart : false,
     HALineDragStart : false,
     inspectorLineDragStart : false,
@@ -29,15 +30,27 @@ Genie.LayoutController = {
         this.HALineDragStart = false;
     },
 
-    startInspectorLineDragStart : function () {
+    startInspectorLineDrag : function () {
         this.inspectorLineDragStart = true;
     },
 
-    isInspectorLineDragStart : function () {
+    isInspectorLineDrag : function () {
         return this.inspectorLineDragStart;
     },
 
-    endInspectorLineDragStart : function () {
+    endInspectorLineDrag : function () {
         this.inspectorLineDragStart = false;
     },
+
+    startCocosLineDrag : function () {
+         this.cocosLineDragStart = true;
+    },
+
+    isCocosLineDrag : function () {
+        return this.cocosLineDragStart;
+    },
+
+    endCocosLineDrag : function () {
+        this.cocosLineDragStart = false;
+    }
 }

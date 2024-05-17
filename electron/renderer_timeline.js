@@ -254,4 +254,9 @@ var Renderer_timeline = {
     setTimeByFrame : function (frame) {
         this.timeline.setTime(frame * this.msPerFrame);
     },
+
+    handleContentSize : function () {
+        // 컨테이너 내 크기 고정을 위해 줌인으로 땡긴다. 아니면 움직여서 width 바뀔 때 마다 커지거나 작아짐.
+        this.timeline.zoomIn();
+    }
 }

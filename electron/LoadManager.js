@@ -1,4 +1,4 @@
-const { ipcMain } = require('electron');
+const { ipcMain, dialog } = require('electron');
 const path = require("path");
 const fileUtil  = require('./FileUtil');
 const fs          = require('fs' );
@@ -394,6 +394,13 @@ var LoadManager  = {
         ipcMain.on( 'file_dropped_on_asset', function( evt, payload ){
             console.log("ipcMain > file_dropped_on_asset", payload);
             LoadManager.loadFiles2( payload );
+        });
+
+        ipcMain.on('save-current-layout-as-default', function (event, message) {
+            dialog.showMessageBox(mainWindow, {
+                message: message,
+                type: 'info'
+            });
         });
     }
 
