@@ -55,6 +55,11 @@ var Renderer_layout = {
             secondColumn.style.height = layoutOption.second_column.height;
             inspector.style.height = layoutOption.inspector_gridItem.height;
 
+            const cocosViewWidth = (gridContainer.clientWidth * layoutOption.grid_container.grid_template_column.split(' ')[0].replace('fr', '') / 5).toFixed(2);
+            cc.view.setFrameSize(cocosViewWidth, cc.view.getFrameSize().height);
+            cc.view._adjustSizeKeepCanvasSize();
+
+            Renderer_timeline.handleContentSize(cocosViewWidth);
             gridContainer.style.gridTemplateColumns = layoutOption.grid_container.grid_template_column;
         }
     },
@@ -69,9 +74,7 @@ var Renderer_layout = {
 
     _initCocosViewGridLineHandler : function () {
         const gridLine = document.getElementById('cocosView_gridLine');
-        const secondColumn = document.getElementById('second_column');
         const cocosViewGridItem = document.getElementById('cocosView_gridItem');
-        const cocosView = document.getElementById('cocosView');
         const parentDiv = document.getElementById('grid_container');
 
 
@@ -115,11 +118,6 @@ var Renderer_layout = {
                     const secondColumnWidth = newSecondColumnWidth + 'fr'
                     const inspectorWidth = (other - newSecondColumnWidth).toFixed(2) + 'fr';
 
-                    cc.log("[taegyun] info: ",newWidth, cocosViewWidth, secondColumnWidth, inspectorWidth,
-                        parseFloat(cocosViewWidth.replace('fr', '')) +
-                        parseFloat(secondColumnWidth.replace('fr', '')) +
-                        parseFloat(inspectorWidth.replace('fr', '')));
-
                     if (1.9 <= width && width <= 3.7) {
                         if (newWidth < cc.view.getFrameSize().height * ScreenUtil.minWHRatio) {
                             return;
@@ -127,19 +125,7 @@ var Renderer_layout = {
                         cc.view.setFrameSize(newWidth, cc.view.getFrameSize().height);
                         cc.view._adjustSizeKeepCanvasSize();
 
-                        const timelineContent = document.getElementById('timeline_content');
-                        timelineContent.style.width = newWidth + 'px';
-
-                        const timelineDiv = document.getElementById('timeline');
-                        if (timelineDiv) {
-                            const canvasEl = timelineDiv.querySelector('canvas');
-                            if (canvasEl) {
-                                canvasEl.style.minWidth = '0px';
-                                canvasEl.style.width = (newWidth - 120) + 'px';
-                                Renderer_timeline.handleContentSize();
-                            }
-                        }
-
+                        Renderer_timeline.handleContentSize(newWidth);
                         parentDiv.style.gridTemplateColumns = cocosViewWidth + ' auto ' + secondColumnWidth + ' auto ' + inspectorWidth;
                     }
                 }

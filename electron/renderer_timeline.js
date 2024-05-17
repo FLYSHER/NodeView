@@ -255,7 +255,19 @@ var Renderer_timeline = {
         this.timeline.setTime(frame * this.msPerFrame);
     },
 
-    handleContentSize : function () {
+    handleContentSize : function (width) {
+        const timelineContent = document.getElementById('timeline_content');
+        timelineContent.style.width = width + 'px';
+
+        const timelineDiv = document.getElementById('timeline');
+        if (timelineDiv) {
+            const canvasEl = timelineDiv.querySelector('canvas');
+            if (canvasEl) {
+                canvasEl.style.minWidth = '0px';
+                canvasEl.style.width = (width - 120) + 'px';
+            }
+        }
+
         // 컨테이너 내 크기 고정을 위해 줌인으로 땡긴다. 아니면 움직여서 width 바뀔 때 마다 커지거나 작아짐.
         this.timeline.zoomIn();
     }
