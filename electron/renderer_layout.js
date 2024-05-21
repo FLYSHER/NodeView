@@ -10,7 +10,7 @@ var Renderer_layout = {
     },
 
     loadConfig : function () {
-        const configPath = this._rootPath ?
+        const configPath = this._rootPath && process.env.NODE_ENV !== 'development' ?
             path.join(this._rootPath, 'client', 'config.json') :
             path.join(__dirname, 'config.json');
 
@@ -29,7 +29,7 @@ var Renderer_layout = {
     },
 
     saveConfig : function (config) {
-        const configPath = this._rootPath ?
+        const configPath = this._rootPath && process.env.NODE_ENV !== 'development' ?
             path.join(this._rootPath, 'client', 'config.json') :
             path.join(__dirname, 'config.json');
 

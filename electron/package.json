@@ -4,7 +4,7 @@
   "description": "A minimal Electron application",
   "main": "dist/sourcemap/main_electron.js",
   "scripts": {
-    "start": "electron . main_electron.js",
+    "start": "cross-env NODE_ENV=development electron . main_electron.js",
     "dev": "nodemon --exec electron  .",
     "webpack:build": "webpack --config webpack.config.js",
     "deploy:win": "electron-builder --windows nsis:ia32 --publish never",
@@ -37,6 +37,7 @@
     "@sentry/integrations": "^7.108.0",
     "@sentry/webpack-plugin": "^2.16.0",
     "animation-timeline-js": "^2.3.0",
+    "cross-env": "^7.0.3",
     "electron-localshortcut": "^3.2.1",
     "electron-log": "^5.0.0",
     "html-webpack-plugin": "^5.6.0",
