@@ -9,10 +9,20 @@ var Renderer_layout = {
         this._initInspectorGridLineHandler();
     },
 
+    getConfigPath : function () {
+        if (this._rootPath && process.env.NODE_ENV !== 'development') {
+            if (process.platform === 'dirwin') {
+                return path.join(path.dirname(this._rootPath), '..', 'client', 'config.json');
+            } else {
+                return path.join(path.dirname(this._rootPath), 'client', 'config.json');
+            }
+        } else {
+            return path.join(__dirname, 'config.json');
+        }
+    },
+
     loadConfig : function () {
-        const configPath = this._rootPath && process.env.NODE_ENV !== 'development' ?
-            path.join(this._rootPath, '..', 'client', 'config.json') :
-            path.join(__dirname, 'config.json');
+        const configPath = this.getConfigPath();
 
         cc.log("[taegyun] load path : ", configPath);
         try {
@@ -29,10 +39,7 @@ var Renderer_layout = {
     },
 
     saveConfig : function (config) {
-        const configPath = this._rootPath && process.env.NODE_ENV !== 'development' ?
-            path.join(this._rootPath, '..', 'client', 'config.json') :
-            path.join(__dirname, 'config.json');
-
+        const configPath = this.getConfigPath();
         fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf-8');
     },
 
