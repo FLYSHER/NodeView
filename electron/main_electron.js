@@ -28,7 +28,7 @@ function createWindow () {
     }
   });
 
-  mainWindow.rootPath = app.getPath('userData');
+  mainWindow.rootPath = app.getPath('exe');
 
   console.log("electron created window");
 
