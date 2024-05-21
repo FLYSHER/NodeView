@@ -396,11 +396,15 @@ var LoadManager  = {
             LoadManager.loadFiles2( payload );
         });
 
-        ipcMain.on('save-current-layout-as-default', function (event, message) {
+        ipcMain.on('save-current-layout-as-default', function (evt, message) {
             dialog.showMessageBox(mainWindow, {
                 message: message,
                 type: 'info'
             });
+        });
+
+        ipcMain.on('get-root-path', function (evt) {
+            mainWindow.webContents.send('get-root-path', mainWindow.rootPath);
         });
     }
 

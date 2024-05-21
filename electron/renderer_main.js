@@ -93,6 +93,13 @@ var Renderer_main = {
             }
         });
 
+        ipcRenderer.send('get-root-path');
+        ipcRenderer.on('get-root-path', (event, rootPath) => {
+            cc.log("[taegyun] path : ", rootPath);
+            Renderer_layout.setRootPath(rootPath);
+            Renderer_layout._adjustConfig(false);
+        });
+
         ipcRenderer.on('reload-default-layout', function () {
             Renderer_layout.reload();
         });
@@ -100,7 +107,6 @@ var Renderer_main = {
         ipcRenderer.on('reset-layout-setting', function () {
             Renderer_layout.reset();
         });
-
         canvas.addEventListener('keydown', function(event) {
             const key = event.key.toLowerCase();
             switch (key) {

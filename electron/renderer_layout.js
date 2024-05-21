@@ -3,8 +3,6 @@ const path=  require('path');
 
 var Renderer_layout = {
     init : function () {
-        this._adjustConfig( false );
-
         this._initCocosViewGridLineHandler();
         this._initLogGridLineHandler();
         this._initHAGridLineHandler();
@@ -12,8 +10,11 @@ var Renderer_layout = {
     },
 
     loadConfig : function () {
-        const configPath = path.join(__dirname, 'config.json');
+        const configPath = this._rootPath ?
+            path.join(this._rootPath, 'client', 'config.json') :
+            path.join(__dirname, 'config.json');
 
+        cc.log("[taegyun] load path : ", configPath);
         try {
             const configData = fs.readFileSync(configPath, 'utf-8');
             return JSON.parse(configData);
@@ -23,8 +24,15 @@ var Renderer_layout = {
         }
     },
 
+    setRootPath: function(path) {
+        this._rootPath = path;
+    },
+
     saveConfig : function (config) {
-        const configPath = path.join(__dirname, 'config.json');
+        const configPath = this._rootPath ?
+            path.join(this._rootPath, 'client', 'config.json') :
+            path.join(__dirname, 'config.json');
+
         fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf-8');
     },
 

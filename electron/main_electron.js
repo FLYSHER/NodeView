@@ -28,6 +28,8 @@ function createWindow () {
     }
   });
 
+  mainWindow.rootPath = app.getAppPath();
+
   console.log("electron created window");
 
   // and load the index.html of the app.
