@@ -1,6 +1,6 @@
 {
   "name": "genietool",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "A minimal Electron application",
   "main": "dist/sourcemap/main_electron.js",
   "scripts": {
