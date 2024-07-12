@@ -16,19 +16,13 @@ Genie.GizmoController = {
 
     //region [ 타겟노드에 기즈모 세팅 관련 ]
     getGizmoByTargetNode : function( node ) {
-        var i, gizmo, targetNode;
-        for( i = 0; i < this.arrActiveGizmoNode.length; ++i ) {
-            gizmo       = this.arrActiveGizmoNode[i];
-            targetNode  = gizmo.getTargetNode();
-            if( node.__instanceId === targetNode.__instanceId ) {
-                return gizmo;
-            }
-        }
-        return null;
+        const targetInstanceId = node.__instanceId;
+        const gizmo = this.arrActiveGizmoNode.find(gizmo => targetInstanceId === gizmo.getTargetNode().__instanceId);
+        return gizmo || null;
     },
 
     updateGizmoByTarget : function( node ) {
-        var gizmo = this.getGizmoByTargetNode( node );
+        const gizmo = this.getGizmoByTargetNode( node );
         if( gizmo ) {
             gizmo.refreshGizmo();
         }
@@ -48,29 +42,22 @@ Genie.GizmoController = {
     },
 
     detachGizmoByTargetNode : function( node ) {
-        var i, gizmo, targetNode;
-        for( i = 0; i < this.arrActiveGizmoNode.length; ++i ) {
-            gizmo       = this.arrActiveGizmoNode[i];
-            targetNode  = gizmo.getTargetNode();
+        const targetInstanceId = node.__instanceId;
 
-            cc.log("node name : ", node.getName() );
-            cc.log("targetNode name : ", targetNode.getName() );
+        this.arrActiveGizmoNode.forEach((gizmo) => {
+            const targetNode = gizmo.getTargetNode();
 
-            if( node.__instanceId === targetNode.__instanceId ) {
-                this.detachGizmo( gizmo );
+            if (targetInstanceId === targetNode.__instanceId) {
+                this.detachGizmo(gizmo);
             }
-        }
+        });
     },
 
     detachGizmo : function( gizmo ) {
         if( gizmo && gizmo.getParent() ) {
-            var gizmoTargetNode = gizmo.getTargetNode();
-            var findIdx = this.arrActiveGizmoNode.findIndex( function( item ) {
-                var targetNode = item.getTargetNode();
-                return ( targetNode.__instanceId === gizmoTargetNode.__instanceId );
-            });
-
-            ( findIdx >= 0 ) && this.arrActiveGizmoNode.splice( findIdx, 1);
+            const gizmoTargetNode = gizmo.getTargetNode();
+            const targetInstanceId = gizmoTargetNode.__instanceId;
+            this.arrActiveGizmoNode = this.arrActiveGizmoNode.filter(item => item.getTargetNode().__instanceId !== targetInstanceId);
 
             cc.pool.putInPool( gizmo );
             gizmo.removeFromParent();
@@ -78,11 +65,9 @@ Genie.GizmoController = {
     },
 
     detachAllGizmo : function() {
-        var i, gizmo;
-        for( i = 0; i < this.arrActiveGizmoNode.length; ++i ) {
-            gizmo = this.arrActiveGizmoNode[i];
-            this.detachGizmo( gizmo );
-        }
+        this.arrActiveGizmoNode.forEach((gizmo) => {
+            this.detachGizmo(gizmo);
+        });
     },
     //endregion
 

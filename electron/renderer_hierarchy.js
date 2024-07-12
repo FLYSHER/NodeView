@@ -127,29 +127,53 @@ var Renderer_hierarchy = {
     },
 
     onDeleteNodeByMenu : function( obj ) {
-        var targetNodeID = parseInt( obj.reference.prevObject[0].id );
-        var targetNode   = this.nodeInstanceIDMap[targetNodeID];
-        var parentNode   = targetNode.getParent();
+        const targetNodes = Genie.ToolController.getSelectedNodes();
+        this.deleteSelectedNodes(targetNodes);
+    },
 
-        this.arrNodeIDToDelete.length = 0;
-
-        if( targetNode && parentNode ) {
-            this.setIDListToDelete( targetNode );
-
-            var i, nodeID, node;
-            for( i = 0; i < this.arrNodeIDToDelete.length; ++i ) {
-                nodeID = this.arrNodeIDToDelete[i];
-                node   = this.nodeInstanceIDMap[nodeID];
-                this.deleteTreeNode( node.__instanceId );
+    /**
+     * delete every selected nodes
+     * @param nodes {Array}
+     */
+    deleteSelectedNodes : function (nodes) {
+        const idsToDelete = new Set();
+        nodes.forEach((node) => {
+            this.collectIDsToDelete(node, idsToDelete);
+            if (node.getParent()) {
+                Genie.GizmoController.detachGizmoByTargetNode( node );
+                node.removeFromParent();
             }
+        });
 
-            Genie.GizmoController.detachGizmoByTargetNode( targetNode );
-            targetNode.removeFromParent();
+        idsToDelete.forEach((id) => {
+            const nodeToDelete = this.nodeInstanceIDMap[id];
+            !!nodeToDelete && this.deleteTreeNode( nodeToDelete.__instanceId );
+        });
 
-            this.onRefreshTree();
+        this.onRefreshTree();
+    },
+
+    /**
+     * 삭제할 노드에게 종속 된 모든 instanceId >> idsToDelete 로 수집
+     * @param targetNode {Object}
+     * @param idsToDelete {Set}
+     */
+    collectIDsToDelete : function (targetNode, idsToDelete) {
+        const stack = [targetNode];
+        while (stack.length > 0) {
+            const currNode = stack.pop();
+            if (!idsToDelete.has(currNode.__instanceId)) {
+                idsToDelete.add(currNode.__instanceId);
+
+                const children = currNode.getChildren();
+                children.forEach((child) => stack.push(child));
+            }
         }
     },
 
+    /**
+     * @deprecated use collectIDsToDelete instead
+     */
     setIDListToDelete : function( targetNode ) {
         var i, child, children = targetNode.getChildren();
         if( this.arrNodeIDToDelete.indexOf(targetNode.__instanceId) < 0) {
@@ -306,5 +330,9 @@ var Renderer_hierarchy = {
 
     getTargetNode : function () {
         return this.curTargetNode;
-    }
+    },
+
+    getRealNodeByInstanceId : function (instanceId) {
+        return this.nodeInstanceIDMap[instanceId] || null;
+    },
 }

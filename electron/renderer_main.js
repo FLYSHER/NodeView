@@ -127,6 +127,7 @@ var Renderer_main = {
 
         this._initAssetAreaEvent();
         this._initHierarchyAreaEvent();
+        this._initDocumentEventListener();
     },
 
     // 에셋 영역 관련 이벤트 처리
@@ -184,6 +185,18 @@ var Renderer_main = {
                     content :  JSON.stringify(cc.loader.getRes( droppedAssetName ))
                 };
                 Genie.ResourceLoader.createToolFileNode( fileEntry );
+            }
+        });
+    },
+
+    _initDocumentEventListener : function () {
+        document.addEventListener('keydown', function(event) {
+            const key = event.key.toLowerCase();
+            switch (key) {
+                case 'delete':
+                    const targetNodes = Genie.ToolController.getSelectedNodes();
+                    Renderer_hierarchy.deleteSelectedNodes(targetNodes);
+                    break;
             }
         });
     },

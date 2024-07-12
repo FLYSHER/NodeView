@@ -32,3 +32,5 @@ Genie.Offset = {
         HEIGHT : 100,
     },
 };
+
+Genie.GIZMO_ORDER = 0;

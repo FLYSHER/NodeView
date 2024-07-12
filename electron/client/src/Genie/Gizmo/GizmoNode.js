@@ -160,14 +160,14 @@ Genie.GizmoNode = Genie.HierarchyProtectNode.extend({
         this.axisXDrawNode.clear();
         this.axisYDrawNode.clear();
 
-        var LINE_LENGTH     = this.axisOptions.line_length,
-            ARROW_LENGTH    = this.axisOptions.arrow_length,
-            AXIS_WIDTH      = this.axisOptions.axis_width;
+        const LINE_LENGTH     = this.axisOptions.line_length;
+        const ARROW_LENGTH    = this.axisOptions.arrow_length;
+        const AXIS_WIDTH      = this.axisOptions.axis_width;
 
         // axis-x
-        var COLOR = this.axisOptions.color_axisX;
+        let COLOR = this.axisOptions.color_axisX;
         // arrow-x
-        var points = [
+        let points = [
             cc.p( LINE_LENGTH + ARROW_LENGTH, 0 ),
             cc.p( LINE_LENGTH - 5, ARROW_LENGTH / 2 ),
 
@@ -202,7 +202,7 @@ Genie.GizmoNode = Genie.HierarchyProtectNode.extend({
     _drawControlRect : function() {
         this.rectDrawNode.clear();
 
-        var RECT_SIZE = cc.p( this.rectOptions.size.width, this.rectOptions.size.height );
+        const RECT_SIZE = cc.p( this.rectOptions.size.width, this.rectOptions.size.height );
         this.rectDrawNode.drawRect( cc.p( 0, 0 ), RECT_SIZE, this.rectOptions.fillColor, this.rectOptions.width, this.rectOptions.lineColor );
         this.rectDrawNode.setPosition( cc.p( -20, -20 ) );
     },
@@ -210,10 +210,10 @@ Genie.GizmoNode = Genie.HierarchyProtectNode.extend({
     _drawRotate : function () {
         this.rotateDrawNode.clear();
 
-        var RADIUS      = this.rotateOptions.radius,
-            CENTER      = this.rotateOptions.center,
-            LINE_WIDTH  = this.rotateOptions.line_width,
-            COLOR       = this.rotateOptions.color;
+        const RADIUS      = this.rotateOptions.radius;
+        const CENTER      = this.rotateOptions.center;
+        const LINE_WIDTH  = this.rotateOptions.line_width;
+        const COLOR       = this.rotateOptions.color;
 
         this.rotateDrawNode.drawCircle( CENTER, RADIUS, 0, 360, false, LINE_WIDTH, COLOR );
     },
@@ -264,8 +264,8 @@ Genie.GizmoNode = Genie.HierarchyProtectNode.extend({
     _drawBoundingBox : function() {
         this.bbDrawNode.clear();
 
-        var loc_node = this.targetNode;
-        var bb, tm;
+        const loc_node = this.targetNode;
+        let bb, tm;
 
         if( this.targetNode instanceof ccs.Armature ) {
             var c_size = this.targetNode.getContentSize();
@@ -282,8 +282,8 @@ Genie.GizmoNode = Genie.HierarchyProtectNode.extend({
         tm = this.getParentToNodeTransform();
         bb = cc.rectApplyAffineTransform(bb, tm);
 
-        var origin  = cc.p( bb.x, bb.y ),
-            dest    = cc.p( bb.x + bb.width, bb.y + bb.height );
+        const origin  = cc.p( bb.x, bb.y );
+        const dest    = cc.p( bb.x + bb.width, bb.y + bb.height );
 
         this.bbDrawNode.drawRect( origin, dest, this.bbOptions.fillColor, this.bbOptions.width, this.bbOptions.lineColor );
     },
@@ -291,12 +291,12 @@ Genie.GizmoNode = Genie.HierarchyProtectNode.extend({
     _drawContentSize : function() {
         this.contentSizeDrawNode.clear();
 
-        var node    = this.targetNode;
-        var c_size  = node.getContentSize();
-        var apps    = node.getAnchorPointInPoints();
+        const node    = this.targetNode;
+        const c_size  = node.getContentSize();
+        const apps    = node.getAnchorPointInPoints();
 
-        var origin  = cc.p( 0, 0 );
-        var dest    = cc.p( c_size.width, c_size.height );
+        let origin  = cc.p( 0, 0 );
+        let dest    = cc.p( c_size.width, c_size.height );
 
         origin  = cc.pSub( origin, apps );
         dest    = cc.pSub( dest, apps );
@@ -578,8 +578,7 @@ Genie.GizmoNode = Genie.HierarchyProtectNode.extend({
     },
 
     refreshGizmo : function() {
-        var visible = this.targetNode.isVisible();
-        visible = visible && Genie.Utils.isAncestorVisible( this.targetNode );
+        const visible = this.targetNode.isVisible() && Genie.Utils.isAncestorVisible( this.targetNode );
         this.setVisible( visible );
 
         this.refreshPosition();
@@ -591,9 +590,9 @@ Genie.GizmoNode = Genie.HierarchyProtectNode.extend({
             return;
         }
 
-        var worldPos = Genie.Utils.getNodeWorldPosition( this.targetNode );
-        var parent   = this.getParent() ? this.getParent() : this;
-        var localPos = parent.convertToNodeSpace( worldPos );
+        const worldPos = Genie.Utils.getNodeWorldPosition( this.targetNode );
+        const parent   = this.getParent() || this;
+        const localPos = parent.convertToNodeSpace( worldPos );
         this.setPosition( localPos );
     },
 
