@@ -1,4 +1,4 @@
-var Renderer_inspector = {
+const Renderer_inspector = {
     formData : {},
     formMeta : {},
     options  : {},
@@ -10,8 +10,8 @@ var Renderer_inspector = {
 
     // 메인뷰 나 hierarchy 뷰에서 현재 노드를 바꿨을 때 호출
     onChangeCurrentNode : function( event ) {
-        var userData = event.getUserData();
-        var node = userData.node;
+        const userData = event.getUserData();
+        const node = userData.node;
         if( !node || node === this.currCocosNode ) {
             return;
         }
@@ -28,7 +28,6 @@ var Renderer_inspector = {
 
     // inspector 에서 속성이 바뀌면 호출
     onChangeProperty : function( grid, name, value ) {
-        console.log(name + ' ' + value);
         this.formData[ name ] = value;
         cc.eventManager.dispatchCustomEvent( "onChangeProperty", {
             property : name,

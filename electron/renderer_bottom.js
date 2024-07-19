@@ -1,7 +1,4 @@
-var timelineModule = require('animation-timeline-js');
-const log = require('electron-log/main');
-
-var Renderer_bottom = {
+const Renderer_bottom = {
     Tag                 : "[ BottomRenderer ] ",
     hierarchyData       : [],
     nodeInstanceIDMap   : {},
@@ -16,12 +13,10 @@ var Renderer_bottom = {
     },
     // todo : 추후 개선 때 활용
     openTab : function( tabName ) {
-        var i,
-            tabContents = document.getElementsByClassName("bottom_content");
-
-        for( i = 0; i < tabContents.length; ++i ) {
-            tabContents[i].style.display = "none";
-        }
+        const tabContents = document.getElementsByClassName("bottom_content");
+        tabContents.forEach((item) => {
+            item.style.display = "none";
+        });
 
         this.setTimelineVisible( false );
 
@@ -37,8 +32,8 @@ var Renderer_bottom = {
 
     // todo : 추후 개선 때 활용
     setTimelineVisible : function( visible ) {
-        var strDisplay = visible === true ? "flex" : "none";
+        const strDisplay = visible === true ? "flex" : "none";
         document.getElementById( "timeline_content" ).style.display = strDisplay;
-        document.getElementsByClassName( "timeline_toolbar" )[0].style.display =         document.getElementById( "timeline_content" ).style.display = strDisplay;
+        document.getElementsByClassName( "timeline_toolbar" )[0].style.display = document.getElementById( "timeline_content" ).style.display = strDisplay;
     },
 }

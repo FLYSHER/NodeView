@@ -1,7 +1,7 @@
 /**
  * Assset 패널 관리
  */
-var Renderer_assets = {
+const Renderer_assets = {
     treeDataArr : [],
     Tag         : "[AssetView] ",
 
@@ -39,11 +39,8 @@ var Renderer_assets = {
     onchangeTree : function( e, data ) {
         cc.log( Renderer_assets.Tag, "*** onchange tree *** : ", data.selected[0], e, data );
 
-        var selectedFileName = data.selected[0];
-        var resType = -1;
-        if( data && data.node && data.node.data ) {
-            resType = data.node.data['resType'];
-        }
+        const selectedFileName = data.selected[0];
+        const resType = (data && data.node && data.node.data) ? data.node.data['resType'] : -1;
         cc.eventManager.dispatchCustomEvent( 'onSetPreviewSprite', {
             name    : selectedFileName,
             resType : resType
@@ -60,16 +57,12 @@ var Renderer_assets = {
     onchangeInputFind : function( event ) {
         cc.log( Renderer_assets.Tag, "*** find asset *** : ", event.target.value );
 
-        var searchString = event.target.value;
+        const searchString = event.target.value;
         $('#assets').jstree('search', searchString);
     },
 
     isExistAsset : function( id, parentID ) {
-        var findOjb = this.treeDataArr.find( function (item){
-            return ( item.parent === parentID && item.id === id );
-        })
-
-        return !!findOjb;
+        return this.treeDataArr.some(item => item.parent === parentID && item.id === id);
     },
 
     /**
@@ -77,52 +70,30 @@ var Renderer_assets = {
      */
     addAsset : function( path, resType /* Genie.ResType */ ) {
         console.log("*** add addAsset  **** ", path );
-        var dirName  = cc.path.dirname( path);
-        var basename =  cc.path.basename( path );
+        const dirName  = cc.path.dirname(path);
+        const basename =  cc.path.basename(path);
+        const isDirNameEmpty = dirName.length === 0;
 
-        var i, id, parentID, arrDir;
         // step1. folder 체크 및 추가
-        if( dirName.length === 0 ) { // empty string
-            parentID = '#';
-            id       = path;
-            this.addAssetToHierarchy( id, parentID );
-        }
-        else {
-            arrDir = dirName.split("/"); /** aaa/bbb/cccc ==> [aaa, bbb, ccc] */
-
-            for( i = 0; i < arrDir.length; ++i ) {
-                parentID = ( i === 0 ) ? '#' : arrDir[ i -1 ];
-                id       = arrDir[i];
-                this.addAssetToHierarchy( id, parentID );
-            }
-        }
+        const arrDir = isDirNameEmpty ? [path] : dirName.split("/");
+        arrDir.reduce((parentId, id) => {
+            this.addAssetToHierarchy(id, parentId);
+            return id;
+        }, '#');
 
         // step2. 바로 위 폴더 구하기
-        if( dirName.length === 0 ) {
-            parentID = '#';
-            id       = path;
-        }
-        else {
-            arrDir   = dirName.split("/");
-            id       = basename;
-            parentID = arrDir.length === 0 ? "#" : arrDir[ arrDir.length - 1 ];
-        }
+        const id = isDirNameEmpty ? path : basename;
+        const parentID = isDirNameEmpty ? "#" : arrDir[arrDir.length - 1];
 
         // step3. 에셋 추가
+        this.addAssetToHierarchy(id, parentID, { resType : resType });
         if( cc.path.extname( id ) === ".plist" ) {
-            this.addAssetToHierarchy( id, parentID, { resType : resType } )
-
-            var frameConfig = cc.spriteFrameCache._frameConfigCache[path];
-            var frames = frameConfig.frames;
-
-            for( var key in frames ) {
-                this.addAssetToHierarchy( key, basename, { resType : Genie.ResType.SPRITE } );
-            }
+            const frameConfig = cc.spriteFrameCache._frameConfigCache[path];
+            const frames = Array.from(frameConfig.frames);
+            frames.forEach((key) => {
+                this.addAssetToHierarchy(key, basename, {resType: Genie.ResType.SPRITE});
+            });
         }
-        else {
-            this.addAssetToHierarchy( id, parentID, { resType : resType } );
-        }
-
     },
 
     /**

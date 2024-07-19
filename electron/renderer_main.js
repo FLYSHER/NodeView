@@ -20,9 +20,9 @@ class FileEntry {
 
 }
 
-var Renderer_main = {
+const Renderer_main = {
     init : function() {
-        var canvas = cc._canvas;
+        const canvas = cc._canvas;
 
         // canvas element 에 file drop을 위한 drop 이벤트 등록.
         canvas.removeEventListener("drop", Loader.onDropHandler);
@@ -33,20 +33,16 @@ var Renderer_main = {
                 console.log("cocos renderer drop");
 
 
-                var droppedAssetName = evt.dataTransfer.getData("assetName");
+                const droppedAssetName = evt.dataTransfer.getData("assetName");
                 if( droppedAssetName ) { // 내부 렌더러로부터 파일 드랍 이루어졌을 경우 처리
-                    var fileEntry = {
+                    const fileEntry = {
                         name    : droppedAssetName,
                         content :  JSON.stringify(cc.loader.getRes( droppedAssetName ))
                     };
                     Genie.ResourceLoader.createToolFileNode( fileEntry );
                 }
                 else {                   // 외부 파일로부터 파일 드랍 이루어졌을 경우 처리
-                    var arrFilePaths = [];
-                    for (var i=0;i < evt.dataTransfer.files.length; i++) {
-                        arrFilePaths.push(evt.dataTransfer.files[i].path);
-                    }
-                    // console.log(" *** event *** : drop > ", arrFilePaths );
+                    const arrFilePaths = Array.from(evt.dataTransfer.files, file => file.path);
                     ipcRenderer.send('fileDropEvent', arrFilePaths);
                 }
             }, false);
@@ -144,18 +140,14 @@ var Renderer_main = {
             event.preventDefault();
             event.stopPropagation();
 
-            var arrFilePaths = [];
-            for (var i=0;i < event.originalEvent.dataTransfer.files.length; i++) {
-                arrFilePaths.push(event.originalEvent.dataTransfer.files[i].path);
-            }
+            const arrFilePaths = Array.from(event.originalEvent.dataTransfer.files, file => file.path);
             ipcRenderer.send( 'file_dropped_on_asset', arrFilePaths );
         });
 
         // 메인 프로세스로 보내 파일로드한 다음 로드된 파일 정보를 다시 받음.
-        var self = this;
-        ipcRenderer.on('file_loaded_from_asset', function( event, payload ){
+        ipcRenderer.on('file_loaded_from_asset', ( event, payload ) => {
 
-            self.loadResources( payload )
+            this.loadResources( payload )
                 .then( function(){
                     console.log(" *** complete load asset on Asset View *** ");
                 })
@@ -178,9 +170,9 @@ var Renderer_main = {
             event.preventDefault();
             event.stopPropagation();
 
-            var droppedAssetName = event.originalEvent.dataTransfer.getData("assetName");
+            const droppedAssetName = event.originalEvent.dataTransfer.getData("assetName");
             if( droppedAssetName ) { // 내부 렌더러로부터 파일 드랍 이루어졌을 경우 처리
-                var fileEntry = {
+                const fileEntry = {
                     name    : droppedAssetName,
                     content :  JSON.stringify(cc.loader.getRes( droppedAssetName ))
                 };
@@ -211,23 +203,21 @@ var Renderer_main = {
         console.log("[EVT] >> fileDropEventReply complete : ", evt, payload);
 
         // 디펜던시 리소스 캐싱 및 로드
-        var p = this.loadResources( payload );
+        let p = this.loadResources( payload );
 
-        var createNode = function ( fileEntry ) {
-            return new Promise( function( resolve, reject ){
-                Genie.ResourceLoader.createToolFileNode( fileEntry );
-            });
-        }
+        const createNode = fileEntry => new Promise((resolve, reject) => {
+            Genie.ResourceLoader.createToolFileNode(fileEntry);
+            resolve();
+        })
 
-        // 타겟 파일들 노드 생성
-        for( var i = 0; i < payload.targetFiles.length; ++i  ) {
-            let file = new FileEntry(payload.targetFiles[i]);
-            p = p.then( function() {
-                return createNode( file );
-            })
-                .then( ()=> console.log( "create targetNode: ", file.name  ))
-                .then( ()=> console.log(  cc.loader  ) );
-        }
+        // // 타겟 파일들 노드 생성
+        payload.targetFiles.reduce((promise, file) => {
+            const entry = new FileEntry(file);
+            return promise
+                .then(() => createNode(entry))
+                .then(() => console.log("create targetNode: ", entry.name))
+                .then(() => console.log(cc.loader));
+        }, p);
     },
 
     /**
@@ -237,59 +227,29 @@ var Renderer_main = {
     loadResources : function( payload ) {
 
         // 리소스 비동기 로드 및 캐싱
-        var loadResource = function( fileEntry ) {
-            return new Promise( function( resolve, reject ){
-                Genie.ResourceLoader.cacheResource( fileEntry, resolve, reject );
+        const loadResource = async (fileEntry) => {
+            return new Promise((resolve, reject) => {
+                Genie.ResourceLoader.cacheResource(fileEntry, resolve, reject);
             });
         };
 
-        // step 1. 텍스쳐부터 미리 로드
-        var textureFiles = payload.dependentFiles.filter( function( file ) {
-            return cc.path.extname( file.filePath ) === '.png'
-        });
+        const loadFiles = (files, message) => {
+            return files.reduce((p, file) => {
+                const fileEntry = new FileEntry(file);
+                return p.then(() => loadResource(fileEntry))
+                    .then(() => console.log(message, fileEntry.name));
+            }, Promise.resolve());
+        };
 
-        for( var i = 0, p = Promise.resolve(); i < textureFiles.length; ++i ) {
-            let file = new FileEntry( textureFiles[i] );
-            p = p.then( function () {
-                return loadResource(file);
-            })
-                .then( ()=> console.log( "load texture complete : ", file.name  ) );
-        }
+        const textureFiles = payload.dependentFiles.filter(file => cc.path.extname( file.filePath ) === '.png');
+        const otherFiles = payload.dependentFiles.filter( file => cc.path.extname( file.filePath ) !== '.png');
+        const targetFiles = payload.targetFiles;
 
-        p.then( function() {
-            return new Promise( ()=> console.log("*** complete all textures *** ") );
-        });
-
-        // step2. 다른 디펜던시 로드
-        var otherFiles = payload.dependentFiles.filter( function( file ) {
-            return cc.path.extname( file.filePath ) !== '.png'
-        });
-
-        for( i = 0; i < otherFiles.length; ++i  ) {
-            let file = new FileEntry( otherFiles[i] );
-            p = p.then( function() {
-                return loadResource( file );
-            })
-                .then( ()=> console.log( "load other complete : ", file.name  ));
-        }
-
-        p.then( function() {
-            return new Promise( ()=> console.log("*** complete all dependencies *** ") );
-        });
-
-        // 타겟 파일들 로드
-        for( i = 0; i < payload.targetFiles.length; ++i  ) {
-            let file = new FileEntry(payload.targetFiles[i]);
-            p = p.then( function() {
-                return loadResource( file );
-            })
-                .then( ()=> console.log( "load complete : ", file.name  ));
-        }
-
-        p.then( function() {
-            return new Promise( ()=> console.log("*** complete all target files *** ") );
-        });
-
-        return p;
+        return loadFiles(textureFiles, "load texture complete: ")
+            .then(() => console.log("*** complete all textures *** "))
+            .then(() => loadFiles(otherFiles, "load other complete: "))
+            .then(() => console.log("*** complete all dependencies *** "))
+            .then(() => loadFiles(targetFiles, "load complete: "))
+            .then(() => console.log("*** complete all target files *** "));
     },
 };

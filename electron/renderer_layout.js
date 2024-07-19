@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path=  require('path');
 
-var Renderer_layout = {
+const Renderer_layout = {
     init : function () {
         this._initCocosViewGridLineHandler();
         this._initLogGridLineHandler();
@@ -10,21 +10,17 @@ var Renderer_layout = {
     },
 
     getConfigPath : function () {
-        if (this._rootPath && process.env.NODE_ENV !== 'development') {
-            if (process.platform === 'dirwin') {
-                return path.join(path.dirname(this._rootPath), '..', 'client', 'config.json');
-            } else {
-                return path.join(path.dirname(this._rootPath), 'client', 'config.json');
-            }
-        } else {
-            return path.join(__dirname, 'config.json');
-        }
+        const isService = this._rootPath && process.env.NODE_ENV !== 'development';
+        const isMacOs = process.platform === 'darwin';
+
+        const rootPath = isService ? path.dirname(this._rootPath) : __dirname;
+        const configPath = isService ? (isMacOs ? path.join('client', 'config.json') : path.join('..', 'client', 'config.json')) : 'config.json';
+
+        return path.join(rootPath, configPath);
     },
 
     loadConfig : function () {
         const configPath = this.getConfigPath();
-
-        cc.log("[taegyun] load path : ", configPath);
         try {
             const configData = fs.readFileSync(configPath, 'utf-8');
             return JSON.parse(configData);

@@ -8,14 +8,17 @@ Genie.ToolController = {
         this.arrSelectedNode.length = 0;
     },
 
+    /** @returns {boolean} */
     isSelectedNode : function( node ) {
-        return this.arrSelectedNode.some(item => item.__instanceId === node.__instanceId);
+        return node && this.arrSelectedNode.some(item => item.__instanceId === node.__instanceId);
     },
 
+    /** @returns {Array<node>} */
     getSelectedNodes : function () {
         return this.arrSelectedNode;
     },
 
+    /** @returns {node | null} */
     getSelectNode : function() {
         return this.arrSelectedNode[0];
     },
