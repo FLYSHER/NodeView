@@ -290,7 +290,13 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
         else {
             searchBox.style.visibility = 'hidden';
             uiOption.style.visibility = 'hidden';
-            spineOption.style.visibility = node.spine ? 'visible' : 'hidden';
+
+            if( node && node.spine ) {
+                spineOption.style.visibility = 'visible';
+            }
+            else {
+                spineOption.style.visibility ='hidden';
+            }
         }
     },
 
