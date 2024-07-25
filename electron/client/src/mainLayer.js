@@ -263,9 +263,9 @@ var MainLayer = cc.Layer.extend({
 
         var arrBone = [];
         var setBoneLabel = function( lbBone, bone ) {
-            lbBone.setPosition( cc.p( bone.worldX, bone.worldY ) );
-            lbBone.setScaleX( bone.getWorldScaleX() );
-            lbBone.setScaleY( bone.getWorldScaleY() );
+            lbBone.setPosition( cc.p( bone.ax, bone.ay ) );
+            lbBone.setScaleX( bone.ascaleX );
+            lbBone.setScaleY( bone.ascaleY );
             lbBone.setRotation( -bone.arotation );
             // lbBone.setRotationY( -bone.getWorldRotationY() );
         };
