@@ -1,6 +1,3 @@
-// const { sentryRendererInit } = require('./sentryRenderer');
-// sentryRendererInit();
-
 var Renderer_hierarchy = {
     Tag                 : "[ Renderer_hierarchy ] ",
     hierarchyData       : [],
@@ -61,10 +58,6 @@ var Renderer_hierarchy = {
                         "label"     : "delete Node",
                         "action"    : self.onDeleteNodeByMenu.bind(self)
                     },
-                    "deleteComponent" : {
-                        "label"     : "delete Component",
-                        "submenu"   : {}
-                    },
                 }
             },
             "plugins": ["search", "contextmenu"],
@@ -91,11 +84,11 @@ var Renderer_hierarchy = {
     //region [ jsTree ]
 
     _initContextMenu : function() {
-        var addNodeSubMenu = this._jstreeConfig["contextmenu"]["items"]["addNode"]["submenu"];
+        const addNodeSubMenu = this._jstreeConfig["contextmenu"]["items"]["addNode"]["submenu"];
         this._addSubMenu( addNodeSubMenu, this.MenuPrefix.Node, this.onAddNodeByMenu, this );
         this._addSubMenu( addNodeSubMenu, this.MenuPrefix.Sprite, this.onAddNodeByMenu, this );
 
-        var addComponentSubMenu = this._jstreeConfig["contextmenu"]["items"]["addComponent"]["submenu"];
+        const addComponentSubMenu = this._jstreeConfig["contextmenu"]["items"]["addComponent"]["submenu"];
         this._addSubMenu( addComponentSubMenu, this.MenuPrefix.PopupComponent, this.onAddComponentByMenu, this );
         this._addSubMenu( addComponentSubMenu, this.MenuPrefix.CodeComponent, this.onAddComponentByMenu, this );
         this._addSubMenu( addComponentSubMenu, this.MenuPrefix.EmptyComponent, this.onAddComponentByMenu, this );
@@ -107,11 +100,11 @@ var Renderer_hierarchy = {
     },
 
     onAddNodeByMenu : function( obj ) {
-        var parentNodeId = parseInt( obj.reference.prevObject[0].id );
-        var parentNode   = this.nodeInstanceIDMap[parentNodeId];
+        const parentNodeId = parseInt( obj.reference.prevObject[0].id );
+        const parentNode   = this.nodeInstanceIDMap[parentNodeId];
 
         if( parentNode ) {
-            var newNode = new cc.Node();
+            const newNode = new cc.Node();
             newNode.setName( "newNode");
 
             parentNode.addChild( newNode );
@@ -121,11 +114,11 @@ var Renderer_hierarchy = {
     },
 
     onAddComponentByMenu : function( obj ) {
-        var currNodeId = parseInt( obj.reference.prevObject[0].id );
-        var currNode = this.nodeInstanceIDMap[ currNodeId ];
-        var compName = obj.item.label;
+        const currNodeId = parseInt( obj.reference.prevObject[0].id );
+        const currNode = this.nodeInstanceIDMap[ currNodeId ];
+        const compName = obj.item.label;
         if( currNode ) {
-            var component = new Genie.Component[ compName ];
+            const component = new Genie.Component[ compName ];
             if( component ) {
                 currNode.addComponent( component );
                 component.drawInspector();
@@ -134,29 +127,53 @@ var Renderer_hierarchy = {
     },
 
     onDeleteNodeByMenu : function( obj ) {
-        var targetNodeID = parseInt( obj.reference.prevObject[0].id );
-        var targetNode   = this.nodeInstanceIDMap[targetNodeID];
-        var parentNode   = targetNode.getParent();
+        const targetNodes = Genie.ToolController.getSelectedNodes();
+        this.deleteSelectedNodes(targetNodes);
+    },
 
-        this.arrNodeIDToDelete.length = 0;
-
-        if( targetNode && parentNode ) {
-            this.setIDListToDelete( targetNode );
-
-            var i, nodeID, node;
-            for( i = 0; i < this.arrNodeIDToDelete.length; ++i ) {
-                nodeID = this.arrNodeIDToDelete[i];
-                node   = this.nodeInstanceIDMap[nodeID];
-                this.deleteTreeNode( node.__instanceId );
+    /**
+     * delete every selected nodes
+     * @param nodes {Array}
+     */
+    deleteSelectedNodes : function (nodes) {
+        const idsToDelete = new Set();
+        nodes.forEach((node) => {
+            this.collectIDsToDelete(node, idsToDelete);
+            if (node.getParent()) {
+                Genie.GizmoController.detachGizmoByTargetNode( node );
+                node.removeFromParent();
             }
+        });
 
-            Genie.GizmoController.detachGizmoByTargetNode( targetNode );
-            targetNode.removeFromParent();
+        idsToDelete.forEach((id) => {
+            const nodeToDelete = this.nodeInstanceIDMap[id];
+            !!nodeToDelete && this.deleteTreeNode( nodeToDelete.__instanceId );
+        });
 
-            this.onRefreshTree();
+        this.onRefreshTree();
+    },
+
+    /**
+     * 삭제할 노드에게 종속 된 모든 instanceId >> idsToDelete 로 수집
+     * @param targetNode {Object}
+     * @param idsToDelete {Set}
+     */
+    collectIDsToDelete : function (targetNode, idsToDelete) {
+        const stack = [targetNode];
+        while (stack.length > 0) {
+            const currNode = stack.pop();
+            if (!idsToDelete.has(currNode.__instanceId)) {
+                idsToDelete.add(currNode.__instanceId);
+
+                const children = currNode.getChildren();
+                children.forEach((child) => stack.push(child));
+            }
         }
     },
 
+    /**
+     * @deprecated use collectIDsToDelete instead
+     */
     setIDListToDelete : function( targetNode ) {
         var i, child, children = targetNode.getChildren();
         if( this.arrNodeIDToDelete.indexOf(targetNode.__instanceId) < 0) {
@@ -178,15 +195,12 @@ var Renderer_hierarchy = {
 
     onchangeInputFind : function( event ) {
         console.log("find assets > ", event.target.value );
-        var searchString = event.target.value;
+        const searchString = event.target.value;
         $('#hierarchy').jstree('search', searchString);
     },
 
     // hierarchy view 에서 선택 노드 변경시
     onchangeSelectedNode : function (e, data) {
-        console.log( e, data );
-        var selectedFileName = data.selected[0];
-
         if( data.node && data.node.id ) {
             var realNode = this.nodeInstanceIDMap[data.node.id];
             if( realNode ) {
@@ -203,9 +217,9 @@ var Renderer_hierarchy = {
 
     // main view 에서 노드 선택 시
     onSelectNode : function( event ) {
-        var userData= event.getUserData();
-        var node    = userData.node;
-        var id      = node.__instanceId;
+        const userData = event.getUserData();
+        const node     = userData.node;
+        const id       = node.__instanceId;
 
         $("#hierarchy").jstree("deselect_all");
         $("#hierarchy").jstree(true).select_node( id.toString() );
@@ -222,29 +236,16 @@ var Renderer_hierarchy = {
     // 최상위 노드부터 다시 트리 데이터 세팅
     refreshTree : function( cocosNode, parentID ) {
         console.log("** refreshTree ** ");
-        // console.log("   > ", cocosNode.getName(), cocosNode.__instanceId, cocosNode._className );
 
-        var id       = cocosNode.__instanceId;
-        this.addTreeNode( id, parentID, cocosNode.getName(), cocosNode );
+        const cocosNodeId = cocosNode.__instanceId;
+        this.addTreeNode(cocosNodeId, parentID, cocosNode.getName(), cocosNode);
 
-        if( !!cocosNode && cocosNode.getChildren ) {
-
-            var i, loc_parentID, child,
-                children = cocosNode.getChildren();
-
-            for( i = 0; i < children.length; ++i ) {
-                child = children[i];
-
-                // armature 의 자식들 본 중에 부모가 없는거만 처리
-                if( cocosNode._className === "Armature" ) {
-                    if( child._className === "Bone" && child._parentBone ) {
-                        continue;
-                    }
-                }
-                console.log("       > ", child.getName(), child.__instanceId, child._className );
-                loc_parentID = cocosNode.__instanceId;
-                this.refreshTree( children[i], loc_parentID, cocosNode  );
-            }
+        if(cocosNode.getChildren) {
+            const children = cocosNode.getChildren();
+            children.forEach((child) => {
+                const isContinue = cocosNode._className === "Armature" && (child._className === "Bone" && child._parentBone);
+                !isContinue && this.refreshTree( child, cocosNodeId, cocosNode);
+            });
         }
     },
 
@@ -256,14 +257,9 @@ var Renderer_hierarchy = {
      * @param realNode  실제 코코스 노드
      */
     addTreeNode : function( id, parentID, text, realNode  ) {
-        // cc.log( Renderer_hierarchy.Tag, " ** addTreeNode ** ", id, parentID, text, realNode );
-
-        if( this.isExistNode( id, parentID ) ) {
+        if(this.isExistNode(id, parentID))
             return;
-        }
-
         this.nodeInstanceIDMap[id] = realNode;
-
         this.hierarchyData.push({
             "id"        : id,
             "parent"    : parentID,
@@ -272,46 +268,42 @@ var Renderer_hierarchy = {
     },
 
     renameTreeNode : function( event ) {
-        var userData= event.getUserData();
-        var name    = userData.name;
-        var id      = userData.id;
+        const userData = event.getUserData();
+        const name     = userData.name;
+        const id       = userData.id;
 
-        var treeNode    = $('#hierarchy').jstree(true).get_node( id );
+        const treeNode    = $('#hierarchy').jstree(true).get_node( id );
         if( treeNode ) {
-            var findIdx = this.hierarchyData.findIndex( function( item ){
-                return item.id === id;
+            this.hierarchyData.some((item) => {
+                if (item.id === id) {
+                    item.text = name;
+                    return true;
+                }
+                return false;
             });
-
-            if( findIdx >= 0 ) {
-                this.hierarchyData[findIdx].text = name;
-            }
-
             $('#hierarchy').jstree('refresh');
         }
     },
 
-    deleteTreeNode : function( id) {
-        var findIdx = this.hierarchyData.findIndex( function( treeNode ) {
-            return ( treeNode.id === id );
-        } );
-
-        if( findIdx < 0 ) {
-            return;
+    deleteTreeNode : function(id) {
+        this.hierarchyData = this.hierarchyData.filter((node) => {
+            return node.id !== id;
+        });
+        if (this.nodeInstanceIDMap.hasOwnProperty(id)) {
+            delete this.nodeInstanceIDMap[id];
         }
-
-        this.hierarchyData.splice( findIdx, 1 );
-        delete this.nodeInstanceIDMap[id];
     },
 
+    /** @returns {boolean} */
     isExistNode : function( id, parentID ) {
-        var findOjb = this.hierarchyData.find( function (item){
-            return ( item.parent === parentID && item.id === id );
-        })
-
-        return !!findOjb;
+        return this.hierarchyData.some(item => item.parent === parentID && item.id === id);
     },
 
     getTargetNode : function () {
         return this.curTargetNode;
-    }
+    },
+
+    getRealNodeByInstanceId : function (instanceId) {
+        return this.nodeInstanceIDMap[instanceId] || null;
+    },
 }

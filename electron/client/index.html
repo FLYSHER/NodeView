@@ -48,23 +48,61 @@
     <script src="../renderer_assets.js"></script>
     <script src="../renderer_timeline.js"></script>
     <script src="../renderer_bottom.js"></script>
+    <script src="../renderer_log.js"></script>
+    <script src="../renderer_top.js"></script>
+    <script src="../renderer_layout.js"></script>
     <script src="../renderer_main.js"></script>
 
 </head>
 <body>
 
-<div class="grid_container" >
+<div class="grid_container" id="grid_container" >
     <div id="cocosView_gridItem">
+        <div id="topView">
+            <div id="gizmo_buttons">
+                <button class="log_button" id="gizmo_hide" title="기즈모 숨김(q)">
+                    <i class="fa-solid fa-eye-slash"></i>
+                </button>
+
+                <button class="log_button" id="gizmo_move" title="기즈모 이동(w)">
+                    <i class="fa-sharp fa-solid fa-arrows-up-down-left-right"></i>
+                </button>
+
+                <button class="log_button" id="gizmo_rotate" title="기즈모 회전(e)">
+                    <i class="fa-solid fa-rotate"></i>
+                </button>
+
+                <button class="log_button" id="gizmo_scale" title="기즈모 확장(r)">
+                    <i class="fa-solid fa-expand"></i>
+                </button>
+            </div>
+            <label class="frameBar_label" id="gizmo_label">gizmo</label>
+            <div id="zoom_buttons">
+                <button class="log_button" id="zoom_in" title="캔버스 확대">
+                    <i class="fa-solid fa-magnifying-glass-plus"></i>
+                </button>
+
+                <button class="log_button" id="zoom_out" title="캔버스 축소">
+                    <i class="fa-solid fa-magnifying-glass-minus"></i>
+                </button>
+            </div>
+            <label id="zoom_label">screen size : 100%</label>
+        </div>
         <div id="cocosView">
             <canvas id="gameCanvas" ></canvas>
         </div>
         <div id="bottomView">
+            <!--
             <div class="tab">
                 <button id="button_tab_command" class="tab_button"> command </button>
                 <button id="button_tab_timeline" class="tab_button"> timeline </button>
             </div>
             <div id="bottom_history" class="bottom_content" >
                 <div id="div_command_log"> </div>
+            </div>
+            -->
+            <div class="frameBar_div" id="timeline_bar_root">
+                <label class="frameBar_label"> Timeline </label>
             </div>
             <div class="timeline_toolbar"></div>
             <div id="timeline_content">
@@ -80,6 +118,10 @@
         </div>
     </div>
 
+    <div id="cocosView_gridLine">
+
+    </div>
+
     <div id="second_column">
         <div id="hierarchy_gridItem">
             <div class="frameBar_div" id="hierarchy_bar_root" >
@@ -92,7 +134,9 @@
             </div>
 
         </div>
+        <div id="hierarchy_asset_gridLine">
 
+        </div>
         <div id="assets_gridItem">
             <div class="frameBar_div" id="assets_bar_root" >
                 <label class="frameBar_label"> Assets </label>
@@ -105,6 +149,10 @@
         </div>
     </div>
 
+    <div id="inspector_gridLine">
+
+    </div>
+
     <div id="inspector_gridItem">
         <div class="frameBar_div" id="inspector_bar_root">
             <label class="frameBar_label"> Inspector </label>
@@ -114,7 +162,30 @@
         </div>
 
     </div>
+    <div id="log_gridLine">
 
+    </div>
+    <div id="log_gridItem">
+        <div class="frameBar_div" id="log_bar_root">
+            <label class="frameBar_label"> Log </label>
+            <div id="log_buttons">
+                <button class="log_button" id="log_undo" title="실행 취소">
+                    <i class="fa-solid fa-rotate-left"></i>
+                </button>
+
+                <button class="log_button" id="log_redo" title="재실행">
+                    <i class="fa-solid fa-rotate-right"></i>
+                </button>
+
+                <button class="log_button" id="log_clear" title="로그 초기화">
+                    <i class="fa-solid fa-trash-can"></i>
+                </button>
+            </div>
+        </div>
+        <div id="log_view">
+            <div id="div_command_log"> </div>
+        </div>
+    </div>
 </div>
 
 <script src="frameworks/cocos2d-html5/CCBoot.js"></script>

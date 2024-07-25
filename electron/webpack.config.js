@@ -34,7 +34,7 @@ const common_config = {
       org: "taegyunhan",
       project: "electron",
       release: {
-        name: "genietool@1.0.5",
+        name: "genietool@1.0.6",
         deploy: {
           env: 'production',
           name: 'my_deploy',

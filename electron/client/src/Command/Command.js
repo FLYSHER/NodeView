@@ -1,6 +1,3 @@
-// const { sentryRendererInit } = require('../../../sentryRenderer');
-// sentryRendererInit();
-
 Genie.Command = Genie.Command || {};
 
 Genie.CommandType = {
@@ -72,18 +69,25 @@ Genie.Command.Base = cc.Class.extend({
     setCommandLog : function( commandType, targetName, strValue ) {
         var log_title = this.getCommandName();
         var parent = document.getElementById('div_command_log' );
+        var container = document.getElementById('log_view');
 
         switch ( commandType ) {
             case Genie.CommandType.EXECUTE:
                 if( !this._commandDiv ) {
                     this._commandDiv = HtmlHelper.createCommandLog( parent, log_title, targetName, strValue );
+                    container.scrollTop = this._commandDiv.offsetTop - container.offsetTop;
+                    this._commandDiv.onclick = () => {
+                        Genie.CommandManager.onclick( this );
+                    };
                 }
                 break;
             case Genie.CommandType.REDO:
                 this._commandDiv && ( this._commandDiv.style.background = "#363636");
+                this._commandDiv && ( container.scrollTop = this._commandDiv.offsetTop - container.offsetTop );
                 break;
             case Genie.CommandType.UNDO:
                 this._commandDiv && ( this._commandDiv.style.background = "#777777");
+                this._commandDiv && ( container.scrollTop = this._commandDiv.offsetTop - container.offsetTop );
                 break;
         }
     },

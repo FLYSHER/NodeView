@@ -28,6 +28,8 @@ function createWindow () {
     }
   });
 
+  mainWindow.rootPath = app.getPath('exe');
+
   console.log("electron created window");
 
   // and load the index.html of the app.
@@ -73,60 +75,89 @@ const template = [
       },
       {
         role: 'ToggleDevTools'
+      }
+    ]
+  },
+  {
+    label: 'View',
+    submenu: [
+      {
+        label: 'Save Current Layout As Default',
+        click: function () {
+          const window = BrowserWindow.getAllWindows()[0];
+          window.webContents.send('save-current-layout-as-default');
+        },
       },
       {
-        label: 'New Window',
-        click : function () {
-          //https://tinydew4.gitbooks.io/electron-ko/content/api/browser-window.html
-          console.log("[CHECK]");
-          let win = new BrowserWindow({
-            width: 800,
-            height: 600,
-            webPreferences: {
-              webSecurity: false,
-              nodeIntegration: true,
-              contextIsolation: false,
-              enableRemoteModule: true,
-            }});
-
-          win.on('close', () => {
-            console.log("close");
-            win = null
-          })
-          win.on('ready-to-show',()=>{
-            console.log("cccccc");
-            win.webContents.send('channel1', ["sssss"]);
-          });
-          // Or load a local HTML file
-          win.webContents.openDevTools();
-          win.loadFile('index2.html')
-          win.webContents.openDevTools();
-          ipcMain.on("onTest2",(evt, payload) => {
-            console.log('on ipcMain event:: ', payload);
-          });
-
-          ipcMain.on("nodeHierarchy",(evt, payload) => {
-            console.log("ipcMain > getHierarchy ", payload);
-            win.webContents.send('request_nodeTree', payload);
-          });
-
-          ipcMain.on("request_nodeTree",(evt, payload) => {
-            console.log("ipcMain > request_nodeTree", payload);
-            loadManager._mainWindow.webContents.send('getHierarchy');
-            console.log("ipcMain > request_nodeTree end", payload);
-          });
+        label: 'Reload Default Layout',
+        click: function () {
+          const window = BrowserWindow.getAllWindows()[0];
+          window.webContents.send('reload-default-layout');
         }
-
       },
       {
-        label : "sentry undefined error test",
+        label: 'Reset Layout Setting',
         click : function () {
-          myUndefinedFunction();
-          console.log("[sentry] send undefined error on sentry");
+          const window = BrowserWindow.getAllWindows()[0];
+          window.webContents.send('reset-layout-setting');
         }
       }
     ]
   },
+  {
+    label: 'New Window',
+    click : function () {
+      //https://tinydew4.gitbooks.io/electron-ko/content/api/browser-window.html
+      console.log("[CHECK]");
+      let win = new BrowserWindow({
+        width: 800,
+        height: 600,
+        webPreferences: {
+          webSecurity: false,
+          nodeIntegration: true,
+          contextIsolation: false,
+          enableRemoteModule: true,
+        }});
+
+      win.on('close', () => {
+        console.log("close");
+        win = null
+      })
+      win.on('ready-to-show',()=>{
+        console.log("cccccc");
+        win.webContents.send('channel1', ["sssss"]);
+      });
+      // Or load a local HTML file
+      win.webContents.openDevTools();
+      win.loadFile('index2.html')
+      win.webContents.openDevTools();
+      ipcMain.on("onTest2",(evt, payload) => {
+        console.log('on ipcMain event:: ', payload);
+      });
+
+      ipcMain.on("nodeHierarchy",(evt, payload) => {
+        console.log("ipcMain > getHierarchy ", payload);
+        win.webContents.send('request_nodeTree', payload);
+      });
+
+      ipcMain.on("request_nodeTree",(evt, payload) => {
+        console.log("ipcMain > request_nodeTree", payload);
+        loadManager._mainWindow.webContents.send('getHierarchy');
+        console.log("ipcMain > request_nodeTree end", payload);
+      });
+    }
+  },
+  {
+    role: 'Help',
+    submenu: [
+      {
+        label: 'Learn More',
+        click: function () {
+          require('electron').shell.openExternal('https://www.notion.so/playlinks/Genie-Tool-c663cc8dbb554081b3d3fc7535ca54bf');
+        }
+      }
+    ]
+  }
 ]
 const menu = Menu.buildFromTemplate(template);
 Menu.setApplicationMenu(menu);
@@ -155,7 +186,6 @@ app.whenReady().then(() => {
   });
 
   loadManager.init(mainWindow);
-
 
   // log
   log.initialize({

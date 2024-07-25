@@ -1,64 +1,57 @@
-// const { sentryRendererInit } = require('../../../sentryRenderer');
-// sentryRendererInit();
-
 var Genie = Genie || {};
 
 Genie.ToolController = {
     arrSelectedNode : [],
+    screenScale : 1.0,
 
     reset : function() {
         this.arrSelectedNode.length = 0;
     },
 
+    /** @returns {boolean} */
     isSelectedNode : function( node ) {
-        var findIdx = this.arrSelectedNode.findIndex( function( item ) {
-            return node.__instanceId === item.__instanceId;
-        });
-        return ( findIdx >= 0 );
+        return node && this.arrSelectedNode.some(item => item.__instanceId === node.__instanceId);
     },
 
+    /** @returns {Array<node>} */
     getSelectedNodes : function () {
         return this.arrSelectedNode;
     },
 
+    /** @returns {node | null} */
     getSelectNode : function() {
         return this.arrSelectedNode[0];
     },
 
-    addSelectNode : function( node, multiSelect ) {
-        if( this.isSelectedNode( node ) === false ) {
-            var loc_multiSelected = !!multiSelect;
-            if( loc_multiSelected === false ) {
-                this.removeAllSelectNode();
-            }
-
-            this.arrSelectedNode.push( node );
-            Genie.GizmoController.attachGizmo( node );
+    /** @taegyun.han 다중 선택 기본 지원 24.07.12 */
+    addSelectNode : function( node ) {
+        if( !(this.isSelectedNode(node)) ){
+            this.arrSelectedNode.push(node);
+            Genie.GizmoController.attachGizmo(node);
         }
     },
 
     removeAllSelectNode : function() {
-        var i, selectNode;
-        for( i = 0; i < this.arrSelectedNode.length; ++i ) {
-            selectNode = this.arrSelectedNode[i];
-            this.removeSelectNode( selectNode );
-        }
+        this.arrSelectedNode.forEach((node) => {
+            Genie.GizmoController.detachGizmoByTargetNode(node);
+        });
+        this.reset();
     },
 
     removeSelectNode : function( node ) {
-        if( this.isSelectedNode( node ) === true ) {
+        const findIdx = this.arrSelectedNode.findIndex(item => node.__instanceId === item.__instanceId);
+
+        if (findIdx >= 0) {
             Genie.GizmoController.detachGizmoByTargetNode( node );
-            this._removeSelectNode( node );
+            this.arrSelectedNode.splice( findIdx, 1 );
         }
     },
 
-    _removeSelectNode : function( node ) {
-        var findIdx = this.arrSelectedNode.findIndex( function( item ) {
-            return node.__instanceId === item.__instanceId;
-        });
+    setScreenScale : function (scale) {
+        this.screenScale = scale;
+    },
 
-        if( findIdx >= 0 ) {
-            this.arrSelectedNode.splice( findIdx, 1 );
-        }
+    getScreenScale : function () {
+        return this.screenScale;
     },
 }

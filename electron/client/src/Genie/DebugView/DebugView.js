@@ -1,6 +1,3 @@
-// const { sentryRendererInit } = require('../../../../sentryRenderer');
-// sentryRendererInit();
-
 var Genie = Genie || {};
 Genie.Test = Genie.Test || {};
 
@@ -282,7 +279,7 @@ Genie.Test.TestWindowFrame = ccui.Layout.extend({
 
     },
 
-    addCommand: function(text, onClick, fontSize){
+    addCommand : function(text, onClick, fontSize){
         return this._listView.addListItemBtn(text, onClick, fontSize);
     },
 
@@ -290,11 +287,11 @@ Genie.Test.TestWindowFrame = ccui.Layout.extend({
         return this._listView.addListItemWithImg( spriteName, text, onClick, fontSize);
     },
 
-    addPlusMinus: function ( text, onClick, fontSize, initValue, step, controlCB ) {
+    addPlusMinus : function ( text, onClick, fontSize, initValue, step, controlCB ) {
         return this._listView.addListItemPlusMinus( text, onClick, fontSize, initValue, step, controlCB );
     },
 
-    closeLayer:function () {
+    closeLayer : function () {
         this.setVisible(false);
     },
 });

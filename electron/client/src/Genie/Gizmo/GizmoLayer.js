@@ -1,12 +1,9 @@
-// const { sentryRendererInit } = require('../../../../sentryRenderer');
-// sentryRendererInit();
-
 var Genie = Genie || {};
 
 Genie.GizmoLayer = cc.LayerColor.extend({
     ctor : function() {
         this.initProperty();
-        this._super( cc.color( 150, 0, 0, 50 ));
+        this._super( cc.color( 150, 0, 0, 0 ) );
 
         this.initPreviewArea();
         this.initDebugView();
@@ -20,6 +17,7 @@ Genie.GizmoLayer = cc.LayerColor.extend({
             GIZMO : 1,
             PREVIEW : 10,
             DEBUG_VIEW : 20,
+            COMMAND_LOG_VIEW : 20,
         }
 
         this.debugView = null;
@@ -108,9 +106,8 @@ Genie.GizmoLayer = cc.LayerColor.extend({
     initDebugView : function () {
         var debugViw = new Genie.Test.DebugViewNode();
         this.addChild( debugViw, this.Local_Order.DEBUG_VIEW );
-        debugViw.setPosition( 0, cc.winSize.height - 100 );
+        debugViw.setPosition( 0, cc.winSize.height - Genie.Offset.DEBUG_VIEW_SIZE.HEIGHT );
         this.debugView = debugViw;
     },
     //endregion
-
 });

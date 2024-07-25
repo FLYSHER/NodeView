@@ -1,6 +1,3 @@
-// const { sentryRendererInit } = require('../../../sentryRenderer');
-// sentryRendererInit();
-
 var Genie = Genie || {};
 
 Genie.Utils = {
@@ -139,4 +136,55 @@ Genie.Utils = {
             return index === 0 ? match.toLowerCase() : match.toUpperCase();
         });
     },
+
+    fixStringLength : function (str, length) {
+        const whitespace = (' ').repeat(length);
+        return (str + whitespace).substring(0, length);
+    },
+
+    /**
+    * min ~ max 의 값을 newMin ~ newMax 의 값으로 압축 및 확장 스케일링 해주는 함수
+    * */
+    minMaxScaling : function (value, min, max, newMin, newMax) {
+        return (value - min) * (newMax - newMin) / (max - min) + newMin;
+    },
+
+    /**
+     * 선분 2개가 이루는 각도를 반환합니다.
+     */
+    calculateAngleOfTwoSegments : function (seg1Start, seg1End, seg2Start, seg2End) {
+        var seg1DirectionX = seg1End.x - seg1Start.x,
+            seg1DirectionY = seg1End.y - seg1Start.y;
+
+        var seg2DirectionX = seg2End.x - seg2Start.x,
+            seg2DirectionY = seg2End.y - seg2Start.y;
+
+        var dotProduct = seg1DirectionX * seg2DirectionX + seg1DirectionY * seg2DirectionY;
+        var seg1Length = Math.sqrt(seg1DirectionX * seg1DirectionX + seg1DirectionY * seg1DirectionY),
+            seg2Length = Math.sqrt(seg2DirectionX * seg2DirectionX + seg2DirectionY * seg2DirectionY);
+
+        var angle = Math.acos(dotProduct / (seg1Length * seg2Length));
+        angle = cc.radiansToDegrees(angle);
+
+        var crossProduct = seg1DirectionX * seg2DirectionY - seg1DirectionY * seg2DirectionX;
+
+        if (crossProduct < 0) {
+            angle = 360 - angle;
+        }
+        return angle;
+    },
+
+    /**
+     *  백터의 길이를 최소 길이로 연장해서 반환
+     */
+    extendVectorToMinimumLength : function (vector, minLength) {
+        var length = Math.sqrt(vector.x * vector.x + vector.y * vector.y);
+        if (length < minLength) {
+            var scaleFactor = minLength / length;
+            return cc.p(vector.x * scaleFactor, vector.y * scaleFactor);
+        } else {
+            return vector;
+        }
+    },
+
 }

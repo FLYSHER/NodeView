@@ -1,6 +1,3 @@
-// const { sentryRendererInit } = require('../../../sentryRenderer');
-// sentryRendererInit();
-
 var EVT = EVT || {};
 
 EVT.MAIN_VIEW = {
@@ -10,5 +7,5 @@ EVT.MAIN_VIEW = {
 }
 
 EVT.TOOL = {
-    SELECT_NODE     : "evt.tool.selectNode"
+    SELECT_NODE     : "evt.tool.selectNode",
 }

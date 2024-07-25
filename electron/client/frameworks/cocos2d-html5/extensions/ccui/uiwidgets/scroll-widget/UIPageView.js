@@ -62,6 +62,12 @@ ccui.PageView = ccui.ListView.extend(/** @lends ccui.PageView# */{
         this.setScrollBarEnabled(false);
     },
 
+    onEnter: function () {
+        this.addComponent( new Genie.Component.UIPageView() );
+        ccui.Layout.prototype.onEnter.call(this);
+        this.scheduleUpdate();
+    },
+
     /**
      * Add a widget to a page of PageView.
      * @deprecated since v3.9, please use 'insertPage(Widget* page, int idx)' instead.

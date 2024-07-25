@@ -1,6 +1,3 @@
-// const { sentryRendererInit } = require('../../../sentryRenderer');
-// sentryRendererInit();
-
 var Genie = Genie || {};
 Genie.Component = Genie.Component || {};
 
@@ -61,4 +58,23 @@ Genie.CommandManager = {
             cc.log( "[command] redo : ", this._currentIndex, command.getCommandName() + " > " + JSON.stringify( command.getArgsObj() ) );
         }
     },
+
+    clear : function () {
+        if( this.commands.length <= 0 || this._currentIndex >= this.commands.length ) {
+            return;
+        }
+        this._currentIndex = -1;
+        var parent = document.getElementById('div_command_log' );
+        while( parent.firstChild ) {
+            parent.removeChild(parent.firstChild);
+        }
+        this.commands = [];
+    },
+
+    onclick : function ( command ) {
+        if (this.commands.length <= 0 || this._currentIndex >= this.commands.length) {
+            return;
+        }
+        command.execute();
+    }
 };

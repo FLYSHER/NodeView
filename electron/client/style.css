@@ -37,7 +37,8 @@ canvas {
 
 body {
     background: var(--background);
-    height: 100vh;
+    height: 99vh;
+    overflow: hidden;
 }
 
 h1,
@@ -100,10 +101,10 @@ code {
 
 .grid_container {
     display: grid;
-    gap: 2px;
+    gap: 1px;
 
-    grid-template-columns: 3fr 1fr 1fr;
-    grid-template-rows   : 1fr;
+    grid-template-columns: 3fr auto 1fr auto 1fr;
+    grid-template-rows   : auto auto auto;
 }
 
 button:active {
@@ -115,13 +116,60 @@ button:active {
     /*background-color: #95B8E7;*/
 }
 
-#cocosView_gridItem, #subView_gridItem, #hierarchy_gridItem, #assets_gridItem, #inspector_gridItem {
+#cocosView_gridItem, #subView_gridItem, #hierarchy_gridItem, #assets_gridItem, #inspector_gridItem, #log_gridItem {
     border-radius: 3px;
     border: solid 1px #a8a5a5;
 }
 
 #cocosView_gridItem {
-    height: 98vh;
+    height: 95vh;
+    grid-column: 1 / 2;
+    grid-row: 1 / 4;
+}
+
+#topView {
+    flex: none;
+    height: 30px;
+    background: #444242;
+}
+
+#gizmo_label {
+    float: right;
+}
+
+#gizmo_buttons {
+    float: right;
+    height: 100%;
+
+    display: grid;
+    gap: 5px;
+
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-template-rows   : auto auto auto;
+    margin-right: 4px;
+}
+
+#zoom_label {
+    float: right;
+    display: inline-block;
+
+    font-weight: bold;
+    width: 160px;
+    color: var(--text);
+    background: var(--heading-background);
+    margin: 5px;
+}
+
+#zoom_buttons {
+    float: right;
+    height: 100%;
+
+    display: grid;
+    gap: 5px;
+
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows   : auto auto;
+    margin-right: 100px;
 }
 
 #cocosView {
@@ -133,13 +181,15 @@ button:active {
     height: 35%;
 }
 
+#cocosView_gridLine {
+    min-width: 1px;
+    grid-column: 2 / 3;
+    grid-row: 1 / 4;
+}
+
 #tab_button {
     background: #444444;
     display: flex;
-}
-
-#bottom_history {
-    display: inline;
 }
 
 #div_command_log {
@@ -152,46 +202,157 @@ button:active {
 }
 
 #second_column {
-    height: 98vh;
+    height: 87vh;
+    grid-column: 3 / 4;
+    grid-row: 1 / 2;
 }
 
 #hierarchy_gridItem {
-    height: 50%;
+    height: 49.9%;
+    display: flex;
+    flex-direction: column;
 }
 
 #hierarchy_bar_root {
+    min-height: 30px;
+    max-height: 35px;
     height: 6%;
 }
 
 #hierarchy {
-    height: 94%;
+    flex: 1;
     overflow: scroll;
 }
 
 #assets_gridItem {
-    height : 50%;
+    height : 49.9%;
+    display: flex;
+    flex-direction: column;
 }
 
 #assets_bar_root{
+    min-height: 30px;
+    max-height: 35px;
     height: 6%;
 }
 
 #assets {
-    height: 94%;
+    flex: 1;
     overflow: scroll;
 }
 
-#inspector_gridItem {
-    height: 98vh;
+#hierarchy_asset_gridLine {
+    height: 0.2%;
 }
 
-#inspector_bar_root{
+#inspector_gridLine {
+    min-width: 1px;
+    grid-column: 4 / 5;
+    grid-row: 1 / 2;
+}
+
+#inspector_gridItem {
+    height: 87.2vh;
+    grid-column: 5 / 6;
+    grid-row: 1 / 2;
+}
+
+#inspector_bar_root {
+    min-height: 30px;
     height: 3%;
 }
 
 #inspector {
     height: 97%;
     overflow: scroll;
+}
+
+#log_gridLine {
+    height: 0.1vh;
+    grid-column: 3 / 6;
+    grid-row: 2 / 3;
+}
+
+#log_gridItem {
+    height: 9.9vh;
+    display: flex;
+    flex-direction: column;
+    grid-column: 3 / 6;
+    grid-row : 3 / 4;
+}
+
+#log_bar_root {
+    min-height: 25px;
+    max-height: 35px;
+    height: 25%;
+    align-items: center;
+}
+
+#log_view {
+    flex: 1;
+    overflow-y: scroll;
+}
+
+#log_buttons {
+    float: right;
+    height: 100%;
+
+    display: grid;
+    gap: 5px;
+
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows   : auto auto;
+    margin-right: 4px;
+}
+
+.log_button {
+    min-width: 40px;
+    margin-top: 4px;
+
+    position: relative;
+    color: #444242;
+    z-index: 2;
+    padding: 0;
+}
+
+.log_button:hover {
+    border: none;
+}
+
+.log_button:before,
+.log_button:after {
+    position: absolute;
+    content: "";
+    width: 0;
+    height: 0;
+    border: 2px solid;
+    z-index: -1;
+    transition: all 0.3s ease;
+}
+
+.log_button:before {
+    top: 0;
+    left: 0;
+    border-bottom-color: transparent;
+    border-right-color: transparent;
+    border-top-color: #444242;
+    border-left-color: #444242;
+}
+
+.log_button:after{
+    bottom: 0;
+    right: 0;
+    border-top-color: transparent;
+    border-left-color: transparent;
+    border-bottom-color: #444242;
+    border-right-color: #444242;
+}
+
+.log_button:hover:before,
+.log_button:hover:after {
+    border-color: #444242;
+    height: 100%;
+    width: 100%;
 }
 
 .component_title {
@@ -547,10 +708,15 @@ input[readonly] {
     background-color: #363636;
 }
 
+#timeline_bar_root {
+    min-height: 30px;
+    height: 10%;
+}
+
 .timeline_toolbar {
     padding-left: 44px;
     max-height: 36px;
-    height: 36px;
+    height: 5px;
     position: relative;
     overflow: hidden;
     display: flex;

@@ -1,12 +1,9 @@
-// const { sentryRendererInit } = require('../../../../sentryRenderer');
-// sentryRendererInit();
-
 var Genie = Genie || {};
 Genie.Test = Genie.Test || {};
 
 Genie.Test.DebugViewNode = cc.Node.extend({
     ctor : function() {
-        this.initProperties()
+        this.initProperties();
         this._super();
 
         this.setName( "Genie.Test.DebugViewNode" );
@@ -21,7 +18,11 @@ Genie.Test.DebugViewNode = cc.Node.extend({
     },
 
     initUI : function() {
-        var debugViewFrame = new Genie.Test.TestWindowFrame(" DebugView ", 200, 100);
+        var debugViewFrame = new Genie.Test.TestWindowFrame(
+            " DebugView ",
+            Genie.Offset.DEBUG_VIEW_SIZE.WIDTH,
+            Genie.Offset.DEBUG_VIEW_SIZE.HEIGHT,
+        );
         this.addChild( debugViewFrame );
 
         // 윈도우 사이즈
@@ -33,7 +34,7 @@ Genie.Test.DebugViewNode = cc.Node.extend({
     },
 
     getWinSizeString : function( size ) {
-        return "w : " + parseInt( size.width ) + " , h : " + parseInt( size.height );
+        return "W : " + parseInt( size.width ) + " , H : " + parseInt( size.height );
     },
 
     updateWinSize : function() {

@@ -1,7 +1,3 @@
-// const { sentryRendererInit } = require('../../../sentryRenderer');
-// sentryRendererInit();
-
-
 var HtmlHelper = {
 
     createDiv : function( parent, className ) {
@@ -41,7 +37,7 @@ var HtmlHelper = {
         el_checkbox.type = "checkbox";
         name && ( el_checkbox.name = name );
         el_checkbox.checked = checked;
-        el_checkbox.readOnly = !!readOnly;
+        el_checkbox.disabled = !!readOnly;
 
         onchange && el_checkbox.addEventListener( "change", onchange );
 
@@ -194,8 +190,25 @@ var HtmlHelper = {
         label.innerText =  componentName;
         div_comp.appendChild( label );
 
-        const menu_container = HtmlHelper.createComponentMenu();
+        const windowIcon = document.createElement('i');
+        windowIcon.className = 'fa-solid fa-window-minimize';
+        windowIcon.style.color = '#d0b8f4';
+        windowIcon.style.float = 'right';
+        windowIcon.style.paddingRight = '10px';
+        windowIcon.style.margin = '5px';
+        windowIcon.addEventListener('click', function () {
+            const contents = div_comp.parentElement.children;
 
+            $.each(contents, (index, item) => {
+                if (index !== 0) {
+                    item.style.display = item.style.display === 'none' ? 'block' : 'none';
+                }
+            });
+
+            windowIcon.className = windowIcon.className === 'fa-solid fa-window-minimize' ? 'fa-solid fa-window-maximize' : 'fa-solid fa-window-minimize';
+        });
+
+        const menu_container = HtmlHelper.createComponentMenu();
         const menu_icon = document.createElement('i');
         menu_icon.className = 'fa-solid fa-ellipsis-vertical';
         menu_icon.style.color = '#d0b8f4';
@@ -206,6 +219,7 @@ var HtmlHelper = {
         menu_icon.addEventListener('click', menu_container._onclick);
 
         div_comp.appendChild( menu_icon );
+        div_comp.appendChild( windowIcon );
         div_comp.appendChild( menu_container );
 
         return div_comp;
@@ -327,9 +341,20 @@ var HtmlHelper = {
         // option_addComponent.appendChild(component_option_icon);
         // option_addComponent.appendChild(component_menu_div);
 
-        const option_removeComponent = HtmlHelper.createComponentMenuOption('Remove this Component', () => {
+        const option_removeComponent = HtmlHelper.createComponentMenuOption('Remove this custom Component', () => {
             const target = Renderer_hierarchy.getTargetNode();
             const componentName = $(menu_div.parentElement.parentElement).children('span')[0].outerText;
+
+            const customCompNames = [
+                Genie.ComponentName.POPUP,
+                Genie.ComponentName.CODE,
+                Genie.ComponentName.EMPTY
+            ];
+
+            if (!customCompNames.includes(componentName)) {
+                menu_div.style.maxHeight = '0px';
+                return;
+            }
 
             if (target && componentName) {
                 target.removeComponent(componentName);
@@ -452,10 +477,10 @@ var HtmlHelper = {
         return resultObj;
     },
 
-    createCheckboxAttrib : function( parent, propertyName, checked, readyonly, onchange ) {
+    createCheckboxAttrib : function( parent, propertyName, checked, readonly, onchange ) {
         var div = HtmlHelper.createDiv( parent, 'component_lineDiv' );
         HtmlHelper.createLabel( div, propertyName, "component_propertyLabel" );
-        return HtmlHelper.createCheckbox( div, "", checked, readyonly, onchange );
+        return HtmlHelper.createCheckbox( div, "", checked, readonly, onchange );
     },
 
     createIconButtonAttrib : function ( parent, propertyName, iconInfoObj, onclick) {

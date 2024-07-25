@@ -1,13 +1,10 @@
-// const { sentryRendererInit } = require('../../../sentryRenderer');
-// sentryRendererInit();
-
 /**
  * 스크린과 관련된 함수 모음
  * @namespace
  */
 var ScreenUtil = {};
 ScreenUtil.contentScale = 1;
-ScreenUtil.minWHRatio = 0.75;
+ScreenUtil.minWHRatio = 0.85;
 ScreenUtil.resizeListeners = [];
 
 // 따로 관리하고 싶은 resizeListener는 직접 addCustomListener를 호출하여 등록한다.

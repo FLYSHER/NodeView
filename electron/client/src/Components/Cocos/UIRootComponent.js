@@ -1,6 +1,3 @@
-// const { sentryRendererInit } = require('../../../../sentryRenderer');
-// sentryRendererInit();
-
 var Genie = Genie || {};
 Genie.Component = Genie.Component || {};
 
@@ -8,7 +5,7 @@ Genie.Component = Genie.Component || {};
 Genie.Component.UIRoot = Genie.Component.InspectorBase.extend({
     ctor : function ( jsonName ) {
         this._super();
-        this.setName( 'UIRoot' );
+        this.setName( Genie.ComponentName.UI_ROOT_VIEW );
         this._jsonName = jsonName;
     },
 

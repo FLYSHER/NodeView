@@ -1,6 +1,3 @@
-// const { sentryRendererInit } = require('../../../../sentryRenderer');
-// sentryRendererInit();
-
 var Genie = Genie || {};
 Genie.Component = Genie.Component || {};
 Genie.Component.ArmatureView = Genie.Component.InspectorBase.extend({
@@ -82,7 +79,7 @@ Genie.Component.ArmatureView = Genie.Component.InspectorBase.extend({
         this.mov_name   = HtmlHelper.createOneLongTextInput( div_group, 'movName', name, true );
         this.mov_dl     = HtmlHelper.createOneShortTextInput( div_group, "duration", dl, true );
         this.mov_sc     = HtmlHelper.createOneShortTextInput( div_group, "speedScale", sc, true, this.onchange.bind(this) );
-        this.mov_loop   = HtmlHelper.createCheckboxAttrib( div_group, 'loop', loop, true );
+        this.mov_loop   = HtmlHelper.createCheckboxAttrib( div_group, 'loop', loop, false );
     },
 
     drawRelativeData : function( rootDiv ) {
@@ -163,7 +160,7 @@ Genie.Component.ArmatureView = Genie.Component.InspectorBase.extend({
                 var moveIdx     = parseInt( this.select_track.value );
                 var loop        = this.mov_loop.checked;
                 owner.getAnimation().playWithIndex( moveIdx, -1, loop );
-                Renderer_timeline.playTrack();
+                Renderer_timeline.playTrack(loop);
                 break;
             case this.btn_stop:
                 owner.getAnimation().stop();
@@ -205,7 +202,8 @@ Genie.Component.ArmatureView = Genie.Component.InspectorBase.extend({
 
         owner.getAnimation().play( name );
         owner.getAnimation().gotoAndPause( loc_frame );
-
+        Renderer_timeline.setTimeByFrame(loc_frame);
+        Renderer_timeline.moveTimelineIntoTheBounds();
         this.input_gotoAndPause.value = loc_frame;
     },
 

@@ -1,6 +1,3 @@
-// const { sentryRendererInit } = require('../../sentryRenderer');
-// sentryRendererInit();
-
 var HelloWorldLayer = cc.LayerColor.extend({
     _sprite:null,
     _isMp3 : 0,
