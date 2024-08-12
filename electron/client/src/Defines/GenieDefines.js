@@ -7,6 +7,7 @@ Genie.ComponentName = {
     UI_BITMAP_FONT  : 'uiBMFontView',
     UI_TEXT_VIEW    : 'uiTextView',
     UI_BUTTON_VIEW  : 'uiButtonView',
+    SHADER_VIEW     : 'shaderView',
     ARMATURE_VIEW   : 'armatureView',
     BONE_VIEW       : 'boneView',
     UI_ACTION_VIEW  : 'uiActionView',

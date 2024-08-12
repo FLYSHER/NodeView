@@ -16,7 +16,7 @@ Genie.Component.UIImageView = Genie.Component.InspectorBase.extend({
         var iconObj = {
             className : "fa-solid fa-bezier-curve",
             style : "color: #d0b8f4;"
-        }
+        };
         var titleBar = HtmlHelper.createComponentBar(this.getName(), iconObj);
         rootDiv.appendChild( titleBar );
         this.rootDiv = rootDiv;

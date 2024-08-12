@@ -466,13 +466,30 @@ var HtmlHelper = {
     createSizeAttrib : function( parent, titleName, arrPlaceholder, arrReadOnly, onchange ) {
         var resultObj = {};
         var div = HtmlHelper.createDiv( parent, 'component_lineDiv' );
-        HtmlHelper.createLabel( div, titleName, "component_propertyLabel");
+        HtmlHelper.createLabel( div, titleName, 'component_propertyLabel');
 
-        HtmlHelper.createLabel( div, "W", "component_attribSizeLabel");
-        resultObj.width = HtmlHelper.createTextInput( div, arrPlaceholder[0], "component_shortTextInput", arrReadOnly[0], onchange );
+        HtmlHelper.createLabel( div, 'W', 'component_attribSizeLabel');
+        resultObj.width = HtmlHelper.createTextInput( div, arrPlaceholder[0], 'component_shortTextInput', arrReadOnly[0], onchange );
 
-        HtmlHelper.createLabel( div, "H", "component_attribSizeLabel");
-        resultObj.height = HtmlHelper.createTextInput( div, arrPlaceholder[1], "component_shortTextInput", arrReadOnly[1], onchange );
+        HtmlHelper.createLabel( div, 'H', 'component_attribSizeLabel');
+        resultObj.height = HtmlHelper.createTextInput( div, arrPlaceholder[1], 'component_shortTextInput', arrReadOnly[1], onchange );
+
+        return resultObj;
+    },
+
+    createShaderAttrib : function (parent, titleName, arrPlaceholder, arrReadOnly, onchange) {
+        const resultObj = {};
+        const div = HtmlHelper.createDiv(parent, 'component_lineDiv');
+        HtmlHelper.createLabel(div, titleName, 'component_propertyLabel');
+
+        HtmlHelper.createLabel( div, 'type', 'component_attribSizeLabel');
+        resultObj.type = HtmlHelper.createTextInput( div, arrPlaceholder[0], 'component_shortTextInput', arrReadOnly[0], onchange);
+
+        HtmlHelper.createLabel( div, 'size', 'component_attribSizeLabel');
+        resultObj.size = HtmlHelper.createTextInput( div, arrPlaceholder[1], 'component_shortTextInput', arrReadOnly[1], onchange);
+
+        HtmlHelper.createLabel( div, 'ptr?', 'component_attribSizeLabel');
+        resultObj.location = HtmlHelper.createTextInput( div, arrPlaceholder[2], 'component_shortTextInput', arrReadOnly[2], onchange);
 
         return resultObj;
     },

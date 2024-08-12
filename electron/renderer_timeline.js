@@ -30,7 +30,6 @@ const Renderer_timeline = {
         this.generateHTMLOutlineListNodes( this.timeline_rows );
 
         this.timeline.onTimeChanged( (event) => {
-            console.log("onTimeChanged : ", event );
             const source = event.source;
             if( source === 'user' ) {
                 this.onTimelineChangedByUser( event );

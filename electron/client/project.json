@@ -43,6 +43,7 @@
         "src/Components/Cocos/UIScrollViewComponent.js",
         "src/Components/Cocos/UIPageViewComponent.js",
         "src/Components/Cocos/UIImageViewComponent.js",
+        "src/Components/Cocos/ShaderComponent.js",
         "src/Components/Cocos/UILabelBMFontComponent.js",
         "src/Components/Cocos/UIButtonComponent.js",
         "src/Components/Custom/PopupComponent.js",

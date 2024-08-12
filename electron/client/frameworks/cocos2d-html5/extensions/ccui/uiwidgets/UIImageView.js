@@ -62,6 +62,7 @@ ccui.ImageView = ccui.Widget.extend(/** @lends ccui.ImageView# */{
         }
 
         this.addComponent( new Genie.Component.UIImageView() );
+        this.addComponent( new Genie.Component.ShaderView() );
     },
 
     _initRenderer: function () {
