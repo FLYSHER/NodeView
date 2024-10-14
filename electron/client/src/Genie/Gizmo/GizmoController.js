@@ -42,6 +42,9 @@ Genie.GizmoController = {
     },
 
     detachGizmoByTargetNode : function( node ) {
+        if (!node) {
+            return;
+        }
         const targetInstanceId = node.__instanceId;
 
         this.arrActiveGizmoNode.forEach((gizmo) => {
