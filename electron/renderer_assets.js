@@ -1,6 +1,7 @@
 /**
  * Assset 패널 관리
  */
+const { clipboard } = require('electron');
 const Renderer_assets = {
     treeDataArr : [],
     Tag         : "[AssetView] ",
@@ -40,6 +41,11 @@ const Renderer_assets = {
         cc.log( Renderer_assets.Tag, "*** onchange tree *** : ", data.selected[0], e, data );
 
         const selectedFileName = data.selected[0];
+        try {
+            clipboard.writeText(selectedFileName);
+        } catch (e) {
+
+        }
         const resType = (data && data.node && data.node.data) ? data.node.data['resType'] : -1;
         cc.eventManager.dispatchCustomEvent( 'onSetPreviewSprite', {
             name    : selectedFileName,
