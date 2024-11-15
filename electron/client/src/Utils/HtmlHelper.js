@@ -603,6 +603,21 @@ var HtmlHelper = {
         return img_spr;
     },
 
+    createPngFilePreviewAttrib : function( parent, textureUrl ) {
+        var textureName = textureUrl.replace("image/", "");
+
+        var div = HtmlHelper.createDiv( parent, 'img_preview_div' );
+        parent.appendChild( div );
+
+        var img_tex   = document.createElement( 'img' );
+        img_tex.src       = cc.loader.getRes( textureName );
+        img_tex.className = 'img_preview';
+        img_tex.style.filter = 'opacity( 1.0 ) grayscale( 0% )';
+        div.append( img_tex );
+
+        return img_tex;
+    },
+
     createSelectMenuAttrib : function( parent, propertyName, strPlaceHolder, arrOption, onchange  ) {
         var div = HtmlHelper.createDiv( parent, 'component_lineDiv' );
         HtmlHelper.createLabel( div, propertyName, 'component_propertyLabel');

@@ -20,8 +20,15 @@ Genie.Component.UILabelBMFontView = Genie.Component.InspectorBase.extend({
         var titleBar = HtmlHelper.createComponentBar(this.getName(), iconObj);
         rootDiv.appendChild( titleBar );
 
-        this.input_fntFileName = HtmlHelper.createOneLongTextInput( rootDiv, 'fontName', owner._fntFileName, true, this.onchange.bind(this)  );
+        this.input_fntFileName = HtmlHelper.createOneLongTextInput( rootDiv, 'fontUrl', owner._fntFileName, true, this.onchange.bind(this) );
+        var textureUrl = owner._labelBMFontRenderer._config.atlasName;
+        this.input_pngFileName = HtmlHelper.createOneLongTextInput( rootDiv, 'pngUrl', textureUrl, true, this.onchange.bind(this) );
         this.input_text     = HtmlHelper.createOneLongTextInput( rootDiv, 'text', owner.getString(), false, this.onchange.bind(this) );
+
+        this.div_spritePreview = HtmlHelper.createDiv( rootDiv, 'component_groupDiv' );
+        HtmlHelper.createLabel( this.div_spritePreview, "SpriteFrame", "component_groupTitleLabel" );
+
+        HtmlHelper.createPngFilePreviewAttrib( this.div_spritePreview, textureUrl );
     },
 
     onchange : function( event ) {

@@ -8,7 +8,7 @@ Genie.Component = Genie.Component || {};
  *         복사 버튼을 누르면 클립보드에 코드를 복사합니다.
  * todo : 개발 중
  */
-const { clipboard } = require('electron');
+var { clipboard } = require('electron');
 const tab = '    ';
 
 Genie.Component.Code = Genie.Component.InspectorBase.extend({

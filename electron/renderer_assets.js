@@ -1,7 +1,7 @@
 /**
  * Assset 패널 관리
  */
-const { clipboard } = require('electron');
+var { clipboard } = require('electron');
 const Renderer_assets = {
     treeDataArr : [],
     Tag         : "[AssetView] ",
