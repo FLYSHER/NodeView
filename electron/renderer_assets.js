@@ -89,16 +89,16 @@ const Renderer_assets = {
 
         // step2. 바로 위 폴더 구하기
         const id = isDirNameEmpty ? path : basename;
-        const parentID = isDirNameEmpty ? "#" : arrDir[arrDir.length - 1];
+        const parentID = arrDir.length === 0 ? "#" : arrDir[arrDir.length - 1];
 
         // step3. 에셋 추가
-        this.addAssetToHierarchy(id, parentID, { resType : resType });
+        this.addAssetToHierarchy( id, parentID, { resType : resType } );
         if( cc.path.extname( id ) === ".plist" ) {
             const frameConfig = cc.spriteFrameCache._frameConfigCache[path];
-            const frames = Array.from(frameConfig.frames);
-            frames.forEach((key) => {
+            const frames = frameConfig.frames;
+            for (let key in frames) {
                 this.addAssetToHierarchy(key, basename, {resType: Genie.ResType.SPRITE});
-            });
+            }
         }
     },
 
