@@ -79,6 +79,7 @@ Genie.PreviewNode = cc.Node.extend({
                 this._spriteNode.setScale(loc_scale);
 
                 this._scaleText.setVisible(true);
+                this._scaleText.setOpacity(120);
                 this._scaleText.setString('View 배율 : ' + loc_scale.toFixed(3));
                 this._scaleText.setScale(1 / loc_scale );
                 break;
@@ -87,6 +88,7 @@ Genie.PreviewNode = cc.Node.extend({
                 this._spriteNode.setScale(loc_scale);
 
                 this._scaleText.setVisible(true);
+                this._scaleText.setOpacity(120);
                 this._scaleText.setString('View 배율 : ' + loc_scale.toFixed(3));
                 this._scaleText.setScale(1 / loc_scale );
                 break;
