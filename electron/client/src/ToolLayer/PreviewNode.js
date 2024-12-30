@@ -37,6 +37,13 @@ Genie.PreviewNode = cc.Node.extend({
         this._frameNode.drawRect( origin, dest, cc.color( 0, 0, 0, 0 ), 2, cc.color( 255, 100, 0 ) );
         this._root.addChild( this._frameNode );
 
+        // 배율 텍스트
+        this._scaleText = new ccui.Text("Test", 'Arial', 24);
+        this._scaleText.setTextColor(cc.color(255, 255, 255, 255));
+        this._scaleText.setVisible(false);
+        this._scaleText.setAnchorPoint(cc.p(0, 0));
+        this._spriteNode.addChild( this._scaleText, 0 );
+
         this._initTouchComponent();
 
         this.reposition( 1.0 );
@@ -59,12 +66,30 @@ Genie.PreviewNode = cc.Node.extend({
     },
 
     _adjustSpriteSize   : function( resType ) {
-        if( resType === Genie.ResType.SPRITE
-            || resType === Genie.ResType.TEXTURE) {
-            var rate_w = this._rtSize.width/ this._spriteNode.getContentSize().width;
-            var rate_h = this._rtSize.height/ this._spriteNode.getContentSize().height;
-            var loc_scale = Math.min( rate_w, rate_h );
-            this._spriteNode.setScale(loc_scale);
+        // 폰트는 기존 해상도가 대체로 작기 때문에 꽉 채워서 보여주면 깨져서 축소함 offset <= 1.0
+        const fontScaleOffset = 0.5;
+        let rate_w, rate_h, loc_scale;
+        rate_w = this._rtSize.width / this._spriteNode.getContentSize().width;
+        rate_h = this._rtSize.height / this._spriteNode.getContentSize().height;
+        this._scaleText.setVisible(false);
+        switch (resType) {
+            case Genie.ResType.SPRITE:
+            case Genie.ResType.TEXTURE:
+                loc_scale = Math.min( rate_w, rate_h );
+                this._spriteNode.setScale(loc_scale);
+
+                this._scaleText.setVisible(true);
+                this._scaleText.setString('View 배율 : ' + loc_scale.toFixed(3));
+                this._scaleText.setScale(1 / loc_scale );
+                break;
+            case Genie.ResType.FONT_META:
+                loc_scale = Math.min( rate_w, rate_h ) * fontScaleOffset;
+                this._spriteNode.setScale(loc_scale);
+
+                this._scaleText.setVisible(true);
+                this._scaleText.setString('View 배율 : ' + loc_scale.toFixed(3));
+                this._scaleText.setScale(1 / loc_scale );
+                break;
         }
     },
 
@@ -116,6 +141,15 @@ Genie.PreviewNode = cc.Node.extend({
                 var tex = cc.textureCache.getTextureForKey( 'image/' + resName);
                 tex && this._spriteNode.initWithTexture( tex )
                 validCheck = !!tex;
+                break;
+            case Genie.ResType.FONT_META:
+                const fontData = userData.fontData;
+                const rect = fontData && fontData.rect;
+                if (fontData && rect) {
+                    const fontSpriteFrame = new cc.SpriteFrame( resName, rect );
+                    fontSpriteFrame && this._spriteNode.setSpriteFrame(fontSpriteFrame);
+                    validCheck = !!fontSpriteFrame;
+                }
                 break;
             default:
                 validCheck = false;

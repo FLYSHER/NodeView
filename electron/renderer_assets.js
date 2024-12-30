@@ -48,8 +48,9 @@ const Renderer_assets = {
         }
         const resType = (data && data.node && data.node.data) ? data.node.data['resType'] : -1;
         cc.eventManager.dispatchCustomEvent( 'onSetPreviewSprite', {
-            name    : selectedFileName,
-            resType : resType
+            name    : resType === Genie.ResType.FONT_META ? data.node.data.resPath : selectedFileName,
+            resType : resType,
+            fontData : resType === Genie.ResType.FONT_META ? data.node.data.fontData : null,
         } );
     },
 
@@ -89,7 +90,7 @@ const Renderer_assets = {
 
         // step2. 바로 위 폴더 구하기
         const id = isDirNameEmpty ? path : basename;
-        const parentID = arrDir.length === 0 ? "#" : arrDir[arrDir.length - 1];
+        const parentID = isDirNameEmpty ? "#" : arrDir[arrDir.length - 1];
 
         // step3. 에셋 추가
         this.addAssetToHierarchy( id, parentID, { resType : resType } );
@@ -98,6 +99,19 @@ const Renderer_assets = {
             const frames = frameConfig.frames;
             for (let key in frames) {
                 this.addAssetToHierarchy(key, basename, {resType: Genie.ResType.SPRITE});
+            }
+        } else if (cc.path.extname( id ) === ".fnt" ) {
+            let font = cc.loader.getRes(path, cc.UI_BITMAP_FONT);
+            if (font) {
+                const def = font.fontDefDictionary;
+                const atlasName = font.atlasName;
+                for (let key in def) {
+                    this.addAssetToHierarchy(key + " - " + id, basename, {
+                        resPath: atlasName,
+                        resType: Genie.ResType.FONT_META,
+                        fontData : def[key],
+                    });
+                }
             }
         }
     },
@@ -115,14 +129,32 @@ const Renderer_assets = {
             return;
         }
 
+        // 폰트는 id 값을 path 대신에 코드 - path 로 처리
+        let text = id;
+        const fontCode = id.split(" - ")[0];
+        if (!isNaN(fontCode)) {
+            // ASCII 코드 변환
+            text = String.fromCharCode(Number(fontCode));
+            switch (text) {
+                case '\t':
+                    text = 'tab';
+                    break;
+                case ' ':
+                    text = '공백';
+                    break;
+            }
+        }
+
         this.treeDataArr.push({
             "id"        : id,
             "parent"    : parentID,
-            "text"      : id,
+            "text"      : text,
             "data"      : customDataObj || undefined
         });
 
-        $("#assets").jstree(true).settings.core.data = this.treeDataArr;
+        if( $('#assets').jstree(true).settings.core.data !== this.treeDataArr ) {
+            $('#assets').jstree(true).settings.core.data = this.treeDataArr;
+        }
         $(`#assets`).jstree("refresh");
     },
 
