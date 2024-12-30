@@ -289,7 +289,7 @@ Genie.Component.Code.Builder = cc.Class.extend({
 
             this._buttonSet.forEach((name) => {
                 if (name !== this._exitButton) {
-                    body += `${tab}${tab}this.addWidgetClickListener(this._uiWidgets.${name}, this.onclick_${Genie.Utils.camelize(name.replaceAll('btn', ''))}, globalCommon,Click);\n`;
+                    body += `${tab}${tab}this.addWidgetClickListener(this._uiWidgets.${name}, this.onclick_${Genie.Utils.camelize(name.replaceAll('btn', ''))}, globalCommon.Click);\n`;
                 }
             });
 
