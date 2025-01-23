@@ -28,6 +28,7 @@
         "src/Genie/DebugView/DebugView.js",
         "src/Genie/DebugView/DebugViewNode.js",
 
+        "src/GenieResourceLoader/GenieRefChecker.js",
         "src/GenieResourceLoader/GenieResourceLoader.js",
 
         "src/Components/GenieComponent.js",

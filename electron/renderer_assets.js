@@ -84,7 +84,7 @@ const Renderer_assets = {
         // step1. folder 체크 및 추가
         const arrDir = isDirNameEmpty ? [path] : dirName.split("/");
         arrDir.reduce((parentId, id) => {
-            this.addAssetToHierarchy(id, parentId);
+            this.addAssetToHierarchy(path, id, parentId);
             return id;
         }, '#');
 
@@ -93,12 +93,12 @@ const Renderer_assets = {
         const parentID = isDirNameEmpty ? "#" : arrDir[arrDir.length - 1];
 
         // step3. 에셋 추가
-        this.addAssetToHierarchy( id, parentID, { resType : resType } );
+        this.addAssetToHierarchy( path, id, parentID, { resType : resType } );
         if( cc.path.extname( id ) === ".plist" ) {
             const frameConfig = cc.spriteFrameCache._frameConfigCache[path];
             const frames = frameConfig.frames;
             for (let key in frames) {
-                this.addAssetToHierarchy(key, basename, {resType: Genie.ResType.SPRITE});
+                this.addAssetToHierarchy( path, key, basename, {resType: Genie.ResType.SPRITE});
             }
         } else if (cc.path.extname( id ) === ".fnt" ) {
             let font = cc.loader.getRes(path, cc.UI_BITMAP_FONT);
@@ -106,7 +106,7 @@ const Renderer_assets = {
                 const def = font.fontDefDictionary;
                 const atlasName = font.atlasName;
                 for (let key in def) {
-                    this.addAssetToHierarchy(key + " - " + id, basename, {
+                    this.addAssetToHierarchy( path, key + " - " + id, basename, {
                         resPath: atlasName,
                         resType: Genie.ResType.FONT_META,
                         fontData : def[key],
@@ -122,7 +122,7 @@ const Renderer_assets = {
      * @param parentID
      * @param customDataObj
      */
-    addAssetToHierarchy : function( id, parentID, customDataObj ) {
+    addAssetToHierarchy : function( path, id, parentID, customDataObj ) {
         console.log("*** add hierarchy  **** ", id, parentID );
         if( this.isExistAsset( id, parentID ) ) {
             console.log(" >> already exist : ", id, parentID );
@@ -149,12 +149,22 @@ const Renderer_assets = {
             "id"        : id,
             "parent"    : parentID,
             "text"      : text,
-            "data"      : customDataObj || undefined
+            "data"      : customDataObj || undefined,
+            "file"      : path,
         });
 
-        if( $('#assets').jstree(true).settings.core.data !== this.treeDataArr ) {
-            $('#assets').jstree(true).settings.core.data = this.treeDataArr;
-        }
+        this.onRefreshTree();
+    },
+
+    deleteAssetFile : function (key) {
+        this.treeDataArr = this.treeDataArr.filter((node) => {
+            return node.file !== key;
+        });
+    },
+
+    // jstree를 데이터 대로 재구성
+    onRefreshTree : function() {
+        $("#assets").jstree(true).settings.core.data = this.treeDataArr;
         $(`#assets`).jstree("refresh");
     },
 

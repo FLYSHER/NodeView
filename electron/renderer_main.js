@@ -225,6 +225,20 @@ const Renderer_main = {
      * 마지막 프로미스를 리턴한다.
      */
     loadResources : function( payload ) {
+        // 래퍼런스 업데이트
+        payload.dependentFiles.forEach((item) => {
+            const filePaths = item.filePath.split('\\');
+            const fileName = filePaths[filePaths.length - 1];
+
+            Genie.RefChecker.increase(fileName);
+        });
+
+        payload.targetFiles.forEach((item) => {
+            const filePaths = item.filePath.split('\\');
+            const fileName = filePaths[filePaths.length - 1];
+
+            Genie.RefChecker.increase(fileName);
+        });
 
         // 리소스 비동기 로드 및 캐싱
         const loadResource = async (fileEntry) => {

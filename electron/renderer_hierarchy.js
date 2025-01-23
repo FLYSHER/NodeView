@@ -137,7 +137,13 @@ var Renderer_hierarchy = {
      */
     deleteSelectedNodes : function (nodes) {
         const idsToDelete = new Set();
-        nodes.forEach((node) => {
+        // mainLayer can't be deleted.
+        const nodesToDelete = nodes.filter((node) => {
+            return node.getName() !== "mainLayer";
+        });
+
+        // 삭제할 ID 수집
+        nodesToDelete.forEach((node) => {
             this.collectIDsToDelete(node, idsToDelete);
             if (node.getParent()) {
                 Genie.GizmoController.detachGizmoByTargetNode( node );
@@ -145,9 +151,67 @@ var Renderer_hierarchy = {
             }
         });
 
+        // 삭제 수행
         idsToDelete.forEach((id) => {
             const nodeToDelete = this.nodeInstanceIDMap[id];
-            !!nodeToDelete && this.deleteTreeNode( nodeToDelete.__instanceId );
+            if (nodeToDelete) {
+                this.deleteTreeNode( nodeToDelete.__instanceId );
+                // .ExportJson 파일이 캐싱되어 있으면 캐싱도 삭제
+                const tempFileName = nodeToDelete.getName() + '.ExportJson';
+                if (cc.loader.cache[tempFileName]) {
+                    // 관련 종속 파일도 확인해야 함.
+                        // 관련 종속 파일 레퍼런스가 추가로 있으면 ?
+                            // 지우면 안됨
+                        // 현재 파일만 종속되어 있다면 ?
+                            // 관련 파일도 같이 날려야 함.
+                    Genie.RefChecker.decrease(tempFileName);
+                    const configFilePath = cc.loader.cache[tempFileName].config_file_path;
+                    const configFilePng = cc.loader.cache[tempFileName].config_png_path;
+
+                    configFilePath.forEach((path) => {
+                        const pathArr = path.split('/')
+                        const name = pathArr[pathArr.length - 1];
+                        Genie.RefChecker.decrease(name);
+                    });
+
+                    configFilePng.forEach((name) => {
+                        Genie.RefChecker.decrease(name);
+                    });
+
+                    const removeFiles = Genie.RefChecker.getRemoveFileList();
+                    removeFiles.forEach((fileName) => {
+                        const extName = cc.path.extname( fileName ).toLowerCase();
+                        let key = 'image/' + fileName;
+                        switch ( extName ) {
+                            case '.plist':
+                                cc.log("[Resource] plist spriteFrameCache 에서 삭제 : ", key);
+                                cc.spriteFrameCache.removeSpriteFramesFromFile(key);
+                                break;
+                            case '.png':
+                                cc.log("[Resource] png textureCache 에서 삭제 : ", key);
+                                cc.textureCache.removeTextureForKey(key);
+                                cc.log("[Resource] png loader.cache 에서 삭제 : ", fileName);
+                                cc.loader.release(fileName);
+                                break;
+                            case '.fnt':
+
+                                break;
+                            case '.exportjson':
+                                return;
+                        }
+                        cc.log("[Resource] 파일 loader.cache 에서 삭제 : ", key);
+                        Renderer_assets.deleteAssetFile(key);
+                        cc.loader.release(key);
+                    });
+                    if (Genie.RefChecker.canRemove(tempFileName)) {
+                        cc.log("[Resource] 파일 loader.cache 에서 삭제 : ", tempFileName);
+
+                        cc.loader.release(tempFileName);
+                        Renderer_assets.deleteAssetFile(tempFileName);
+                    }
+                    Renderer_assets.onRefreshTree();
+                }
+            }
         });
 
         this.onRefreshTree();
