@@ -139,7 +139,7 @@ var Renderer_hierarchy = {
         const idsToDelete = new Set();
         // mainLayer can't be deleted.
         const nodesToDelete = nodes.filter((node) => {
-            return node.getName() !== "mainLayer";
+            return !node || node.getName() !== "mainLayer";
         });
 
         // 삭제할 ID 수집
@@ -164,20 +164,40 @@ var Renderer_hierarchy = {
                             // 지우면 안됨
                         // 현재 파일만 종속되어 있다면 ?
                             // 관련 파일도 같이 날려야 함.
+                    const fileType = Genie.Utils.getFileTypeFromExportJson(tempFileName);
+                    switch (fileType) {
+                        case Genie.ToolFileType.UIFile:
+                            const textures = cc.loader.cache[tempFileName].textures;
+                            const texturesPng = cc.loader.cache[tempFileName].texturesPng;
+
+                            textures.forEach((path) => {
+                                const pathArr = path.split('/');
+                                const name = pathArr[pathArr.length - 1];
+                                Genie.RefChecker.decrease(name);
+                            });
+
+                            texturesPng.forEach((name) => {
+                                Genie.RefChecker.decrease(name);
+                            });
+                            break;
+                        case Genie.ToolFileType.ARMATURE:
+                            const configFilePath = cc.loader.cache[tempFileName].config_file_path;
+                            const configFilePng = cc.loader.cache[tempFileName].config_png_path;
+
+                            configFilePath.forEach((path) => {
+                                const pathArr = path.split('/')
+                                const name = pathArr[pathArr.length - 1];
+                                Genie.RefChecker.decrease(name);
+                            });
+
+                            configFilePng.forEach((name) => {
+                                Genie.RefChecker.decrease(name);
+                            });
+                            break;
+                    }
                     Genie.RefChecker.decrease(tempFileName);
-                    const configFilePath = cc.loader.cache[tempFileName].config_file_path;
-                    const configFilePng = cc.loader.cache[tempFileName].config_png_path;
 
-                    configFilePath.forEach((path) => {
-                        const pathArr = path.split('/')
-                        const name = pathArr[pathArr.length - 1];
-                        Genie.RefChecker.decrease(name);
-                    });
-
-                    configFilePng.forEach((name) => {
-                        Genie.RefChecker.decrease(name);
-                    });
-
+                    // 관련 파일 중 지울 수 있는 파일이 있다면 지움
                     const removeFiles = Genie.RefChecker.getRemoveFileList();
                     removeFiles.forEach((fileName) => {
                         const extName = cc.path.extname( fileName ).toLowerCase();
@@ -203,6 +223,7 @@ var Renderer_hierarchy = {
                         Renderer_assets.deleteAssetFile(key);
                         cc.loader.release(key);
                     });
+                    // exportJson 파일을 삭제 할 수 있다면 지움.
                     if (Genie.RefChecker.canRemove(tempFileName)) {
                         cc.log("[Resource] 파일 loader.cache 에서 삭제 : ", tempFileName);
 
