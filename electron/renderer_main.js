@@ -225,6 +225,7 @@ const Renderer_main = {
      * 마지막 프로미스를 리턴한다.
      */
     loadResources : function( payload ) {
+        cc.log("[Renderer Main][tg] payload : ", payload);
         // 래퍼런스 업데이트
         payload.dependentFiles.forEach((item) => {
             const filePaths = item.filePath.split('\\');

@@ -139,13 +139,16 @@ var Renderer_hierarchy = {
         const idsToDelete = new Set();
         // mainLayer can't be deleted.
         const nodesToDelete = nodes.filter((node) => {
+            if (!node) {
+                cc.log("[Renderer Hierarchy] node 가 없습니다.", node);
+            }
             return !node || node.getName() !== "mainLayer";
         });
 
         // 삭제할 ID 수집
         nodesToDelete.forEach((node) => {
             this.collectIDsToDelete(node, idsToDelete);
-            if (node.getParent()) {
+            if (node && node.getParent()) {
                 Genie.GizmoController.detachGizmoByTargetNode( node );
                 node.removeFromParent();
             }
@@ -169,6 +172,8 @@ var Renderer_hierarchy = {
                         case Genie.ToolFileType.UIFile:
                             const textures = cc.loader.cache[tempFileName].textures;
                             const texturesPng = cc.loader.cache[tempFileName].texturesPng;
+                            const widgetTree = cc.loader.cache[tempFileName].widgetTree;
+                            const fntSet = Genie.RefChecker.getFntDependencyFromWidgetTree( widgetTree );
 
                             textures.forEach((path) => {
                                 const pathArr = path.split('/');
@@ -177,6 +182,10 @@ var Renderer_hierarchy = {
                             });
 
                             texturesPng.forEach((name) => {
+                                Genie.RefChecker.decrease(name);
+                            });
+
+                            fntSet.forEach((name) => {
                                 Genie.RefChecker.decrease(name);
                             });
                             break;
@@ -214,7 +223,8 @@ var Renderer_hierarchy = {
                                 cc.loader.release(fileName);
                                 break;
                             case '.fnt':
-
+                                // cc.FntFrameCache 체크 ?
+                                cc.log("[Resource] 파일 폰트: ", fileName);
                                 break;
                             case '.exportjson':
                                 return;
@@ -230,6 +240,8 @@ var Renderer_hierarchy = {
                         cc.loader.release(tempFileName);
                         Renderer_assets.deleteAssetFile(tempFileName);
                     }
+                    // RefChecker 정리
+                    Genie.RefChecker.gc();
                     Renderer_assets.onRefreshTree();
                 }
             }
@@ -247,7 +259,7 @@ var Renderer_hierarchy = {
         const stack = [targetNode];
         while (stack.length > 0) {
             const currNode = stack.pop();
-            if (!idsToDelete.has(currNode.__instanceId)) {
+            if (currNode && !idsToDelete.has(currNode.__instanceId)) {
                 idsToDelete.add(currNode.__instanceId);
 
                 const children = currNode.getChildren();

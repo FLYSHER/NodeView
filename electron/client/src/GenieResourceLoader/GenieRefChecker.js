@@ -29,10 +29,9 @@ Genie.RefChecker = {
 
             if (this._ref[fileName] <= 0) {
                 this._ref[fileName] = 0;
-                // todo broadcast or do something;
             }
         } else {
-            throw new Error('[Genie RefChecker] decrease ref error');
+            cc.warn('[Genie RefChecker] decrease ref error');
         }
         return this;
     },
@@ -59,6 +58,13 @@ Genie.RefChecker = {
     },
 
     /**
+     * remove ref-value 0
+     */
+    gc : function () {
+        this._ref = Object.fromEntries(Object.entries(this._ref).filter(([key, value]) => { return value !== 0; }));
+    },
+
+    /**
      * Can the file be removed.
      * @param fileName{string}
      * @returns {boolean}
@@ -78,5 +84,32 @@ Genie.RefChecker = {
         return Object.entries(this._ref)
             .filter(([fileName, refCount]) => refCount === 0)
             .map((arr) => arr[0]);
-    }
+    },
+
+    /**
+     * return fnt dependency
+     * @param widgetTree
+     * @returns {Set<any>}
+     */
+    getFntDependencyFromWidgetTree : function ( widgetTree ) {
+        var result = new Set();
+        this._getFntDependencyFromWidgetTree( widgetTree, result );
+        return result;
+    },
+
+    _getFntDependencyFromWidgetTree : function ( widgetTree, result ) {
+        var children = widgetTree['children'];
+        var i, path;
+        for (i = 0; i < children.length; i++) {
+            if (children[i]['classname'] === 'LabelBMFont') {
+                path = children[i]['options']['fileNameData']['path'];
+                result.add(path.replace('image/', ''));
+                result.add(path.replace('image/', '').replace('.fnt', '.png'));
+            }
+
+            if (children[i]['children'].length > 0) {
+                this._getFntDependencyFromWidgetTree( children[i], result );
+            }
+        }
+    },
 };
