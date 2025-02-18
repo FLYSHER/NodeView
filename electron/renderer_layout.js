@@ -121,11 +121,12 @@ const Renderer_layout = {
                     const width = (newWidth / parentDiv.clientWidth * MAX_FR).toFixed(2);
                     const other = MAX_FR - width;
 
-                    const prevWidth = parseFloat(parentDiv.style.gridTemplateColumns.split(' ')[0].replace('fr', ''));
+                    const gridTemplateColumns = parentDiv.style.gridTemplateColumns.split(' ');
+                    const prevWidth = gridTemplateColumns[0].replace('fr', '');
                     const prevOther = MAX_FR - prevWidth;
 
                     const cocosViewWidth = width + 'fr';
-                    const newSecondColumnWidth = (parseFloat(parentDiv.style.gridTemplateColumns.split(' ')[2].replace('fr', '')) * other / prevOther).toFixed(2);
+                    const newSecondColumnWidth = (gridTemplateColumns[2].replace('fr', '') * other / prevOther).toFixed(2);
                     const secondColumnWidth = newSecondColumnWidth + 'fr'
                     const inspectorWidth = (other - newSecondColumnWidth).toFixed(2) + 'fr';
 
