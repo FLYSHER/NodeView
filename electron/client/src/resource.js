@@ -1,7 +1,9 @@
 var res = {
     HelloWorld_png : "res/HelloWorld.png",
     RobotoCondensedBold : "res/fonts/RobotoCondensed-Bold.ttf",
-    LotusEdenBold : "res/fonts/LotusEden-Bold.ttf"
+    LotusEdenBold : "res/fonts/LotusEden-Bold.ttf",
+    LotusEdenExtraBold : "res/fonts/LotusEden-ExtraBold.ttf",
+    LotusEdenUltraBold : "res/fonts/LotusEden-UltraBold.ttf"
 };
 
 var g_resources = [];

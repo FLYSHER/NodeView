@@ -2,6 +2,12 @@ cc.LabelTTF.prototype.setFontName = function( fontName ) {
     if( fontName.indexOf( 'LotusEden-Bold' ) !== -1 ) {
         this._fontName = fontName;
     }
+    else if( fontName.indexOf( 'LotusEden-ExtraBold' ) !== -1 ) {
+        this._fontName = fontName;
+    }
+    else if( fontName.indexOf( 'LotusEden-UltraBold' ) !== -1 ) {
+        this._fontName = fontName;
+    }
     else {
         this._fontName = 'RobotoCondensed-Bold';
     }
@@ -25,6 +31,12 @@ cc.LabelTTF.prototype.setString = function (text) {
         setTimeout( function() {
             if( this._fontName.indexOf( "LotusEden-Bold" ) !== -1 ) {
                 this.setFontName( "LotusEden-Bold" );
+            }
+            else if( this._fontName.indexOf( "LotusEden-ExtraBold" ) !== -1 ) {
+                this.setFontName( "LotusEden-ExtraBold" );
+            }
+            else if( this._fontName.indexOf( "LotusEden-UltraBold" ) !== -1 ) {
+                this.setFontName( "LotusEden-UltraBold" );
             }
         }.bind( this ), 1 );
     }
