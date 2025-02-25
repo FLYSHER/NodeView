@@ -299,7 +299,7 @@ Genie.Component.Code.Builder = cc.Class.extend({
         // initAR
         if (this._arAddr) {
             body += `${tab}_initAR : function () {\n` +
-                `${tab}${tab}this._ar = this.addARChildOnCenter(${this._contentsName}.Res.${this._viewName}.${this._arAddr});\n`;
+                `${tab}${tab}this._ar = this.addARChildOnCenter(${this._contentsName}.Res.${this._viewName}.${this._arAddr.replace('.ExportJson', '')});\n`;
 
             body += `${tab}${tab}/** animation track\n`;
             this._movData.forEach((data, index) => {
