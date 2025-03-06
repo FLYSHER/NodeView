@@ -22,31 +22,6 @@ class FileEntry {
 
 const Renderer_main = {
     init : function() {
-        const canvas = cc._canvas;
-
-        // canvas element 에 file drop을 위한 drop 이벤트 등록.
-        canvas.removeEventListener("drop", Loader.onDropHandler);
-        canvas.addEventListener("drop", function (evt) {
-                evt.stopPropagation();
-                evt.preventDefault();   // stops the browser from redirecting off to the image.
-
-                console.log("cocos renderer drop");
-
-
-                const droppedAssetName = evt.dataTransfer.getData("assetName");
-                if( droppedAssetName ) { // 내부 렌더러로부터 파일 드랍 이루어졌을 경우 처리
-                    const fileEntry = {
-                        name    : droppedAssetName,
-                        content :  JSON.stringify(cc.loader.getRes( droppedAssetName ))
-                    };
-                    Genie.ResourceLoader.createToolFileNode( fileEntry );
-                }
-                else {                   // 외부 파일로부터 파일 드랍 이루어졌을 경우 처리
-                    const arrFilePaths = Array.from(evt.dataTransfer.files, file => file.path);
-                    ipcRenderer.send('fileDropEvent', arrFilePaths);
-                }
-            }, false);
-
         // main process 와 통신
         ipcRenderer.on('fileDropEventReply', this.onFileDropReply.bind(this) );
 
@@ -58,6 +33,15 @@ const Renderer_main = {
             Genie.CommandManager.redo();
         });
 
+        this._initLayoutEvent();
+        this._initAssetAreaEvent();
+        this._initHierarchyAreaEvent();
+        this._initCanvasEventListener();
+        this._initDocumentEventListener();
+    },
+
+    // 레이아웃 관련 이벤트 처리
+    _initLayoutEvent : function () {
         ipcRenderer.on('save-current-layout-as-default', function () {
             try {
                 const config = Renderer_layout.loadConfig();
@@ -91,7 +75,6 @@ const Renderer_main = {
 
         ipcRenderer.send('get-root-path');
         ipcRenderer.on('get-root-path', (event, rootPath) => {
-            cc.log("[taegyun] path : ", rootPath);
             Renderer_layout.setRootPath(rootPath);
             Renderer_layout._adjustConfig(false);
         });
@@ -103,27 +86,6 @@ const Renderer_main = {
         ipcRenderer.on('reset-layout-setting', function () {
             Renderer_layout.reset();
         });
-        canvas.addEventListener('keydown', function(event) {
-            const key = event.key.toLowerCase();
-            switch (key) {
-                case 'q': // gizmo 숨기기
-                    Genie.GizmoController.hideGizmo();
-                    break;
-                case 'w': // 이동 gizmo
-                    Genie.GizmoController.showMoveGizmo();
-                    break;
-                case 'e': // 회전 gizmo
-                    Genie.GizmoController.showRotateGizmo();
-                    break;
-                case 'r': // 스케일 gizmo
-                    Genie.GizmoController.showScaleGizmo();
-                    break;
-            }
-        });
-
-        this._initAssetAreaEvent();
-        this._initHierarchyAreaEvent();
-        this._initDocumentEventListener();
     },
 
     // 에셋 영역 관련 이벤트 처리
@@ -189,8 +151,66 @@ const Renderer_main = {
                     const targetNodes = Genie.ToolController.getSelectedNodes();
                     Renderer_hierarchy.deleteSelectedNodes(targetNodes);
                     break;
+                case 'q': // gizmo 숨기기
+                    Genie.GizmoController.hideGizmo();
+                    break;
+                case 'w': // 이동 gizmo
+                    Genie.GizmoController.showMoveGizmo();
+                    break;
+                case 'e': // 회전 gizmo
+                    Genie.GizmoController.showRotateGizmo();
+                    break;
+                case 'r': // 스케일 gizmo
+                    Genie.GizmoController.showScaleGizmo();
+                    break;
             }
         });
+    },
+
+    _initCanvasEventListener : function () {
+        const canvas = cc._canvas;
+
+        // canvas element 에 file drop을 위한 drop 이벤트 등록.
+        canvas.removeEventListener("drop", Loader.onDropHandler);
+        canvas.addEventListener("drop", function (evt) {
+            evt.stopPropagation();
+            evt.preventDefault();   // stops the browser from redirecting off to the image.
+
+            console.log("cocos renderer drop");
+
+
+            const droppedAssetName = evt.dataTransfer.getData("assetName");
+            if( droppedAssetName ) { // 내부 렌더러로부터 파일 드랍 이루어졌을 경우 처리
+                const fileEntry = {
+                    name    : droppedAssetName,
+                    content :  JSON.stringify(cc.loader.getRes( droppedAssetName ))
+                };
+                Genie.ResourceLoader.createToolFileNode( fileEntry );
+            }
+            else {                   // 외부 파일로부터 파일 드랍 이루어졌을 경우 처리
+                const arrFilePaths = Array.from(evt.dataTransfer.files, file => file.path);
+                ipcRenderer.send('fileDropEvent', arrFilePaths);
+            }
+        }, false);
+
+        canvas.addEventListener('keydown', function(event) {
+            const key = event.key.toLowerCase();
+            switch (key) {
+                case 'q': // gizmo 숨기기
+                    Genie.GizmoController.hideGizmo();
+                    break;
+                case 'w': // 이동 gizmo
+                    Genie.GizmoController.showMoveGizmo();
+                    break;
+                case 'e': // 회전 gizmo
+                    Genie.GizmoController.showRotateGizmo();
+                    break;
+                case 'r': // 스케일 gizmo
+                    Genie.GizmoController.showScaleGizmo();
+                    break;
+            }
+        });
+
     },
 
     /**
