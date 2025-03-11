@@ -361,7 +361,7 @@ cc.defineGetterSetter(_p, "br", _p._getBR, _p._setBR);
 cc.Quad3 = function (bl, br, tl, tr, arrayBuffer, offset) {
     this._arrayBuffer = arrayBuffer || new ArrayBuffer(cc.Quad3.BYTES_PER_ELEMENT);
     this._offset = offset || 0;
-    
+
     var locArrayBuffer = this._arrayBuffer, locOffset = this._offset, locElementLen = cc.Vertex3F.BYTES_PER_ELEMENT;
     this.bl = bl ? new cc.Vertex3F(bl.x, bl.y, bl.z, locArrayBuffer, locOffset) : new cc.Vertex3F(0, 0, 0, locArrayBuffer, locOffset);
     locOffset += locElementLen;
@@ -784,17 +784,28 @@ cc.blendFuncDisable = function () {
 /**
  * convert a string of color for style to Color.
  * e.g. "#ff06ff"  to : cc.color(255,6,255)
+ * e.g. "#ff06ffff"  to : cc.color(255,6,255,255)
  * @function
  * @param {String} hex
  * @return {cc.Color}
  */
 cc.hexToColor = function (hex) {
+    // '#'를 제거하고 '0x'로 치환
     hex = hex.replace(/^#?/, "0x");
     var c = parseInt(hex);
-    var r = c >> 16;
-    var g = (c >> 8) % 256;
-    var b = c % 256;
-    return new cc.Color(r, g, b);
+    // 8자리(hex 문자열 길이가 "0x" 포함 10자리)인 경우: RRGGBBAA
+    if (hex.length === 10) {
+        var r = (c >> 24) & 0xff;
+        var g = (c >> 16) & 0xff;
+        var b = (c >> 8) & 0xff;
+        var a = c & 0xff;
+        return new cc.Color(r, g, b, a);
+    } else { // 6자리: RRGGBB, 알파값이 누락되었으므로 기본값 127을 사용
+        var r = c >> 16;
+        var g = (c >> 8) & 0xff;
+        var b = c & 0xff;
+        return new cc.Color(r, g, b, 127);
+    }
 };
 
 /**
