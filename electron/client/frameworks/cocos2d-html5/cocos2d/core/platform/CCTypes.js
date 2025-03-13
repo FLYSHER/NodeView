@@ -800,11 +800,11 @@ cc.hexToColor = function (hex) {
         var b = (c >> 8) & 0xff;
         var a = c & 0xff;
         return new cc.Color(r, g, b, a);
-    } else { // 6자리: RRGGBB, 알파값 누락 시 기본값을 255로 지정
+    } else { // 6자리: RRGGBB, 알파값 누락 시 기본값을 128로 지정
         var r = c >> 16;
         var g = (c >> 8) & 0xff;
         var b = c & 0xff;
-        return new cc.Color(r, g, b, 255);
+        return new cc.Color(r, g, b, 128);
     }
 };
 

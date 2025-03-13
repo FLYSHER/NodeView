@@ -329,6 +329,10 @@ cc.LabelTTF = cc.Sprite.extend(/** @lends cc.LabelTTF# */{
         this._shadowColor.g = shadowColor.g;
         this._shadowColor.b = shadowColor.b;
 
+        if( shadowColor.a !== undefined && shadowColor.a !== null ) {
+            this._shadowColor.a = shadowColor.a;
+        }
+
         var x, y, a, b;
         x = offset.width || offset.x || 0;
         y = offset.height || offset.y || 0;
