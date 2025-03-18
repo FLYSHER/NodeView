@@ -367,6 +367,7 @@ cc.LabelTTF._firsrEnglish = /^[a-zA-Z0-9ÄÖÜäöüßéèçàùêâîôû]/;
         if (locStrokeEnabled) {
             context.lineWidth = locStrokeSize * 2;
             context.strokeStyle = this._strokeColorStr;
+            context.lineJoin = "round";
         }
 
         context.textBaseline = cc.LabelTTF._textBaseline[locVAlignment];
