@@ -402,7 +402,9 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
         $("input[name=opacity]").val(nodeObj.getOpacity());
         $('#opacityValue').html(nodeObj.getOpacity());
 
-        $('#anchorValue').html("("+ nodeObj._getAnchorX()+" , "+nodeObj._getAnchorY()+")");
+        $('#anchorValue').html("("+ nodeObj.getAnchorPoint().x+" , "+nodeObj.getAnchorPoint().y+")");
+
+        $('#zOrderValue').html(nodeObj.getLocalZOrder());
 
         var rect = nodeObj.getBoundingBox();
         var po =   nodeObj.getParent().convertToWorldSpace( cc.p(rect.x, rect.y));
@@ -432,6 +434,7 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
         var opa= this._selectNode[0].getOpacity();
         var ancX= this._selectNode[0].getAnchorPoint().x;
         var ancY= this._selectNode[0].getAnchorPoint().y;
+        var zOrder= this._selectNode[0].getLocalZOrder();
 
         this._selectNode.forEach( item => {
             posX = posX === item.getPosition().x.toFixed(2) ? posX : "-";
@@ -440,7 +443,8 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
             sizeH = sizeH === item.getContentSize().height ? sizeH : "-";
             opa = opa === item.getOpacity() ? opa : "-";
             ancX = ancX === item.getAnchorPoint().x ? ancX : "-";
-            ancY = ancY === item.getAnchorPoint().x ? ancY : "-";
+            ancY = ancY === item.getAnchorPoint().Y ? ancY : "-";
+            zOrder = zOrder === item.getLocalZOrder() ? zOrder : "-";
 
         });
 
@@ -461,6 +465,7 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
 
         $('#anchorValue').html("("+ ancX+" , "+ancY+")");
 
+        $('#zOrderValue').html(zOrder);
 
         var rectNode = cc.director.getRunningScene().getChildByTag(gizmoNodTag);
         if(!rectNode) {
