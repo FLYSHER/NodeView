@@ -84,12 +84,12 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
         $('#actionTree').on("changed.jstree", function (e, data) {
             if( !!data.node === false)
                 return;
-            if(self._masterNode.cocosAction){
+            /*if(self._masterNode.cocosAction){
                 self._masterNode.cocosAction.play(data.node.text)
             }
             else {
                 ccs.actionManager.playActionByName(self._jsonName, data.node.text);
-            }
+            }*/
         });
 
         this._jsonName = null;
