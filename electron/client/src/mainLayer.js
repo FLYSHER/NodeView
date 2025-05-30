@@ -489,47 +489,95 @@ var MainLayer = cc.Layer.extend({
         }
 
         var actionArray = [];
+        var self = this; // this 참조 보존
 
-        animationSequence.forEach(function(seqItem) {
+        animationSequence.forEach(function(seqItem, index) {
             var targetNode = seqItem.targetNode;
 
-            if (seqItem.type === 'armature') {
-                var armaturePlayAction = cc.callFunc(function() {
-                    var isLoop = seqItem.animName.endsWith('_loop');
-                    var loopParam = isLoop ? -1 : 0;
-                    targetNode.armature.getAnimation().play(seqItem.animName, -1, loopParam);
-                });
-                // Armature는 길이를 알 수 없으므로 임의 딜레이
-                var delay = cc.delayTime(1.0);
-                actionArray.push(armaturePlayAction);
-                actionArray.push(delay);
+            // 클로저 문제 해결을 위해 즉시 실행 함수 사용
+            (function(currentSeqItem, currentTarget) {
 
-            } else if (seqItem.type === 'action') {
-                // [수정] UI Action(하위 액션) 재생 로직
-                if (targetNode && targetNode.cocosAction) {
-                    var uiActionPlayAction = cc.callFunc(function() {
-                        // 저장된 하위 액션 이름으로 재생
-                        targetNode.cocosAction.play(seqItem.animName);
+                if (currentSeqItem.type === 'armature') {
+                    // Armature 액션 실행
+                    var armaturePlayAction = cc.callFunc(function() {
+                        console.log("Playing armature animation:", currentSeqItem.animName);
+
+                        if (currentTarget && currentTarget.armature) {
+                            var animation = currentTarget.armature.getAnimation();
+                            var isLoop = currentSeqItem.animName.endsWith('_loop');
+                            var loopParam = isLoop ? -1 : 0;
+
+                            // 현재 실행 중인 애니메이션 정지
+                            animation.stop();
+
+                            // 새 애니메이션 재생
+                            animation.play(currentSeqItem.animName, -1, loopParam);
+                        } else {
+                            console.error("Target node or armature not found");
+                        }
                     });
 
-                    // 중요: 하위 액션의 정확한 길이를 가져오는 API가 없으므로, 임의의 딜레이를 사용합니다.
-                    // 이 값은 가장 긴 하위 액션의 길이에 맞춰 수동으로 조절해야 할 수 있습니다.
-                    var delay = cc.delayTime(1.5);
+                    actionArray.push(armaturePlayAction);
+
+                } else if (currentSeqItem.type === 'action') {
+                    // UI Action 실행
+                    var uiActionPlayAction = cc.callFunc(function() {
+                        console.log("Playing UI action:", currentSeqItem.animName);
+
+                        if (currentTarget && currentTarget.cocosAction) {
+                            // 현재 실행 중인 액션 정지
+                            currentTarget.stopAllActions();
+
+                            // 새 액션 재생
+                            currentTarget.cocosAction.play(currentSeqItem.animName);
+                        } else if (currentTarget) {
+                            // cocosAction이 없는 경우 ccs.actionManager 사용
+                            var jsonName = currentTarget.getName() + '.ExportJson';
+                            console.log("Trying to play action via actionManager:", jsonName, currentSeqItem.animName);
+                            ccs.actionManager.playActionByName(jsonName, currentSeqItem.animName);
+                        } else {
+                            console.error("Target node not found for UI action");
+                        }
+                    });
 
                     actionArray.push(uiActionPlayAction);
-                    actionArray.push(delay);
                 }
-            }
-        }.bind(this));
 
+            })(seqItem, targetNode); // 즉시 실행 함수로 클로저 문제 해결
+        });
+
+        // 디버깅용 로그
+        console.log("Total actions in sequence:", actionArray.length);
+        console.log("Animation sequence:", animationSequence);
+
+        if (actionArray.length === 0) {
+            console.error("No valid actions to execute");
+            return;
+        }
+
+        // 시퀀스 액션 생성 및 실행
         var sequenceAction = cc.sequence(actionArray);
+
+        // 기존 러너 노드 제거
         if (this.getChildByTag(999)) {
             this.removeChildByTag(999);
         }
+
+        // 새 러너 노드 생성 및 액션 실행
         var runnerNode = new cc.Node();
         runnerNode.setTag(999);
         this.addChild(runnerNode);
+
+        console.log("Starting sequence action execution");
         runnerNode.runAction(sequenceAction);
+
+        // 시퀀스 완료 콜백 (선택사항)
+        var sequenceWithCallback = cc.sequence(
+            sequenceAction,
+            cc.callFunc(function() {
+                console.log("Sequence playback completed");
+            })
+        );
     },
 
     onClearSequence: function() {
