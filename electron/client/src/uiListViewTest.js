@@ -113,26 +113,6 @@ var UIListViewTest = cc.Node.extend({
 
     },
 
-    getSelectedAnimationName: function() {
-        // jstree 인스턴스를 가져옵니다.
-        var jstreeInstance = $('#animationTree').jstree(true);
-
-        // get_selected() API를 사용해 현재 선택된 노드의 ID 배열을 가져옵니다.
-        var selectedNodeIds = jstreeInstance.get_selected();
-
-        // 선택된 노드가 있는지 확인합니다.
-        if (selectedNodeIds && selectedNodeIds.length > 0) {
-            // 첫 번째 선택된 노드의 전체 객체를 ID를 이용해 가져옵니다.
-            var node = jstreeInstance.get_node(selectedNodeIds[0]);
-
-            // 노드의 'text' 프로퍼티가 애니메이션 이름이므로 이를 반환합니다.
-            return node.text;
-        }
-
-        // 선택된 노드가 없으면 null을 반환합니다.
-        return null;
-    },
-
 
     // onEnter: function() {
 

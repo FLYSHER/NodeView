@@ -5,10 +5,10 @@
     <link href="style.css" rel="stylesheet" type="text/css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
     <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/jstree.min.js"></script>
     <script>if (window.module) module = window.module;</script>
-
+    
     <meta charset="utf-8">
     <title>NodeView - Flysher</title>
     <link rel="icon" type="image/GIF" href="res/favicon.ico"/>
@@ -63,9 +63,12 @@
             <div class = "smallWidget">
                 <div id="fileNameTree"></div>
             </div>
-            <div class="button-group">
+            <div>
+                <!-- File Delete Button -->
                 <button type="button" id="deleteBtn" class="styleButton" title="파일 삭제" style="width: 30%;">Delete</button>
+
                 <button type="button" id="frontBtn" class="styleButton" title="zorder 앞으로 변경" style="width:30%;">Front</button>
+
                 <button type="button" id="backBtn" class="styleButton" title="zorder 뒤로 변경" style="width:30%;">Back</button>
             </div>
         </div>
@@ -93,7 +96,7 @@
                 <div id="widgetTree"></div>
                 <div id="animationTree"></div>
             </div>
-            <div class="button-group">
+            <div align="center">
                 <!-- Widget Tree Visible Button -->
                 <button type="button" id="toggleVisible" class="styleButton" title="노드 표시" style="width: 22%;visibility:hidden;">Visible</button>
                 <button type="button" id="openAll" class="styleButton" title="모든 노드 트리 열기" style="width: 22%;visibility:hidden;">Open</button>
@@ -189,28 +192,6 @@
                     </td>
                 </tr>
             </table>
-        </div>
-    </div>
-
-    <!-- Sequencer -->
-    <div id="sequencerContainer" class="widgetContainer">
-        <ul class="tabs">
-            <li class="tab-link current">
-                <div align="center">
-                    <label id="sequencerLabel" class="styleLabel">Animation Sequencer</label>
-                </div>
-            </li>
-        </ul>
-        <div id="tab-1" class="tab-widgetContent current">
-            <div class = "treeWidget" id="sequencerTree" style="height: 150px;">
-            </div>
-            <div class="button-group">
-                <button type="button" id="addSequenceBtn" class="styleButton" title="현재 애니메이션을 시퀀스에 추가" style="width: 45%;">Add</button>
-                <button type="button" id="playSequenceBtn" class="styleButton" title="시퀀스 전체 재생" style="width: 45%;">Play All</button>
-            </div>
-            <div class="button-group" style="margin-top: 5px;">
-                <button type="button" id="clearSequenceBtn" class="styleButton" title="시퀀스 초기화" style="width: 92%;">Clear</button>
-            </div>
         </div>
     </div>
 

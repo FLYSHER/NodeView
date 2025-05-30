@@ -12,9 +12,6 @@ var TempTargetPos = null;
 var TempTargetScale = null;
 var TempTargetRot = null;
 var TargetRunActionData = null;
-var animationSequence = []; // 시퀀서에 등록된 애니메이션을 저장할 배열
-var g_uiActions = {};
-
 var RunAction = function (script) {
     if(Target !== null) {
         if(TargetRunActionData !== null)
@@ -128,9 +125,6 @@ var MainLayer = cc.Layer.extend({
         this.onResize();
         ScreenUtil.addResizeListener( this.onResize, this );
 
-        // --- [추가된 코드] 시퀀서 버튼 이벤트 리스너 초기화 ---
-        this.initSequencerButtons();
-
         return true;
     },
 
@@ -143,7 +137,7 @@ var MainLayer = cc.Layer.extend({
         this._itemList.setPosition(size.width - this._itemList.getContentSize().width , size.height - (this._itemList.getContentSize().height + 60));
         this._screenSize.setPosition(size.width - this._screenSize.getContentSize().width , size.height - this._screenSize.getContentSize().height);
         this._movementCtrl.setPosition(100, 0);
-        // this._btnHideButtons.setPosition( cc.winSize.width - 100, 30 );
+       // this._btnHideButtons.setPosition( cc.winSize.width - 100, 30 );
 
         this._treeView.setPosition(0, size.height - this._treeView.getContentSize().height);
 
@@ -337,7 +331,7 @@ var MainLayer = cc.Layer.extend({
         var selectNode = this._nodeList[ name ];
         toggleJSONUI(name.indexOf('(JSON)') !== -1  );
         if( !selectNode ) return;
-
+        
         selectNode.setName(name);
         if( selectNode.armature) {
             this._animationList.setVisible(true);
@@ -414,140 +408,19 @@ var MainLayer = cc.Layer.extend({
                     this._itemList.visible = false;
                     this._movementCtrl.visible = false;
                     this._treeView.visible = false;
-                    //   this._btnHideButtons.setTitleText("SHOW ALL BUTTONS");
+                 //   this._btnHideButtons.setTitleText("SHOW ALL BUTTONS");
                 } else {
                     this._screenSize.visible = true;
                     this._animationList.visible = this._prevAnimationListVisble;
                     this._itemList.visible = this._prevItemListVisble;
                     this._movementCtrl.visible = this._prevMovementCtrlVisble;
                     this._treeView.visible = this._prevTreeViewVisible;
-                    //   this._btnHideButtons.setTitleText("HIDE ALL BUTTONS");
+                 //   this._btnHideButtons.setTitleText("HIDE ALL BUTTONS");
                 }
                 break;
             }
         }
     },
-
-    // --- [추가된 코드] 시퀀서 관련 메서드들 ---
-
-    initSequencerButtons: function() {
-        // jQuery를 사용해 HTML 버튼의 클릭 이벤트와 Layer의 메서드를 연결합니다.
-        // .bind(this)를 통해 콜백 함수 내에서 'this'가 MainLayer 인스턴스를 가리키도록 합니다.
-        $('#addSequenceBtn').on('click', this.onAddToSequence.bind(this));
-        $('#playSequenceBtn').on('click', this.onPlaySequence.bind(this));
-        $('#clearSequenceBtn').on('click', this.onClearSequence.bind(this));
-    },
-
-    onAddToSequence: function() {
-        if (!Target) {
-            alert("먼저 캔버스에서 노드를 선택하세요.");
-            return;
-        }
-
-        var selectedAnimName = null;
-        var animType = null;
-
-        // 1. Armature Animation 목록(#animationTree)에서 선택된 것이 있는지 먼저 확인
-        if (this._animationList.isVisible() && typeof this._animationList.getSelectedAnimationName === 'function') {
-            selectedAnimName = this._animationList.getSelectedAnimationName();
-            if (selectedAnimName) {
-                animType = 'armature';
-            }
-        }
-
-        // 2. Armature에서 선택된 것이 없다면, UI Action Tree(#actionTree)에서 선택된 것이 있는지 확인
-        if (!selectedAnimName) {
-            var actionTreeInstance = $('#actionTree').jstree(true);
-            var selectedActionIds = actionTreeInstance.get_selected();
-
-            if (selectedActionIds && selectedActionIds.length > 0) {
-                var selectedNode = actionTreeInstance.get_node(selectedActionIds[0]);
-                selectedAnimName = selectedNode.text; // "start", "idle_loop" 같은 하위 액션 이름
-                animType = 'action';
-            }
-        }
-
-        // 3. 추가할 애니메이션을 찾았는지 확인하고 시퀀스에 추가
-        if (selectedAnimName && animType) {
-            animationSequence.push({
-                targetNode: Target, // UI Action은 현재 선택된 Target 노드에서 실행
-                animName: selectedAnimName,
-                type: animType
-            });
-
-            this.updateSequencerUI();
-            console.log("'" + selectedAnimName + "' ("+ animType +") 이(가) 시퀀스에 추가되었습니다.");
-        } else {
-            alert("추가할 애니메이션이 선택되지 않았습니다. (좌측 패널 목록에서 항목 선택)");
-        }
-    },
-
-    onPlaySequence: function() {
-        if (animationSequence.length === 0) {
-            alert("시퀀스가 비어있습니다.");
-            return;
-        }
-
-        var actionArray = [];
-
-        animationSequence.forEach(function(seqItem) {
-            var targetNode = seqItem.targetNode;
-
-            if (seqItem.type === 'armature') {
-                var armaturePlayAction = cc.callFunc(function() {
-                    var isLoop = seqItem.animName.endsWith('_loop');
-                    var loopParam = isLoop ? -1 : 0;
-                    targetNode.armature.getAnimation().play(seqItem.animName, -1, loopParam);
-                });
-                // Armature는 길이를 알 수 없으므로 임의 딜레이
-                var delay = cc.delayTime(1.0);
-                actionArray.push(armaturePlayAction);
-                actionArray.push(delay);
-
-            } else if (seqItem.type === 'action') {
-                // [수정] UI Action(하위 액션) 재생 로직
-                if (targetNode && targetNode.cocosAction) {
-                    var uiActionPlayAction = cc.callFunc(function() {
-                        // 저장된 하위 액션 이름으로 재생
-                        targetNode.cocosAction.play(seqItem.animName);
-                    });
-
-                    // 중요: 하위 액션의 정확한 길이를 가져오는 API가 없으므로, 임의의 딜레이를 사용합니다.
-                    // 이 값은 가장 긴 하위 액션의 길이에 맞춰 수동으로 조절해야 할 수 있습니다.
-                    var delay = cc.delayTime(1.5);
-
-                    actionArray.push(uiActionPlayAction);
-                    actionArray.push(delay);
-                }
-            }
-        }.bind(this));
-
-        var sequenceAction = cc.sequence(actionArray);
-        if (this.getChildByTag(999)) {
-            this.removeChildByTag(999);
-        }
-        var runnerNode = new cc.Node();
-        runnerNode.setTag(999);
-        this.addChild(runnerNode);
-        runnerNode.runAction(sequenceAction);
-    },
-
-    onClearSequence: function() {
-        animationSequence = [];
-        this.updateSequencerUI();
-        console.log("시퀀스가 초기화되었습니다.");
-    },
-
-    updateSequencerUI: function() {
-        var sequencerTreeDiv = $('#sequencerTree');
-        sequencerTreeDiv.empty(); // 목록을 비웁니다.
-        animationSequence.forEach(function(item, index) {
-            var displayText = (index + 1) + ". " + item.targetNode.getName() + " - " + item.animName + " (" + item.type + ")";
-            sequencerTreeDiv.append('<div>' + displayText + '</div>');
-        });
-    },
-
-    // --- [여기까지 추가된 코드] ---
 
     onExit: function() {
         cc.eventManager.removeListener( this._loadArmatureListener );
