@@ -137,6 +137,33 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
             }
         }.bind(this));
 
+        $('#debugBone').click( function( sender ){
+            this._selectNode.forEach( item => {
+                if( item.getDebugBonesEnabled() ) {
+                    sender.target.innerText = "Show Bone";
+                }
+                else {
+                    sender.target.innerText = "Hide Bone";
+                }
+
+                // item.setDebugBonesEnabled( !item.getDebugBonesEnabled() );
+                item.setDebugBone();
+            });
+        }.bind(this));
+
+        $('#debugSlot').click( function( sender ){
+            this._selectNode.forEach( item => {
+                if( item.getDebugSlotsEnabled() ) {
+                    sender.target.innerText = "Show Slot";
+                }
+                else {
+                    sender.target.innerText = "Hide Slot";
+                }
+
+                item.setDebugSlotsEnabled( !item.getDebugSlotsEnabled() );
+            });
+        }.bind(this));
+
         // console.log($("input[name=opacity]").val());
         $("input[name=opacity]").change(function(){
             this._selectNode.forEach( item => {
@@ -184,7 +211,10 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
         var treeObj = [];
         var actionObj = [];
 
-        if(node && node.ui) {
+        if( node && node.spine ) {
+            this._selectNode.push( node.spine );
+        }
+        else if(node && node.ui) {
             var childTree = this.createUIChildList(node.ui);
 
             this.treeInfo = [{
@@ -249,24 +279,24 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
         }
 
         var searchBox = document.getElementById( "searchNode" );
-        var visibleBtn = document.getElementById( "toggleVisible" );
-        var openBtn = document.getElementById( "openAll" );
-        var closeBtn = document.getElementById( "closeAll" );
-        var copyBtn = document.getElementById( "copyBtn" );
+        var uiOption = document.getElementById( "ui-option" );
+        var spineOption = document.getElementById( "spine-option" );
 
         if( treeObj.length > 0 ) {
             searchBox.style.visibility = 'visible';
-            visibleBtn.style.visibility = 'visible';
-            openBtn.style.visibility = 'visible';
-            closeBtn.style.visibility = 'visible';
-            copyBtn.style.visibility = 'visible';
+            uiOption.style.visibility = 'visible';
+            spineOption.style.visibility = 'hidden';
         }
         else {
             searchBox.style.visibility = 'hidden';
-            visibleBtn.style.visibility = 'hidden';
-            openBtn.style.visibility = 'hidden';
-            closeBtn.style.visibility = 'hidden';
-            copyBtn.style.visibility = 'hidden';
+            uiOption.style.visibility = 'hidden';
+
+            if( node && node.spine ) {
+                spineOption.style.visibility = 'visible';
+            }
+            else {
+                spineOption.style.visibility ='hidden';
+            }
         }
     },
 
@@ -372,7 +402,9 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
         $("input[name=opacity]").val(nodeObj.getOpacity());
         $('#opacityValue').html(nodeObj.getOpacity());
 
-        $('#anchorValue').html("("+ nodeObj._getAnchorX()+" , "+nodeObj._getAnchorY()+")");
+        $('#anchorValue').html("("+ nodeObj.getAnchorPoint().x+" , "+nodeObj.getAnchorPoint().y+")");
+
+        $('#zOrderValue').html(nodeObj.getLocalZOrder());
 
         var rect = nodeObj.getBoundingBox();
         var po =   nodeObj.getParent().convertToWorldSpace( cc.p(rect.x, rect.y));
@@ -402,6 +434,7 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
         var opa= this._selectNode[0].getOpacity();
         var ancX= this._selectNode[0].getAnchorPoint().x;
         var ancY= this._selectNode[0].getAnchorPoint().y;
+        var zOrder= this._selectNode[0].getLocalZOrder();
 
         this._selectNode.forEach( item => {
             posX = posX === item.getPosition().x.toFixed(2) ? posX : "-";
@@ -410,7 +443,8 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
             sizeH = sizeH === item.getContentSize().height ? sizeH : "-";
             opa = opa === item.getOpacity() ? opa : "-";
             ancX = ancX === item.getAnchorPoint().x ? ancX : "-";
-            ancY = ancY === item.getAnchorPoint().x ? ancY : "-";
+            ancY = ancY === item.getAnchorPoint().Y ? ancY : "-";
+            zOrder = zOrder === item.getLocalZOrder() ? zOrder : "-";
 
         });
 
@@ -431,6 +465,7 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
 
         $('#anchorValue').html("("+ ancX+" , "+ancY+")");
 
+        $('#zOrderValue').html(zOrder);
 
         var rectNode = cc.director.getRunningScene().getChildByTag(gizmoNodTag);
         if(!rectNode) {
