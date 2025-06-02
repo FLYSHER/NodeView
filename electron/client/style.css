@@ -84,19 +84,15 @@ canvas {
 }
 
 .horizontal-resizer {
-    height: 1px; /* 변경: 높이를 줄여 선처럼 보이게 함 */
+    height: 15px; /* 변경: 높이를 줄여 선처럼 보이게 함 */
     cursor: row-resize;
-    background-color: var(--border-color); /* 추가: 항상 보이는 선 색상 */
     transition: background-color 0.3s ease;
     z-index: 15;
-    margin-top: 12px;    /* 변경: 상단 간격 증가 */
-    margin-bottom: 12px; /* 변경: 하단 간격 증가 */
-    border-radius: 1px;
+    border-radius: 999px;
 }
 
 .horizontal-resizer:hover {
     background-color: var(--accent-color);
-    height: 3px; /* 추가: 호버 시 높이를 키워 조작하기 쉽게 함 */
     transform: translateY(-1px);
 }
 
