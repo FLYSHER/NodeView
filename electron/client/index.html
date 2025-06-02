@@ -60,14 +60,12 @@
 
     <div id="widgetContainer" class="widgetContainer">
         <ul class="tabs">
-            <li class="tab-link current">
+            <li class="tab-link current" style="display: flex; align-items: center; gap: 6px;">
                 <div align="center">
                     <label id = "nodeTreeLabel" class="styleLabel">Widget</label>
                 </div>
-            </li>
-            <li class="tab-link">
                 <div align="center">
-                    <input type="text" id = "searchNode" class = "searchNode" placeholder="Search" size="17" style="width: 100%;visibility:hidden">
+                    <input type="text" id = "searchNode" class = "searchNode" placeholder="Search" size="12" style="width: 100px;visibility:hidden">
                 </div>
             </li>
         </ul>
@@ -109,7 +107,7 @@
             </li>
         </ul>
         <div id="tab-1" class="tab-propertiesContent current">
-            <table style="width:100%; height:100%; background-color: #353535;" style="table-layout: fixed">
+            <table style="width:100%; background-color: #353535;" style="table-layout: fixed">
                 <tr>
                     <td>
                         <label class="styleLabel">LocalPos : </label>

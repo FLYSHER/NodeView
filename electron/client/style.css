@@ -62,6 +62,7 @@ canvas {
     border-right: 1px solid var(--border-color);
     padding: 10px;
     background-color: var(--bg-primary);
+    overflow: auto;
 }
 
 .side_hr {
@@ -111,6 +112,7 @@ canvas {
     padding: 0;
     border-top: none;
     height: auto;
+    flex-shrink: 0;
 }
 
 .styleLabel {
