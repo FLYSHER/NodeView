@@ -14,52 +14,39 @@
     <link rel="icon" type="image/GIF" href="res/favicon.ico"/>
 
     <meta name="viewport"
-        content="width=device-width,user-scalable=no,initial-scale=1, minimum-scale=1,maximum-scale=1"/>
+          content="width=device-width,user-scalable=no,initial-scale=1, minimum-scale=1,maximum-scale=1"/>
 
-    <!--https://developer.apple.com/library/safari/documentation/AppleApplications/Reference/SafariHTMLRef/Articles/MetaTags.html-->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="format-detection" content="telephone=no">
 
-    <!-- force webkit on 360 -->
     <meta name="renderer" content="webkit"/>
     <meta name="force-rendering" content="webkit"/>
-    <!-- force edge on IE -->
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
     <meta name="msapplication-tap-highlight" content="no">
 
-    <!-- force full screen on some browser -->
     <meta name="full-screen" content="yes"/>
     <meta name="x5-fullscreen" content="true"/>
     <meta name="360-fullscreen" content="true"/>
 
-    <!-- force screen orientation on some browser -->
-    <!-- <meta name="screen-orientation" content="portrait"/>
-    <meta name="x5-orientation" content="portrait"> -->
-
     <meta name="browsermode" content="application">
     <meta name="x5-page-mode" content="app">
 
-    <!-- for electron-->
     <script src="../renderer.js"></script>
 </head>
 <body>
 
-<!-- 사이드 메뉴 -->
 <div id="sidenav" class="sidenav">
 
-    <!-- File -->
     <div id="fileContainer" class="fileContainer">
         <ul class="tabs">
             <li class="tab-link current">
-                <!-- File Label 및 가운데 정렬 -->
                 <div align="center">
                     <label id = "fileLabel" class="styleLabel">File List</label>
                 </div>
             </li>
         </ul>
-        <div id="tab-1" class="tab-fileContent current">
-            <!-- File Tree -->
+        <div class="tab-fileContent current">
             <div class = "smallWidget">
                 <div id="fileNameTree"></div>
             </div>
@@ -71,30 +58,27 @@
         </div>
     </div>
 
-    <!-- Widget -->
+    <div class="horizontal-resizer"></div>
+
     <div id="widgetContainer" class="widgetContainer">
         <ul class="tabs">
             <li class="tab-link current">
-                <!-- Widget Label 및 가운데 정렬 -->
                 <div align="center">
                     <label id = "nodeTreeLabel" class="styleLabel">Widget</label>
                 </div>
             </li>
             <li class="tab-link">
-                <!-- Widget Label 및 가운데 정렬 -->
                 <div align="center">
                     <input type="text" id = "searchNode" class = "searchNode" placeholder="Search" size="17" style="width: 100%;visibility:hidden">
                 </div>
             </li>
         </ul>
-        <div id="tab-1" class="tab-widgetContent current">
-            <!-- Widget Tree -->
+        <div class="tab-widgetContent current">
             <div class = "treeWidget">
                 <div id="widgetTree"></div>
                 <div id="animationTree"></div>
             </div>
             <div class="button-group">
-                <!-- Widget Tree Visible Button -->
                 <button type="button" id="toggleVisible" class="styleButton" title="노드 표시" style="width: 22%;visibility:hidden;">Visible</button>
                 <button type="button" id="openAll" class="styleButton" title="모든 노드 트리 열기" style="width: 22%;visibility:hidden;">Open</button>
                 <button type="button" id="closeAll" class="styleButton" title="모든 노드 트리 닫기" style="width: 22%;visibility:hidden;">Close</button>
@@ -103,36 +87,34 @@
         </div>
     </div>
 
-    <!-- Widget -->
+    <div class="horizontal-resizer"></div>
+
     <div id="uiAnimationContainer" class="uiAnimationContainer">
         <ul class="tabs">
             <li class="tab-link current">
-                <!-- UI Animation Label 및 가운데 정렬 -->
                 <div align="center">
                     <label id = "animationTreeLabel" class="styleLabel">UI Animation</label>
                 </div>
             </li>
         </ul>
-        <div id="tab-1" class="tab-uiAnimContent current">
-            <!-- UI Animation Widget -->
+        <div class="tab-uiAnimContent current">
             <div class = "actionWidget">
                 <div id="actionTree"></div>
             </div>
         </div>
     </div>
 
-    <!-- Node Info, Table 로 구성 -->
+    <div class="horizontal-resizer"></div>
+
     <div id="nodeInfoContainer" class="nodeInfoContainer">
         <ul class="tabs">
             <li class="tab-link current">
-                <!-- Properties Label 및 가운데 정렬 -->
                 <div align="center">
                     <label id = "propertiesLabel" class="styleLabel">Properties</label>
                 </div>
             </li>
         </ul>
-        <div id="tab-1" class="tab-propertiesContent current">
-            <!-- UI Animation Widget -->
+        <div class="tab-propertiesContent current">
             <table style="width:100%; height:100%; background-color: #353535;" style="table-layout: fixed">
                 <tr>
                     <td>
@@ -192,7 +174,8 @@
         </div>
     </div>
 
-    <!-- Sequencer -->
+    <div class="horizontal-resizer"></div>
+
     <div id="sequencerContainer" class="widgetContainer">
         <ul class="tabs">
             <li class="tab-link current">
@@ -201,19 +184,20 @@
                 </div>
             </li>
         </ul>
-        <div id="tab-1" class="tab-widgetContent current">
+        <div class="tab-widgetContent current">
             <div class = "treeWidget" id="sequencerTree" style="height: 150px;">
             </div>
             <div class="button-group">
-                <button type="button" id="addSequenceBtn" class="styleButton" title="현재 애니메이션을 시퀀스에 추가" style="width: 45%;">Add</button>
-                <button type="button" id="playSequenceBtn" class="styleButton" title="시퀀스 전체 재생" style="width: 45%;">Play All</button>
+                <button type="button" id="addSequenceBtn" class="styleButton" title="현재 애니메이션을 시퀀스에 추가" style="width: 30%;">Add</button>
+                <button type="button" id="addDummyBtn" class="styleButton" title="더미 딜레이 아이템 추가" style="width: 30%;">Add Dummy</button>
+                <button type="button" id="playSequenceBtn" class="styleButton" title="시퀀스 전체 재생" style="width: 30%;">Play All</button>
             </div>
             <div class="button-group" style="margin-top: 5px;">
                 <button type="button" id="clearSequenceBtn" class="styleButton" title="시퀀스 초기화" style="width: 92%;">Clear</button>
             </div>
         </div>
     </div>
-
+    <div class="horizontal-resizer"></div>
 
     <div align="center">
         <button type="button" id="DownloadBtn" class="styleButton" title="Download" style="width: 80%; visibility: hidden;">Download</button>
