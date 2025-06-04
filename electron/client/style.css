@@ -51,7 +51,7 @@ canvas {
 
 .sidenav {
     height: 100%;
-    width: 450px; /* 왼쪽 패널 너비 (이전 값: 350px) */
+    width: 450px;
     position: fixed;
     z-index: 10;
     top: 0;
@@ -60,16 +60,16 @@ canvas {
     display: flex;
     flex-direction: column;
     border-right: 1px solid var(--border-color);
-    padding: 10px;
+    padding: 15px;
     background-color: var(--bg-primary);
-    overflow: auto; /* Allow sidenav to scroll if content overflows */
+    overflow: auto;
 }
 
 .side_hr {
     width: 5px;
     height: 100%;
     position: fixed;
-    margin-left: 450px; /* .sidenav의 width와 동일하게 설정 */
+    margin-left: 450px;
     z-index: 20;
     background-color: transparent;
     transition: background-color 0.3s ease;
@@ -84,23 +84,23 @@ canvas {
 }
 
 .horizontal-resizer {
-    height: 15px; /* 변경: 높이를 줄여 선처럼 보이게 함 */
+    height: 15px;
     cursor: row-resize;
     transition: background-color 0.3s ease;
     z-index: 15;
     border-radius: 999px;
+    flex-shrink: 0; /* 추가: 리사이저 크기가 줄어들지 않도록 설정 */
 }
 
 .horizontal-resizer:hover {
     background-color: var(--accent-color);
-    transform: translateY(-1px);
 }
 
 
 #Cocos2dGameContainer {
     position: relative;
     overflow: hidden;
-    margin-left: 455px; /* .sidenav의 width + .side_hr의 width */
+    margin-left: 455px;
     flex-grow: 1;
     display: flex;
     justify-content: center;
@@ -110,16 +110,15 @@ canvas {
 .smallWidget, .treeWidget, .actionWidget {
     width: 100%;
     overflow: auto;
-    background-color: transparent; /* 이전 코드에서는 var(--bg-secondary) 였으나, transparent가 적절해 보임 */
-    padding: 10px; /* 내부 여백 */
-    /* Give a default height to make them resizable */
+    background-color: transparent;
+    padding: 10px;
     height: 150px;
 }
 
-/* Give properties pane a default height too */
 .tab-propertiesContent {
     height: 235px;
     overflow: auto;
+    padding: 10px;
 }
 
 
@@ -128,35 +127,39 @@ canvas {
 .uiAnimationContainer,
 .nodeInfoContainer {
     background-color: var(--bg-secondary);
-    border-radius: 12px; /* 이전 8px에서 12px로 변경하여 좀 더 부드럽게 */
-    /* margin-bottom: 10px; remove this to use resizer margin instead */
+    border-radius: 12px;
     border: 1px solid var(--border-color);
-    overflow: hidden; /* 내부 콘텐츠가 넘칠 경우 숨김 */
-    padding: 0; /* 내부 패딩은 각 컨테이너 하위 요소에서 관리 */
-    border-top: none; /* 탭 UI와 자연스럽게 연결되도록 */
-    /* height: auto;  Let the content define the height */
-    display: flex; /* Use flexbox for better internal layout */
+    overflow: hidden;
+    padding: 0;
+    border-top: none;
+    display: flex;
     flex-direction: column;
+    flex-shrink: 0; /* 추가: 패널 크기가 멋대로 줄어드는 것을 방지 */
 }
 
 .tab-fileContent, .tab-widgetContent, .tab-uiAnimContent {
-    flex-grow: 1; /* Allow content to fill the container */
+    flex-grow: 1;
     display: flex;
     flex-direction: column;
-    overflow: hidden; /* Hide overflow and let inner widgets scroll */
+    overflow: hidden;
 }
 
 .styleLabel {
     color: var(--font-primary);
     font-size: 0.9rem;
-    margin-bottom: 5px; /* 라벨과 입력 요소 사이 간격 */
+    margin-bottom: 5px;
+}
+
+ul.tabs .styleLabel {
+    font-size: 1rem;
+    font-weight: 500;
 }
 
 .button-group {
     display: flex;
-    justify-content: center; /* 버튼들을 중앙 정렬 */
-    gap: 8px; /* 버튼 사이의 간격 */
-    padding: 8px; /* 버튼 그룹 상하좌우 여백 */
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 12px;
 }
 
 .styleButton {
@@ -166,11 +169,11 @@ canvas {
     padding: 8px 15px;
     text-decoration: none;
     font-size: 0.9rem;
-    margin: 0; /* Reset margin */
+    margin: 0;
     cursor: pointer;
-    border-radius: 999px; /* 캡슐 모양 */
-    transition: background-color 0.3s ease, transform 0.1s ease;
-    display: inline-flex; /* 내부 아이콘/텍스트 정렬 용이 */
+    border-radius: 999px;
+    transition: all 0.2s ease;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
 }
@@ -182,7 +185,7 @@ canvas {
 }
 
 .styleButton:active {
-    transform: translateY(1px); /* 클릭 시 약간 아래로 이동하는 효과 */
+    transform: translateY(1px) scale(0.98);
 }
 
 
@@ -193,13 +196,13 @@ canvas {
     color: var(--font-primary);
     padding: 5px;
     border-radius: 3px;
-    box-sizing: border-box; /* 패딩과 테두리를 너비에 포함 */
+    box-sizing: border-box;
 }
 
 .positionInput:focus {
     outline: none;
     border-color: var(--accent-color);
-    box-shadow: 0 0 0 2px rgba(0, 122, 204, 0.5); /* 포커스 시 강조 효과 */
+    box-shadow: 0 0 0 2px rgba(0, 122, 204, 0.5);
 }
 
 ul.tabs {
@@ -207,17 +210,17 @@ ul.tabs {
     padding: 0;
     list-style: none;
     border-bottom: 1px solid var(--border-color);
-    padding-left: 15px; /* 탭 좌우 여백 */
+    padding-left: 15px;
     padding-right: 15px;
-    padding-top: 5px; /* 탭 상단 여백 */
-    flex-shrink: 0; /* Prevent tabs from shrinking */
+    padding-top: 5px;
+    flex-shrink: 0;
 }
 
 ul.tabs li {
     background: none;
     color: var(--font-secondary);
     display: inline-block;
-    padding: 10px 14px; /* 탭 내부 패딩 */
+    padding: 10px 14px;
     cursor: pointer;
     position: relative; /* 밑줄 효과를 위한 position */
     border-bottom: 2px solid transparent; /* 비활성 탭 밑줄 투명 처리 */
@@ -236,15 +239,14 @@ ul.tabs li.current {
 }
 
 .tab-content {
-    display: none; /* 기본적으로 숨김 */
-    /* height: 100%; */ /* 이 부분은 부모 컨테이너에 따라 조절될 수 있음 */
-    overflow: auto; /* 내용이 넘칠 경우 스크롤 */
+    display: none;
+    overflow: auto;
     padding: 15px;
-    background: transparent; /* 탭 콘텐츠 영역 배경 투명 */
+    background: transparent;
 }
 
 .tab-content.current {
-    display: block; /* 활성 탭 콘텐츠만 보이도록 */
+    display: block;
 }
 
 ::-webkit-scrollbar {
@@ -258,21 +260,21 @@ ul.tabs li.current {
 
 ::-webkit-scrollbar-thumb {
     background: var(--scrollbar-thumb);
-    border-radius: 4px; /* 스크롤바 썸 둥글게 */
+    border-radius: 4px;
     transition: background-color 0.2s ease-in-out;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: var(--accent-color); /* 스크롤바 호버 시 강조 */
+    background: var(--accent-color);
 }
 
 /* --- 시퀀서 UI 스타일 --- */
 .sequencer-item {
     display: flex;
-    justify-content: space-between; /* 내부 요소들 사이에 공간 균등 배분 */
-    align-items: center; /* 내부 요소들 수직 중앙 정렬 */
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 5px;
-    padding: 3px 6px; /* 내부 좌우 패딩 약간 추가 */
+    padding: 3px 6px;
     border-radius: 4px;
     background-color: var(--bg-tertiary);
 }
@@ -283,31 +285,31 @@ ul.tabs li.current {
     border-radius: 4px;
     font-size: 0.75rem;
     font-weight: bold;
-    margin-right: 8px; /* 태그와 다음 텍스트 사이 간격 */
-    flex-shrink: 0; /* 태그 크기 줄어들지 않도록 */
+    margin-right: 8px;
+    flex-shrink: 0;
 }
 
 .type-armature {
-    background-color: #007acc; /* 파란색 계열 */
+    background-color: #007acc;
 }
 
 .type-action {
-    background-color: #c850c0; /* 보라색 계열 */
+    background-color: #c850c0;
 }
 
-.type-dummy { /* 더미 태그 스타일 */
-    background-color: #555555; /* 회색 계열 */
+.type-dummy {
+    background-color: #555555;
 }
 
 .sequencer-text {
-    flex-grow: 1; /* 남은 공간을 모두 차지하도록 */
-    white-space: nowrap; /* 텍스트가 길어도 한 줄로 표시 */
-    overflow: hidden; /* 넘치는 텍스트 숨김 */
-    text-overflow: ellipsis; /* 넘치는 텍스트 ... 처리 */
+    flex-grow: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     font-size: 0.8rem;
-    margin-left: 5px; /* 타입 태그와 약간의 간격 */
-    margin-right: 5px; /* 딜레이 입력창과 약간의 간격 */
-    min-width: 0; /* flex 아이템이 내용보다 작아질 수 있도록 허용 (ellipsis 처리에 중요) */
+    margin-left: 5px;
+    margin-right: 5px;
+    min-width: 0;
     color: var(--font-primary);
 }
 
@@ -315,14 +317,14 @@ ul.tabs li.current {
     width: 55px;
     padding: 4px;
     margin-right: 8px;
-    flex-shrink: 0; /* 크기가 줄어들지 않도록 설정 */
+    flex-shrink: 0;
     background-color: var(--bg-primary);
     color: var(--font-primary);
     border: 1px solid var(--border-color);
     border-radius: 3px;
     text-align: right;
     box-sizing: border-box;
-    cursor: text; /* 텍스트 입력 커서 */
+    cursor: text;
 }
 
 /* Webkit 계열 브라우저 숫자 입력 화살표 숨기기 */
@@ -339,7 +341,7 @@ ul.tabs li.current {
 
 .playback-mode-select {
     width: 75px;
-    flex-shrink: 0; /* 크기가 줄어들지 않도록 설정 */
+    flex-shrink: 0;
     padding: 4px;
     background-color: var(--bg-secondary);
     color: var(--font-primary);
