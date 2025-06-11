@@ -1,12 +1,21 @@
 <!DOCTYPE html>
 <html>
 <head>
-
     <link href="style.css" rel="stylesheet" type="text/css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
     <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+
+    <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/jstree.min.js"></script>
+
     <script>if (window.module) module = window.module;</script>
 
     <meta charset="utf-8">
@@ -35,9 +44,27 @@
     <script src="../renderer.js"></script>
 </head>
 <body>
+<div id="top-right-controls">
+    <div id="resolution-controller">
+        <label class="styleLabel">Resolution:</label>
+        <input type="number" id="res-width-input" class="positionInput" value="800">
+        <span class="styleLabel" style="margin: 0 5px;">x</span>
+        <input type="number" id="res-height-input" class="positionInput" value="600">
+        <button id="res-apply-btn" class="styleButton" style="margin-left: 10px;">Apply</button>
+    </div>
 
-<div id="sidenav" class="sidenav">
+    <div id="panel-toggle-menu-container">
+        <button id="panel-toggle-button"><i class="fas fa-layer-group"></i> 패널 목록</button>
+        <div id="panel-toggle-dropdown"></div>
+    </div>
+</div>
+<div id="resize-overlay"></div>
+<div id="panels-container-area">
+    <div class="vertical-guide"></div>
+    <div class="horizontal-guide"></div>
+</div>
 
+<div id="original-content-templates">
     <div id="fileContainer" class="fileContainer">
         <ul class="tabs">
             <li class="tab-link current">
@@ -57,7 +84,6 @@
             </div>
         </div>
     </div>
-    <div class="horizontal-resizer"></div>
 
     <div id="widgetContainer" class="widgetContainer">
         <ul class="tabs">
@@ -81,9 +107,18 @@
                 <button type="button" id="closeAll" class="styleButton" title="모든 노드 트리 닫기" style="width: 22%;">Close</button>
                 <button type="button" id="copyBtn" class="styleButton" title="위젯 노드 트리 복사" style="width: 22%;">Copy</button>
             </div>
+
+            <div id="ui-option">
+            </div>
+
+            <div id="spine-option" style="visibility: hidden;">
+                <div class="button-group">
+                    <button type="button" id="debugBone" class="styleButton" style="width: 45%;">Show Bone</button>
+                    <button type="button" id="debugSlot" class="styleButton" style="width: 45%;">Show Slot</button>
+                </div>
+            </div>
         </div>
     </div>
-    <div class="horizontal-resizer"></div>
 
     <div id="uiAnimationContainer" class="uiAnimationContainer">
         <ul class="tabs">
@@ -99,7 +134,6 @@
             </div>
         </div>
     </div>
-    <div class="horizontal-resizer"></div>
 
     <div id="nodeInfoContainer" class="nodeInfoContainer">
         <ul class="tabs">
@@ -168,12 +202,6 @@
             </table>
         </div>
     </div>
-    <div class="horizontal-resizer"></div>
-
-    <div id="ui-option" style="visibility: hidden;">
-    </div>
-    <div id="spine-option" style="visibility: hidden;">
-    </div>
 
     <div id="sequencerContainer" class="widgetContainer">
         <ul class="tabs">
@@ -192,19 +220,21 @@
             </div>
             <div class="button-group" style="margin-top: 5px;">
                 <button type="button" id="clearSequenceBtn" class="styleButton" title="시퀀스 초기화" style="width: 92%;">Clear</button>
+                <button type="button" id="addDummyBtn" class="styleButton" title="더미 딜레이 추가" style="width: 30%;">Add Dummy</button>
             </div>
         </div>
     </div>
-    <div class="horizontal-resizer"></div>
-
 
     <div align="center">
         <button type="button" id="DownloadBtn" class="styleButton" title="Download" style="width: 80%; visibility: hidden;">Download</button>
     </div>
 </div>
-<div id="side_hr" class="side_hr"></div>
+
+<div id="game-canvas-template">
+    <canvas id="gameCanvas" width="480" height="720"></canvas>
+</div>
+
 <script src="res/loading.js"></script>
-<canvas id="gameCanvas" width="480" height="720"></canvas>
 <script src="frameworks/cocos2d-html5/CCBoot.js"></script>
 <script cocos src="main.js"></script>
 <script src="src/DownloadCurrent.js"></script>
