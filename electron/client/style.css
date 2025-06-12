@@ -1,10 +1,4 @@
-/* ==================================================================
-   1. 패널 시스템 기본 & 테마 스타일 (DragPanelLayoutDemo에서 가져옴)
-  ==================================================================
-*/
-
 :root {
-    /* 새로운 패널 시스템의 디자인 테마 */
     --bg-primary: #1e1e1e;
     --bg-secondary: #2d2d2d;
     --bg-tertiary: #3a3a3a;
@@ -13,22 +7,20 @@
     --border-color: #4a4a4a;
     --accent-color: #007acc;
     --panel-shadow: 0 2px 8px rgba(0,0,0,0.3);
-    --guide-color: #ff3b30; /* 스마트 가이드 선 색상 */
+    --guide-color: #ff3b30;
     --dropdown-bg: #252526;
     --dropdown-hover-bg: #3e3e42;
     --scrollbar-thumb: #555;
     --scrollbar-track: var(--bg-secondary);
+    --pixels-per-second: 100;
 }
-
 *, *::before, *::after {
     box-sizing: border-box;
 }
-
 html {
     -ms-touch-action: none;
     touch-action: none;
 }
-
 body, div {
     margin: 0;
     padding: 0;
@@ -36,7 +28,6 @@ body, div {
     user-select: none;
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
-
 body {
     position: absolute;
     top: 0;
@@ -47,30 +38,23 @@ body {
     color: var(--font-primary);
     background-color: var(--bg-primary);
     font-family: 'Roboto', Helvetica, Verdana, Arial, sans-serif;
-    overflow: hidden; /* 전체 페이지 스크롤 방지 */
+    overflow: hidden;
 }
-
 body.is-interacting .draggable-panel:not(.ui-draggable-dragging):not(.ui-resizable-resizing) {
     pointer-events: none;
 }
-
 .draggable-panel:not(.ui-draggable-dragging) {
     position: absolute !important;
 }
-
 canvas {
     background-color: transparent;
 }
-
 #panels-container-area {
     width: 100%;
     height: 100%;
     position: relative;
-    /* overflow: hidden; <- 이 줄을 제거하거나 주석 처리 */
-    overflow: visible; /* 패널이 자유롭게 이동할 수 있도록 변경 */
+    overflow: visible;
 }
-
-/* 스마트 가이드 라인 스타일 */
 .vertical-guide, .horizontal-guide {
     position: absolute;
     background-color: var(--guide-color);
@@ -79,8 +63,6 @@ canvas {
 }
 .vertical-guide { width: 1px; }
 .horizontal-guide { height: 1px; }
-
-/* --- 패널 핵심 스타일 (수정 완료) --- */
 .draggable-panel {
     background-color: var(--bg-secondary);
     border: 1px solid var(--border-color);
@@ -88,37 +70,28 @@ canvas {
     box-shadow: var(--panel-shadow);
     display: flex;
     flex-direction: column;
-    position: absolute !important; /* !important로 강제 적용 */
+    position: absolute !important;
     min-width: 200px;
-    min-height: 150px; /* 최소 높이 조정 */
+    min-height: 150px;
     transition: box-shadow 0.2s ease-in-out, border-color 0.2s ease-in-out;
-
-    /* 자유 배치를 위한 추가 속성들 */
     top: auto;
     left: auto;
     right: auto;
     bottom: auto;
     float: none;
     clear: none;
-    transform: none; /* 기본 transform 제거 */
+    transform: none;
 }
-
 .draggable-panel.ui-draggable-dragging,
 .draggable-panel.ui-resizable-resizing {
     z-index: 1000 !important;
     box-shadow: 0 8px 25px rgba(0,0,0,0.5);
     border-color: var(--accent-color);
-    position: absolute !important; /* 드래그 중에도 absolute 유지 */
-}
-
-.ui-draggable {
     position: absolute !important;
 }
-
 .ui-draggable-dragging {
     position: absolute !important;
 }
-
 .panel-header {
     background-color: var(--bg-tertiary);
     color: var(--font-primary);
@@ -131,101 +104,160 @@ canvas {
     align-items: center;
     border-top-left-radius: 7px;
     border-top-right-radius: 7px;
-    flex-shrink: 0; /* 헤더 크기는 줄어들지 않도록 고정 */
+    flex-shrink: 0;
 }
 .panel-header .panel-title-text { font-size: 0.95rem; }
 .panel-header .drag-handle-visual {
     width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; opacity: 0.6;
 }
-
 .panel-content {
     padding: 10px;
-    flex-grow: 1; /* 헤더를 제외한 나머지 공간을 모두 차지 */
-    overflow-y: auto; /* 내용이 많으면 세로 스크롤바 생성 */
-    overflow-x: hidden; /* 가로 스크롤바는 숨김 */
+    flex-grow: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
     display: flex;
     flex-direction: column;
-    min-height: 0; /* flex-grow와 함께 사용할 때 높이 계산 오류 방지 */
+    min-height: 0;
 }
-
-/* 패널 토글 메뉴 스타일 */
-#panel-toggle-menu-container { z-index: 2000; }
-#panel-toggle-button { background-color: var(--bg-tertiary); color: var(--font-primary); border: 1px solid var(--border-color); padding: 8px 12px; border-radius: 5px; cursor: pointer; font-size: 1rem; }
-#panel-toggle-button:hover { background-color: var(--accent-color); border-color: var(--accent-color); }
-#panel-toggle-dropdown { display: none; position: absolute; top: 100%; right: 0; background-color: var(--dropdown-bg); border: 1px solid var(--border-color); border-radius: 5px; padding: 5px 0; min-width: 200px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); margin-top: 5px; }
-#panel-toggle-dropdown label { display: block; padding: 8px 15px; color: var(--font-primary); cursor: pointer; font-size: 0.9rem; white-space: nowrap; }
-#panel-toggle-dropdown label:hover { background-color: var(--dropdown-hover-bg); }
-#panel-toggle-dropdown input[type="checkbox"] { margin-right: 8px; vertical-align: middle; }
-
-
-/* ==================================================================
-   2. 기존 콘텐츠 및 UI 요소 스타일 (원본 style.css에서 가져옴)
-  ==================================================================
-*/
-
-/* 기존 레이아웃 스타일은 더 이상 필요 없음 */
-/* #sidenav, #side_hr, #Cocos2dGameContainer 등은 주석 처리하거나 삭제 */
-
-/* [수정] 아래 위젯들이 부모의 공간을 채우도록 flex-grow를 추가하고 고정 height 제거 */
+#top-right-controls {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 1002;
+    display: flex;
+    align-items: stretch;
+    gap: 15px;
+}
+#main-menu-toggle-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid #666;
+    background-color: #444;
+    color: white;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: transform 0.3s ease;
+}
+#main-menu-toggle-btn:hover {
+    background-color: #555;
+}
+#main-menu-toggle-btn.is-active {
+    transform: rotate(90deg);
+}
+#resolution-controller {
+    z-index: 2000;
+    background-color: var(--bg-tertiary);
+    padding: 8px 12px;
+    border-radius: 5px;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--panel-shadow);
+    display: flex;
+    align-items: center;
+}
+#resolution-controller .positionInput {
+    width: 70px;
+}
+#panel-toggle-menu-container {
+    position: relative;
+}
+#panel-toggle-button {
+    background-color: var(--bg-tertiary);
+    color: var(--font-primary);
+    border: 1px solid var(--border-color);
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    height: 100%;
+}
+#panel-toggle-button:hover {
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+}
+#panel-toggle-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: var(--dropdown-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    padding: 5px 0;
+    min-width: 200px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    margin-top: 5px;
+    z-index: 1001;
+}
+#panel-toggle-dropdown label {
+    display: block;
+    padding: 8px 15px;
+    color: var(--font-primary);
+    cursor: pointer;
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+#panel-toggle-dropdown label:hover {
+    background-color: var(--dropdown-hover-bg);
+}
+#panel-toggle-dropdown input[type="checkbox"] {
+    margin-right: 8px;
+    vertical-align: middle;
+}
 .smallWidget, .treeWidget, .actionWidget {
     width: 100%;
     overflow: auto;
     background-color: transparent;
     padding: 10px;
-    flex-grow: 1; /* 가용 공간을 채우도록 설정 */
-    min-height: 0; /* flex 계산 오류 방지 */
+    flex-grow: 1;
+    min-height: 0;
 }
-
 #ui-option,
 #spine-option {
-    display: none; /* 필요할 때 자바스크립트로 'display: block' 등으로 변경하여 사용 */
+    display: none;
 }
-
-/* [수정] 아래 위젯들이 부모의 공간을 채우도록 flex-grow를 추가하고 고정 height 제거 */
 .tab-propertiesContent {
     overflow: auto;
     padding: 10px;
-    flex-grow: 1; /* 가용 공간을 채우도록 설정 */
+    flex-grow: 1;
 }
-
 .fileContainer,
 .widgetContainer,
 .uiAnimationContainer,
 .nodeInfoContainer {
-    /* 이 컨테이너들은 이제 패널 콘텐츠의 일부이므로, 배경/테두리 등은 불필요 */
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
-    height: 100%; /* 부모인 .panel-content 높이에 맞춤 */
+    height: 100%;
 }
-
 .tab-fileContent, .tab-widgetContent, .tab-uiAnimContent {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
-    overflow: hidden; /* 스크롤은 자식 요소에서 처리하므로 hidden으로 변경 */
-    min-height: 0; /* flex 계산 오류 방지 */
+    overflow: hidden;
+    min-height: 0;
 }
-
 .styleLabel {
     color: var(--font-primary);
     font-size: 0.9rem;
     margin-bottom: 5px;
 }
-
 ul.tabs .styleLabel {
     font-size: 1rem;
     font-weight: 500;
 }
-
 .button-group {
     display: flex;
     justify-content: center;
     gap: 8px;
     padding: 8px 12px;
-    flex-shrink: 0; /* 버튼 그룹은 크기가 늘어나지 않도록 고정 */
+    flex-shrink: 0;
 }
-
 .styleButton {
     background-color: var(--bg-tertiary);
     color: var(--font-primary);
@@ -241,17 +273,14 @@ ul.tabs .styleLabel {
     align-items: center;
     justify-content: center;
 }
-
 .styleButton:hover {
     background-color: var(--accent-color);
     border-color: var(--accent-color);
     color: white;
 }
-
 .styleButton:active {
     transform: translateY(1px) scale(0.98);
 }
-
 .positionInput {
     width: 60px;
     background-color: var(--bg-primary);
@@ -261,13 +290,11 @@ ul.tabs .styleLabel {
     border-radius: 3px;
     box-sizing: border-box;
 }
-
 .positionInput:focus {
     outline: none;
     border-color: var(--accent-color);
     box-shadow: 0 0 0 2px rgba(0, 122, 204, 0.5);
 }
-
 ul.tabs {
     margin: 0;
     padding: 0;
@@ -276,9 +303,8 @@ ul.tabs {
     padding-left: 15px;
     padding-right: 15px;
     padding-top: 5px;
-    flex-shrink: 0; /* 탭 영역은 크기가 늘어나지 않도록 고정 */
+    flex-shrink: 0;
 }
-
 ul.tabs li {
     background: none;
     color: var(--font-secondary);
@@ -290,173 +316,312 @@ ul.tabs li {
     transition: color 0.3s ease, border-color 0.3s ease;
     margin-bottom: -1px;
 }
-
 ul.tabs li:not(.current):hover {
     color: var(--font-primary);
 }
-
 ul.tabs li.current {
     color: var(--accent-color);
     font-weight: 500;
     border-bottom-color: var(--accent-color);
 }
-
-/* [수정] tab-content의 flex 속성 추가 */
 .tab-content {
     display: none;
     overflow: auto;
     padding: 15px;
     background: transparent;
-    flex-grow: 1; /* 부모(tab-*Content)의 공간을 채우도록 설정 */
-    display: flex; /* 자식 요소의 레이아웃을 위해 flex로 설정 */
-    flex-direction: column; /* 자식 요소를 세로로 쌓음 */
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
 }
-
 .tab-content.current {
-    display: flex; /* none에서 flex로 변경 */
+    display: flex;
 }
-
-
-/* 스크롤바 스타일 */
 ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
 }
-
 ::-webkit-scrollbar-track {
     background: var(--scrollbar-track);
 }
-
 ::-webkit-scrollbar-thumb {
     background: var(--scrollbar-thumb);
     border-radius: 4px;
     transition: background-color 0.2s ease-in-out;
 }
-
 ::-webkit-scrollbar-thumb:hover {
     background: var(--accent-color);
 }
-
-/* 시퀀서 UI 스타일 */
-.sequencer-item {
+.custom-tree-container {
+    padding: 5px;
+    height: 100%;
+    overflow-y: auto;
+}
+.custom-tree-item {
+    display: block;
+    padding: 6px 8px;
+    margin-bottom: 4px;
+    border-radius: 4px;
+    cursor: pointer;
+    background-color: var(--bg-tertiary);
+    color: var(--font-primary);
+    font-size: 0.9rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border: 1px solid transparent;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+.custom-tree-item:hover {
+    background-color: #4a4a4a;
+}
+.custom-tree-item.selected {
+    background-color: var(--accent-color);
+    border-color: #ffffff;
+    font-weight: bold;
+}
+.custom-drag-helper {
+    background-color: var(--accent-color);
+    color: white;
+    padding: 8px 15px;
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    opacity: 0.85;
+    z-index: 9999;
+}
+#timeline-top-bar {
+    padding: 0 5px 5px 5px;
+}
+#timeline-top-bar .styleButton {
+    min-width: 40px;
+    padding: 5px 10px;
+}
+#timeline-editor {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    min-height: 0;
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    position: relative;
+}
+#timeline-header-wrapper, #timeline-body-wrapper {
+    display: flex;
+}
+#timeline-header-wrapper {
+    flex-shrink: 0;
+    position: relative;
+    z-index: 6;
+}
+#timeline-body-wrapper {
+    flex-grow: 1;
+    overflow: hidden;
+    position: relative;
+}
+#timeline-header-label {
+    width: 120px;
+    flex-shrink: 0;
+    border-bottom: 1px solid var(--border-color);
+    border-right: 1px solid var(--border-color);
+    background-color: #333;
+}
+#timeline-header-ruler {
+    flex-grow: 1;
+    position: relative;
+    overflow: hidden;
+    height: 25px;
+    border-bottom: 1px solid var(--border-color);
+    background-color: var(--bg-tertiary);
+}
+#timeline-ruler {
+    position: absolute;
+    height: 100%;
+    background-image: linear-gradient(to right, rgba(255,255,255,0.1) 1px, transparent 1px);
+}
+.ruler-marker {
+    position: absolute;
+    height: 100%;
+    color: var(--font-secondary);
+    font-size: 10px;
+    padding-left: 4px;
+    user-select: none;
+    border-left: 1px solid rgba(255,255,255,0.3);
+}
+.ruler-marker.sub {
+    border-left: 1px solid rgba(255,255,255,0.1);
+}
+.ruler-marker .marker-text.sub-text {
+    color: #888;
+}
+#track-labels-container {
+    width: 120px;
+    flex-shrink: 0;
+    overflow: hidden;
+    background-color: #333;
+}
+.track-label {
+    height: 32px;
+    padding: 0 10px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    color: var(--font-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    border-right: 1px solid var(--border-color);
+    line-height: 31px;
+    box-sizing: border-box;
+}
+.track-label:not(:last-child) {
+    border-bottom: 1px solid var(--border-color);
+}
+#timeline-tracks-container {
+    flex-grow: 1;
+    overflow: auto;
+}
+#timeline-content {
+    position: relative;
+    width: 5000px;
+}
+#timeline-playhead {
+    position: absolute;
+    top: 0;
+    left: 120px;
+    width: 2px;
+    height: 100%;
+    background-color: var(--guide-color);
+    z-index: 10;
+    pointer-events: none;
+    display: none;
+}
+.timeline-track {
+    position: relative;
+    height: 32px;
+    box-sizing: border-box;
+    background-image:
+            linear-gradient(to right, rgba(255,255,255,0.1) 1px, transparent 1px),
+            linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px);
+    background-size:
+            calc(var(--pixels-per-second) * 1) 100%,  /* 1초 간격 메이저 그리드 */
+            calc(var(--pixels-per-second) * 0.1) 100%; /* 0.1초 간격 마이너 그리드 */
+}
+.timeline-track:not(:last-child) {
+    border-bottom: 1px solid var(--border-color);
+}
+.track-drop-hover {
+    background-color: rgba(0, 122, 204, 0.3) !important;
+}
+.timeline-clip {
+    position: absolute;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 5px;
-    padding: 3px 6px;
+    top: 2px;
+    height: 28px;
+    background-color: #d9534f; /* AR 클립을 위한 부드러운 붉은색 */
     border-radius: 4px;
-    background-color: var(--bg-tertiary);
-}
-/* 드래그 핸들 스타일 */
-.sequencer-item .drag-handle {
-    cursor: grab;
-    color: var(--font-secondary);
-    margin-right: 8px;
-    padding: 0 5px;
-    opacity: 0.7;
-    transition: opacity 0.2s ease;
-}
-.sequencer-item .drag-handle:hover {
-    opacity: 1;
-}
-.ui-sortable-helper .drag-handle {
-    cursor: grabbing;
-}
-
-/* 개별 삭제 버튼 스타일 */
-.delete-sequence-item-btn {
-    background: transparent;
-    border: none;
-    color: var(--font-secondary);
-    cursor: pointer;
-    padding: 4px 8px;
-    border-radius: 50%;
-    margin-left: 5px;
-    font-size: 0.9em;
-    transition: background-color 0.2s ease, color 0.2s ease;
-}
-
-.delete-sequence-item-btn:hover {
-    background-color: #c82333; /* Bootstrap's danger color */
-    color: white;
-}
-
-/* [수정] 입력 필드와 선택 메뉴의 data-index가 제대로 동작하도록 수정 */
-.delay-input, .playback-mode-select {
-    /* 기존 스타일은 유지하고 data-index 속성을 사용하도록 JS에서 수정했으므로 CSS 변경은 불필요합니다. */
-    /* 다만, 아래와 같이 일부 속성만 가져옵니다. */
-    width: 55px; padding: 4px; margin-right: 8px; flex-shrink: 0;
-}
-.playback-mode-select {
-    width: 75px;
-}
-
-.anim-type-tag {
-    color: white; padding: 2px 6px; border-radius: 4px;
-    font-size: 0.75rem; font-weight: bold; margin-right: 8px; flex-shrink: 0;
-}
-.type-armature { background-color: #007acc; }
-.type-action { background-color: #c850c0; }
-.type-dummy { background-color: #555555; }
-
-.sequencer-text {
-    flex-grow: 1; white-space: nowrap; overflow: hidden;
-    text-overflow: ellipsis; font-size: 0.8rem; margin-left: 5px;
-    margin-right: 5px; min-width: 0; color: var(--font-primary);
-}
-
-.delay-input {
-    width: 55px; padding: 4px; margin-right: 8px; flex-shrink: 0;
-    background-color: var(--bg-primary); color: var(--font-primary);
-    border: 1px solid var(--border-color); border-radius: 3px;
-    text-align: right; box-sizing: border-box; cursor: text;
-}
-.delay-input::-webkit-outer-spin-button, .delay-input::-webkit-inner-spin-button {
-    -webkit-appearance: none; margin: 0;
-}
-.delay-input { -moz-appearance: textfield; }
-
-.playback-mode-select {
-    width: 75px; flex-shrink: 0; padding: 4px;
-    background-color: var(--bg-secondary); color: var(--font-primary);
-    border: 1px solid var(--border-color); border-radius: 3px;
     box-sizing: border-box;
+    padding: 0 4px 0 8px;
+    color: white;
+    font-size: 0.8rem;
+    line-height: 26px;
+    cursor: grab;
+    overflow: hidden;
+    border: 1px solid #d43f3a; /* 붉은색 계열 테두리 */
+    z-index: 2;
 }
-
-#resize-overlay {
-    position: fixed; /* 화면 전체에 고정 */
+.ui-draggable-dragging, .timeline-clip:active {
+    cursor: grabbing;
+    z-index: 3;
+}
+.timeline-clip.type-action {
+    background-color: #428bca; /* UI 클립을 위한 부드러운 파란색 */
+    border-color: #357ebd; /* 파란색 계열 테두리 */
+}
+.timeline-track > .ui-wrapper {
+    position: absolute !important;
+}
+.clip-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    pointer-events: none;
+}
+.clip-duration {
+    margin-left: 10px;
+    color: rgba(255,255,255,0.7);
+    pointer-events: none;
+}
+.clip-duration .modified {
+    margin-left: 5px;
+    font-weight: bold;
+}
+.clip-duration .increased {
+    color: #28a745;
+}
+.clip-duration .decreased {
+    color: #dc3545;
+}
+.clip-delete-btn {
+    width: 16px;
+    height: 16px;
+    text-align: center;
+    line-height: 16px;
+    margin-left: 4px;
+    color: rgba(255,255,255,0.7);
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1.2em;
+    border-radius: 50%;
+}
+.clip-delete-btn:hover {
+    color: white;
+    background-color: rgba(0,0,0,0.3);
+}
+.dragging-helper {
+    opacity: 0.7;
+    border: 1px dashed white;
+}
+#timeline-interaction-overlay {
+    position: absolute;
     top: 0;
     left: 0;
-    width: 100%;
+    right: 0;
+    bottom: 0;
+    z-index: 20;
+    display: none;
+}
+.ui-resizable-handle {
+    width: 7px;
     height: 100%;
-    z-index: 9999; /* 모든 패널 위에 위치하도록 z-index를 매우 높게 설정 */
-    display: none; /* 평소에는 숨겨 둠 */
-    /* 커서 모양을 움직이는 중임을 나타내도록 변경할 수 있습니다. 예: cursor: move; */
+    position: absolute;
+    top: 0;
+    cursor: ew-resize;
+    z-index: 4;
+}
+.ui-resizable-e {
+    right: 0;
+}
+.ui-resizable-w {
+    left: 0;
+}
+.timeline-overlap-indicator {
+    position: absolute;
+    height: 100%;
+    top: 0;
+    background-color: rgba(255, 0, 0, 0.5);
+    z-index: 5;
+    pointer-events: none;
 }
 
-/* 해상도 조절 UI 스타일 */
-#resolution-controller {
-    /* position, top, left 속성 제거 */
-    z-index: 2000;
-    background-color: var(--bg-tertiary);
-    padding: 8px 12px;
-    border-radius: 5px;
-    border: 1px solid var(--border-color);
-    box-shadow: var(--panel-shadow);
-    display: flex;
-    align-items: center;
+.timeline-clip {
+    position: absolute !important;
+    top: 2px !important;
 }
 
-#resolution-controller .positionInput {
-    width: 70px; /* 입력 필드 너비 조정 */
+.ui-wrapper {
+    top: 2px !important;
 }
 
-#top-right-controls {
-    position: fixed;
-    top: 10px;
-    right: 10px;
-    z-index: 2001;
-    display: flex;
-    align-items: center;
-    gap: 15px; /* 두 UI 요소 사이의 간격 */
+.timeline-clip.ui-draggable-dragging,
+.timeline-clip.ui-resizable-resizing {
+    top: 2px !important;
 }

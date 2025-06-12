@@ -128,9 +128,33 @@ var PanelManager = (function() {
                 }
             });
 
-            $('#panel-toggle-button').on('click', function(e) { e.stopPropagation(); $('#panel-toggle-dropdown').slideToggle(200); });
-            $('#panel-toggle-dropdown').on('change', 'input[type="checkbox"]', function() { $('#' + $(this).data('panel-id')).toggle($(this).is(':checked')); LayoutManager.save(); });
-            $(document).on('click', function(e) { if (!$('#panel-toggle-menu-container').is(e.target) && $('#panel-toggle-menu-container').has(e.target).length === 0) { $('#panel-toggle-dropdown').slideUp(200); } });
+            // 오른쪽 위 버튼
+
+            // '패널 목록' 버튼 클릭 시 드롭다운 토글 (기존 기능 유지)
+            $('#panel-toggle-button').on('click', function(e) {
+                e.stopPropagation();
+                $('#panel-toggle-dropdown').slideToggle(150);
+            });
+
+            // '패널 목록' 드롭다운 외부 클릭 시 닫기 (기존 기능 유지)
+            $(document).on('click', function(e) {
+                const $dropdownContainer = $('#panel-toggle-menu-container');
+                if (!$dropdownContainer.is(e.target) && $dropdownContainer.has(e.target).length === 0) {
+                    $('#panel-toggle-dropdown').slideUp(150);
+                }
+            });
+
+            // 각 패널 체크박스 변경 시 패널 on/off (기존 기능 유지)
+            $('#panel-toggle-dropdown').on('change', 'input[type="checkbox"]', function() {
+                $('#' + $(this).data('panel-id')).toggle($(this).is(':checked'));
+                // LayoutManager.save(); // 필요 시 주석 해제
+            });
+
+            // 새로운 햄버거 버튼 클릭 이벤트 (주변 컨트롤 토글)
+            $('#main-menu-toggle-btn').on('click', function() {
+                $(this).toggleClass('is-active'); // 클릭된 버튼 자신에게 is-active 클래스를 추가/제거
+                $('.toggleable-control').toggle('slide', { direction: 'right' }, 150);
+            });
         }
     };
 })();

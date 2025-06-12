@@ -45,7 +45,7 @@
 </head>
 <body>
 <div id="top-right-controls">
-    <div id="resolution-controller">
+    <div id="resolution-controller" class="toggleable-control" style="display: none;">
         <label class="styleLabel">Resolution:</label>
         <input type="number" id="res-width-input" class="positionInput" value="800">
         <span class="styleLabel" style="margin: 0 5px;">x</span>
@@ -53,10 +53,12 @@
         <button id="res-apply-btn" class="styleButton" style="margin-left: 10px;">Apply</button>
     </div>
 
-    <div id="panel-toggle-menu-container">
+    <div id="panel-toggle-menu-container" class="toggleable-control" style="display: none;">
         <button id="panel-toggle-button"><i class="fas fa-layer-group"></i> 패널 목록</button>
         <div id="panel-toggle-dropdown"></div>
     </div>
+
+    <button id="main-menu-toggle-btn"><i class="fas fa-bars"></i></button>
 </div>
 <div id="resize-overlay"></div>
 <div id="panels-container-area">
@@ -212,15 +214,38 @@
             </li>
         </ul>
         <div id="tab-1" class="tab-widgetContent current">
-            <div class = "treeWidget" id="sequencerTree" style="height: 150px;">
+
+            <div id="timeline-top-bar">
+                <div class="button-group" style="padding: 0; justify-content: flex-end;">
+                    <button type="button" id="zoom-out-btn" class="styleButton" title="축소">-</button>
+                    <button type="button" id="zoom-in-btn" class="styleButton" title="확대">+</button>
+                </div>
             </div>
+
+            <div id="timeline-editor">
+                <div id="timeline-header-wrapper">
+                    <div id="timeline-header-label"></div>
+                    <div id="timeline-header-ruler">
+                        <div id="timeline-ruler"></div>
+                    </div>
+                </div>
+                <div id="timeline-body-wrapper">
+                    <div id="track-labels-container">
+                    </div>
+                    <div id="timeline-tracks-container">
+                        <div id="timeline-content">
+                        </div>
+                    </div>
+                    <div id="timeline-interaction-overlay"></div>
+                </div>
+                <div id="timeline-playhead"></div>
+            </div>
+
             <div class="button-group">
-                <button type="button" id="addSequenceBtn" class="styleButton" title="현재 애니메이션을 시퀀스에 추가" style="width: 45%;">Add</button>
-                <button type="button" id="playSequenceBtn" class="styleButton" title="시퀀스 전체 재생" style="width: 45%;">Play All</button>
-            </div>
-            <div class="button-group" style="margin-top: 5px;">
-                <button type="button" id="clearSequenceBtn" class="styleButton" title="시퀀스 초기화" style="width: 92%;">Clear</button>
-                <button type="button" id="addDummyBtn" class="styleButton" title="더미 딜레이 추가" style="width: 30%;">Add Dummy</button>
+                <button type="button" id="addSequenceBtn" class="styleButton" title="현재 애니메이션을 시퀀스에 추가" style="width: 24%;">Add</button>
+                <button type="button" id="playSequenceBtn" class="styleButton" title="시퀀스 전체 재생" style="width: 24%;">Play</button>
+                <button type="button" id="stopSequenceBtn" class="styleButton" title="시퀀스 정지" style="width: 24%;">Stop</button>
+                <button type="button" id="clearSequenceBtn" class="styleButton" title="시퀀스 초기화" style="width: 24%;">Clear</button>
             </div>
         </div>
     </div>

@@ -108,7 +108,6 @@ var MainLayer = cc.Layer.extend({
         }
     },
 
-    // ... (onLoadArmature, onLoadUI 등 나머지 메서드는 그대로 유지) ...
     onLoadArmature: function( ids )  {
         var children = this.getChildren();
         var self = this;
