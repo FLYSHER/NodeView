@@ -21,6 +21,19 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
             }
         });
 
+        $('#widgetTree').on('ready.jstree', function() {
+            var $anchors = $(this).find('.jstree-anchor');
+            $anchors
+                .on('mousedown', function(e) {
+                    e.preventDefault();
+                })
+                .draggable({
+                    helper: 'clone',
+                    appendTo: 'body',
+                    revert: 'invalid'
+                });
+        });
+
         $(document).ready(function () {
             $(".searchNode").keyup(function () {
                 var searchString = $(this).val();
@@ -70,27 +83,7 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
 
         });
 
-
-        $('#actionTree').jstree({
-            'core' : {
-                'data' : [
-                ],
-                'themes' : {
-                    "dots" : false,
-                    "icons" : null,
-                }
-            }
-        });
-        $('#actionTree').on("changed.jstree", function (e, data) {
-            if( !!data.node === false)
-                return;
-            /*if(self._masterNode.cocosAction){
-                self._masterNode.cocosAction.play(data.node.text)
-            }
-            else {
-                ccs.actionManager.playActionByName(self._jsonName, data.node.text);
-            }*/
-        });
+        $('#actionTree').addClass('custom-tree-container');
 
         this._jsonName = null;
     },
@@ -101,12 +94,6 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
             this._selectNode.forEach( item => {
                 item.setVisible( !item.isVisible());
             });
-            // if(this._selectNode){
-            //
-            //     this._selectNode.setVisible(!this._selectNode.isVisible());
-            //     this.selectNode(this._selectNode);
-            //
-            // }
         }.bind(this));
 
         $('#openAll').click( function(){
@@ -145,8 +132,6 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
                 else {
                     sender.target.innerText = "Hide Bone";
                 }
-
-                // item.setDebugBonesEnabled( !item.getDebugBonesEnabled() );
                 item.setDebugBone();
             });
         }.bind(this));
@@ -164,7 +149,6 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
             });
         }.bind(this));
 
-        // console.log($("input[name=opacity]").val());
         $("input[name=opacity]").change(function(){
             this._selectNode.forEach( item => {
                 item.setOpacity($("input[name=opacity]").val());
@@ -209,7 +193,7 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
         this._treeWidgetObj = {};
 
         var treeObj = [];
-        var actionObj = [];
+        var actionList = [];
 
         if( node && node.spine ) {
             this._selectNode.push( node.spine );
@@ -227,30 +211,20 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
                 childList : childTree
             }] ;
 
-            //treeWidget
             this.drawTree(this.treeInfo, 0, 0, treeObj);
-
 
             if(  node.cocosAction ){
                 for(var key in node.cocosAction._animationInfos){
-                    var obj = {
-                        'text': key
-                    }
-                    actionObj.push(obj);
+                    actionList.push(key);
                 }
             }
             else {
-                //UI Action 추가되는 부분
                 this._jsonName = node.getName() + '.ExportJson';
-                var actionList = ccs.actionManager.getActionList(this._jsonName);
-                for (var i = 0; i < actionList.length; i++) {
-                    var obj = {
-                        'text': actionList[i].getName()
-                    }
-                    actionObj.push(obj);
+                var rawActionList = ccs.actionManager.getActionList(this._jsonName);
+                for (var i = 0; i < rawActionList.length; i++) {
+                    actionList.push(rawActionList[i].getName());
                 }
             }
-
         }
 
         $('#widgetTree').jstree(true).settings.core.data = treeObj;
@@ -265,18 +239,31 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
             },50);
         }
 
-        $('#actionTree').jstree(true).settings.core.data = actionObj;
-        $('#actionTree').jstree("refresh");
+        const $actionContainer = $('#actionTree');
+        $actionContainer.empty();
 
-        var uiAnimationContainer = document.getElementById( "uiAnimationContainer" );
+        actionList.forEach(actionName => {
+            const $item = $(`
+                <div class="custom-tree-item" data-anim-name="${actionName}">
+                    ${actionName}
+                </div>
+            `);
 
-        if( actionObj.length > 0 ) {
+            $item.draggable({
+                appendTo: 'body',
+                helper: function() {
+                    return $(`<div class="custom-drag-helper">${$(this).text()}</div>`);
+                },
+                revert: 'invalid'
+            });
 
-            uiAnimationContainer.style.display = "block";
-        }
-        else {
-            uiAnimationContainer.style.display = "none";
-        }
+            $item.on('click', () => {
+                $actionContainer.find('.custom-tree-item').removeClass('selected');
+                $item.addClass('selected');
+            });
+
+            $actionContainer.append($item);
+        });
 
         var searchBox = document.getElementById( "searchNode" );
         var uiOption = document.getElementById( "ui-option" );
@@ -377,7 +364,6 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
             this._treeWidgetObj[ info.info.id ].initScaleX = info.info.obj.getScaleX();
             this._treeWidgetObj[ info.info.id ].initScaleY = info.info.obj.getScaleY();
 
-
             dataObj.push( obj );
 
             line = this.drawTree(info.childList, depth+1, line, obj.children);
@@ -393,7 +379,7 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
             $('#toggleVisible').html('Hide');
         else
             $('#toggleVisible').html('Show');
-        
+
         $('#localPos').html("(" + nodeObj.getPosition().x.toFixed(2) + " , " +nodeObj.getPosition().y.toFixed(2) + ")");
         $("input[name=lPosX]").val(nodeObj.getPosition().x.toFixed(2));
         $("input[name=lPosY]").val(nodeObj.getPosition().y.toFixed(2));
@@ -409,8 +395,6 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
         var rect = nodeObj.getBoundingBox();
         var po =   nodeObj.getParent().convertToWorldSpace( cc.p(rect.x, rect.y));
 
-
-
         if(rect.width < 5)
             rect.width = 10;
         if (rect.height < 5 )
@@ -419,13 +403,11 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
         Gizmo_DrawTouchLayerByRect(
             cc.rect(po.x, po.y, rect.width, rect.height)
         );
-
     },
 
     selectNodeMulti :function (nodeArr) {
         this._selectNode.length = 0;
         this._selectNode = nodeArr;
-
 
         var posX = this._selectNode[0].getPosition().x.toFixed(2);
         var posY= this._selectNode[0].getPosition().y.toFixed(2);
@@ -445,15 +427,12 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
             ancX = ancX === item.getAnchorPoint().x ? ancX : "-";
             ancY = ancY === item.getAnchorPoint().Y ? ancY : "-";
             zOrder = zOrder === item.getLocalZOrder() ? zOrder : "-";
-
         });
 
         if(this._selectNode[0].isVisible() )
             $('#toggleVisible').html('Hide');
         else
             $('#toggleVisible').html('Show');
-
-
 
         $('#localPos').html("(" + posX + " , " + posY + ")");
         $("input[name=lPosX]").val(posX);
@@ -513,7 +492,6 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
 
                 while( find ) {
                     for( var key2 in treeArrName ) {
-                        // console.log( key + '=>' + this._treeWidgetObj[ key ] );
 
                         var objName = firstSubString1 + ( idx < 10 ? '0' + idx : idx );
                         var objName2 = treeArrName[ key2 ].name;
@@ -543,6 +521,3 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
         return treeArrName;
     }
 });
-
-
-

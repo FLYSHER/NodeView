@@ -26,6 +26,10 @@
         "src/eventDispatcher.js",
         "src/mainLayer.js",
         "src/uiErrorLog.js",
-        "src/engineoverride.js"
+        "src/engineoverride.js",
+        "src/layoutManager.js",
+        "src/panelManager.js",
+        "src/gameViewManager.js",
+        "src/squencer.js"
     ]
 }
