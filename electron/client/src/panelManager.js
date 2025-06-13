@@ -4,10 +4,10 @@ var PanelManager = (function() {
 
     const panelLayoutConfig = {
         gameView:   { id: "panel-game-view",   title: "Game View",      left: 470, top: 20,  width: 800, height: 600, visible: true },
-        fileList:   { id: "panel-file-list",   title: "File List",      left: 20,  top: 20,  width: 430, height: 200, visible: true },
-        widgetTree: { id: "panel-widget-tree", title: "Widget",         left: 20,  top: 240, width: 430, height: 280, visible: true },
+        fileList:   { id: "panel-file-list",   title: "Assets",      left: 20,  top: 20,  width: 430, height: 200, visible: true },
+        widgetTree: { id: "panel-widget-tree", title: "Hierarchy",         left: 20,  top: 240, width: 430, height: 280, visible: true },
         properties: { id: "panel-properties",  title: "Properties",     left: 20,  top: 540, width: 430, height: 240, visible: true },
-        uiAnimation:{ id: "panel-ui-animation",title: "UI Animation",   left: 470, top: 640, width: 395, height: 140, visible: false },
+        uiAnimation:{ id: "panel-ui-animation",title: "Animations",   left: 470, top: 640, width: 395, height: 140, visible: false },
         sequencer:  { id: "panel-sequencer",   title: "Sequencer",      left: 885, top: 640, width: 385, height: 140, visible: false },
     };
 

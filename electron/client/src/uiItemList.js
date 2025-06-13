@@ -16,30 +16,62 @@ var UIItemList = cc.Node.extend({
 
     selectItem : null,
     selectIndex : -1,
-    ctor: function() {
-         this._super(color.backgroundColor);
-        
+    ctor: function(mainLayer) {
+        this._super(); // this._super(color.backgroundColor); 에서 컬러 인자 제거
+        this._mainLayer = mainLayer;
+
         $('#fileNameTree').jstree({
             'core' : {
-                'data' : [
-                ],
+                'data' : [],
+                'check_callback': true, // 드래그 앤 드롭을 위해 필요할 수 있습니다.
                 'themes' : {
                     "dots" : false,
                     "icons" : null,
                 }
             }
         });
-        $('#fileNameTree').jstree("refresh");
+
+        // [수정] jstree가 준비되거나, 새로고침될 때마다 드래그 기능을 적용합니다.
+        $('#fileNameTree').on('ready.jstree refresh.jstree', function() {
+            $(this).find('.jstree-anchor').each(function() {
+                const $anchor = $(this);
+                // 이미 draggable이 적용되었다면 다시 적용하지 않습니다.
+                if ($anchor.is('.ui-draggable')) {
+                    return;
+                }
+                $anchor.draggable({
+                    appendTo: "body",
+                    helper: function() {
+                        const assetName = $(this).text();
+                        const $helper = $(`<div class="custom-drag-helper">${assetName}</div>`);
+                        $helper.data('assetName', assetName);
+                        return $helper;
+                    },
+                    revert: 'invalid',
+                    zIndex: 9999,
+
+                    // [추가] 드래그 시작/종료 이벤트 핸들러
+                    start: function(event, ui) {
+                        // 드래그를 시작하면 오버레이를 보여줍니다.
+                        $('#resize-overlay').show();
+                    },
+                    stop: function(event, ui) {
+                        // 드래그가 끝나면 오버레이를 다시 숨깁니다.
+                        $('#resize-overlay').hide();
+                    }
+                });
+            });
+        });
+
         this.itemCallbacks = {};
 
         var self = this;
-        $('#fileNameTree').on("changed.jstree", function (e, data) {
-            if( !!data.node === false)
-                return;
-            self.selectItem =  self.itemCallbacks[ data.node.text ];
-            self.selectItem && self.selectItem.cb( ItemListClickType.SELECT );
-            
-        });
+        /*$('#fileNameTree').on("changed.jstree", function (e, data) {
+            if( !data.node || !data.node.text ) return;
+
+            // [수정] mainLayer의 updateMenu를 호출하여 선택 이벤트를 전달합니다.
+            self._mainLayer.updateMenu(data.node.text);
+        });*/
 
         $("#deleteBtn").click( function(e){
             self.delBySelectItem();
@@ -74,6 +106,36 @@ var UIItemList = cc.Node.extend({
             cb : cb
         };
 
+    },
+
+    addAsset: function (assetInfo) {
+        // [새로운 로직] 에셋 정보를 받아 jstree에 노드를 추가합니다.
+
+        // jstree 노드 ID는 에셋 이름으로 하여 중복을 방지합니다.
+        var treeNodeObj = {
+            "id": assetInfo.name, // 인스턴스 ID 대신 에셋 이름으로 ID 설정
+            "text": assetInfo.name,
+            "state": {
+                "opened": true
+            },
+            // [추가] 나중에 드래그할 때 타입을 알 수 있도록 데이터 저장
+            "data": {
+                "assetType": assetInfo.type
+            }
+        };
+
+        // 이미 같은 이름의 에셋이 있는지 확인하고 추가합니다.
+        var existingNode = $("#fileNameTree").jstree(true).get_node(assetInfo.name);
+        if (!existingNode) {
+            $("#fileNameTree").jstree(true).settings.core.data.push(treeNodeObj);
+            $('#fileNameTree').jstree("refresh");
+
+            // 콜백은 이제 선택 이벤트에서 주로 사용되므로, 여기서는 일단 비워둡니다.
+            this.itemCallbacks[assetInfo.name] = {
+                itemName: assetInfo.name,
+                cb: function(type) { /* 필요시 선택 콜백 로직 구현 */ }
+            };
+        }
     },
 
     changeItem : function (selectIndex, targetIndex){

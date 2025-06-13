@@ -277,28 +277,19 @@ var Sequencer = (function() {
 
     function _onAdd() {
         let selectedAnimName, animType;
-        const $selectedAnim = mainLayerInstance._animationList.getSelectedAnimationName();
+        const $selectedItem = $('#actionTree').find('.custom-tree-item.selected');
 
-        // [수정] 스파인/아머처 타입 구분
-        if ($selectedAnim && Target) {
-            selectedAnimName = $selectedAnim;
-            if (Target.spine) {
-                animType = 'spine';
-            } else if (Target.armature) {
-                animType = 'armature';
-            }
-        } else {
-            const $selectedAction = $('#actionTree').find('.custom-tree-item.selected');
-            if ($selectedAction.length > 0) {
-                selectedAnimName = $selectedAction.data('anim-name');
-                animType = 'action';
-            }
+        if ($selectedItem.length > 0) {
+            // 선택된 아이템에서 이름과 타입을 모두 가져옵니다.
+            selectedAnimName = $selectedItem.data('anim-name');
+            animType = $selectedItem.data('anim-type'); // ✅ 핵심 수정사항
         }
 
-        if (selectedAnimName && Target) {
+        if (selectedAnimName && animType && Target) {
+            // _addClipToTrack 함수는 수정할 필요 없이 그대로 사용합니다.
             _addClipToTrack(selectedAnimName, animType, Target);
         } else {
-            alert("추가할 애니메이션과 적용할 타겟을 먼저 선택하세요.");
+            alert("목록에서 추가할 애니메이션과 씬에서 적용할 타겟을 먼저 선택하세요.");
         }
     }
 
@@ -318,12 +309,14 @@ var Sequencer = (function() {
     }
 
     function _onPlay() {
+        // --- 여기서부터 디버깅 코드 추가 ---
+        console.log("%c[Sequencer] Playback sequence started.", "color: #3498db; font-weight: bold;");
+
         isPlaying = true; isPaused = false; sequenceStartTime = Date.now();
 
         const $playhead = $('#timeline-playhead');
         $('#playSequenceBtn').text('Pause');
 
-        // [수정] 하드코딩된 120 대신 실제 라벨 너비를 가져옵니다.
         const labelWidth = $('#track-labels-container').outerWidth();
         $playhead.show().stop().css('left', labelWidth);
 
@@ -333,20 +326,48 @@ var Sequencer = (function() {
         if (!runnerNode) { runnerNode = new cc.Node(); runnerNode.setTag(999); mainLayerInstance.addChild(runnerNode); }
         runnerNode.stopAllActions();
 
+        if (tracks.size === 0) {
+            console.warn("[Sequencer] No tracks to play.");
+        }
+
         tracks.forEach(trackData => {
+            const targetNode = trackData.node;
+            console.log(`[Sequencer] Processing track for node: "${targetNode.getName()}"`, targetNode);
+
+            if (trackData.clips.length === 0) {
+                console.log(`[Sequencer] Node "${targetNode.getName()}" has no clips.`);
+                return;
+            }
+
             trackData.clips.forEach(clip => {
-                const targetNode = trackData.node;
                 const isLooping = clip.duration > clip.originalDuration;
+                console.log(`%c[Sequencer] Scheduling clip: "${clip.animName}"`, "color: #2ecc71;", {
+                    target: targetNode.getName(),
+                    startTime: clip.startTime.toFixed(2) + 's',
+                    duration: clip.duration.toFixed(2) + 's',
+                    isLooping: isLooping,
+                    type: clip.type
+                });
 
                 const playAction = cc.callFunc(() => {
+                    console.log(`%c[Sequencer] >> Playing clip: "${clip.animName}" on "${targetNode.getName()}"`, "color: #e67e22;");
+
                     if (clip.type === 'spine' && targetNode.spine) {
                         targetNode.spine.setAnimation(0, clip.animName, isLooping);
                     } else if (clip.type === 'armature' && targetNode.armature) {
-                        targetNode.armature.getAnimation().play(clip.animName, -1, isLooping);
-                    } else if (clip.type === 'action' && targetNode.cocosAction) {
+                        targetNode.armature.getAnimation().play(clip.animName, -1, isLooping ? 0 : 1);
+                    }
+                    else if (clip.type === 'action' && targetNode.cocosAction) {
                         targetNode.cocosAction.play(clip.animName, isLooping);
-                    } else if (clip.type === 'action') {
-                        ccs.actionManager.playActionByName(targetNode.getName() + '.ExportJson', clip.animName);
+                    }
+                    else if (clip.type === 'action' && targetNode.ui) {
+                        if (targetNode.actionUrl) {
+                            ccs.actionManager.playActionByName(targetNode.actionUrl, clip.animName);
+                        } else {
+                            console.error(`[Sequencer] Could not play UIAction. Target node "${targetNode.getName()}" is missing the 'actionUrl' property.`);
+                        }
+                    } else {
+                        console.error(`[Sequencer] Could not play clip. Target node "${targetNode.getName()}" does not have the required component for type "${clip.type}".`, targetNode);
                     }
                 });
 
@@ -357,6 +378,7 @@ var Sequencer = (function() {
 
                 if (!isNextClipStarting) {
                     const stopAction = cc.callFunc(() => {
+                        console.log(`%c[Sequencer] << Stopping animation for clip "${clip.animName}" at ${endTime.toFixed(2)}s`, "color: #f1c40f;");
                         if (clip.type === 'spine' && targetNode.spine) {
                             targetNode.spine.clearTrack(0);
                         } else if (clip.type === 'armature' && targetNode.armature && targetNode.armature.getAnimation().getCurrentMovementID() === clip.animName) {
@@ -369,21 +391,28 @@ var Sequencer = (function() {
         });
 
         const totalDuration = _getTotalDuration();
+        console.log(`[Sequencer] Total sequence duration: ${totalDuration.toFixed(2)}s`);
+
         if (totalDuration > 0) {
-            // [수정] 애니메이션 목적지 계산에도 동적 너비를 사용합니다.
             $playhead.animate({ left: labelWidth + totalDuration * PIXELS_PER_SECOND }, {
                 duration: totalDuration * 1000, easing: 'linear',
                 step: function(now) {
                     const $container = $('#timeline-tracks-container');
-                    const playheadPos = now - labelWidth; // 기준값을 동적 너비로 변경
+                    const playheadPos = now - labelWidth;
                     const containerWidth = $container.width(), scrollLeft = $container.scrollLeft();
                     if (playheadPos > scrollLeft + containerWidth * 0.75 || playheadPos < scrollLeft) {
                         $container.scrollLeft(playheadPos - containerWidth / 2);
                     }
                 },
-                complete: () => _onStop(true)
+                complete: () => {
+                    console.log("%c[Sequencer] Playback finished.", "color: #3498db; font-weight: bold;");
+                    _onStop(true);
+                }
             });
-        } else { _onStop(true); }
+        } else {
+            console.log("[Sequencer] Playback finished immediately (total duration is 0).");
+            _onStop(true);
+        }
     }
 
     function _onPause() {
@@ -538,23 +567,15 @@ var Sequencer = (function() {
                 drop: function(event, ui) {
                     if (!Target) { alert("먼저 캔버스에서 애니메이션을 적용할 타겟을 선택하세요."); return; }
 
+                    // 드래그된 아이템(ui.draggable)에서 이름과 타입을 직접 읽어옵니다.
                     const animName = ui.draggable.data('anim-name');
+                    const animType = ui.draggable.data('anim-type'); // ✅ 핵심 수정사항
 
-                    // ================================================================
-                    // ##### [수정] 드래그 앤 드롭 시, Target 타입을 확인하여 animType을 올바르게 지정합니다. #####
-                    let animType;
-                    if (ui.draggable.closest('#animationTree').length > 0) {
-                        // 애니메이션 목록에서 드래그한 경우
-                        if (Target && Target.spine) {
-                            animType = 'spine';
-                        } else { // armature 또는 기타
-                            animType = 'armature';
-                        }
-                    } else {
-                        // 액션 목록에서 드래그한 경우
-                        animType = 'action';
+                    // 타입을 찾지 못했다면 실행하지 않습니다.
+                    if (!animType) {
+                        console.error("드래그된 아이템에서 'data-anim-type'을 찾을 수 없습니다.");
+                        return;
                     }
-                    // ================================================================
 
                     const dropX = event.pageX - $tracksContainer.offset().left + $tracksContainer.scrollLeft();
                     _addClipToTrack(animName, animType, Target, dropX / PIXELS_PER_SECOND);

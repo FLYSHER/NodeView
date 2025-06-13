@@ -42,6 +42,10 @@ var MainLayer = cc.Layer.extend({
     ctor: function () {
         this._super();
 
+        this.assetLibrary = {}; // 로드된 모든 에셋의 정보 저장소
+        this.sceneNodes = {};   // 씬에 실제 배치된 노드들의 정보 저장소
+        this.nodeMap = {};      // 모든 노드를 ID 기반으로 저장할 지도
+
         var size = cc.winSize;
         this.CX = size.width / 2;
         this.CY = size.height / 2;
@@ -61,10 +65,9 @@ var MainLayer = cc.Layer.extend({
 
         this._nodeList = {};
         this._nodeOrder = [];
-        this._animationList = new UIListViewTest();
         this._movementCtrl = new UiPositionCtrl();
-        this._itemList = new UIItemList();
-        this._treeView = new UIScrollTreeViewCtrl();
+        this._itemList = new UIItemList(this);
+        this._treeView = new UIScrollTreeViewCtrl(this);
         this._treeView.setup();
         NodeList = this._nodeList;
         Sequencer.initialize(this);
@@ -105,22 +108,19 @@ var MainLayer = cc.Layer.extend({
         children.forEach( function( c ) { if( c.getTag() === self.DESC_TAG ) { c.removeFromParent(); } });
 
         cc.each( ids, function( name, index ) {
-            if(this._nodeList[ name ]) return;
-            var armature = new ccs.Armature( name );
-            var node = new DraggableNode( armature.getContentSize() );
-            node.setPosition( this.CX - armature.getContentSize().width * 0.5 , this.CY - armature.getContentSize().height * 0.5 );
-            this.addChild( node );
-            node.addChildToCenter( armature );
-            node.armature = armature;
-            node.ui = null;
-            node.spine = null;
-            node.order = this._nodeOrder.length;
-            node.setLocalZOrder(10 + node.order);
-            this._nodeOrder[node.order] = node;
-            this._nodeList[ name ] = node;
-            this._addToJsonListMenu( name , node );
+            if(this.assetLibrary[name]) return;
+
+            const assetInfo = {
+                type: 'armature',
+                name: name
+            };
+            this.assetLibrary[name] = assetInfo;
+            console.log(`[Asset] Armature 에셋 '${name}'이 라이브러리에 추가되었습니다.`);
+            this._itemList.addAsset(assetInfo);
+
         }, this );
     },
+
 
     onLoadUI: function( url ) {
         var children = this.getChildren();
@@ -128,23 +128,15 @@ var MainLayer = cc.Layer.extend({
         children.forEach( function( c ) { if( c.getTag() === self.DESC_TAG ) { c.removeFromParent(); } });
 
         var name = cc.path.mainFileName( url );
-        if(this._nodeList[ name ]) return;
-        var json = ccs.load( url );
-        var ui = json.node;
-        var node = new DraggableNode( ui.getContentSize() );
-        node.setAnchorPoint( 0.5, 0.5 );
-        node.setPosition( this.CX , this.CY );
-        this.addChild( node );
-        ui.setAnchorPoint( 0.5, 0.5 );
-        node.addChildToCenter( ui );
-        node.armature = null;
-        node.ui = ui;
-        node.spine = null;
-        node.order = this._nodeOrder.length;
-        node.setLocalZOrder(10 + node.order);
-        this._nodeOrder[node.order] = node;
-        this._nodeList[ name ] = node;
-        this._addToJsonListMenu( name ,node);
+        if(this.assetLibrary[name]) return;
+        const assetInfo = {
+            type: 'ui',
+            name: name,
+            url: url
+        };
+        this.assetLibrary[name] = assetInfo;
+        console.log(`[Asset] UI 에셋 '${name}'이 라이브러리에 추가되었습니다.`);
+        this._itemList.addAsset(assetInfo);
     },
 
     onLoadSpine: function( fileName ) {
@@ -153,69 +145,14 @@ var MainLayer = cc.Layer.extend({
         children.forEach( function( c ) { if( c.getTag() === self.DESC_TAG ) { c.removeFromParent(); } });
 
         var name = cc.path.mainFileName( fileName );
-        if(this._nodeList[ name ]) return;
-
-        var spine = sp.SkeletonAnimation.createWithJsonFile( fileName + ".json", fileName +".atlas", 1.0 );
-        spine.setPosition( cc.p( cc.winSize.width / 2, cc.winSize.height / 2 ) );
-        var node = new DraggableNode( spine.getContentSize() );
-        node.setAnchorPoint( 0.5, 0.5 );
-        node.setPosition( this.CX , this.CY );
-        this.addChild( node );
-        node.addChildToCenter( spine );
-
-        var arrBone = [];
-        var setBoneLabel = function( lbBone, bone ) {
-            lbBone.setPosition( cc.p( bone.ax, bone.ay ) );
-            lbBone.setScaleX( bone.ascaleX );
-            lbBone.setScaleY( bone.ascaleY );
-            lbBone.setRotation( -bone.arotation );
+        if(this.assetLibrary[name]) return;
+        const assetInfo = {
+            type: 'spine',
+            name: name
         };
-
-        var setBone = function ( bone ) {
-            var lbBone = new ccui.Text( bone.data.name, "Arial", 20 );
-            lbBone.enableOutline(cc.color(41, 0, 0, 127), 1 );
-            lbBone.enableShadow(cc.color(41, 0, 0, 127), cc.size(0, -1) );
-            lbBone.setVisible( false );
-            arrBone.push( { "bone": bone, "lbBone": lbBone } );
-            if( bone.children.length > 0 ) {
-                bone.children.forEach( function( _bone ) { setBone( _bone ); } );
-                setBoneLabel( lbBone, bone );
-            } else {
-                setBoneLabel( lbBone, bone );
-            }
-            spine.addChild( lbBone, 1 );
-        };
-        setBone( spine._rootBone );
-
-        node.armature = null;
-        node.ui = null;
-        node.spine = spine;
-        node.spine.arrBone = arrBone;
-        node.spine.setDebugBone = function() {
-            node.spine.setDebugBonesEnabled( !node.spine.getDebugBonesEnabled() );
-            node.spine.updateFunc = function( dt ) {
-                arrBone.forEach( function( boneData ) {
-                    var lbBone = boneData.lbBone;
-                    var bone = boneData.bone;
-                    setBoneLabel( lbBone, bone );
-                } );
-            };
-            if( node.spine.getDebugBonesEnabled() ) {
-                node.spine.schedule( node.spine.updateFunc );
-            }
-            else {
-                node.spine.unschedule( node.spine.updateFunc );
-            }
-            arrBone.forEach( function( boneData ) {
-                boneData.lbBone.visible = node.spine.getDebugBonesEnabled();
-            } );
-        }.bind( node.spine );
-
-        node.order = this._nodeOrder.length;
-        node.setLocalZOrder(10 + node.order);
-        this._nodeOrder[node.order] = node;
-        this._nodeList[ name ] = node;
-        this._addToJsonListMenu( name ,node);
+        this.assetLibrary[name] = assetInfo;
+        console.log(`[Asset] Spine 에셋 '${name}'이 라이브러리에 추가되었습니다.`);
+        this._itemList.addAsset(assetInfo);
     },
 
     onLoadCocosStuido : function( url ) {
@@ -224,27 +161,159 @@ var MainLayer = cc.Layer.extend({
         children.forEach( function( c ) { if( c.getTag() === self.DESC_TAG ) { c.removeFromParent(); } });
 
         var name = cc.path.mainFileName( url );
-        if(this._nodeList[ name ]) return;
-        var json = ccs.load( url );
-        var ui = json.node;
-        var size = ui.getContentSize();
-        if(size.width < 0.01 || size.height < 0.01){ size = ui.getBoundingBoxToWorld(); }
-        var node = new DraggableNode( size );
-        node.setAnchorPoint( 0.5, 0.5 );
-        node.setPosition( this.CX , this.CY );
-        this.addChild( node );
-        ui.setAnchorPoint( 0.5, 0.5 );
-        node.addChildToCenter( ui );
-        node.armature = null;
-        node.ui = ui;
-        node.spine = null;
-        node.cocosAction = json.action;
-        if(node.cocosAction){ node.runAction(node.cocosAction); }
-        node.order = this._nodeOrder.length;
-        node.setLocalZOrder(10 + node.order);
-        this._nodeOrder[node.order] = node;
-        this._nodeList[ name ] = node;
-        this._addToJsonListMenu( name ,node);
+        if(this.assetLibrary[name]) return;
+        const assetInfo = {
+            type: 'cocosstudio',
+            name: name,
+            url: url
+        };
+        this.assetLibrary[name] = assetInfo;
+        console.log(`[Asset] CocosStudio 에셋 '${name}'이 라이브러리에 추가되었습니다.`);
+        this._itemList.addAsset(assetInfo);
+    },
+
+    // 자식 노드 데이터를 재귀적으로 생성하는 헬퍼 함수
+    _buildChildrenRecursive: function(parentNode) {
+        let childrenData = [];
+        const children = parentNode.getChildren();
+        if (children && children.length > 0) {
+            for (const child of children) {
+                // DraggableNode에 포함된 selectMark(DrawNode)는 하이어라키에 표시하지 않습니다.
+                if (child instanceof cc.DrawNode) continue;
+
+                let childNodeData = {
+                    text: child.getName() || "Unnamed Node",
+                    children: this._buildChildrenRecursive(child),
+                    data: { nodeId: child.__instanceId }
+                };
+                childrenData.push(childNodeData);
+            }
+        }
+        return childrenData;
+    },
+
+    // 하이어라키 전체를 다시 그리는 메인 함수
+    refreshHierarchyView: function() {
+        let unifiedTreeData = [];
+        for (const instanceName in this.sceneNodes) {
+            if (this.sceneNodes.hasOwnProperty(instanceName)) {
+                const draggableNode = this.sceneNodes[instanceName];
+                // [수정!] getChildren()[0] 대신, 저장된 속성으로 실제 컨텐츠를 찾습니다.
+                const contentNode = draggableNode.ui || draggableNode.armature || draggableNode.spine;
+
+                let topLevelNodeData = {
+                    text: draggableNode.getName(),
+                    children: contentNode ? this._buildChildrenRecursive(contentNode) : [],
+                    data: { nodeId: draggableNode.__instanceId },
+                    state: { opened: false }
+                };
+                unifiedTreeData.push(topLevelNodeData);
+            }
+        }
+        this._treeView.updateTreeView(unifiedTreeData);
+    },
+
+    // ID를 받아 노드를 찾아 처리하는 함수
+    updateMenuWithNodeId: function(nodeId) {
+        if (!nodeId) return;
+        const node = this.nodeMap[nodeId];
+        if (!node) {
+            console.error("Node not found with ID:", nodeId);
+            return;
+        }
+
+        Target = node;
+        this._treeView.setNode(node);
+        // 하이어라키에서 노드를 클릭했을 때도 드래그 가능 상태가 되도록 설정
+        this.setDraggableItem(node.getName());
+    },
+
+    createInstanceFromLibrary: function(assetName) {
+        const assetInfo = this.assetLibrary[assetName];
+        if (!assetInfo) {
+            console.error(`[Error] assetLibrary에 '${assetName}' 에셋이 존재하지 않습니다.`);
+            return;
+        }
+
+        let instanceName = assetInfo.name;
+        let count = 1;
+        while (this.sceneNodes[instanceName]) {
+            instanceName = `${assetInfo.name} (${count})`;
+            count++;
+        }
+
+        console.log(`[Instance] '${instanceName}' 인스턴스를 생성합니다. (타입: ${assetInfo.type})`);
+
+        let node = null;
+
+        switch (assetInfo.type) {
+            case 'armature':
+                var armature = new ccs.Armature(assetInfo.name);
+                node = new DraggableNode(armature.getContentSize());
+                // Armature는 기준점이 (0,0)에 가까우므로, 중앙에 배치하기 위해 위치를 보정합니다.
+                node.setPosition(this.CX - armature.getContentSize().width * 0.5, this.CY - armature.getContentSize().height * 0.5);
+                node.addChildToCenter(armature);
+                node.armature = armature;
+                node.assetType = 'armature'; // ✅ Armature 타입 꼬리표
+                break;
+
+            case 'spine':
+                var spine = sp.SkeletonAnimation.createWithJsonFile(assetInfo.name + ".json", assetInfo.name +".atlas", 1.0);
+                node = new DraggableNode(spine.getContentSize());
+                node.setAnchorPoint(0.5, 0.5);
+                node.setPosition(this.CX, this.CY);
+                node.addChildToCenter(spine);
+                node.spine = spine;
+                node.assetType = 'spine'; // ✅ Spine 타입 꼬리표
+                break;
+
+            case 'ui':
+            case 'cocosstudio':
+                var json = ccs.load(assetInfo.url);
+                var ui = json.node;
+                var size = ui.getContentSize();
+                if (size.width < 0.01 || size.height < 0.01) {
+                    size = ui.getBoundingBoxToWorld();
+                }
+                node = new DraggableNode(size);
+                node.setAnchorPoint(0.5, 0.5);
+                node.setPosition(this.CX, this.CY);
+
+                // ✅ UI Action의 정확한 배치를 위한 핵심 코드
+                ui.setAnchorPoint(0.5, 0.5);
+
+                node.addChildToCenter(ui);
+                node.ui = ui;
+                if (json.action) {
+                    node.cocosAction = json.action;
+                    node.runAction(node.cocosAction);
+                }
+                node.assetType = 'action';   // ✅ UI/Action 타입 꼬리표
+                node.actionUrl = assetInfo.url; // ✅ UI/Action URL 꼬리표
+                break;
+
+            default:
+                console.error(`[Error] 알 수 없는 에셋 타입입니다: ${assetInfo.type}`);
+                return;
+        }
+
+        if (node) {
+            node.setName(instanceName);
+            this.addChild(node);
+            this.sceneNodes[instanceName] = node;
+
+            const addNodeToMap = (n) => {
+                if (!n) return;
+                this.nodeMap[n.__instanceId] = n;
+                const children = n.getChildren();
+                if(children) {
+                    children.forEach(child => addNodeToMap(child));
+                }
+            };
+            addNodeToMap(node);
+
+            this.refreshHierarchyView();
+        }
     },
 
     reOrderup : function (nodeName, orderPlus) {
@@ -277,121 +346,109 @@ var MainLayer = cc.Layer.extend({
             }.bind(this));
     },
 
-    updateMenu: function( name, finalNode ) {
-        var selectNode = this._nodeList[ name ];
-        toggleJSONUI(name.indexOf('(JSON)') !== -1);
-        if( !selectNode ) return;
-
-        selectNode.setName(name);
-        if( selectNode.armature) {
-            var animations =  selectNode.armature.getAnimation();
-            var animNameArr = animations._animationData.movementNames;
-            var playCb = function (animName) { animations.play(animName); };
-            this._animationList.init(animNameArr,playCb);
-            $('#LocalSize').html("(" + selectNode.armature.getContentSize().width.toFixed(2) + " , " +selectNode.armature.getContentSize().height.toFixed(2) + ")");
-        } else if ( selectNode.spine ) {
-            var animations = selectNode.spine.getState().data.skeletonData.animations;
-            var animNameArr = [];
-            for( var idx = 0; idx < animations.length; idx++ ) {
-                animNameArr.push( animations[ idx ].name );
-            }
-            var playCb = function ( animName) {
-                selectNode.spine.setAnimation( 0, animName, false );
-            };
-            this._animationList.init(animNameArr,playCb);
-            $('#LocalSize').html("(" + selectNode.spine.getContentSize().width.toFixed(2) + " , " +selectNode.spine.getContentSize().height.toFixed(2) + ")");
-        } else{
-            this._animationList.init([],null);
-        }
-        this._movementCtrl.init(selectNode);
-        this._treeView.setNode(selectNode, finalNode);
-        this.setDraggableItem( name );
-    },
-
-    deleteItem : function ( name) {
-        var selectNode = this._nodeList[ name ];
+    deleteItem : function (name) {
+        var selectNode = this.sceneNodes[name];
         if(selectNode) {
-            if(Target === selectNode) Target = null;
-            var order = selectNode.order;
-            selectNode.removeFromParent();
-            this._animationList.init([],null);
-            delete this._nodeList[ name ];
-            this._movementCtrl.init(null);
-            for(var n = order; n < this._nodeOrder.length - 1; n++) {
-                this._nodeOrder[n + 1].order =n;
-                this._nodeOrder[n] = this._nodeOrder[n + 1];
-                this._nodeOrder[n].setLocalZOrder(1000 - this._nodeOrder[n].order);
+            if(Target === selectNode) {
+                Target = null;
+                this._treeView.setNode(null);
             }
-            this._nodeOrder.pop();
-            this._treeView.setNode(null);
+
+            const removeNodeFromMap = (n) => {
+                if (!n) return;
+                delete this.nodeMap[n.__instanceId];
+                const children = n.getChildren();
+                if(children) {
+                    children.forEach(child => removeNodeFromMap(child));
+                }
+            };
+            removeNodeFromMap(selectNode);
+
+            delete this.sceneNodes[name];
+            selectNode.removeFromParent();
+            this.refreshHierarchyView();
         }
     },
 
     setDraggableItem: function( name ) {
-        for( var nodeName in this._nodeList ) {
-            if( typeof this._nodeList[ nodeName ].setDraggable === 'function' ) {
-                this._nodeList[ nodeName ].setDraggable( false );
-                if(Target ===  this._nodeList[ nodeName ]) Target = null;
+        // 모든 노드의 드래그 상태를 우선 비활성화
+        for( var nodeName in this.sceneNodes ) {
+            if( typeof this.sceneNodes[ nodeName ].setDraggable === 'function' ) {
+                this.sceneNodes[ nodeName ].setDraggable( false );
             }
         }
-        if( this._nodeList.hasOwnProperty( name ) ) {
-            this._nodeList[ name ].setDraggable( true );
-            Target = this._nodeList[ name ];
+        // 선택된 노드만 드래그 활성화
+        if( this.sceneNodes.hasOwnProperty( name ) ) {
+            this.sceneNodes[ name ].setDraggable( true );
+            Target = this.sceneNodes[ name ];
         }
     },
 
     getAnimationLength: function(node, animName) {
         if (!node || !animName) return 0;
+
+        let contentNode = node.ui || node.armature || node.spine;
+        if (!contentNode) contentNode = node;
+
         var durationInSeconds = 0;
-        if (node.armature) {
-            try {
-                var animation = node.armature.getAnimation();
-                var movementData = animation._animationData.movementDataDic[animName];
-                if (movementData && movementData.duration) {
-                    var durationInFrames = movementData.duration;
-                    var speedScale = movementData.scale || 1;
-                    durationInSeconds = (durationInFrames / speedScale) / 60.0;
-                }
-            } catch (e) { console.error("Armature 길이를 가져오는 중 오류:", e); }
-        }
-        else if (node.spine) {
-            try {
-                // [수정] 스파인 애니메이션 길이를 가져오는 API를 정확하게 수정합니다.
-                const animation = node.spine.getState().data.skeletonData.findAnimation(animName);
-                if (animation) {
-                    durationInSeconds = animation.duration;
-                }
-            } catch (e) { console.error("Spine 길이를 가져오는 중 오류:", e); }
-        }
-        else {
-            try {
-                var rawJsonData = null;
-                var fileName = node.getName();
-                var url = Loader.cocosStudioURL[fileName] || Loader.uiURL[fileName];
-                if (url && cc.loader.cache[url]) {
-                    rawJsonData = (typeof cc.loader.cache[url] === 'string') ? JSON.parse(cc.loader.cache[url]) : cc.loader.cache[url];
-                }
-                if (!rawJsonData && node.cocosAction && node.cocosAction.animation && node.cocosAction.animation.actionlist){
-                    rawJsonData = node.cocosAction;
-                }
-                if (rawJsonData && rawJsonData.animation && rawJsonData.animation.actionlist) {
-                    var actionClipData = rawJsonData.animation.actionlist.find(clip => clip.name === animName);
-                    if (actionClipData) {
-                        var unitTime = (typeof actionClipData.unittime === 'number' && actionClipData.unittime > 0) ? actionClipData.unittime : (1 / 60);
-                        var maxFrameId = 0;
-                        if (actionClipData.actionnodelist) {
-                            actionClipData.actionnodelist.forEach(function(actionNodeInClip) {
-                                if (actionNodeInClip.actionframelist) {
-                                    actionNodeInClip.actionframelist.forEach(function(frame) {
-                                        if (frame.frameid > maxFrameId) maxFrameId = frame.frameid;
-                                    });
-                                }
-                            });
-                        }
-                        durationInSeconds = maxFrameId * unitTime;
+
+        switch (node.assetType) {
+            case 'armature':
+                try {
+                    const animation = contentNode.getAnimation();
+                    const movementData = animation._animationData.movementDataDic[animName];
+                    if (movementData && movementData.duration) {
+                        const durationInFrames = movementData.duration;
+                        const speedScale = movementData.scale || 1;
+                        durationInSeconds = (durationInFrames / speedScale) / 60.0;
                     }
-                }
-            } catch (e) { console.error("UIAction 길이를 가져오는 중 오류:", e); durationInSeconds = 0; }
+                } catch (e) { console.error("Armature 길이를 가져오는 중 오류:", e); }
+                break;
+
+            case 'spine':
+                try {
+                    const animation = contentNode.getState().data.skeletonData.findAnimation(animName);
+                    if (animation) {
+                        durationInSeconds = animation.duration;
+                    }
+                } catch (e) { console.error("Spine 길이를 가져오는 중 오류:", e); }
+                break;
+
+            case 'action':
+                try {
+                    let rawJsonData = null;
+                    // ✅ [핵심 수정] 1. 원본 코드처럼, 노드에 직접 첨부된 cocosAction이 있는지 먼저 확인합니다.
+                    if (node.cocosAction && node.cocosAction.animation && node.cocosAction.animation.actionlist) {
+                        rawJsonData = node.cocosAction;
+                    }
+                    // 2. 없다면, actionUrl을 이용해 캐시에서 찾습니다. (Fallback)
+                    else {
+                        const url = node.actionUrl;
+                        if (url && cc.loader.cache[url]) {
+                            rawJsonData = (typeof cc.loader.cache[url] === 'string') ? JSON.parse(cc.loader.cache[url]) : cc.loader.cache[url];
+                        }
+                    }
+
+                    // 3. 찾은 데이터를 기반으로 길이를 계산하는 로직은 동일합니다.
+                    if (rawJsonData && rawJsonData.animation && rawJsonData.animation.actionlist) {
+                        const actionClipData = rawJsonData.animation.actionlist.find(clip => clip.name === animName);
+                        if (actionClipData) {
+                            const unitTime = (typeof actionClipData.unittime === 'number' && actionClipData.unittime > 0) ? actionClipData.unittime : (1 / 60);
+                            let maxFrameId = 0;
+                            if (actionClipData.actionnodelist) {
+                                actionClipData.actionnodelist.forEach(function(actionNodeInClip) {
+                                    if (actionNodeInClip.actionframelist) {
+                                        actionNodeInClip.actionframelist.forEach(function(frame) {
+                                            if (frame.frameid > maxFrameId) maxFrameId = frame.frameid;
+                                        });
+                                    }
+                                });
+                            }
+                            durationInSeconds = maxFrameId * unitTime;
+                        }
+                    }
+                } catch (e) { console.error("UIAction 길이를 가져오는 중 오류:", e); durationInSeconds = 0; }
+                break;
         }
         return Math.max(0, durationInSeconds);
     },
@@ -445,21 +502,45 @@ var ManiLayerScene = cc.Scene.extend({
 
         GameViewManager.sync();
 
+        $(cc.game.canvas).droppable({
+            accept: ".jstree-anchor",
+            drop: function(event, ui) {
+                const assetName = ui.helper.data('assetName');
+                if (assetName) {
+                    layer.createInstanceFromLibrary(assetName);
+                }
+            }
+        });
+
         var self = this;
         cc.eventManager.addListener( {
             event: cc.EventListener.MOUSE,
             onMouseDown: function( event ) {
-                var nodeObj = self.getFrontTouchedNode( event.getLocation() );
                 var mainLayer = self.getChildByName("MainLayer");
-                if( nodeObj.node && mainLayer) {
-                    mainLayer.updateMenu( nodeObj.nodeName, nodeObj.finalNode );
-                    setTimeout(function(){
-                        $('#fileNameTree').jstree("deselect_all");
-                        $('#fileNameTree').jstree('select_node',nodeObj.node.__instanceId);
-                    },100);
+                if (!mainLayer) return;
+
+                var touchedDraggableNode = null;
+                var children = mainLayer.getChildren().slice().reverse();
+                for(const child of children){
+                    if(child instanceof DraggableNode && child.isVisible()){
+                        const worldBoundingBox = child.getBoundingBoxToWorld();
+                        if(cc.rectContainsPoint(worldBoundingBox, event.getLocation())){
+                            touchedDraggableNode = child;
+                            break;
+                        }
+                    }
+                }
+
+                if (touchedDraggableNode) {
+                    // ✅ [수정!] 옛날 함수 대신 새 ID 기반 함수를 호출합니다.
+                    mainLayer.updateMenuWithNodeId(touchedDraggableNode.__instanceId);
+                } else {
+                    // 캔버스 빈 공간 클릭 시 모든 선택 해제
+                    mainLayer.setDraggableItem(null);
+                    mainLayer.updateMenuWithNodeId(null);
                 }
             },
-            swallowTouches: false
+            swallowTouches: true // 다른 곳으로 이벤트가 전파되지 않도록 설정
         }, this );
     },
 

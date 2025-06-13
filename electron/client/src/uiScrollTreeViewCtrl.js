@@ -7,8 +7,11 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
     _masterNode : null,
     _treeWidgetObj : {},
     _treeString : "",
-    ctor : function () {
+    _mainLayer: null,
+    ctor : function (mainLayer) {
         this._super("");
+        this._mainLayer = mainLayer; // 참조 저장
+
         $('#widgetTree').jstree({
             'core' : {
                 'data' : [
@@ -18,6 +21,26 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
             "search": {
                 "case_sensitive": false,
                 "show_only_matches": true
+            }
+        });
+
+        const self = this;
+        $('#widgetTree').droppable({
+            accept: ".jstree-anchor",
+            // 드롭을 감지했을 때 실행될 함수
+            drop: function(event, ui) {
+                const assetName = ui.helper.data('assetName');
+                if (assetName && self._mainLayer) {
+                    // 저장해둔 MainLayer 참조를 통해 인스턴스 생성 함수를 호출합니다.
+                    self._mainLayer.createInstanceFromLibrary(assetName);
+                }
+            },
+            // 드롭 가능한 영역 위에 올라왔을 때 시각적 효과
+            over: function(event, ui) {
+                $(this).addClass('track-drop-hover');
+            },
+            out: function(event, ui) {
+                $(this).removeClass('track-drop-hover');
             }
         });
 
@@ -52,46 +75,14 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
             });
         });
 
-        var self = this;
         $('#widgetTree').on("changed.jstree", function (e, data) {
-            if( !!data.node === false)
-                return;
+            if (data.node && data.node.data && data.node.data.nodeId && data.action === 'select_node') {
 
-            if( data.selected.length < 2 ){
-                var selectedObj = self._treeWidgetObj[ data.node.id ];
-                if( !!selectedObj === false )
-                    return;
+                const selectedNodeId = data.node.data.nodeId; // ✅ 저장된 ID를 가져옵니다.
 
-                if( selectedObj.obj.getNumberOfRunningActions() === 0 ) {
-
-                    var actionBy = cc.scaleBy(0.15, 1.2).easing( cc.easeElasticOut( 1.5 ));
-
-                    $('#scaleValue').html("("+selectedObj.initScaleX+" , "+selectedObj.initScaleY+")");
-                    selectedObj.obj.runAction(cc.sequence(actionBy, actionBy.reverse())).setTag(100);
-                }
-
-                self.selectNode(selectedObj.obj);
+                // ✅ ID를 MainLayer의 새 함수로 전달합니다.
+                self._mainLayer.updateMenuWithNodeId(selectedNodeId);
             }
-            else {
-                var objArr = [];
-                for ( var i = 0 ; i < data.selected.length ; i ++ ){
-                    var selectedObj = self._treeWidgetObj[ data.selected[i] ];
-                    if( !!selectedObj === false )
-                        return;
-
-                    if( selectedObj.obj.getNumberOfRunningActions() === 0 ) {
-
-                        var actionBy = cc.scaleBy(0.15, 1.2).easing( cc.easeElasticOut( 1.5 ));
-
-                        $('#scaleValue').html("("+selectedObj.initScaleX+" , "+selectedObj.initScaleY+")");
-                        selectedObj.obj.runAction(cc.sequence(actionBy, actionBy.reverse())).setTag(100);
-                    }
-
-                    objArr.push( selectedObj.obj);
-                }
-                self.selectNodeMulti(objArr);
-            }
-
         });
 
         $('#actionTree').addClass('custom-tree-container');
@@ -196,85 +187,116 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
         }.bind(this));
     },
 
-    setNode :function (node, finalNode) {
-        delete this.treeInfo;
-        this._selectNode.length = 0;
-        this._selectNode = [];
-        this._masterNode = node;
-        this._treeWidgetObj = {};
-
-        var treeObj = [];
-        var actionList = [];
-
-        if( node && node.spine ) {
-            this._selectNode.push( node.spine );
-        }
-        else if(node && node.ui) {
-            var childTree = this.createUIChildList(node.ui);
-
-            this.treeInfo = [{
-                info :{
-                    id : node.ui.__instanceId,
-                    obj : node.ui,
-                    name : node.ui.getName(),
-                    initScale : node.ui.getScale(),
-                },
-                childList : childTree
-            }] ;
-
-            this.drawTree(this.treeInfo, 0, 0, treeObj);
-
-            if(  node.cocosAction ){
-                for(var key in node.cocosAction._animationInfos){
-                    actionList.push(key);
-                }
+    setNode: function(node, finalNode) {
+        if (!node) {
+            this._selectNode = [];
+            this._masterNode = null;
+            $('#widgetTree').jstree(true).settings.core.data = [];
+            $('#widgetTree').jstree("refresh");
+            $('#actionTree').empty();
+            $('#localPos').html("( - , - )");
+            $('#LocalSize').html("( - , - )");
+            $('#opacityValue').html("255");
+            $('#anchorValue').html("( - , - )");
+            $('#zOrderValue').html("-");
+            $("input[name=lPosX]").val("");
+            $("input[name=lPosY]").val("");
+            $("input[name=opacity]").val(255);
+            var searchBox = document.getElementById("searchNode");
+            var uiOption = document.getElementById("ui-option");
+            var spineOption = document.getElementById("spine-option");
+            if (searchBox) searchBox.style.visibility = 'hidden';
+            if (uiOption) uiOption.style.visibility = 'hidden';
+            if (spineOption) spineOption.style.visibility = 'hidden';
+            if (typeof Gizmo_ClearDraw === 'function') {
+                Gizmo_ClearDraw();
             }
-            else {
-                this._jsonName = node.getName() + '.ExportJson';
-                var rawActionList = ccs.actionManager.getActionList(this._jsonName);
-                for (var i = 0; i < rawActionList.length; i++) {
-                    actionList.push(rawActionList[i].getName());
-                }
-            }
+            return;
         }
 
-        $('#widgetTree').jstree(true).settings.core.data = treeObj;
-        $('#widgetTree').jstree("refresh");
+        const targetNode = node.ui || node.armature || node.spine || node;
+        this._selectNode = [targetNode];
 
-        var self = this;
+        $('#localPos').html("(" + targetNode.getPosition().x.toFixed(2) + " , " + targetNode.getPosition().y.toFixed(2) + ")");
+        $("input[name=lPosX]").val(targetNode.getPosition().x.toFixed(2));
+        $("input[name=lPosY]").val(targetNode.getPosition().y.toFixed(2));
+        $('#LocalSize').html("(" + targetNode.getContentSize().width.toFixed(2) + " , " + targetNode.getContentSize().height.toFixed(2) + ")");
+        $("input[name=opacity]").val(targetNode.getOpacity());
+        $('#opacityValue').html(targetNode.getOpacity());
+        $('#anchorValue').html("("+ targetNode.getAnchorPoint().x+" , "+targetNode.getAnchorPoint().y+")");
+        $('#zOrderValue').html(targetNode.getLocalZOrder());
 
-        if(!!finalNode){
-            setTimeout(function(){
-                $('#widgetTree').jstree("deselect_all");
-                $('#widgetTree').jstree('select_node',self.recursiveTreeCheck(treeObj,finalNode.name));
-            },50);
+        if (typeof Gizmo_DrawTouchLayerByRect === 'function') {
+            var rect = targetNode.getBoundingBox();
+            var po = targetNode.getParent().convertToWorldSpace(cc.p(rect.x, rect.y));
+            if(rect.width < 5) rect.width = 10;
+            if (rect.height < 5 ) rect.height = 10;
+            Gizmo_DrawTouchLayerByRect(cc.rect(po.x, po.y, rect.width, rect.height));
+        }
+
+        var unifiedAnimationList = [];
+
+        switch (node.assetType) {
+            case 'armature':
+                var animNameArr = node.armature.getAnimation()._animationData.movementNames;
+                animNameArr.forEach(name => unifiedAnimationList.push({ name: name, type: 'armature' }));
+                break;
+            case 'spine':
+                var animations = node.spine.getState().data.skeletonData.animations;
+                animations.forEach(anim => unifiedAnimationList.push({ name: anim.name, type: 'spine' }));
+                break;
+            case 'action':
+                console.log("[Type Check] Detected as 'action' via assetType tag.");
+                if (node.cocosAction) {
+                    for (var key in node.cocosAction._animationInfos) {
+                        unifiedAnimationList.push({ name: key, type: 'action' });
+                    }
+                } else if (node.ui) {
+                    // ✅ [수정] 꼬리표로 달아둔 actionUrl을 직접 키로 사용 (100% 정확)
+                    const rawActionList = ccs.actionManager.getActionList(node.actionUrl);
+                    if (rawActionList) {
+                        rawActionList.forEach(action => unifiedAnimationList.push({ name: action.getName(), type: 'action' }));
+                    }
+                }
+                break;
+            default:
+                break;
         }
 
         const $actionContainer = $('#actionTree');
         $actionContainer.empty();
 
-        actionList.forEach(actionName => {
+        unifiedAnimationList.forEach(item => {
+            let iconText = '';
+            let typeClass = `type-${item.type}`;
+            if (item.type === 'armature') iconText = 'AR';
+            if (item.type === 'spine') iconText = 'SP';
+            if (item.type === 'action') iconText = 'UI';
+
             const $item = $(`
-                <div class="custom-tree-item" data-anim-name="${actionName}">
-                    ${actionName}
-                </div>
-            `);
+        <div class="custom-tree-item" data-anim-name="${item.name}" data-anim-type="${item.type}">
+            <span class="track-type-icon ${typeClass}">${iconText}</span>
+            ${item.name}
+        </div>
+    `);
 
             $item.draggable({
-                appendTo: 'body',
+                appendTo: "body",
                 helper: function() {
-                    const $helper = $(`<div class="custom-drag-helper">${$(this).text()}</div>`);
-
-                    // 정확한 중앙값으로 cursorAt 설정
-                    $(this).draggable("option", "cursorAt", {
-                        left: 1,
-                        top: 1
-                    });
-
+                    const assetName = $(this).data('anim-name');
+                    const $helper = $(`<div class="custom-drag-helper">${assetName}</div>`);
+                    $helper.data('animName', assetName);
+                    $helper.data('animType', $(this).data('anim-type'));
                     return $helper;
                 },
                 revert: 'invalid',
-                zIndex: 9999
+                zIndex: 9999,
+                start: function(event, ui) {
+                    $('#resize-overlay').show();
+                },
+                stop: function(event, ui) {
+                    $('#resize-overlay').hide();
+                }
             });
 
             $item.on('click', () => {
@@ -285,110 +307,40 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
             $actionContainer.append($item);
         });
 
-        var searchBox = document.getElementById( "searchNode" );
-        var uiOption = document.getElementById( "ui-option" );
-        var spineOption = document.getElementById( "spine-option" );
+        var searchBox = document.getElementById("searchNode");
+        var uiOption = document.getElementById("ui-option");
+        var spineOption = document.getElementById("spine-option");
 
-        if( treeObj.length > 0 ) {
-            searchBox.style.visibility = 'visible';
-            uiOption.style.visibility = 'visible';
-            spineOption.style.visibility = 'hidden';
-        }
-        else {
-            searchBox.style.visibility = 'hidden';
-            uiOption.style.visibility = 'hidden';
+        if (searchBox) searchBox.style.visibility = 'visible';
+        if (uiOption) uiOption.style.visibility = 'visible';
 
-            if( node && node.spine ) {
-                spineOption.style.visibility = 'visible';
-            }
-            else {
-                spineOption.style.visibility ='hidden';
-            }
+        if (node && node.spine) {
+            if (spineOption) spineOption.style.visibility = 'visible';
+        } else {
+            if (spineOption) spineOption.style.visibility ='hidden';
         }
     },
 
-    recursiveTreeCheck : function(arr, name){
-        for(var idx = 0; idx < arr.length;idx++){
-            if(arr[idx].text === name) return arr[idx].id;
-
-            if(!!arr[idx] && !!arr[idx].children){
-                return this.recursiveTreeCheck(arr[idx].children, name);
+    updateHierarchy: function(sceneNodes) {
+        // [새로운 함수] 씬 노드 목록을 받아 jstree 데이터를 생성하고 업데이트합니다.
+        var treeData = [];
+        for (const nodeName in sceneNodes) {
+            if (sceneNodes.hasOwnProperty(nodeName)) {
+                const node = sceneNodes[nodeName];
+                treeData.push({
+                    "id": node.__instanceId, // 고유 ID로 식별
+                    "text": node.getName(),   // 화면에 표시될 이름
+                    "parent": "#", // 지금은 모두 최상위 노드
+                    "data": {
+                        "instanceId": node.__instanceId
+                    }
+                });
             }
         }
-    },
 
-    createUIChildList :function (node) {
-        if(!node)
-            return null;
-        var childList = [];
-        var children = node.getChildren();
-        for(var  i=0; i< children.length; i++)  {
-            childList[i] = {};
-            childList[i].info ={};
-            childList[i].info.obj = children[i];
-            childList[i].info.name = children[i].getName();
-            childList[i].info.initScale = children[i].getScale();
-            childList[i].info.initScaleX = children[i].getScaleX();
-            childList[i].info.initScaleY = children[i].getScaleY();
-
-            childList[i].info.id = children[i].__instanceId;
-            childList[i].childList = this.createUIChildList(children[i]);
-        }
-        return childList;
-    },
-
-    createArChildList :function (node) {
-        if(!node)
-            return null;
-
-        var childList = [];
-
-        var boneDic = node.armatureData.getBoneDataDic();
-        var i = 0;
-        for (var b in boneDic){
-
-            childList[i] = {};
-            childList[i].info ={};
-            childList[i].info.obj = boneDic[b];
-            childList[i].info.name =  boneDic[b].name;
-            i++;
-        }
-        return childList;
-    },
-
-    drawTree :function (treeInfo, depth, line, dataObj) {
-        if(!treeInfo)
-            return line;
-
-        var len = treeInfo.length;
-        for(var i = 0; i < len; i++) {
-            line++;
-
-            var info = treeInfo[i];
-            var obj = {
-                "id" : info.info.id,
-                "text" : info.info.name,
-                "state": {
-                    "opened": true
-                },
-                "instanceID" : 0
-            };
-            if( info.childList.length > 0){
-                obj.children = [];
-            }
-            this._treeWidgetObj[ info.info.id ] = {};
-            this._treeWidgetObj[ info.info.id ].obj = info.info.obj;
-            this._treeWidgetObj[ info.info.id ].id = info.info.id;
-            this._treeWidgetObj[ info.info.id ].name = info.info.name;
-            this._treeWidgetObj[ info.info.id ].initScale = info.info.obj.getScale();
-            this._treeWidgetObj[ info.info.id ].initScaleX = info.info.obj.getScaleX();
-            this._treeWidgetObj[ info.info.id ].initScaleY = info.info.obj.getScaleY();
-
-            dataObj.push( obj );
-
-            line = this.drawTree(info.childList, depth+1, line, obj.children);
-        }
-        return line;
+        // '#widgetTree'를 사용하는 jstree를 새로운 데이터로 업데이트합니다.
+        $('#widgetTree').jstree(true).settings.core.data = treeData;
+        $('#widgetTree').jstree("refresh");
     },
 
     selectNode :function (nodeObj) {
@@ -477,67 +429,9 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
         }
     },
 
-    getTreeObjName: function() {
-        var length = Object.keys( this._treeWidgetObj ).length;
-        var treeArrName = {};
-        var treeObjName = [];
-
-        for( var key1 in this._treeWidgetObj ) {
-            treeArrName [ key1 ] = {};
-            treeArrName [ key1 ].name = this._treeWidgetObj[ key1 ].name;
-            treeArrName [ key1 ].copyString = this._treeWidgetObj[ key1 ].name + " : null,\n";
-            treeObjName[ treeObjName.length ] = treeArrName [ key1 ].name;
-        }
-
-        for( var loop1 = 0; loop1 < length; loop1++ ) {
-            var name = treeObjName[ loop1 ];
-            var firstSubString1 = name.substring( 0, name.length - 2 );
-            var firstSubString2 = name.substring( name.length - 2, name.length );
-
-            if( firstSubString2 === '01' ) {
-                var find = false;
-                var idx = 1;
-                var addTreeNameArr = null;
-
-                for( var loop2 = 0; loop2 < length; loop2++ ) {
-                    name = treeObjName[ loop2 ];
-                    var secondSubString1 = name.substring( 0, name.length - 2 );
-                    var secondSubString2 = name.substring( name.length - 2, name.length );
-                    secondSubString2 = name.substring( name.length - 2, name.length );
-
-                    if( firstSubString1 === secondSubString1 && secondSubString2 === '02' ) {
-                        find = true;
-                    }
-                }
-
-                while( find ) {
-                    for( var key2 in treeArrName ) {
-
-                        var objName = firstSubString1 + ( idx < 10 ? '0' + idx : idx );
-                        var objName2 = treeArrName[ key2 ].name;
-                        find = false;
-
-                        if( objName2 === objName ) {
-                            addTreeNameArr = firstSubString1;
-                            find = true;
-                            idx++;
-
-                            delete treeArrName[ key2 ];
-
-                            break;
-                        }
-                    }
-                }
-            }
-
-            if( addTreeNameArr ) {
-                treeArrName [ addTreeNameArr ] = {};
-                treeArrName [ addTreeNameArr ].name = addTreeNameArr;
-                treeArrName [ addTreeNameArr ].copyString = addTreeNameArr + " : [],\n";
-                addTreeNameArr = null;
-            }
-        }
-
-        return treeArrName;
-    }
+    // 데이터를 받아 jstree를 그리는 함수
+    updateTreeView: function(treeData) {
+        $('#widgetTree').jstree(true).settings.core.data = treeData;
+        $('#widgetTree').jstree(true).refresh();
+    },
 });
