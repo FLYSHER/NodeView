@@ -452,19 +452,41 @@ var Sequencer = (function() {
     }
 
     function _onStop(resetPlayhead = true) {
-        isPlaying = false; isPaused = false;
+        isPlaying = false;
+        isPaused = false;
         $('#playSequenceBtn').text('Play');
         $('#timeline-interaction-overlay').hide();
         $('#timeline-playhead').stop();
 
-        if (runnerNode) runnerNode.stopAllActions();
+        if (runnerNode) {
+            runnerNode.stopAllActions();
+        }
+
+        // [수정] 정지 시, 일시정지되었을 수 있는 모든 노드들을 재개시킨 후 애니메이션을 정지합니다.
         tracks.forEach(trackData => {
-            if (trackData.node.spine) trackData.node.spine.clearTracks();
-            if (trackData.node.armature) trackData.node.armature.getAnimation().stop();
+            const node = trackData.node;
+
+            // 1. 노드 자체의 스케줄러/액션을 '재개' 상태로 먼저 돌립니다.
+            if (node.spine) {
+                node.spine.resume();
+            }
+            if (node.armature) {
+                node.armature.getAnimation().resume();
+            }
+
+            // DraggableNode 래퍼 자체도 재개합니다.
+            cc.director.getActionManager().resumeTarget(node);
+
+            // 2. 현재 재생 중인 애니메이션을 정지/클리어합니다.
+            if (node.spine) {
+                node.spine.clearTracks();
+            }
+            if (node.armature) {
+                node.armature.getAnimation().stop();
+            }
         });
 
         if (resetPlayhead) {
-            // [수정] 플레이 헤드 리셋 위치를 동적 너비로 설정합니다.
             const labelWidth = $('#track-labels-container').outerWidth();
             $('#timeline-playhead').hide().css('left', labelWidth);
         }
