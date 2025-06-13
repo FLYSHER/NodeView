@@ -36,9 +36,18 @@ var UIListViewTest = cc.Node.extend({
             $item.draggable({
                 appendTo: 'body',
                 helper: function() {
-                    return $(`<div class="custom-drag-helper">${$(this).text()}</div>`);
+                    const $helper = $(`<div class="custom-drag-helper">${$(this).text()}</div>`);
+
+                    // 정확한 중앙값으로 cursorAt 설정
+                    $(this).draggable("option", "cursorAt", {
+                        left: 1,
+                        top: 1
+                    });
+
+                    return $helper;
                 },
-                revert: 'invalid'
+                revert: 'invalid',
+                zIndex: 9999
             });
 
             $item.on('click', () => {
