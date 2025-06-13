@@ -55,7 +55,6 @@ var Sequencer = (function() {
         $ruler.empty();
         $ruler.width(totalWidth);
 
-        // 메이저 그리드 배경 (1초 간격)
         const majorGridPixel = GRID_TIME_INTERVAL * 10 * PIXELS_PER_SECOND;
         $ruler.css('background-size', `${majorGridPixel}px 100%`);
 
@@ -92,21 +91,43 @@ var Sequencer = (function() {
         $labelsContainer.empty();
         $timelineContent.empty();
 
-        // 정확한 그리드 픽셀 계산
         const gridPixel = GRID_TIME_INTERVAL * PIXELS_PER_SECOND;
-        const majorGridPixel = gridPixel * 10; // 1초 간격
+        const majorGridPixel = gridPixel * 10;
 
         tracks.forEach((trackData, nodeId) => {
-            const $label = $(`<div class="track-label" title="${trackData.node.getName()}">${trackData.node.getName()}</div>`);
+            let iconText = '';
+            let typeClass = '';
+            if (trackData.node.armature) {
+                iconText = 'AR';
+                typeClass = 'type-armature';
+            } else if (trackData.node.spine) {
+                iconText = 'SP';
+                typeClass = 'type-spine';
+            } else if (trackData.node.ui) {
+                iconText = 'UI';
+                typeClass = 'type-action';
+            }
+
+// 새로운 HTML 구조로 라벨을 생성합니다.
+            const labelHtml = `
+    <div class="track-label" title="${trackData.node.getName()}">
+        <span class="track-type-icon ${typeClass}">${iconText}</span>
+        ${trackData.node.getName()}
+    </div>`;
+            const $label = $(labelHtml);
             $labelsContainer.append($label);
 
             const $track = $(`<div class="timeline-track" data-node-id="${nodeId}"></div>`);
-            // 메이저 그리드 (1초 간격) 배경
             $track.css('background-size', `${majorGridPixel}px 100%`);
             $timelineContent.append($track);
 
             trackData.clips.forEach(clip => {
-                const clipTypeClass = clip.type === 'action' ? 'type-action' : '';
+                // [수정] 스파인 타입에 대한 클래스 추가
+                let clipTypeClass = '';
+                if (clip.type === 'action') clipTypeClass = 'type-action';
+                if (clip.type === 'spine') clipTypeClass = 'type-spine';
+                if (clip.type === 'armature') clipTypeClass = 'type-armature';
+
                 const clipHtml = `<div class="timeline-clip ${clipTypeClass}" data-clip-id="${clip.id}" title="${clip.animName} ${clip.duration.toFixed(1)}s">
                     <span class="clip-name">${clip.animName}</span>
                     <span class="clip-duration"></span>
@@ -120,7 +141,6 @@ var Sequencer = (function() {
                     _deleteClip(nodeId, clip.id);
                 });
 
-                // 정확한 픽셀 위치 계산
                 $clip.css({
                     left: _timeToPixel(clip.startTime) + 'px',
                     width: _timeToPixel(clip.duration) + 'px',
@@ -128,10 +148,8 @@ var Sequencer = (function() {
 
                 $track.append($clip);
 
-                // 개선된 draggable 설정
                 $clip.draggable({
                     axis: 'x',
-                    // 그리드를 제거하고 직접 스냅 처리
                     helper: function() {
                         return $(this).clone().css({
                             width: $(this).outerWidth(),
@@ -141,25 +159,18 @@ var Sequencer = (function() {
                     },
                     drag: function(event, ui) {
                         ui.position.top = 2;
-
-                        // 실시간 그리드 스냅
                         const snappedLeft = _getSnappedPixel(ui.position.left);
                         ui.position.left = Math.max(0, snappedLeft);
-
-                        // 헬퍼의 위치도 스냅
                         ui.helper.css('left', ui.position.left + 'px');
                     },
                     stop: function(event, ui) {
                         const snappedLeft = _getSnappedPixel(ui.position.left);
                         const snappedTime = _pixelToTime(Math.max(0, snappedLeft));
-
                         clip.startTime = snappedTime;
-
                         $(this).css({
                             left: _timeToPixel(clip.startTime) + 'px',
                             top: '2px'
                         });
-
                         _updateOverlapsForTrack(trackData, $track);
                     }
                 }).resizable({
@@ -169,18 +180,14 @@ var Sequencer = (function() {
                     },
                     resize: function(event, ui) {
                         ui.position.top = 2;
-
-                        // 실시간 스냅
                         const snappedLeft = _getSnappedPixel(ui.position.left);
                         const snappedWidth = _getSnappedPixel(ui.size.width);
-
                         ui.position.left = Math.max(0, snappedLeft);
                         ui.size.width = Math.max(_timeToPixel(GRID_TIME_INTERVAL), snappedWidth);
                     },
                     stop: function(event, ui) {
                         const snappedLeft = _getSnappedPixel(ui.position.left);
                         const snappedWidth = _getSnappedPixel(ui.size.width);
-
                         const snappedStartTime = _pixelToTime(Math.max(0, snappedLeft));
                         const snappedDuration = _pixelToTime(Math.max(_timeToPixel(GRID_TIME_INTERVAL), snappedWidth));
 
@@ -217,7 +224,6 @@ var Sequencer = (function() {
         _renderTimeline();
     }
 
-    // 정확한 그리드 스냅 함수 추가
     function _snapToGrid(timeValue) {
         return Math.round(timeValue / GRID_TIME_INTERVAL) * GRID_TIME_INTERVAL;
     }
@@ -272,17 +278,28 @@ var Sequencer = (function() {
     function _onAdd() {
         let selectedAnimName, animType;
         const $selectedAnim = mainLayerInstance._animationList.getSelectedAnimationName();
-        if ($selectedAnim) {
-            selectedAnimName = $selectedAnim; animType = 'armature';
+
+        // [수정] 스파인/아머처 타입 구분
+        if ($selectedAnim && Target) {
+            selectedAnimName = $selectedAnim;
+            if (Target.spine) {
+                animType = 'spine';
+            } else if (Target.armature) {
+                animType = 'armature';
+            }
         } else {
             const $selectedAction = $('#actionTree').find('.custom-tree-item.selected');
             if ($selectedAction.length > 0) {
-                selectedAnimName = $selectedAction.data('anim-name'); animType = 'action';
+                selectedAnimName = $selectedAction.data('anim-name');
+                animType = 'action';
             }
         }
 
-        if (selectedAnimName && Target) _addClipToTrack(selectedAnimName, animType, Target);
-        else alert("추가할 애니메이션과 적용할 타겟을 먼저 선택하세요.");
+        if (selectedAnimName && Target) {
+            _addClipToTrack(selectedAnimName, animType, Target);
+        } else {
+            alert("추가할 애니메이션과 적용할 타겟을 먼저 선택하세요.");
+        }
     }
 
     function _togglePlayback() {
@@ -305,7 +322,11 @@ var Sequencer = (function() {
 
         const $playhead = $('#timeline-playhead');
         $('#playSequenceBtn').text('Pause');
-        $playhead.show().stop().css('left', 120);
+
+        // [수정] 하드코딩된 120 대신 실제 라벨 너비를 가져옵니다.
+        const labelWidth = $('#track-labels-container').outerWidth();
+        $playhead.show().stop().css('left', labelWidth);
+
         $('#timeline-interaction-overlay').show();
 
         runnerNode = mainLayerInstance.getChildByTag(999);
@@ -318,9 +339,15 @@ var Sequencer = (function() {
                 const isLooping = clip.duration > clip.originalDuration;
 
                 const playAction = cc.callFunc(() => {
-                    if (clip.type === 'armature' && targetNode.armature) targetNode.armature.getAnimation().play(clip.animName, -1, isLooping);
-                    else if (clip.type === 'action' && targetNode.cocosAction) targetNode.cocosAction.play(clip.animName, isLooping);
-                    else if (clip.type === 'action') ccs.actionManager.playActionByName(targetNode.getName() + '.ExportJson', clip.animName);
+                    if (clip.type === 'spine' && targetNode.spine) {
+                        targetNode.spine.setAnimation(0, clip.animName, isLooping);
+                    } else if (clip.type === 'armature' && targetNode.armature) {
+                        targetNode.armature.getAnimation().play(clip.animName, -1, isLooping);
+                    } else if (clip.type === 'action' && targetNode.cocosAction) {
+                        targetNode.cocosAction.play(clip.animName, isLooping);
+                    } else if (clip.type === 'action') {
+                        ccs.actionManager.playActionByName(targetNode.getName() + '.ExportJson', clip.animName);
+                    }
                 });
 
                 runnerNode.runAction(cc.sequence(cc.delayTime(clip.startTime), playAction));
@@ -330,7 +357,9 @@ var Sequencer = (function() {
 
                 if (!isNextClipStarting) {
                     const stopAction = cc.callFunc(() => {
-                        if (clip.type === 'armature' && targetNode.armature && targetNode.armature.getAnimation().getCurrentMovementID() === clip.animName) {
+                        if (clip.type === 'spine' && targetNode.spine) {
+                            targetNode.spine.clearTrack(0);
+                        } else if (clip.type === 'armature' && targetNode.armature && targetNode.armature.getAnimation().getCurrentMovementID() === clip.animName) {
                             targetNode.armature.getAnimation().stop();
                         }
                     });
@@ -341,11 +370,12 @@ var Sequencer = (function() {
 
         const totalDuration = _getTotalDuration();
         if (totalDuration > 0) {
-            $playhead.animate({ left: 120 + totalDuration * PIXELS_PER_SECOND }, {
+            // [수정] 애니메이션 목적지 계산에도 동적 너비를 사용합니다.
+            $playhead.animate({ left: labelWidth + totalDuration * PIXELS_PER_SECOND }, {
                 duration: totalDuration * 1000, easing: 'linear',
                 step: function(now) {
                     const $container = $('#timeline-tracks-container');
-                    const playheadPos = now - 120;
+                    const playheadPos = now - labelWidth; // 기준값을 동적 너비로 변경
                     const containerWidth = $container.width(), scrollLeft = $container.scrollLeft();
                     if (playheadPos > scrollLeft + containerWidth * 0.75 || playheadPos < scrollLeft) {
                         $container.scrollLeft(playheadPos - containerWidth / 2);
@@ -365,7 +395,15 @@ var Sequencer = (function() {
         if (runnerNode) cc.director.getActionManager().pauseTarget(runnerNode);
         tracks.forEach(trackData => {
             const node = trackData.node;
-            if (node.armature) node.armature.getAnimation().pause();
+
+            // [수정] 스파인 일시정지 방식을 pause() 함수로 변경합니다.
+            if (node.spine) {
+                node.spine.pause();
+            }
+
+            if (node.armature) {
+                node.armature.getAnimation().pause();
+            }
             cc.director.getActionManager().pauseTarget(node);
         });
     }
@@ -378,22 +416,31 @@ var Sequencer = (function() {
         if (runnerNode) cc.director.getActionManager().resumeTarget(runnerNode);
         tracks.forEach(trackData => {
             const node = trackData.node;
-            if (node.armature) node.armature.getAnimation().resume();
+
+            // [수정] 스파인 재개 방식을 resume() 함수로 변경합니다.
+            if (node.spine) {
+                node.spine.resume();
+            }
+
+            if (node.armature) {
+                node.armature.getAnimation().resume();
+            }
             cc.director.getActionManager().resumeTarget(node);
         });
 
         const $playhead = $('#timeline-playhead');
         const currentLeft = $playhead.position().left;
         const totalDuration = _getTotalDuration();
-        const currentTime = (currentLeft - 120) / PIXELS_PER_SECOND;
+        const labelWidth = $('#track-labels-container').outerWidth();
+        const currentTime = (currentLeft - labelWidth) / PIXELS_PER_SECOND;
         const remainingDuration = totalDuration - currentTime;
 
         if (remainingDuration > 0) {
-            $playhead.animate({ left: 120 + totalDuration * PIXELS_PER_SECOND }, {
+            $playhead.animate({ left: labelWidth + totalDuration * PIXELS_PER_SECOND }, {
                 duration: remainingDuration * 1000, easing: 'linear',
                 step: function(now) {
                     const $container = $('#timeline-tracks-container');
-                    const playheadPos = now - 120;
+                    const playheadPos = now - labelWidth;
                     const containerWidth = $container.width(), scrollLeft = $container.scrollLeft();
                     if (playheadPos > scrollLeft + containerWidth * 0.75 || playheadPos < scrollLeft) {
                         $container.scrollLeft(playheadPos - containerWidth / 2);
@@ -411,9 +458,16 @@ var Sequencer = (function() {
         $('#timeline-playhead').stop();
 
         if (runnerNode) runnerNode.stopAllActions();
-        tracks.forEach(trackData => { if (trackData.node.armature) trackData.node.armature.getAnimation().stop(); });
+        tracks.forEach(trackData => {
+            if (trackData.node.spine) trackData.node.spine.clearTracks();
+            if (trackData.node.armature) trackData.node.armature.getAnimation().stop();
+        });
 
-        if (resetPlayhead) $('#timeline-playhead').hide().css('left', 120);
+        if (resetPlayhead) {
+            // [수정] 플레이 헤드 리셋 위치를 동적 너비로 설정합니다.
+            const labelWidth = $('#track-labels-container').outerWidth();
+            $('#timeline-playhead').hide().css('left', labelWidth);
+        }
     }
 
     function _zoom(direction) {
@@ -461,8 +515,25 @@ var Sequencer = (function() {
                 accept: '.custom-tree-item',
                 drop: function(event, ui) {
                     if (!Target) { alert("먼저 캔버스에서 애니메이션을 적용할 타겟을 선택하세요."); return; }
+
                     const animName = ui.draggable.data('anim-name');
-                    const animType = ui.draggable.closest('#animationTree').length > 0 ? 'armature' : 'action';
+
+                    // ================================================================
+                    // ##### [수정] 드래그 앤 드롭 시, Target 타입을 확인하여 animType을 올바르게 지정합니다. #####
+                    let animType;
+                    if (ui.draggable.closest('#animationTree').length > 0) {
+                        // 애니메이션 목록에서 드래그한 경우
+                        if (Target && Target.spine) {
+                            animType = 'spine';
+                        } else { // armature 또는 기타
+                            animType = 'armature';
+                        }
+                    } else {
+                        // 액션 목록에서 드래그한 경우
+                        animType = 'action';
+                    }
+                    // ================================================================
+
                     const dropX = event.pageX - $tracksContainer.offset().left + $tracksContainer.scrollLeft();
                     _addClipToTrack(animName, animType, Target, dropX / PIXELS_PER_SECOND);
                 }

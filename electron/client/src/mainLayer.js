@@ -37,7 +37,7 @@ var ResetAction = function () {
 var MainLayer = cc.Layer.extend({
     DESC_TAG: 99,
     _animationList : null,
-    _canvasResizeListener: null, // 리스너 참조를 저장할 변수
+    _canvasResizeListener: null,
 
     ctor: function () {
         this._super();
@@ -51,6 +51,7 @@ var MainLayer = cc.Layer.extend({
         this._loadArmatureListener = cc.eventManager.addCustomListener('loadArmature', function(event) { self.onLoadArmature(JSON.parse(event.getUserData())); });
         this._loadUIListener = cc.eventManager.addCustomListener('loadUI', function(event) { self.onLoadUI(event.getUserData()); });
         this._loadCocosStudioListener = cc.eventManager.addCustomListener('loadCocosStudio', function (event){ self.onLoadCocosStuido(event.getUserData()); });
+        this._loadSpineListener = cc.eventManager.addCustomListener('loadSpine', function(event) { self.onLoadSpine(event.getUserData()); });
 
         this._canvasResizeListener = cc.eventManager.addCustomListener('canvas-resize', this.updateLayout.bind(this));
 
@@ -70,38 +71,28 @@ var MainLayer = cc.Layer.extend({
         return true;
     },
 
-    // 캔버스 크기가 변경될 때 호출될 레이아웃 업데이트 메서드
     updateLayout: function() {
-        // 변경 전의 중심 좌표를 기록합니다.
         const oldCX = this.CX;
         const oldCY = this.CY;
 
-        // 캔버스 크기 변경에 따라 새로운 중심 좌표를 계산합니다.
         var size = cc.winSize;
         this.CX = size.width / 2;
         this.CY = size.height / 2;
 
-        // "파일을 드래그 해주세요" 라벨 위치를 업데이트합니다.
         var label = this.getChildByTag(this.DESC_TAG);
         if (label) {
             label.setPosition(this.CX, this.CY);
         }
 
-        // 기존에 있던 모든 노드들의 위치를 새로운 중심점에 맞춰 보정합니다.
-        if (oldCX && oldCY && this._nodeList) { // oldCX, oldCY가 유효한 경우에만 실행
+        if (oldCX && oldCY && this._nodeList) {
             for (const name in this._nodeList) {
                 if (this._nodeList.hasOwnProperty(name)) {
                     const node = this._nodeList[name];
                     const currentPos = node.getPosition();
-
-                    // 이전 중심점으로부터의 상대적 위치를 계산합니다.
                     const relativeX = currentPos.x - oldCX;
                     const relativeY = currentPos.y - oldCY;
-
-                    // 새로운 중심점에 상대적 위치를 더해 최종 위치를 계산합니다.
                     const newX = this.CX + relativeX;
                     const newY = this.CY + relativeY;
-
                     node.setPosition(newX, newY);
                 }
             }
@@ -122,6 +113,7 @@ var MainLayer = cc.Layer.extend({
             node.addChildToCenter( armature );
             node.armature = armature;
             node.ui = null;
+            node.spine = null;
             node.order = this._nodeOrder.length;
             node.setLocalZOrder(10 + node.order);
             this._nodeOrder[node.order] = node;
@@ -147,6 +139,78 @@ var MainLayer = cc.Layer.extend({
         node.addChildToCenter( ui );
         node.armature = null;
         node.ui = ui;
+        node.spine = null;
+        node.order = this._nodeOrder.length;
+        node.setLocalZOrder(10 + node.order);
+        this._nodeOrder[node.order] = node;
+        this._nodeList[ name ] = node;
+        this._addToJsonListMenu( name ,node);
+    },
+
+    onLoadSpine: function( fileName ) {
+        var children = this.getChildren();
+        var self = this;
+        children.forEach( function( c ) { if( c.getTag() === self.DESC_TAG ) { c.removeFromParent(); } });
+
+        var name = cc.path.mainFileName( fileName );
+        if(this._nodeList[ name ]) return;
+
+        var spine = sp.SkeletonAnimation.createWithJsonFile( fileName + ".json", fileName +".atlas", 1.0 );
+        spine.setPosition( cc.p( cc.winSize.width / 2, cc.winSize.height / 2 ) );
+        var node = new DraggableNode( spine.getContentSize() );
+        node.setAnchorPoint( 0.5, 0.5 );
+        node.setPosition( this.CX , this.CY );
+        this.addChild( node );
+        node.addChildToCenter( spine );
+
+        var arrBone = [];
+        var setBoneLabel = function( lbBone, bone ) {
+            lbBone.setPosition( cc.p( bone.ax, bone.ay ) );
+            lbBone.setScaleX( bone.ascaleX );
+            lbBone.setScaleY( bone.ascaleY );
+            lbBone.setRotation( -bone.arotation );
+        };
+
+        var setBone = function ( bone ) {
+            var lbBone = new ccui.Text( bone.data.name, "Arial", 20 );
+            lbBone.enableOutline(cc.color(41, 0, 0, 127), 1 );
+            lbBone.enableShadow(cc.color(41, 0, 0, 127), cc.size(0, -1) );
+            lbBone.setVisible( false );
+            arrBone.push( { "bone": bone, "lbBone": lbBone } );
+            if( bone.children.length > 0 ) {
+                bone.children.forEach( function( _bone ) { setBone( _bone ); } );
+                setBoneLabel( lbBone, bone );
+            } else {
+                setBoneLabel( lbBone, bone );
+            }
+            spine.addChild( lbBone, 1 );
+        };
+        setBone( spine._rootBone );
+
+        node.armature = null;
+        node.ui = null;
+        node.spine = spine;
+        node.spine.arrBone = arrBone;
+        node.spine.setDebugBone = function() {
+            node.spine.setDebugBonesEnabled( !node.spine.getDebugBonesEnabled() );
+            node.spine.updateFunc = function( dt ) {
+                arrBone.forEach( function( boneData ) {
+                    var lbBone = boneData.lbBone;
+                    var bone = boneData.bone;
+                    setBoneLabel( lbBone, bone );
+                } );
+            };
+            if( node.spine.getDebugBonesEnabled() ) {
+                node.spine.schedule( node.spine.updateFunc );
+            }
+            else {
+                node.spine.unschedule( node.spine.updateFunc );
+            }
+            arrBone.forEach( function( boneData ) {
+                boneData.lbBone.visible = node.spine.getDebugBonesEnabled();
+            } );
+        }.bind( node.spine );
+
         node.order = this._nodeOrder.length;
         node.setLocalZOrder(10 + node.order);
         this._nodeOrder[node.order] = node;
@@ -173,6 +237,7 @@ var MainLayer = cc.Layer.extend({
         node.addChildToCenter( ui );
         node.armature = null;
         node.ui = ui;
+        node.spine = null;
         node.cocosAction = json.action;
         if(node.cocosAction){ node.runAction(node.cocosAction); }
         node.order = this._nodeOrder.length;
@@ -224,6 +289,17 @@ var MainLayer = cc.Layer.extend({
             var playCb = function (animName) { animations.play(animName); };
             this._animationList.init(animNameArr,playCb);
             $('#LocalSize').html("(" + selectNode.armature.getContentSize().width.toFixed(2) + " , " +selectNode.armature.getContentSize().height.toFixed(2) + ")");
+        } else if ( selectNode.spine ) {
+            var animations = selectNode.spine.getState().data.skeletonData.animations;
+            var animNameArr = [];
+            for( var idx = 0; idx < animations.length; idx++ ) {
+                animNameArr.push( animations[ idx ].name );
+            }
+            var playCb = function ( animName) {
+                selectNode.spine.setAnimation( 0, animName, false );
+            };
+            this._animationList.init(animNameArr,playCb);
+            $('#LocalSize').html("(" + selectNode.spine.getContentSize().width.toFixed(2) + " , " +selectNode.spine.getContentSize().height.toFixed(2) + ")");
         } else{
             this._animationList.init([],null);
         }
@@ -277,7 +353,17 @@ var MainLayer = cc.Layer.extend({
                     durationInSeconds = (durationInFrames / speedScale) / 60.0;
                 }
             } catch (e) { console.error("Armature 길이를 가져오는 중 오류:", e); }
-        } else {
+        }
+        else if (node.spine) {
+            try {
+                // [수정] 스파인 애니메이션 길이를 가져오는 API를 정확하게 수정합니다.
+                const animation = node.spine.getState().data.skeletonData.findAnimation(animName);
+                if (animation) {
+                    durationInSeconds = animation.duration;
+                }
+            } catch (e) { console.error("Spine 길이를 가져오는 중 오류:", e); }
+        }
+        else {
             try {
                 var rawJsonData = null;
                 var fileName = node.getName();
@@ -320,6 +406,7 @@ var MainLayer = cc.Layer.extend({
         cc.eventManager.removeListener(this._loadArmatureListener);
         cc.eventManager.removeListener(this._loadUIListener);
         cc.eventManager.removeListener(this._loadCocosStudioListener);
+        cc.eventManager.removeListener(this._loadSpineListener);
         this._super();
     }
 });
@@ -329,31 +416,23 @@ var ManiLayerScene = cc.Scene.extend({
     onEnter: function () {
         this._super();
 
-        // 1. 저장된 레이아웃 불러오기
         const savedLayout = LayoutManager.load();
-
-        // 2. 불러온 데이터가 있으면 PanelManager의 기본 설정을 덮어씁니다.
         if (savedLayout) {
             for (const panelId in savedLayout) {
-                // PanelManager가 노출한 config 객체에 접근하여 수정합니다.
                 if (PanelManager.config[panelId]) {
                     Object.assign(PanelManager.config[panelId], savedLayout[panelId]);
                 }
             }
         }
 
-        // Loader, ElectronRenderer 등 1회성 초기화
         Loader.init();
         if (typeof ElectronRenderer != 'undefined') ElectronRenderer.init();
 
-        // Cocos2d 레이어 생성
         var layer = new MainLayer();
         this.addChild(layer, 1, "MainLayer");
 
-        // 3. PanelManager 초기화 함수를 호출합니다.
         PanelManager.initialize();
 
-        // 해상도 조절 UI 초기화
         const gameViewConfig = PanelManager.config.gameView;
         $('#res-width-input').val(gameViewConfig.width);
         $('#res-height-input').val(gameViewConfig.height);
@@ -364,7 +443,6 @@ var ManiLayerScene = cc.Scene.extend({
             GameViewManager.setResolution(w, h);
         });
 
-        // 최초 캔버스 크기 동기화
         GameViewManager.sync();
 
         var self = this;
