@@ -356,5 +356,33 @@ cc.spriteFrameCache = /** @lends cc.spriteFrameCache# */{
         this._spriteFrames = {};
         this._spriteFramesAliases = {};
         this._frameConfigCache = {};
-    }
+    },
+
+    /** by taegyun.han
+     * 텍스처 이름으로 어느 plist 경로에 있는지 반환
+     * @param textureName{string}
+     * @param plist{string | Array<string> | undefined | null}
+     * @return {string}
+     */
+    getPlistFileNameByTextureName : function (textureName, plist) {
+        const plistPath = plist
+            ? plist instanceof Array
+                ? plist
+                : [plist]
+            : Object.keys(this._frameConfigCache);
+
+        let pName = "";
+        plistPath.some((plist_name) => {
+            const data = this._frameConfigCache[plist_name];
+
+            if (data) {
+                if (data.frames.hasOwnProperty(textureName)) {
+                    pName = plist_name;
+                    return true;
+                }
+            }
+            return false;
+        });
+        return pName;
+    },
 };

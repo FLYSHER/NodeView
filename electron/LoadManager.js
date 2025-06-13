@@ -383,6 +383,11 @@ var LoadManager  = {
         });
     },
 
+    // 파일 내보내기
+    exportFile : function(filePath) {
+        this._mainWindow.webContents.send('exportFile', filePath);
+    },
+
     init : function (mainWindow){
         this._mainWindow = mainWindow;
 
@@ -405,6 +410,48 @@ var LoadManager  = {
 
         ipcMain.on('get-root-path', function (evt) {
             mainWindow.webContents.send('get-root-path', mainWindow.rootPath);
+        });
+
+
+        ipcMain.on('exportFile', (evt, payload) => {
+            console.log('[export] exportFile ipcMain : payload :', payload);
+
+            const filePath = payload.filePath;
+            const data = payload.data;
+            
+            if (data) {
+                fs.writeFile(filePath, data, (err) => {
+                    if (err) {
+                        console.error('[error] exporting file : ', err);
+                        dialog.showMessageBox(null,{
+                            title: 'File Export Error',
+                            message: '파일을 저장하는 도중에 에러가 발생했습니다.',
+                            buttons: ['Ok'],
+                            defaultId: 0,
+                            detail: '에러 내용 : ' + err,
+                            icon: './build/icons/icon.ico'
+                        }).then();
+                    }
+                    console.log('file exported at : ', filePath);
+                    dialog.showMessageBox(null,{
+                        title: 'File Export',
+                        message: filePath + '\n성공적으로 Export 되었습니다.',
+                        buttons: ['Ok'],
+                        defaultId: 0,
+                        detail: '재로드 시 관련 파일 경로에 유의하여 주십시오.\n본 파일이 관련 파일을 참조할 수 있는 경로에 위치해야 합니다.',
+                        icon: './build/icons/icon.ico'
+                    }).then();
+                });
+            } else {
+                dialog.showMessageBox(null,{
+                    title: 'File Export Error',
+                    message: 'Node Data를 추출하는데 실패했습니다.',
+                    buttons: ['Ok'],
+                    defaultId: 0,
+                    detail: 'Export할 Node가 올바르게 선택되었는지 확인해주십시오.',
+                    icon: './build/icons/icon.ico'
+                }).then();
+            }
         });
     }
 

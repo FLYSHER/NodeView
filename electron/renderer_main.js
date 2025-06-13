@@ -33,11 +33,38 @@ const Renderer_main = {
             Genie.CommandManager.redo();
         });
 
+        ipcRenderer.on('exportFile', (evt, filePath) => {
+            let node = Genie.ToolController.getSelectNode();
+            // 상단 노드를 찾는다.
+            if (node && node.getName() !== "mainLayer") {
+                while (node.getParent() && node.getParent().getName() !== "mainLayer") {
+                    node = node.getParent();
+                }
+            }
+
+            const data = this.exportNodeToJson(node, filePath);
+            console.log("[export] exportFile ipcRenderer node : ", node);
+            console.log("[export] exportFile data : ", data);
+
+            ipcRenderer.send('exportFile', {
+                data : data,
+                filePath : filePath
+            });
+        });
+
         this._initLayoutEvent();
         this._initAssetAreaEvent();
         this._initHierarchyAreaEvent();
         this._initCanvasEventListener();
         this._initDocumentEventListener();
+    },
+
+    // 파일 내보내기
+    exportNodeToJson : function (node, filePath) {
+        if (!node || node.getName() === "mainLayer")
+            return null;
+
+        return exportManager.exportNodeToJson(node, filePath);
     },
 
     // 레이아웃 관련 이벤트 처리
@@ -245,7 +272,7 @@ const Renderer_main = {
      * 마지막 프로미스를 리턴한다.
      */
     loadResources : function( payload ) {
-        cc.log("[Renderer Main][tg] payload : ", payload);
+        cc.log("[Renderer Main][Load Resources] payload : ", payload);
         // 래퍼런스 업데이트
         payload.dependentFiles.forEach((item) => {
             const filePaths = item.filePath.split('\\');

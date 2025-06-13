@@ -87,6 +87,21 @@ ccui.LabelBMFont = ccui.TextBMFont = ccui.Widget.extend(/** @lends ccui.TextBMFo
         }
     },
 
+    /** by taegyun.han
+     * Gets fnt file data
+     * @returns {null|{path: string, plistFile: string, resourceType: number}}
+     */
+    getFntFileData : function () {
+        if (this._fntFileName && this._fntFileName !== "") {
+            return {
+                path : this._fntFileName,
+                plistFile : "",
+                resourceType : 0
+            };
+        }
+        return null;
+    },
+
     /**
      * Sets string value for TextBMFont
      * @deprecated since v3.0, please use setString instead.

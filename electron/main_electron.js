@@ -56,6 +56,27 @@ const template = [
         }
       },
       {
+        label: 'Export',
+        click() {
+          dialog.showSaveDialog({
+            title: 'Export File',
+            defaultPath: 'new_file.ExportJson',
+            filters: [
+              { name: 'ExportJson', extensions: ['ExportJson'] },
+              { name: 'All Files', extensions: ['*'] }
+            ]
+          }).then((result) => {
+            if(!result.canceled && result.filePath) {
+              console.log("[export] try export => ", result);
+              const filePath = result.filePath;
+              loadManager.exportFile(filePath);
+            }
+          }).catch((err) => {
+            console.error('Export 창을 띄우는 중에 오류가 발생 했습니다: ', err);
+          });
+        }
+      },
+      {
         type: 'separator'
       },
       {

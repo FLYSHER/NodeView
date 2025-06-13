@@ -836,6 +836,21 @@ ccui.Layout = ccui.Widget.extend(/** @lends ccui.Layout# */{
         return this._backGroundImageTextureSize;
     },
 
+    /** by taegyun.han
+     * Gets background image texture data
+     * @returns {null|{path: null, plistFile: string, resourceType}}
+     */
+    getBackGroundImageData : function () {
+        if (this._backGroundImageFileName && this._backGroundImageFileName !== "") {
+            return {
+                path : this._backGroundImageFileName,
+                plistFile : "",
+                resourceType : this._bgImageTexType
+            };
+        }
+        return null;
+    },
+
     /**
      * Sets LayoutType to ccui.Layout, LayoutManager will do layout by layout type..
      * @param {ccui.Layout.ABSOLUTE|ccui.Layout.LINEAR_VERTICAL|ccui.Layout.LINEAR_HORIZONTAL|ccui.Layout.RELATIVE} type
