@@ -287,6 +287,12 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
                     const $helper = $(`<div class="custom-drag-helper">${assetName}</div>`);
                     $helper.data('animName', assetName);
                     $helper.data('animType', $(this).data('anim-type'));
+
+                    $(this).draggable("option", "cursorAt", {
+                        left: 1,
+                        top: 1
+                    });
+
                     return $helper;
                 },
                 revert: 'invalid',
