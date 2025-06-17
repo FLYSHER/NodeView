@@ -673,3 +673,24 @@ ul.tabs li.current {
     min-height: 100px; /* 최소 높이를 지정하여 완전히 찌그러지는 것을 방지 */
     height: 100%;
 }
+
+/* 계층 구조창에서 항목을 클릭(선택)했을 때의 스타일 */
+/* 이 규칙이 항상 우선적으로 적용됩니다. */
+.jstree-default .jstree-anchor.jstree-clicked {
+    background-color: var(--accent-color); /* 파란색 */
+    color: white;
+    border-radius: 4px;
+}
+
+/* 계층 구조창의 "선택되지 않은" 항목에 마우스를 올렸을 때의 스타일 */
+.jstree-default .jstree-anchor:not(.jstree-clicked):hover {
+    background-color: #3e3e42; /* 어두운 회색 */
+    color: white;
+    border-radius: 4px;
+}
+
+/* jstree의 기본 포커스 아웃라인(점선) 제거 */
+.jstree-default .jstree-anchor:focus {
+    outline: none !important;
+    background-color: transparent;
+}
