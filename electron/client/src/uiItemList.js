@@ -24,11 +24,32 @@ var UIItemList = cc.Node.extend({
             return;
         }
 
+        // 아이콘 타입과 텍스트를 결정하는 로직 추가
+        let iconText = '';
+        let typeClass = '';
+        switch (assetInfo.type) {
+            case 'armature':
+                iconText = 'AR';
+                typeClass = 'type-armature';
+                break;
+            case 'ui':
+            case 'cocosstudio': // cocosstudio도 UI로 취급
+                iconText = 'UI';
+                typeClass = 'type-action';
+                break;
+            case 'spine':
+                iconText = 'SP';
+                typeClass = 'type-spine';
+                break;
+        }
+
+        // 아이콘을 포함하도록 HTML 구조 변경
         const $item = $(`
-            <div class="custom-tree-item" data-asset-name="${assetInfo.name}" data-asset-type="${assetInfo.type}">
-                ${assetInfo.name}
-            </div>
-        `);
+        <div class="custom-tree-item" data-asset-name="${assetInfo.name}" data-asset-type="${assetInfo.type}">
+            <span class="track-type-icon ${typeClass}">${iconText}</span>
+            ${assetInfo.name}
+        </div>
+    `);
 
         $item.draggable({
             appendTo: "body",
