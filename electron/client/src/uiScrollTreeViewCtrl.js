@@ -274,13 +274,11 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
                 animations.forEach(anim => unifiedAnimationList.push({ name: anim.name, type: 'spine' }));
                 break;
             case 'action':
-                console.log("[Type Check] Detected as 'action' via assetType tag.");
                 if (node.cocosAction) {
                     for (var key in node.cocosAction._animationInfos) {
                         unifiedAnimationList.push({ name: key, type: 'action' });
                     }
                 } else if (node.ui) {
-                    // ✅ [수정] 꼬리표로 달아둔 actionUrl을 직접 키로 사용 (100% 정확)
                     const rawActionList = ccs.actionManager.getActionList(node.actionUrl);
                     if (rawActionList) {
                         rawActionList.forEach(action => unifiedAnimationList.push({ name: action.getName(), type: 'action' }));

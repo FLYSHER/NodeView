@@ -65,9 +65,9 @@ canvas {
 .horizontal-guide { height: 1px; }
 .draggable-panel {
     background-color: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    box-shadow: var(--panel-shadow);
+    border: 1px solid #131313;
+    /*border-radius: 8px;
+    box-shadow: var(--panel-shadow);*/
     display: flex;
     flex-direction: column;
     position: absolute !important;
@@ -102,8 +102,8 @@ canvas {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-top-left-radius: 7px;
-    border-top-right-radius: 7px;
+    /*border-top-left-radius: 7px;
+    border-top-right-radius: 7px;*/
     flex-shrink: 0;
 }
 .panel-header .panel-title-text { font-size: 0.95rem; }
@@ -700,7 +700,7 @@ ul.tabs li.current {
     cursor: pointer;
 }
 .jstree-default .jstree-leaf > .jstree-ocl {
-    display: none;
+    visibility: hidden;
 }
 
 /* [수정] 자식 그룹(UL)은 너비 100%를 차지해 다음 줄로 넘어가게 하고, 들여쓰기합니다. */

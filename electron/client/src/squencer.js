@@ -1,3 +1,4 @@
+
 var Sequencer = (function() {
     let PIXELS_PER_SECOND = 100;
     const ZOOM_FACTOR = 1.5;
@@ -11,6 +12,15 @@ var Sequencer = (function() {
     let runnerNode = null;
     let sequenceStartTime = 0;
     let pausedTime = 0;
+
+    let playIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
+                        <path d="M6.3 2.84A1.5 1.5 0 0 0 4 4.11v11.78a1.5 1.5 0 0 0 2.3 1.27l9.344-5.891a1.5 1.5 0 0 0 0-2.538L6.3 2.841Z" />
+                    </svg>`;
+
+    let pauseIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
+                              <path d="M5.75 3a.75.75 0 0 0-.75.75v12.5c0 .414.336.75.75.75h1.5a.75.75 0 0 0 .75-.75V3.75A.75.75 0 0 0 7.25 3h-1.5ZM12.75 3a.75.75 0 0 0-.75.75v12.5c0 .414.336.75.75.75h1.5a.75.75 0 0 0 .75-.75V3.75a.75.75 0 0 0-.75-.75h-1.5Z" />
+                            </svg>
+                            `;
 
     function _updateClipDurationText($clipElement, clipData) {
         let durationText = clipData.duration.toFixed(1) + 's';
@@ -315,7 +325,7 @@ var Sequencer = (function() {
         isPlaying = true; isPaused = false; sequenceStartTime = Date.now();
 
         const $playhead = $('#timeline-playhead');
-        $('#playSequenceBtn').text('Pause');
+        $('#playSequenceBtn').html(pauseIcon);
 
         const labelWidth = $('#track-labels-container').outerWidth();
         $playhead.show().stop().css('left', labelWidth);
@@ -418,7 +428,7 @@ var Sequencer = (function() {
     function _onPause() {
         if (!isPlaying || isPaused) return;
         isPaused = true; pausedTime = Date.now() - sequenceStartTime;
-        $('#playSequenceBtn').text('Resume');
+        $('#playSequenceBtn').html(playIcon);
         $('#timeline-playhead').stop();
 
         if (runnerNode) cc.director.getActionManager().pauseTarget(runnerNode);
@@ -440,7 +450,7 @@ var Sequencer = (function() {
     function _onResume() {
         if (!isPlaying || !isPaused) return;
         isPaused = false; sequenceStartTime = Date.now() - pausedTime;
-        $('#playSequenceBtn').text('Pause');
+        $('#playSequenceBtn').html(pauseIcon);
 
         if (runnerNode) cc.director.getActionManager().resumeTarget(runnerNode);
         tracks.forEach(trackData => {
@@ -483,7 +493,7 @@ var Sequencer = (function() {
     function _onStop(resetPlayhead = true) {
         isPlaying = false;
         isPaused = false;
-        $('#playSequenceBtn').text('Play');
+        $('#playSequenceBtn').html(playIcon);
         $('#timeline-interaction-overlay').hide();
         $('#timeline-playhead').stop();
 
