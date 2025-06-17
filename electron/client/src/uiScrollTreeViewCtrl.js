@@ -26,9 +26,11 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
 
         const self = this;
         $('#widgetTree').droppable({
-            accept: ".jstree-anchor",
+            accept: ".custom-tree-item",
             // 드롭을 감지했을 때 실행될 함수
             drop: function(event, ui) {
+                $(this).removeClass('track-drop-hover'); // [추가된 코드] 드롭 시 점선 제거
+
                 const assetName = ui.helper.data('assetName');
                 if (assetName && self._mainLayer) {
                     // 저장해둔 MainLayer 참조를 통해 인스턴스 생성 함수를 호출합니다.
@@ -55,7 +57,6 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
                     helper: function() {
                         const $helper = $(`<div class="custom-drag-helper">${$(this).text()}</div>`);
 
-                        // 정확한 중앙값으로 cursorAt 설정
                         $(this).draggable("option", "cursorAt", {
                             left: 1,
                             top: 1
@@ -64,6 +65,7 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
                         return $helper;
                     },
                     revert: 'invalid',
+                    revertDuration: 200,
                     zIndex: 9999
                 });
         });
@@ -296,6 +298,7 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
                     return $helper;
                 },
                 revert: 'invalid',
+                revertDuration: 200,
                 zIndex: 9999,
                 start: function(event, ui) {
                     $('#resize-overlay').show();

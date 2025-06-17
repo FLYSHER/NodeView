@@ -184,7 +184,9 @@ var MainLayer = cc.Layer.extend({
                 let childNodeData = {
                     text: child.getName() || "Unnamed Node",
                     children: this._buildChildrenRecursive(child),
-                    data: { nodeId: child.__instanceId }
+                    data: { nodeId: child.__instanceId },
+                    // [수정] 자식 노드임을 나타내는 'type-child' 클래스를 추가합니다.
+                    a_attr: { "class": "type-child" }
                 };
                 childrenData.push(childNodeData);
             }
@@ -198,14 +200,23 @@ var MainLayer = cc.Layer.extend({
         for (const instanceName in this.sceneNodes) {
             if (this.sceneNodes.hasOwnProperty(instanceName)) {
                 const draggableNode = this.sceneNodes[instanceName];
-                // [수정!] getChildren()[0] 대신, 저장된 속성으로 실제 컨텐츠를 찾습니다.
                 const contentNode = draggableNode.ui || draggableNode.armature || draggableNode.spine;
+
+                let childrenData;
+
+                if (draggableNode.assetType === 'armature' || draggableNode.assetType === 'spine') {
+                    childrenData = false;
+                } else {
+                    childrenData = contentNode ? this._buildChildrenRecursive(contentNode) : [];
+                }
 
                 let topLevelNodeData = {
                     text: draggableNode.getName(),
-                    children: contentNode ? this._buildChildrenRecursive(contentNode) : [],
+                    children: childrenData,
                     data: { nodeId: draggableNode.__instanceId },
-                    state: { opened: false }
+                    state: { opened: false },
+                    // [수정된 부분] 노드의 <a> 태그에 동적으로 클래스를 추가합니다.
+                    a_attr: { "class": `type-${draggableNode.assetType}` }
                 };
                 unifiedTreeData.push(topLevelNodeData);
             }
@@ -503,7 +514,7 @@ var ManiLayerScene = cc.Scene.extend({
         GameViewManager.sync();
 
         $(cc.game.canvas).droppable({
-            accept: ".jstree-anchor",
+            accept: ".custom-tree-item", // 수정된 부분
             drop: function(event, ui) {
                 const assetName = ui.helper.data('assetName');
                 if (assetName) {

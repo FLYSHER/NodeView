@@ -674,23 +674,260 @@ ul.tabs li.current {
     height: 100%;
 }
 
-/* 계층 구조창에서 항목을 클릭(선택)했을 때의 스타일 */
-/* 이 규칙이 항상 우선적으로 적용됩니다. */
-.jstree-default .jstree-anchor.jstree-clicked {
-    background-color: var(--accent-color); /* 파란색 */
-    color: white;
-    border-radius: 4px;
+/* =================================== */
+/* Hierarchy (jstree) Custom Styles    */
+/* =================================== */
+
+/* [수정] jstree 컨테이너와 노드의 모든 기본 왼쪽 여백/패딩을 강제로 제거 */
+.jstree-default > .jstree-container-ul,
+.jstree-default .jstree-node {
+    padding-left: 0 !important;
+    margin-left: 0 !important;
 }
 
-/* 계층 구조창의 "선택되지 않은" 항목에 마우스를 올렸을 때의 스타일 */
-.jstree-default .jstree-anchor:not(.jstree-clicked):hover {
-    background-color: #3e3e42; /* 어두운 회색 */
-    color: white;
-    border-radius: 4px;
+/* [수정] 노드(LI)에 Flexbox를 적용하여 자식 요소들을 정렬합니다. */
+.jstree-default .jstree-node {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 4px;
 }
 
-/* jstree의 기본 포커스 아웃라인(점선) 제거 */
-.jstree-default .jstree-anchor:focus {
-    outline: none !important;
-    background-color: transparent;
+/* [수정] 펼치기/접기 버튼의 왼쪽 여백을 확실히 제거합니다. */
+.jstree-default .jstree-ocl {
+    flex-shrink: 0;
+    margin: 0 4px 0 0; /* 오른쪽 여백 4px만 남김 */
+    cursor: pointer;
+}
+.jstree-default .jstree-leaf > .jstree-ocl {
+    display: none;
+}
+
+/* [수정] 자식 그룹(UL)은 너비 100%를 차지해 다음 줄로 넘어가게 하고, 들여쓰기합니다. */
+.jstree-default .jstree-children {
+    flex-basis: 100%;
+    width: 100%;
+    margin-top: 4px;
+    padding-left: 20px;
+}
+
+/* [수정] 앵커(이름, 아이콘이 있는 바)가 남은 공간을 모두 차지하도록 설정합니다. */
+.jstree-default .jstree-anchor {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    padding: 7px 10px;
+    border-radius: 4px;
+    line-height: 1.4;
+    font-size: 0.9rem;
+    font-weight: normal;
+    text-decoration: none !important;
+    box-shadow: none !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    background-color: var(--bg-tertiary);
+    color: var(--font-primary);
+    transition: background-color 0.2s, color 0.2s;
+}
+
+/* --- 호버 및 선택 상태 (앵커에 직접 적용) --- */
+.jstree-default .jstree-anchor:hover {
+    background-color: #4a4a4a !important;
+    color: white !important;
+}
+.jstree-default .jstree-clicked {
+    background-color: var(--accent-color) !important;
+    color: white !important;
+    font-weight: bold;
+}
+.jstree-default .jstree-clicked:hover {
+    background-color: var(--accent-color) !important;
+    color: white !important;
+}
+.jstree-default .jstree-clicked:active {
+    background-color: var(--accent-color) !important;
+    color: white !important;
+}
+.jstree-default .jstree-clicked:focus {
+    background-color: var(--accent-color) !important;
+    color: white !important;
+    outline: none;
+}
+/* 영구 선택 상태 클래스 */
+.jstree-default .jstree-anchor.keep-selected {
+    background-color: var(--accent-color) !important;
+    color: white !important;
+    font-weight: bold;
+}
+.jstree-default .jstree-anchor.keep-selected:hover {
+    background-color: var(--accent-color) !important;
+    color: white !important;
+}
+.jstree-default .jstree-clicked::before {
+    color: white !important;
+}
+
+/* 기본 jstree 아이콘(폴더/파일 모양) 숨기기 */
+.jstree-default .jstree-anchor > .jstree-icon {
+    display: none;
+}
+
+/* 커스텀 아이콘 스타일 */
+.jstree-default .jstree-anchor::before {
+    content: '';
+    display: inline-block;
+    flex-shrink: 0;
+    width: 0;
+    margin-right: 0;
+}
+.jstree-anchor.type-armature::before,
+.jstree-anchor.type-action::before,
+.jstree-anchor.type-spine::before {
+    content: '??';
+    width: 28px;
+    padding: 2px 0;
+    margin-right: 8px;
+    border-radius: 5px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    text-align: center;
+    color: white;
+    line-height: 1.2;
+    vertical-align: middle;
+    background-color: #6c757d;
+}
+.jstree-anchor.type-armature::before {
+    content: 'AR';
+    background-color: #8e44ad;
+}
+.jstree-anchor.type-action::before {
+    content: 'UI';
+    background-color: #3498db;
+}
+.jstree-anchor.type-spine::before {
+    content: 'SP';
+    background-color: #ff8763;
+}
+.jstree-anchor.type-child::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    padding: 0;
+    margin-right: 12px;
+    margin-left: 4px;
+    background-color: #999;
+    border-radius: 50%;
+    vertical-align: middle;
+}
+
+/* =================================== */
+/* jstree 색상 커스터마이징 가이드       */
+/* =================================== */
+
+/* 기본 앵커 색상 */
+.jstree-default .jstree-anchor {
+    background-color: var(--bg-tertiary);    /* 기본 배경색 */
+    color: var(--font-primary);              /* 기본 텍스트 색상 */
+}
+
+/* 호버 상태 색상 */
+.jstree-default .jstree-anchor:hover {
+    background-color: #4a4a4a !important;   /* 호버 배경색 */
+    color: white !important;                 /* 호버 텍스트 색상 */
+}
+
+/* 선택된 상태 색상 */
+.jstree-default .jstree-clicked {
+    background-color: var(--accent-color) !important;  /* 선택된 배경색 */
+    color: white !important;                           /* 선택된 텍스트 색상 */
+}
+
+/* 선택된 상태에서 호버 색상 */
+.jstree-default .jstree-clicked:hover {
+    background-color: var(--accent-color) !important;  /* 선택+호버 배경색 */
+    color: white !important;                           /* 선택+호버 텍스트 색상 */
+}
+
+/* 선택된 상태에서 액티브 색상 */
+.jstree-default .jstree-clicked:active {
+    background-color: var(--accent-color) !important;  /* 선택+액티브 배경색 */
+    color: white !important;                           /* 선택+액티브 텍스트 색상 */
+}
+
+/* 선택된 상태에서 포커스 색상 */
+.jstree-default .jstree-clicked:focus {
+    background-color: var(--accent-color) !important;  /* 선택+포커스 배경색 */
+    color: white !important;                           /* 선택+포커스 텍스트 색상 */
+    outline: none;                                     /* 포커스 아웃라인 제거 */
+}
+
+/* 비활성화된 노드 색상 */
+.jstree-default .jstree-disabled {
+    background-color: #f5f5f5 !important;   /* 비활성화 배경색 */
+    color: #999 !important;                  /* 비활성화 텍스트 색상 */
+}
+
+/* 드래그 중인 노드 색상 */
+.jstree-default .jstree-dragging {
+    background-color: #e8f4f8 !important;   /* 드래그 중 배경색 */
+    color: #333 !important;                  /* 드래그 중 텍스트 색상 */
+}
+
+/* 드롭 타겟 색상 */
+.jstree-default .jstree-drop {
+    background-color: #d4edda !important;   /* 드롭 가능 배경색 */
+    color: #155724 !important;               /* 드롭 가능 텍스트 색상 */
+}
+
+/* 검색 결과 하이라이트 색상 */
+.jstree-default .jstree-search {
+    background-color: #fff3cd !important;   /* 검색 결과 배경색 */
+    color: #856404 !important;               /* 검색 결과 텍스트 색상 */
+}
+
+/* 펼치기/접기 버튼 색상 */
+.jstree-default .jstree-ocl {
+    color: var(--font-primary);             /* 펼치기/접기 버튼 색상 */
+}
+
+/* 펼치기/접기 버튼 호버 색상 */
+.jstree-default .jstree-ocl:hover {
+    color: var(--accent-color);             /* 펼치기/접기 버튼 호버 색상 */
+}
+
+/* 커스텀 아이콘 색상 조정 */
+.jstree-anchor.type-armature::before {
+    background-color: #8e44ad;              /* AR 아이콘 배경색 */
+    color: white;                           /* AR 아이콘 텍스트 색상 */
+}
+
+.jstree-anchor.type-action::before {
+    background-color: #3498db;              /* UI 아이콘 배경색 */
+    color: white;                           /* UI 아이콘 텍스트 색상 */
+}
+
+.jstree-anchor.type-spine::before {
+    background-color: #ff8763;              /* SP 아이콘 배경색 */
+    color: white;                           /* SP 아이콘 텍스트 색상 */
+}
+
+.jstree-anchor.type-child::before {
+    background-color: #999;                 /* 자식 노드 점 색상 */
+}
+
+/* 선택된 노드의 아이콘 색상 */
+.jstree-default .jstree-clicked::before {
+    color: white !important;                /* 선택된 노드의 아이콘 색상 */
+}
+
+/* 체크박스 색상 (체크박스 플러그인 사용 시) */
+.jstree-default .jstree-checkbox {
+    background-color: white;                /* 체크박스 배경색 */
+    border-color: #ccc;                     /* 체크박스 테두리 색상 */
+}
+
+.jstree-default .jstree-clicked > .jstree-checkbox {
+    background-color: var(--accent-color);  /* 선택된 체크박스 배경색 */
+    border-color: var(--accent-color);      /* 선택된 체크박스 테두리 색상 */
 }
