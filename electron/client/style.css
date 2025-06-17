@@ -587,10 +587,10 @@ ul.tabs li.current {
     font-weight: bold;
 }
 .clip-duration .increased {
-    color: #28a745;
+    color: #85ff9e;
 }
 .clip-duration .decreased {
-    color: #dc3545;
+    color: #ff4152;
 }
 .clip-delete-btn {
     width: 16px;
