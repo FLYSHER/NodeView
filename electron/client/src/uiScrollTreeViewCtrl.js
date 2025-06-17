@@ -12,6 +12,32 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
         this._super("");
         this._mainLayer = mainLayer; // 참조 저장
 
+        cc.eventManager.addCustomListener('node_drag_started', function(event) {
+            const eventData = event.getUserData();
+            if (eventData && eventData.nodeId) {
+                const tree = $('#widgetTree').jstree(true);
+                const allNodes = tree.get_json('#', { flat: true });
+                let targetNodeIdInTree = null;
+
+                for (const node of allNodes) {
+                    if (node.data && node.data.nodeId === eventData.nodeId) {
+                        targetNodeIdInTree = node.id;
+                        break;
+                    }
+                }
+
+                if (targetNodeIdInTree) {
+                    tree.deselect_all();
+                    tree.select_node(targetNodeIdInTree);
+
+                    const $selectedNodeLI = tree.get_node(targetNodeIdInTree, true);
+                    if ($selectedNodeLI) {
+                        $selectedNodeLI.find('> .jstree-anchor').addClass('jstree-clicked');
+                    }
+                }
+            }
+        });
+
         $('#widgetTree').jstree({
             'core' : {
                 'data' : [

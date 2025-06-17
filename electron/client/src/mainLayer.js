@@ -261,11 +261,10 @@ var MainLayer = cc.Layer.extend({
             case 'armature':
                 var armature = new ccs.Armature(assetInfo.name);
                 node = new DraggableNode(armature.getContentSize());
-                // Armature는 기준점이 (0,0)에 가까우므로, 중앙에 배치하기 위해 위치를 보정합니다.
                 node.setPosition(this.CX - armature.getContentSize().width * 0.5, this.CY - armature.getContentSize().height * 0.5);
                 node.addChildToCenter(armature);
                 node.armature = armature;
-                node.assetType = 'armature'; // ✅ Armature 타입 꼬리표
+                node.assetType = 'armature';
                 break;
 
             case 'spine':
@@ -275,7 +274,7 @@ var MainLayer = cc.Layer.extend({
                 node.setPosition(this.CX, this.CY);
                 node.addChildToCenter(spine);
                 node.spine = spine;
-                node.assetType = 'spine'; // ✅ Spine 타입 꼬리표
+                node.assetType = 'spine';
                 break;
 
             case 'ui':
@@ -534,7 +533,8 @@ var ManiLayerScene = cc.Scene.extend({
                 var children = mainLayer.getChildren().slice().reverse();
                 for(const child of children){
                     if(child instanceof DraggableNode && child.isVisible()){
-                        const worldBoundingBox = child.getBoundingBoxToWorld();
+                        // 동적인 getBoundingBoxToWorld() 대신, 새로 만든 함수를 사용합니다.
+                        const worldBoundingBox = child.getStaticHitboxWorld();
                         if(cc.rectContainsPoint(worldBoundingBox, event.getLocation())){
                             touchedDraggableNode = child;
                             break;
@@ -543,10 +543,9 @@ var ManiLayerScene = cc.Scene.extend({
                 }
 
                 if (touchedDraggableNode) {
-                    // ✅ [수정!] 옛날 함수 대신 새 ID 기반 함수를 호출합니다.
+                    cc.eventManager.dispatchCustomEvent('node_drag_started', { nodeId: touchedDraggableNode.__instanceId });
                     mainLayer.updateMenuWithNodeId(touchedDraggableNode.__instanceId);
                 } else {
-                    // 캔버스 빈 공간 클릭 시 모든 선택 해제
                     mainLayer.setDraggableItem(null);
                     mainLayer.updateMenuWithNodeId(null);
                 }
