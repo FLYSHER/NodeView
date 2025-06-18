@@ -6,7 +6,6 @@ var DraggableNode = cc.Node.extend({
     ctor: function(contentSize) {
         this._super();
 
-        // 1. 노드의 크기를 고정된 값으로 저장합니다.
         this._staticSize = cc.size(contentSize.width, contentSize.height);
         this._staticHitboxRect = cc.rect(0, 0, this._staticSize.width, this._staticSize.height);
         this.setContentSize(this._staticSize);
@@ -29,32 +28,40 @@ var DraggableNode = cc.Node.extend({
             event: cc.EventListener.MOUSE,
             onMouseMove: function(event) {
                 if (!self._draggable) {
+                    // 드래그 불가능할 때는 기즈모를 여기서 직접 그리지 않음
                     return;
                 }
 
                 var pos = event.getLocation();
                 var prevOver = isOver;
 
-                // 2. 동적인 getBoundingBoxToWorld() 대신, 고정된 크기의 사각 영역을 사용합니다.
                 var worldRect = self.getStaticHitboxWorld();
 
                 if (event.getButton() !== cc.EventMouse.BUTTON_LEFT) {
                     isOver = cc.rectContainsPoint(worldRect, pos);
                     touchStart = false;
+
+                    // 마우스 오버 상태만으로 기즈모를 그리지 않음. MainLayer의 mousedown에서 선택 시 그림
                 } else if (event.getButton() === cc.EventMouse.BUTTON_LEFT && isOver) {
                     if (!touchStart) {
                         touchStart = true;
                         var centerPos = self.getPosition();
                         centerPointDiff = cc.p(pos.x - centerPos.x, pos.y - centerPos.y);
 
+                        // 드래그 시작 시 MainLayer에 이벤트 알림. MainLayer가 선택된 노드를 업데이트하고 기즈모를 그림
                         cc.eventManager.dispatchCustomEvent('node_drag_started', { nodeId: self.__instanceId });
                     }
 
                     var nodePoint = self.getParent().convertToNodeSpace(cc.p(pos.x - centerPointDiff.x, pos.y - centerPointDiff.y));
                     event.getCurrentTarget().setPosition(nodePoint);
 
+                    // [핵심 수정]: 드래그 중에는 MainLayer에 'node_position_changed' 이벤트를 디스패치하여
+                    // MainLayer가 다시 _treeView.setNode()를 호출하고 그 안에서 기즈모를 그리도록 합니다.
+                    cc.eventManager.dispatchCustomEvent('node_position_changed', { nodeId: self.__instanceId });
+
                 } else {
                     touchStart = false;
+                    // 드래그 종료 시 기즈모를 여기서 직접 지우지 않음. MainLayer의 mousedown에서 처리
                 }
 
                 if (!prevOver && isOver) {
@@ -67,7 +74,6 @@ var DraggableNode = cc.Node.extend({
         }, this);
     },
 
-    // 3. 고정된 크기의 월드 좌표 사각 영역을 반환하는 헬퍼 함수를 추가합니다.
     getStaticHitboxWorld: function() {
         var worldPos = this.getParent().convertToWorldSpace(this.getPosition());
         var anchor = this.getAnchorPoint();
@@ -83,6 +89,8 @@ var DraggableNode = cc.Node.extend({
     setDraggable: function(enable) {
         this._draggable = enable;
         this.selectMark.setVisible(this._draggable);
+        // 드래그 불가능 상태가 될 때 기즈모를 여기서 직접 제거하지 않음.
+        // UIScrollTreeViewCtrl의 setNode(null) 호출을 통해 제거
     },
 
     isDraggable: function() {

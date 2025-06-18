@@ -59,6 +59,15 @@ var MainLayer = cc.Layer.extend({
 
         this._canvasResizeListener = cc.eventManager.addCustomListener('canvas-resize', this.updateLayout.bind(this));
 
+        // [추가] 노드 위치 변경 이벤트 리스너
+        this._nodePositionChangedListener = cc.eventManager.addCustomListener('node_position_changed', function(event) {
+            const eventData = event.getUserData();
+            if (eventData && eventData.nodeId) {
+                // UI 업데이트 및 기즈모 재그리기를 위해 다시 호출
+                self.updateMenuWithNodeId(eventData.nodeId);
+            }
+        });
+
         var label = new cc.LabelTTF("파일을 이쪽으로 드래그해 주세요", "Arial", 30);
         label.setPosition(this.CX, this.CY);
         this.addChild(label, 0, this.DESC_TAG);
@@ -226,17 +235,31 @@ var MainLayer = cc.Layer.extend({
 
     // ID를 받아 노드를 찾아 처리하는 함수
     updateMenuWithNodeId: function(nodeId) {
-        if (!nodeId) return;
+        if (!nodeId) {
+            Target = null;
+            this._treeView.setNode(null);
+            this.setDraggableItem(null); // 모든 드래그 가능 아이템 비활성화
+            return;
+        }
         const node = this.nodeMap[nodeId];
         if (!node) {
             console.error("Node not found with ID:", nodeId);
             return;
         }
 
-        Target = node;
-        this._treeView.setNode(node);
+        // Target은 항상 DraggableNode 인스턴스를 가리키도록
+        Target = (node instanceof DraggableNode) ? node : node.getParent(); // 노드의 부모가 DraggableNode일 경우
+        if (!(Target instanceof DraggableNode)) { // 혹시 최상위 DraggableNode가 아니면
+            // Hierarchy에서 자식 노드를 선택했을 경우 해당 자식 노드가 UI에 표시되도록
+            this._treeView.setNode(node); // 선택된 자식 노드 정보를 넘김
+            this.setDraggableItem(null); // 부모 DraggableNode가 아닌 다른 노드가 선택되면 드래그 비활성화
+            return;
+        }
+
+
+        this._treeView.setNode(Target); // DraggableNode 인스턴스를 setNode에 전달
         // 하이어라키에서 노드를 클릭했을 때도 드래그 가능 상태가 되도록 설정
-        this.setDraggableItem(node.getName());
+        this.setDraggableItem(Target.getName());
     },
 
     createInstanceFromLibrary: function(assetName) {
@@ -283,9 +306,20 @@ var MainLayer = cc.Layer.extend({
                 var ui = json.node;
                 var size = ui.getContentSize();
                 if (size.width < 0.01 || size.height < 0.01) {
+                    // UI 노드의 getContentSize가 0일 경우, getBoundingBoxToWorld를 사용하여 유효한 크기를 얻으려 시도합니다.
+                    // 이 크기를 DraggableNode의 _staticSize로 설정합니다.
+                    // 주의: getBoundingBoxToWorld는 렌더링 이후에 정확하므로, 초기 생성 시에는 0일 수 있습니다.
+                    // 임시 크기를 설정하거나, 로드 완료 콜백에서 다시 설정하는 로직이 필요할 수 있습니다.
                     size = ui.getBoundingBoxToWorld();
+                    // 만약 getBoundingBoxToWorld()도 유효하지 않으면 기본값 설정
+                    if (size.width < 0.01 || size.height < 0.01) {
+                        console.warn(`UI asset '${assetInfo.name}' has invalid content size. Using default DraggableNode size.`);
+                        size = cc.size(100, 100); // 기본값
+                    } else {
+                        size = cc.size(size.width, size.height); // cc.Rect에서 cc.Size로 변환
+                    }
                 }
-                node = new DraggableNode(size);
+                node = new DraggableNode(size); // DraggableNode 생성 시 크기 전달
                 node.setAnchorPoint(0.5, 0.5);
                 node.setPosition(this.CX, this.CY);
 
@@ -361,7 +395,7 @@ var MainLayer = cc.Layer.extend({
         if(selectNode) {
             if(Target === selectNode) {
                 Target = null;
-                this._treeView.setNode(null);
+                this._treeView.setNode(null); // 선택 해제 시 기즈모 제거
             }
 
             const removeNodeFromMap = (n) => {
@@ -388,7 +422,7 @@ var MainLayer = cc.Layer.extend({
             }
         }
         // 선택된 노드만 드래그 활성화
-        if( this.sceneNodes.hasOwnProperty( name ) ) {
+        if( name && this.sceneNodes.hasOwnProperty( name ) ) {
             this.sceneNodes[ name ].setDraggable( true );
             Target = this.sceneNodes[ name ];
         }
@@ -470,6 +504,9 @@ var MainLayer = cc.Layer.extend({
         if (this._canvasResizeListener) {
             cc.eventManager.removeListener(this._canvasResizeListener);
         }
+        if (this._nodePositionChangedListener) { // [추가] 이벤트 리스너 제거
+            cc.eventManager.removeListener(this._nodePositionChangedListener);
+        }
         cc.eventManager.removeListener(this._loadArmatureListener);
         cc.eventManager.removeListener(this._loadUIListener);
         cc.eventManager.removeListener(this._loadCocosStudioListener);
@@ -530,11 +567,11 @@ var ManiLayerScene = cc.Scene.extend({
                 if (!mainLayer) return;
 
                 var touchedDraggableNode = null;
+                // 뒤에서부터 탐색하여 가장 앞에 있는 DraggableNode를 찾습니다.
                 var children = mainLayer.getChildren().slice().reverse();
                 for(const child of children){
                     if(child instanceof DraggableNode && child.isVisible()){
-                        // 동적인 getBoundingBoxToWorld() 대신, 새로 만든 함수를 사용합니다.
-                        const worldBoundingBox = child.getStaticHitboxWorld();
+                        const worldBoundingBox = child.getStaticHitboxWorld(); // DraggableNode의 고정 크기 바운딩 박스
                         if(cc.rectContainsPoint(worldBoundingBox, event.getLocation())){
                             touchedDraggableNode = child;
                             break;
@@ -543,10 +580,10 @@ var ManiLayerScene = cc.Scene.extend({
                 }
 
                 if (touchedDraggableNode) {
-                    cc.eventManager.dispatchCustomEvent('node_drag_started', { nodeId: touchedDraggableNode.__instanceId });
+                    // MainLayer에서 해당 DraggableNode를 선택하도록 합니다.
                     mainLayer.updateMenuWithNodeId(touchedDraggableNode.__instanceId);
                 } else {
-                    mainLayer.setDraggableItem(null);
+                    // 어떤 DraggableNode도 선택되지 않은 경우, UI 및 기즈모를 초기화합니다.
                     mainLayer.updateMenuWithNodeId(null);
                 }
             },
@@ -555,6 +592,8 @@ var ManiLayerScene = cc.Scene.extend({
     },
 
     getFrontTouchedNode: function( touchPos ) {
+        // 이 함수는 현재 사용되지 않으며, onMouseDown 로직으로 대체됨
+        console.warn("getFrontTouchedNode is deprecated and may not be used.");
         var maxZOrderList = [], frontNode = null, frontNodeName = '', zOrderList = [], node = null;
         var updateData = function( z, n, name ) { maxZOrderList = z; frontNode = n; frontNodeName = name; };
         for( var name in NodeList ) {
@@ -579,6 +618,8 @@ var ManiLayerScene = cc.Scene.extend({
     },
 
     recursiveCheckNode: function(node, touchpos){
+        // 이 함수는 현재 사용되지 않음
+        console.warn("recursiveCheckNode is deprecated and may not be used.");
         if(!node || !node.children) return node;
         for (var idx = 0; idx < node.children.length; idx++) {
             var found = this.recursiveCheckNode(node.children[idx], touchpos);
@@ -591,6 +632,8 @@ var ManiLayerScene = cc.Scene.extend({
     },
 
     getZOrderList: function( node ) {
+        // 이 함수는 현재 사용되지 않음
+        console.warn("getZOrderList is deprecated and may not be used.");
         var zOrderList = [];
         for( let p = node; !!p; p = p.getParent() ) { zOrderList.unshift( p.zIndex ); }
         return zOrderList;
