@@ -75,7 +75,7 @@ var Gizmo_DrawTouchLayerByRect = function( rect ){
 
     rectNode.drawRect(
         cc.p(rect.x, rect.y),
-        cc.p(rect.x + rect.width, rect.y + rect.height), cc.color(255,0,0,50), 0, cc.color(255,255,255,255));
+        cc.p(rect.x + rect.width, rect.y + rect.height), cc.color(0,0,0,0), 1, cc.color(255,255,0,255));
 };
 
 var Gizmo_ClearDraw = function(){

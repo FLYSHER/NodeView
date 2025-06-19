@@ -7,17 +7,127 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
     _masterNode : null,
     _treeWidgetObj : {},
     _treeString : "",
-    ctor : function () {
+    _mainLayer: null,
+
+    ctor : function (mainLayer) {
         this._super("");
+        this._mainLayer = mainLayer;
+
+        const self = this;
+
+        cc.eventManager.addCustomListener('node_drag_started', function(event) {
+            const eventData = event.getUserData();
+            if (eventData && eventData.nodeId) {
+                const tree = $('#widgetTree').jstree(true);
+                const allNodes = tree.get_json('#', { flat: true });
+                let targetNodeIdInTree = null;
+
+                for (const node of allNodes) {
+                    if (node.data && node.data.nodeId === eventData.nodeId) {
+                        targetNodeIdInTree = node.id;
+                        break;
+                    }
+                }
+
+                if (targetNodeIdInTree) {
+                    tree.deselect_all();
+                    tree.select_node(targetNodeIdInTree);
+                    const $selectedNodeLI = tree.get_node(targetNodeIdInTree, true);
+                    if ($selectedNodeLI) {
+                        $selectedNodeLI.find('> .jstree-anchor').addClass('jstree-clicked');
+                    }
+                }
+            }
+        });
+
         $('#widgetTree').jstree({
             'core' : {
-                'data' : [
-                ]
+                'data' : [],
+                "check_callback" : function (operation, node, parent, position, more) {
+                    const mainLayerInstance = self._mainLayer;
+
+                    if (!node || !node.data || !node.data.nodeId) {
+                        return false;
+                    }
+
+                    const movingCocosNode = mainLayerInstance.nodeMap[node.data.nodeId];
+                    const isMovingDraggableNode = (movingCocosNode instanceof DraggableNode);
+
+                    const targetParentId = (typeof parent === 'object' && parent !== null && parent.id) ? parent.id : parent;
+
+                    if (operation === "move_node") {
+                        if (targetParentId === '#') {
+                            if (isMovingDraggableNode) {
+                                return true;
+                            }
+                        }
+
+                        let targetParentCocosNode = null;
+                        if (targetParentId === '#') {
+                            targetParentCocosNode = mainLayerInstance;
+                        } else {
+                            const parentJstreeNode = this.get_node(targetParentId);
+                            if (parentJstreeNode && parentJstreeNode.data && parentJstreeNode.data.nodeId) {
+                                targetParentCocosNode = mainLayerInstance.nodeMap[parentJstreeNode.data.nodeId];
+                            } else {
+                                return false;
+                            }
+                        }
+
+                        if (!targetParentCocosNode) {
+                            return false;
+                        }
+
+                        const isTargetParentMainLayer = (targetParentCocosNode === mainLayerInstance);
+                        const isTargetParentDraggableNode = (targetParentCocosNode instanceof DraggableNode);
+
+                        if (isMovingDraggableNode) {
+                            if (isTargetParentDraggableNode || isTargetParentMainLayer) {
+                                return true;
+                            } else {
+                                return false;
+                            }
+                        }
+
+                        if (isTargetParentDraggableNode) {
+                            const isChildOfDraggableNodeContent = (
+                                targetParentCocosNode.ui === movingCocosNode ||
+                                targetParentCocosNode.armature === movingCocosNode ||
+                                targetParentCocosNode.spine === movingCocosNode
+                            );
+
+                            if (isMovingDraggableNode || isChildOfDraggableNodeContent) {
+                                return true;
+                            } else {
+                                return false;
+                            }
+                        }
+                        return true;
+                    }
+                    return true;
+                },
             },
-            "plugins": ["search"],
+            "plugins": ["search", "dnd"],
             "search": {
                 "case_sensitive": false,
                 "show_only_matches": true
+            }
+        });
+
+        $('#widgetTree').droppable({
+            accept: ".custom-tree-item",
+            drop: function(event, ui) {
+                $(this).removeClass('track-drop-hover');
+                const assetName = ui.helper.data('assetName');
+                if (assetName && self._mainLayer) {
+                    self._mainLayer.createInstanceFromLibrary(assetName);
+                }
+            },
+            over: function(event, ui) {
+                $(this).addClass('track-drop-hover');
+            },
+            out: function(event, ui) {
+                $(this).removeClass('track-drop-hover');
             }
         });
 
@@ -31,16 +141,14 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
                     appendTo: 'body',
                     helper: function() {
                         const $helper = $(`<div class="custom-drag-helper">${$(this).text()}</div>`);
-
-                        // 정확한 중앙값으로 cursorAt 설정
                         $(this).draggable("option", "cursorAt", {
                             left: 1,
                             top: 1
                         });
-
                         return $helper;
                     },
                     revert: 'invalid',
+                    revertDuration: 200,
                     zIndex: 9999
                 });
         });
@@ -52,46 +160,69 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
             });
         });
 
-        var self = this;
         $('#widgetTree').on("changed.jstree", function (e, data) {
-            if( !!data.node === false)
+            if (data.node && data.node.data && data.node.data.nodeId && data.action === 'select_node') {
+                const selectedNodeId = data.node.data.nodeId;
+                self._mainLayer.updateMenuWithNodeId(selectedNodeId);
+            }
+        });
+
+        $('#widgetTree').on('move_node.jstree', function (e, data) {
+            const movedNodeId = data.node.data.nodeId;
+            const oldParentNodeId = data.old_parent === '#' ? null : data.instance.get_node(data.old_parent).data.nodeId;
+            const newParentNodeId = data.parent === '#' ? null : data.instance.get_node(data.parent).data.nodeId;
+
+            const movedCocosNode = self._mainLayer.nodeMap[movedNodeId];
+
+            if (!movedCocosNode) {
                 return;
-
-            if( data.selected.length < 2 ){
-                var selectedObj = self._treeWidgetObj[ data.node.id ];
-                if( !!selectedObj === false )
-                    return;
-
-                if( selectedObj.obj.getNumberOfRunningActions() === 0 ) {
-
-                    var actionBy = cc.scaleBy(0.15, 1.2).easing( cc.easeElasticOut( 1.5 ));
-
-                    $('#scaleValue').html("("+selectedObj.initScaleX+" , "+selectedObj.initScaleY+")");
-                    selectedObj.obj.runAction(cc.sequence(actionBy, actionBy.reverse())).setTag(100);
-                }
-
-                self.selectNode(selectedObj.obj);
             }
-            else {
-                var objArr = [];
-                for ( var i = 0 ; i < data.selected.length ; i ++ ){
-                    var selectedObj = self._treeWidgetObj[ data.selected[i] ];
-                    if( !!selectedObj === false )
-                        return;
 
-                    if( selectedObj.obj.getNumberOfRunningActions() === 0 ) {
+            const currentWorldPos = movedCocosNode.getParent().convertToWorldSpace(movedCocosNode.getPosition());
 
-                        var actionBy = cc.scaleBy(0.15, 1.2).easing( cc.easeElasticOut( 1.5 ));
+            if (movedCocosNode.getParent()) {
+                movedCocosNode.retain();
+                movedCocosNode.removeFromParent(false);
+                movedCocosNode.release();
+            }
 
-                        $('#scaleValue').html("("+selectedObj.initScaleX+" , "+selectedObj.initScaleY+")");
-                        selectedObj.obj.runAction(cc.sequence(actionBy, actionBy.reverse())).setTag(100);
+            let newParentCocosNodeInstance = null;
+            if (newParentNodeId) {
+                newParentCocosNodeInstance = self._mainLayer.nodeMap[newParentNodeId];
+            } else {
+                newParentCocosNodeInstance = self._mainLayer;
+            }
+
+            if (newParentCocosNodeInstance) {
+                const newLocalPos = newParentCocosNodeInstance.convertToNodeSpace(currentWorldPos);
+                movedCocosNode.setPosition(newLocalPos);
+
+                newParentCocosNodeInstance.addChild(movedCocosNode);
+
+                const tree = $('#widgetTree').jstree(true);
+                const childrenOfNewParent = tree.get_children_dom(data.parent);
+
+                const zOrderMap = new Map();
+                childrenOfNewParent.each((index, domElement) => {
+                    const childJstreeId = $(domElement).attr('id');
+                    const childJstreeNodeData = tree.get_node(childJstreeId).data;
+                    if (childJstreeNodeData && childJstreeNodeData.nodeId) {
+                        zOrderMap.set(childJstreeNodeData.nodeId, index);
                     }
+                });
 
-                    objArr.push( selectedObj.obj);
-                }
-                self.selectNodeMulti(objArr);
+                newParentCocosNodeInstance.getChildren().forEach(childCocosNode => {
+                    if (childCocosNode instanceof cc.DrawNode) return;
+                    const childCocosNodeId = childCocosNode.__instanceId;
+                    if (zOrderMap.has(childCocosNodeId)) {
+                        const newChildZ = zOrderMap.get(childCocosNodeId);
+                        if (childCocosNode.getLocalZOrder() !== newChildZ) {
+                            childCocosNode.setLocalZOrder(newChildZ);
+                        }
+                    }
+                });
             }
-
+            self._mainLayer.refreshHierarchyView();
         });
 
         $('#actionTree').addClass('custom-tree-container');
@@ -100,7 +231,6 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
     },
 
     setup:function () {
-        var self = this;
         $('#toggleVisible').click( function(){
             this._selectNode.forEach( item => {
                 item.setVisible( !item.isVisible());
@@ -108,173 +238,214 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
         }.bind(this));
 
         $('#openAll').click( function(){
-            if( this.treeInfo ){
-                $('#widgetTree').jstree("open_all");
+            const tree = $('#widgetTree').jstree(true);
+            if (tree) {
+                tree.open_all();
             }
         }.bind(this));
 
         $('#closeAll').click( function(){
-            if( this.treeInfo ){
-                $('#widgetTree').jstree("close_all");
+            const tree = $('#widgetTree').jstree(true);
+            if (tree) {
+                tree.close_all();
             }
         }.bind(this));
 
         $('#copyBtn').click( function(){
-            if( this.treeInfo ){
+            // 원본 getTreeObjName이 _treeWidgetObj에 의존하므로, 먼저 _treeWidgetObj가 채워져 있는지 확인
+            // 이 예시에서는 _treeWidgetObj가 updateTreeView에서 채워진다고 가정합니다.
+            if (Object.keys(this._treeWidgetObj).length > 0) {
                 var obj = this.getTreeObjName();
-
                 this._treeString = "this._uiWidgets = {\n";
-
                 for( var key in obj ) {
                     this._treeString += obj[ key ].copyString;
                 }
-
                 this._treeString += "};";
 
-                copyStringToClipboard( this._treeString );
+                if (typeof copyStringToClipboard === 'function') {
+                    copyStringToClipboard( this._treeString );
+                } else {
+                    console.warn("copyStringToClipboard 함수가 정의되지 않았습니다.");
+                }
+            } else {
+                console.warn("복사할 트리 데이터가 없습니다. 먼저 트리를 로드하거나 선택해주세요.");
             }
         }.bind(this));
 
         $('#debugBone').click( function( sender ){
             this._selectNode.forEach( item => {
-                if( item.getDebugBonesEnabled() ) {
-                    sender.target.innerText = "Show Bone";
+                const targetArmature = item.armature || (item instanceof ccs.Armature ? item : null);
+                if( targetArmature && targetArmature.getDebugBonesEnabled ) {
+                    if (targetArmature.getDebugBonesEnabled()) {
+                        sender.target.innerText = "Show Bone";
+                    } else {
+                        sender.target.innerText = "Hide Bone";
+                    }
+                    targetArmature.setDebugBone();
                 }
-                else {
-                    sender.target.innerText = "Hide Bone";
-                }
-                item.setDebugBone();
             });
         }.bind(this));
 
         $('#debugSlot').click( function( sender ){
             this._selectNode.forEach( item => {
-                if( item.getDebugSlotsEnabled() ) {
-                    sender.target.innerText = "Show Slot";
+                const targetSpine = item.spine || (item instanceof sp.SkeletonAnimation ? item : null);
+                if( targetSpine && targetSpine.getDebugSlotsEnabled ) {
+                    if (targetSpine.getDebugSlotsEnabled()) {
+                        sender.target.innerText = "Show Slot";
+                    } else {
+                        sender.target.innerText = "Hide Slot";
+                    }
+                    targetSpine.setDebugSlotsEnabled( !targetSpine.getDebugSlotsEnabled() );
                 }
-                else {
-                    sender.target.innerText = "Hide Slot";
-                }
-
-                item.setDebugSlotsEnabled( !item.getDebugSlotsEnabled() );
             });
         }.bind(this));
 
         $("input[name=opacity]").change(function(){
             this._selectNode.forEach( item => {
-                item.setOpacity($("input[name=opacity]").val());
+                item.setOpacity(parseInt($("input[name=opacity]").val(), 10));
                 $('#opacityValue').html(item.getOpacity());
             });
         }.bind(this));
 
         $("input[name=lPosX]").change(function(){
             this._selectNode.forEach( item => {
-                item.setPositionX(parseFloat($("input[name=lPosX]").val()));
-                var position = item.getPosition();
-                if ( item.getParent() instanceof  ccui.Layout  === false ){
-                    var anchorPP = item.getParent()._renderCmd._anchorPointInPoints;
-                    console.log("lposx change" , anchorPP );
-                    position.x -= anchorPP.x;
-                    position.y -= anchorPP.y;
+                const newPosX = parseFloat($("input[name=lPosX]").val());
+                if (!isNaN(newPosX)) {
+                    item.setPositionX(newPosX);
+                    if (this._mainLayer && item.__instanceId) {
+                        this._mainLayer.updateMenuWithNodeId(item.__instanceId);
+                    }
                 }
-                changePosition(g_currentObj, item.getName(), position );
             });
         }.bind(this));
 
         $("input[name=lPosY]").change(function(){
             this._selectNode.forEach( item => {
-                item.setPositionY(parseFloat($("input[name=lPosY]").val()));
-                var position = item.getPosition();
-                if ( item.getParent() instanceof  ccui.Layout  === false ){
-                    var anchorPP = item.getParent()._renderCmd._anchorPointInPoints;
-                    console.log("lposx change" , anchorPP );
-                    position.x -= anchorPP.x;
-                    position.y -= anchorPP.y;
+                const newPosY = parseFloat($("input[name=lPosY]").val());
+                if (!isNaN(newPosY)) {
+                    item.setPositionY(newPosY);
+                    if (this._mainLayer && item.__instanceId) {
+                        this._mainLayer.updateMenuWithNodeId(item.__instanceId);
+                    }
                 }
-                changePosition(g_currentObj, item.getName(), position );
             });
         }.bind(this));
     },
 
-    setNode :function (node, finalNode) {
-        delete this.treeInfo;
-        this._selectNode.length = 0;
-        this._selectNode = [];
-        this._masterNode = node;
-        this._treeWidgetObj = {};
+    setNode: function(node) {
+        if (!node) {
+            this._selectNode = [];
+            this._masterNode = null;
+            $('#widgetTree').jstree(true).settings.core.data = [];
+            $('#widgetTree').jstree("refresh");
+            $('#actionTree').empty();
+            $('#localPos').html("( - , - )");
+            $('#LocalSize').html("( - , - )");
+            $('#opacityValue').html("255");
+            $('#anchorValue').html("( - , - )");
+            $('#zOrderValue').html("-");
+            $("input[name=lPosX]").val("");
+            $("input[name=lPosY]").val("");
+            $("input[name=opacity]").val(255);
 
-        var treeObj = [];
-        var actionList = [];
+            var searchBox = document.getElementById("searchNode");
+            var uiOption = document.getElementById("ui-option");
+            var spineOption = document.getElementById("spine-option");
+            if (searchBox) searchBox.style.visibility = 'hidden';
+            if (uiOption) uiOption.style.visibility = 'hidden';
+            if (spineOption) spineOption.style.visibility = 'hidden';
 
-        if( node && node.spine ) {
-            this._selectNode.push( node.spine );
-        }
-        else if(node && node.ui) {
-            var childTree = this.createUIChildList(node.ui);
-
-            this.treeInfo = [{
-                info :{
-                    id : node.ui.__instanceId,
-                    obj : node.ui,
-                    name : node.ui.getName(),
-                    initScale : node.ui.getScale(),
-                },
-                childList : childTree
-            }] ;
-
-            this.drawTree(this.treeInfo, 0, 0, treeObj);
-
-            if(  node.cocosAction ){
-                for(var key in node.cocosAction._animationInfos){
-                    actionList.push(key);
-                }
+            if (typeof Gizmo_ClearDraw === 'function') {
+                Gizmo_ClearDraw();
             }
-            else {
-                this._jsonName = node.getName() + '.ExportJson';
-                var rawActionList = ccs.actionManager.getActionList(this._jsonName);
-                for (var i = 0; i < rawActionList.length; i++) {
-                    actionList.push(rawActionList[i].getName());
-                }
-            }
+            return;
         }
 
-        $('#widgetTree').jstree(true).settings.core.data = treeObj;
-        $('#widgetTree').jstree("refresh");
+        const targetNode = node.ui || node.armature || node.spine || node;
+        this._selectNode = [targetNode];
 
-        var self = this;
+        $('#localPos').html("(" + targetNode.getPosition().x.toFixed(2) + " , " + targetNode.getPosition().y.toFixed(2) + ")");
+        $("input[name=lPosX]").val(targetNode.getPosition().x.toFixed(2));
+        $("input[name=lPosY]").val(targetNode.getPosition().y.toFixed(2));
+        $('#LocalSize').html("(" + targetNode.getContentSize().width.toFixed(2) + " , " + targetNode.getContentSize().height.toFixed(2) + ")");
+        $("input[name=opacity]").val(targetNode.getOpacity());
+        $('#opacityValue').html(targetNode.getOpacity());
+        $('#anchorValue').html("("+ targetNode.getAnchorPoint().x+" , "+targetNode.getAnchorPoint().y+")");
+        $('#zOrderValue').html(targetNode.getLocalZOrder());
 
-        if(!!finalNode){
-            setTimeout(function(){
-                $('#widgetTree').jstree("deselect_all");
-                $('#widgetTree').jstree('select_node',self.recursiveTreeCheck(treeObj,finalNode.name));
-            },50);
+        if (typeof Gizmo_DrawTouchLayerByRect === 'function') {
+            var rect = targetNode.getBoundingBox();
+            var po = targetNode.getParent().convertToWorldSpace(cc.p(rect.x, rect.y));
+            if(rect.width < 5) rect.width = 10;
+            if (rect.height < 5 ) rect.height = 10;
+            Gizmo_DrawTouchLayerByRect(cc.rect(po.x, po.y, rect.width, rect.height));
+        }
+
+        var unifiedAnimationList = [];
+        switch (node.assetType) {
+            case 'armature':
+                var animNameArr = node.armature.getAnimation()._animationData.movementNames;
+                animNameArr.forEach(name => unifiedAnimationList.push({ name: name, type: 'armature' }));
+                break;
+            case 'spine':
+                var animations = node.spine.getState().data.skeletonData.animations;
+                animations.forEach(anim => unifiedAnimationList.push({ name: anim.name, type: 'spine' }));
+                break;
+            case 'action':
+                if (node.cocosAction) {
+                    for (var key in node.cocosAction._animationInfos) {
+                        unifiedAnimationList.push({ name: key, type: 'action' });
+                    }
+                } else if (node.ui) {
+                    const rawActionList = ccs.actionManager.getActionList(node.actionUrl);
+                    if (rawActionList) {
+                        rawActionList.forEach(action => unifiedAnimationList.push({ name: action.getName(), type: 'action' }));
+                    }
+                }
+                break;
+            default:
+                break;
         }
 
         const $actionContainer = $('#actionTree');
         $actionContainer.empty();
 
-        actionList.forEach(actionName => {
+        unifiedAnimationList.forEach(item => {
+            let iconText = '';
+            let typeClass = `type-${item.type}`;
+            if (item.type === 'armature') iconText = 'AR';
+            if (item.type === 'spine') iconText = 'SP';
+            if (item.type === 'action') iconText = 'UI';
+
             const $item = $(`
-                <div class="custom-tree-item" data-anim-name="${actionName}">
-                    ${actionName}
+                <div class="custom-tree-item" data-anim-name="${item.name}" data-anim-type="${item.type}">
+                    <span class="track-type-icon ${typeClass}">${iconText}</span>
+                    ${item.name}
                 </div>
             `);
 
             $item.draggable({
-                appendTo: 'body',
+                appendTo: "body",
                 helper: function() {
-                    const $helper = $(`<div class="custom-drag-helper">${$(this).text()}</div>`);
-
-                    // 정확한 중앙값으로 cursorAt 설정
+                    const assetName = $(this).data('anim-name');
+                    const $helper = $(`<div class="custom-drag-helper">${assetName}</div>`);
+                    $helper.data('animName', assetName);
+                    $helper.data('animType', $(this).data('anim-type'));
                     $(this).draggable("option", "cursorAt", {
                         left: 1,
                         top: 1
                     });
-
                     return $helper;
                 },
                 revert: 'invalid',
-                zIndex: 9999
+                revertDuration: 200,
+                zIndex: 9999,
+                start: function(event, ui) {
+                    $('#resize-overlay').show();
+                },
+                stop: function(event, ui) {
+                    $('#resize-overlay').hide();
+                }
             });
 
             $item.on('click', () => {
@@ -285,110 +456,18 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
             $actionContainer.append($item);
         });
 
-        var searchBox = document.getElementById( "searchNode" );
-        var uiOption = document.getElementById( "ui-option" );
-        var spineOption = document.getElementById( "spine-option" );
+        var searchBox = document.getElementById("searchNode");
+        var uiOption = document.getElementById("ui-option");
+        var spineOption = document.getElementById("spine-option");
 
-        if( treeObj.length > 0 ) {
-            searchBox.style.visibility = 'visible';
-            uiOption.style.visibility = 'visible';
-            spineOption.style.visibility = 'hidden';
+        if (searchBox) searchBox.style.visibility = 'visible';
+        if (uiOption) uiOption.style.visibility = 'visible';
+
+        if (node && node.spine) {
+            if (spineOption) spineOption.style.visibility = 'visible';
+        } else {
+            if (spineOption) spineOption.style.visibility ='hidden';
         }
-        else {
-            searchBox.style.visibility = 'hidden';
-            uiOption.style.visibility = 'hidden';
-
-            if( node && node.spine ) {
-                spineOption.style.visibility = 'visible';
-            }
-            else {
-                spineOption.style.visibility ='hidden';
-            }
-        }
-    },
-
-    recursiveTreeCheck : function(arr, name){
-        for(var idx = 0; idx < arr.length;idx++){
-            if(arr[idx].text === name) return arr[idx].id;
-
-            if(!!arr[idx] && !!arr[idx].children){
-                return this.recursiveTreeCheck(arr[idx].children, name);
-            }
-        }
-    },
-
-    createUIChildList :function (node) {
-        if(!node)
-            return null;
-        var childList = [];
-        var children = node.getChildren();
-        for(var  i=0; i< children.length; i++)  {
-            childList[i] = {};
-            childList[i].info ={};
-            childList[i].info.obj = children[i];
-            childList[i].info.name = children[i].getName();
-            childList[i].info.initScale = children[i].getScale();
-            childList[i].info.initScaleX = children[i].getScaleX();
-            childList[i].info.initScaleY = children[i].getScaleY();
-
-            childList[i].info.id = children[i].__instanceId;
-            childList[i].childList = this.createUIChildList(children[i]);
-        }
-        return childList;
-    },
-
-    createArChildList :function (node) {
-        if(!node)
-            return null;
-
-        var childList = [];
-
-        var boneDic = node.armatureData.getBoneDataDic();
-        var i = 0;
-        for (var b in boneDic){
-
-            childList[i] = {};
-            childList[i].info ={};
-            childList[i].info.obj = boneDic[b];
-            childList[i].info.name =  boneDic[b].name;
-            i++;
-        }
-        return childList;
-    },
-
-    drawTree :function (treeInfo, depth, line, dataObj) {
-        if(!treeInfo)
-            return line;
-
-        var len = treeInfo.length;
-        for(var i = 0; i < len; i++) {
-            line++;
-
-            var info = treeInfo[i];
-            var obj = {
-                "id" : info.info.id,
-                "text" : info.info.name,
-                "state": {
-                    "opened": true
-                },
-                "instanceID" : 0
-            };
-            if( info.childList.length > 0){
-                obj.children = [];
-            }
-            this._treeWidgetObj[ info.info.id ] = {};
-            this._treeWidgetObj[ info.info.id ].obj = info.info.obj;
-            this._treeWidgetObj[ info.info.id ].id = info.info.id;
-            this._treeWidgetObj[ info.info.id ].name = info.info.name;
-            this._treeWidgetObj[ info.info.id ].initScale = info.info.obj.getScale();
-            this._treeWidgetObj[ info.info.id ].initScaleX = info.info.obj.getScaleX();
-            this._treeWidgetObj[ info.info.id ].initScaleY = info.info.obj.getScaleY();
-
-            dataObj.push( obj );
-
-            line = this.drawTree(info.childList, depth+1, line, obj.children);
-        }
-        return line;
     },
 
     selectNode :function (nodeObj) {
@@ -405,24 +484,22 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
         $("input[name=lPosY]").val(nodeObj.getPosition().y.toFixed(2));
         $('#LocalSize').html("(" + nodeObj.getContentSize().width.toFixed(2) + " , " +nodeObj.getContentSize().height.toFixed(2) + ")");
 
-        $("input[name=opacity]").val(nodeObj.getOpacity());
-        $('#opacityValue').html(nodeObj.getOpacity());
+        $("input[name=opacity]").val( opa);
+        $('#opacityValue').html( opa );
 
-        $('#anchorValue').html("("+ nodeObj.getAnchorPoint().x+" , "+nodeObj.getAnchorPoint().y+")");
+        $('#anchorValue').html("("+ ancX+" , "+ancY+")");
 
-        $('#zOrderValue').html(nodeObj.getLocalZOrder());
+        $('#zOrderValue').html(zOrder);
 
-        var rect = nodeObj.getBoundingBox();
-        var po =   nodeObj.getParent().convertToWorldSpace( cc.p(rect.x, rect.y));
-
-        if(rect.width < 5)
-            rect.width = 10;
-        if (rect.height < 5 )
-            rect.height = 10;
-
-        Gizmo_DrawTouchLayerByRect(
-            cc.rect(po.x, po.y, rect.width, rect.height)
-        );
+        var rectNode = cc.director.getRunningScene().getChildByTag(gizmoNodTag);
+        if(!rectNode) {
+            rectNode = new cc.DrawNode();
+            rectNode.setTag(gizmoNodTag);
+            cc.director.getRunningScene().addChild(rectNode, 999999, gizmoNodTag);
+        }
+        else{
+            rectNode.clear();
+        }
     },
 
     selectNodeMulti :function (nodeArr) {
@@ -435,7 +512,7 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
         var sizeH= this._selectNode[0].getContentSize().height;
         var opa= this._selectNode[0].getOpacity();
         var ancX= this._selectNode[0].getAnchorPoint().x;
-        var ancY= this._selectNode[0].getAnchorPoint().y;
+        var ancY= this._selectNode[0].getAnchorPoint().Y;
         var zOrder= this._selectNode[0].getLocalZOrder();
 
         this._selectNode.forEach( item => {
@@ -477,6 +554,29 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
         }
     },
 
+    updateTreeView: function(treeData) {
+        // jstree 데이터를 기반으로 _treeWidgetObj를 업데이트하는 로직 추가
+        this._treeWidgetObj = {};
+        const processNode = (nodeData) => {
+            if (nodeData.data && nodeData.data.nodeId) {
+                const cocosNode = this._mainLayer.nodeMap[nodeData.data.nodeId];
+                if (cocosNode && cocosNode.getName()) {
+                    this._treeWidgetObj[nodeData.data.nodeId] = {
+                        name: cocosNode.getName(),
+                        // copyString은 getTreeObjName에서 처리되므로 여기서는 name만 저장
+                    };
+                }
+            }
+            if (nodeData.children && nodeData.children.length > 0) {
+                nodeData.children.forEach(child => processNode(child));
+            }
+        };
+        treeData.forEach(node => processNode(node));
+
+        $('#widgetTree').jstree(true).settings.core.data = treeData;
+        $('#widgetTree').jstree(true).refresh();
+    },
+
     getTreeObjName: function() {
         var length = Object.keys( this._treeWidgetObj ).length;
         var treeArrName = {};
@@ -512,7 +612,6 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
 
                 while( find ) {
                     for( var key2 in treeArrName ) {
-
                         var objName = firstSubString1 + ( idx < 10 ? '0' + idx : idx );
                         var objName2 = treeArrName[ key2 ].name;
                         find = false;
