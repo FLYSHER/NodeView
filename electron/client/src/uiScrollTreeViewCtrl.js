@@ -93,7 +93,8 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
                             const isChildOfDraggableNodeContent = (
                                 targetParentCocosNode.ui === movingCocosNode ||
                                 targetParentCocosNode.armature === movingCocosNode ||
-                                targetParentCocosNode.spine === movingCocosNode
+                                targetParentCocosNode.spine === movingCocosNode ||
+                                targetParentCocosNode.image === movingCocosNode // [수정]: 이미지 콘텐츠 노드 추가
                             );
 
                             if (isMovingDraggableNode || isChildOfDraggableNodeContent) {
@@ -119,8 +120,9 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
             drop: function(event, ui) {
                 $(this).removeClass('track-drop-hover');
                 const assetName = ui.helper.data('assetName');
-                if (assetName && self._mainLayer) {
-                    self._mainLayer.createInstanceFromLibrary(assetName);
+                const assetType = ui.helper.data('assetType'); // [수정]: assetType도 드롭 이벤트에서 받음
+                if (assetName && assetType && self._mainLayer) { // [수정]: assetType도 함께 전달
+                    self._mainLayer.createInstanceFromLibrary(assetName, assetType); // [수정]: assetType도 함께 전달
                 }
             },
             over: function(event, ui) {
@@ -321,7 +323,7 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
 
         $("input[name=lPosY]").change(function(){
             this._selectNode.forEach( item => {
-                const newPosY = parseFloat($("input[name=lPosY]").val());
+                const newPosY = parseFloat(parseFloat($("input[name=lPosY]").val()));
                 if (!isNaN(newPosY)) {
                     item.setPositionY(newPosY);
                     if (this._mainLayer && item.__instanceId) {
@@ -361,7 +363,7 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
             return;
         }
 
-        const targetNode = node.ui || node.armature || node.spine || node;
+        const targetNode = node.ui || node.armature || node.spine || node.image || node; // [수정]: image 속성 추가
         this._selectNode = [targetNode];
 
         $('#localPos').html("(" + targetNode.getPosition().x.toFixed(2) + " , " + targetNode.getPosition().y.toFixed(2) + ")");
@@ -382,29 +384,24 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
         }
 
         var unifiedAnimationList = [];
-        switch (node.assetType) {
-            case 'armature':
-                var animNameArr = node.armature.getAnimation()._animationData.movementNames;
-                animNameArr.forEach(name => unifiedAnimationList.push({ name: name, type: 'armature' }));
-                break;
-            case 'spine':
-                var animations = node.spine.getState().data.skeletonData.animations;
-                animations.forEach(anim => unifiedAnimationList.push({ name: anim.name, type: 'spine' }));
-                break;
-            case 'action':
-                if (node.cocosAction) {
-                    for (var key in node.cocosAction._animationInfos) {
-                        unifiedAnimationList.push({ name: key, type: 'action' });
-                    }
-                } else if (node.ui) {
-                    const rawActionList = ccs.actionManager.getActionList(node.actionUrl);
-                    if (rawActionList) {
-                        rawActionList.forEach(action => unifiedAnimationList.push({ name: action.getName(), type: 'action' }));
-                    }
+        // [수정]: node.assetType을 사용하여 애니메이션 목록 구성. 이미지 노드는 제외
+        if (node.assetType === 'armature') {
+            var animNameArr = node.armature.getAnimation()._animationData.movementNames;
+            animNameArr.forEach(name => unifiedAnimationList.push({ name: name, type: 'armature' }));
+        } else if (node.assetType === 'spine') {
+            var animations = node.spine.getState().data.skeletonData.animations;
+            animations.forEach(anim => unifiedAnimationList.push({ name: anim.name, type: 'spine' }));
+        } else if (node.assetType === 'action') {
+            if (node.cocosAction) {
+                for (var key in node.cocosAction._animationInfos) {
+                    unifiedAnimationList.push({ name: key, type: 'action' });
                 }
-                break;
-            default:
-                break;
+            } else if (node.ui) {
+                const rawActionList = ccs.actionManager.getActionList(node.actionUrl);
+                if (rawActionList) {
+                    rawActionList.forEach(action => unifiedAnimationList.push({ name: action.getName(), type: 'action' }));
+                }
+            }
         }
 
         const $actionContainer = $('#actionTree');
@@ -463,7 +460,8 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
         if (searchBox) searchBox.style.visibility = 'visible';
         if (uiOption) uiOption.style.visibility = 'visible';
 
-        if (node && node.spine) {
+        // [수정]: node.assetType을 사용하여 spine-option 가시성 제어
+        if (node && node.assetType === 'spine') {
             if (spineOption) spineOption.style.visibility = 'visible';
         } else {
             if (spineOption) spineOption.style.visibility ='hidden';

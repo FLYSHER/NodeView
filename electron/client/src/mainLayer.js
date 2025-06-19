@@ -42,9 +42,9 @@ var MainLayer = cc.Layer.extend({
     ctor: function () {
         this._super();
 
-        this.assetLibrary = {}; // 로드된 모든 에셋의 정보 저장소
-        this.sceneNodes = {};   // 씬에 실제 배치된 노드들의 정보 저장소
-        this.nodeMap = {};      // 모든 노드를 ID 기반으로 저장할 지도
+        this.assetLibrary = {};
+        this.sceneNodes = {};
+        this.nodeMap = {};
 
         var size = cc.winSize;
         this.CX = size.width / 2;
@@ -56,14 +56,13 @@ var MainLayer = cc.Layer.extend({
         this._loadUIListener = cc.eventManager.addCustomListener('loadUI', function(event) { self.onLoadUI(event.getUserData()); });
         this._loadCocosStudioListener = cc.eventManager.addCustomListener('loadCocosStudio', function (event){ self.onLoadCocosStuido(event.getUserData()); });
         this._loadSpineListener = cc.eventManager.addCustomListener('loadSpine', function(event) { self.onLoadSpine(event.getUserData()); });
+        this._loadImageListener = cc.eventManager.addCustomListener('loadImage', function(event) { self.onLoadImage(event.getUserData()); });
 
         this._canvasResizeListener = cc.eventManager.addCustomListener('canvas-resize', this.updateLayout.bind(this));
 
-        // [추가] 노드 위치 변경 이벤트 리스너
         this._nodePositionChangedListener = cc.eventManager.addCustomListener('node_position_changed', function(event) {
             const eventData = event.getUserData();
             if (eventData && eventData.nodeId) {
-                // UI 업데이트 및 기즈모 재그리기를 위해 다시 호출
                 self.updateMenuWithNodeId(eventData.nodeId);
             }
         });
@@ -111,25 +110,35 @@ var MainLayer = cc.Layer.extend({
         }
     },
 
+    refreshAssetsPanel: function() {
+        const $container = $('#fileNameTree');
+        $container.empty();
+
+        for (const key in this.assetLibrary) {
+            if (this.assetLibrary.hasOwnProperty(key)) {
+                this._itemList.addAsset(this.assetLibrary[key]);
+            }
+        }
+    },
+
     onLoadArmature: function( ids )  {
         var children = this.getChildren();
         var self = this;
         children.forEach( function( c ) { if( c.getTag() === self.DESC_TAG ) { c.removeFromParent(); } });
 
         cc.each( ids, function( name, index ) {
-            if(this.assetLibrary[name]) return;
+            const assetKey = `${name}_armature`;
+            if(this.assetLibrary[assetKey]) return;
 
             const assetInfo = {
                 type: 'armature',
                 name: name
             };
-            this.assetLibrary[name] = assetInfo;
+            this.assetLibrary[assetKey] = assetInfo;
             console.log(`[Asset] Armature 에셋 '${name}'이 라이브러리에 추가되었습니다.`);
-            this._itemList.addAsset(assetInfo);
-
+            this.refreshAssetsPanel();
         }, this );
     },
-
 
     onLoadUI: function( url ) {
         var children = this.getChildren();
@@ -137,31 +146,41 @@ var MainLayer = cc.Layer.extend({
         children.forEach( function( c ) { if( c.getTag() === self.DESC_TAG ) { c.removeFromParent(); } });
 
         var name = cc.path.mainFileName( url );
-        if(this.assetLibrary[name]) return;
+        const assetKey = `${name}_ui`;
+        if(this.assetLibrary[assetKey]) return;
+
         const assetInfo = {
             type: 'ui',
             name: name,
             url: url
         };
-        this.assetLibrary[name] = assetInfo;
+        this.assetLibrary[assetKey] = assetInfo;
         console.log(`[Asset] UI 에셋 '${name}'이 라이브러리에 추가되었습니다.`);
-        this._itemList.addAsset(assetInfo);
+        this.refreshAssetsPanel();
     },
 
     onLoadSpine: function( fileName ) {
+        console.log(`[MainLayer] onLoadSpine called for: ${fileName}`);
+
         var children = this.getChildren();
         var self = this;
         children.forEach( function( c ) { if( c.getTag() === self.DESC_TAG ) { c.removeFromParent(); } });
 
         var name = cc.path.mainFileName( fileName );
-        if(this.assetLibrary[name]) return;
+        const assetKey = `${name}_spine`;
+
+        if (this.assetLibrary[assetKey]) {
+            console.log(`[MainLayer] Spine asset '${name}' already in library. Skipping.`);
+            return;
+        }
+
         const assetInfo = {
             type: 'spine',
             name: name
         };
-        this.assetLibrary[name] = assetInfo;
+        this.assetLibrary[assetKey] = assetInfo;
         console.log(`[Asset] Spine 에셋 '${name}'이 라이브러리에 추가되었습니다.`);
-        this._itemList.addAsset(assetInfo);
+        this.refreshAssetsPanel();
     },
 
     onLoadCocosStuido : function( url ) {
@@ -170,77 +189,248 @@ var MainLayer = cc.Layer.extend({
         children.forEach( function( c ) { if( c.getTag() === self.DESC_TAG ) { c.removeFromParent(); } });
 
         var name = cc.path.mainFileName( url );
-        if(this.assetLibrary[name]) return;
+        const assetKey = `${name}_cocosstudio`;
+        if(this.assetLibrary[assetKey]) return;
+
         const assetInfo = {
             type: 'cocosstudio',
             name: name,
             url: url
         };
-        this.assetLibrary[name] = assetInfo;
+        this.assetLibrary[assetKey] = assetInfo;
         console.log(`[Asset] CocosStudio 에셋 '${name}'이 라이브러리에 추가되었습니다.`);
-        this._itemList.addAsset(assetInfo);
+        this.refreshAssetsPanel();
+    },
+
+    onLoadImage: function(fileName) {
+        var children = this.getChildren();
+        var self = this;
+        children.forEach(function(c) { if (c.getTag() === self.DESC_TAG) { c.removeFromParent(); } });
+
+        const assetKey = `${fileName}_image`;
+        if (this.assetLibrary[assetKey]) return;
+
+        const assetInfo = {
+            type: 'image',
+            name: fileName,
+            url: fileName + '.png'
+        };
+        const textureCheck = cc.loader.getRes(assetInfo.url);
+        if (!textureCheck) {
+            console.warn(`[Asset] PNG 에셋 '${assetInfo.name}'의 텍스처를 캐시에서 찾을 수 없습니다: ${assetInfo.url}. Asset에 추가하지 않습니다.`);
+            return;
+        }
+
+        this.assetLibrary[assetKey] = assetInfo;
+        console.log(`[Asset] Image 에셋 '${fileName}'이 라이브러리에 추가되었습니다.`);
+        this.refreshAssetsPanel();
+    },
+
+    createInstanceFromLibrary: function(assetName, assetType) {
+        let assetInfo = null;
+        const assetKey = `${assetName}_${assetType}`;
+        assetInfo = this.assetLibrary[assetKey];
+
+        if (!assetInfo) {
+            console.error(`[Error] assetLibrary에 '${assetName}' (타입: ${assetType}) 에셋이 존재하지 않습니다.`);
+            return;
+        }
+
+        let instanceName = assetInfo.name;
+        let count = 1;
+        while (this.sceneNodes[instanceName]) {
+            instanceName = `${assetInfo.name} (${count})`;
+            count++;
+        }
+
+        console.log(`[Instance] '${instanceName}' 인스턴스를 생성합니다. (타입: ${assetInfo.type})`);
+
+        let node = null;
+        let contentNode = null;
+
+        switch (assetInfo.type) {
+            case 'armature':
+                contentNode = new ccs.Armature(assetInfo.name);
+                node = new DraggableNode(contentNode.getContentSize());
+                node.setPosition(this.CX - contentNode.getContentSize().width * 0.5, this.CY - contentNode.getContentSize().height * 0.5);
+                node.armature = contentNode;
+                node.assetType = 'armature';
+                break;
+
+            case 'spine':
+                const spineJsonUrl = assetInfo.name + ".json";
+                const spineAtlasUrl = assetInfo.name + ".atlas";
+
+                console.log(`[MainLayer] Attempting to create Spine from: JSON=${spineJsonUrl}, Atlas=${spineAtlasUrl}`);
+
+                const jsonContent = cc.loader.getRes(spineJsonUrl);
+                const atlasContent = cc.loader.getRes(spineAtlasUrl);
+
+                if (!jsonContent) {
+                    console.error(`[MainLayer] Spine JSON data not found in cache: ${spineJsonUrl}`);
+                    return;
+                }
+                if (!atlasContent) {
+                    console.error(`[MainLayer] Spine Atlas data not found in cache: ${spineAtlasUrl}`);
+                    return;
+                }
+
+                try {
+                    contentNode = sp.SkeletonAnimation.createWithJsonFile(spineJsonUrl, spineAtlasUrl, 1.0);
+                } catch (e) {
+                    console.error("[MainLayer] Error creating sp.SkeletonAnimation:", e);
+                    return;
+                }
+
+                if (!contentNode) {
+                    console.error("[MainLayer] sp.SkeletonAnimation creation failed (contentNode is null).");
+                    return;
+                }
+
+                node = new DraggableNode(contentNode.getContentSize());
+                node.setAnchorPoint(0.5, 0.5);
+                node.setPosition(this.CX, this.CY);
+                node.spine = contentNode;
+                node.assetType = 'spine';
+                console.log(`[MainLayer] Successfully created Spine node: ${assetInfo.name}`);
+                break;
+
+            case 'ui':
+            case 'cocosstudio':
+                var json = ccs.load(assetInfo.url);
+                contentNode = json.node;
+                var size = contentNode.getContentSize();
+                if (size.width < 0.01 || size.height < 0.01) {
+                    size = contentNode.getBoundingBoxToWorld();
+                    if (size.width < 0.01 || size.height < 0.01) {
+                        console.warn(`UI asset '${assetInfo.name}' has invalid content size. Using default DraggableNode size.`);
+                        size = cc.size(100, 100);
+                    } else {
+                        size = cc.size(size.width, size.height);
+                    }
+                }
+                node = new DraggableNode(size);
+                node.setAnchorPoint(0.5, 0.5);
+                node.setPosition(this.CX, this.CY);
+
+                contentNode.setAnchorPoint(0.5, 0.5);
+
+                node.ui = contentNode;
+                if (json.action) {
+                    node.cocosAction = json.action;
+                    node.runAction(node.cocosAction);
+                }
+                node.assetType = 'action';
+                node.actionUrl = assetInfo.url;
+                break;
+
+            case 'image':
+                const texture = cc.loader.getRes(assetInfo.url);
+                if (!texture) {
+                    console.error(`[Error] Image asset '${assetInfo.name}' texture not found in cache: ${assetInfo.url}`);
+                    return;
+                }
+                contentNode = new cc.Sprite(texture);
+                node = new DraggableNode(contentNode.getContentSize());
+                node.setAnchorPoint(0.5, 0.5);
+                node.setPosition(this.CX, this.CY);
+                node.image = contentNode;
+                node.assetType = 'image';
+                break;
+
+            default:
+                console.error(`[Error] 알 수 없는 에셋 타입입니다: ${assetInfo.type}`);
+                return;
+        }
+
+        if (node && contentNode) {
+            node.setName(instanceName);
+            let maxZOrder = -1;
+            this.getChildren().forEach(child => {
+                if (child instanceof DraggableNode) {
+                    if (child.getLocalZOrder() > maxZOrder) {
+                        maxZOrder = child.getLocalZOrder();
+                    }
+                }
+            });
+            const newZOrder = maxZOrder + 1;
+            node.setLocalZOrder(newZOrder);
+
+            node.addChildToCenter(contentNode);
+            this.addChild(node);
+            this.sceneNodes[instanceName] = node;
+
+            const addNodeToMap = (n) => {
+                if (!n) return;
+                this.nodeMap[n.__instanceId] = n;
+                const children = n.getChildren();
+                if(children) {
+                    children.forEach(child => addNodeToMap(child));
+                }
+            };
+            addNodeToMap(node);
+
+            this.refreshHierarchyView();
+        }
     },
 
     _buildChildrenRecursive: function(parentNode) {
         let childrenData = [];
         const children = parentNode.getChildren();
-        // Z-order가 낮은 노드가 먼저 오도록 정렬합니다 (즉, 화면 뒤에 있는 노드가 먼저).
         const sortedChildren = children.slice().sort((a, b) => {
             return a.getLocalZOrder() - b.getLocalZOrder();
         });
 
         if (sortedChildren && sortedChildren.length > 0) {
             for (const child of sortedChildren) {
-                // DraggableNode에 포함된 selectMark(DrawNode)는 하이어라키에 표시하지 않습니다.
                 if (child instanceof cc.DrawNode && child.getParent() instanceof DraggableNode) {
                     continue;
                 }
 
                 let textContent = child.getName() || "Unnamed Node";
-                let typeClass = "type-child"; // 일반 Cocos 노드의 기본값
-                let includeGrandchildren = true; // 손주 노드를 포함할지 여부
+                let typeClass = "type-child";
+                let includeGrandchildren = true;
 
                 if (parentNode instanceof DraggableNode) {
                     if (parentNode.ui === child) {
-                        typeClass = "type-action-content"; // DraggableNode 내부 UI 콘텐츠의 클래스
+                        typeClass = "type-action-content";
                         textContent = `UI: ${textContent}`;
                     } else if (parentNode.armature === child) {
-                        typeClass = "type-armature-content"; // Armature 콘텐츠의 클래스
+                        typeClass = "type-armature-content";
                         textContent = `AR: ${textContent}`;
-                        includeGrandchildren = false; // AR은 직계 자식만 보이게 설정
+                        includeGrandchildren = false;
                     } else if (parentNode.spine === child) {
-                        typeClass = "type-spine-content"; // Spine 콘텐츠의 클래스
+                        typeClass = "type-spine-content";
                         textContent = `SP: ${textContent}`;
-                        includeGrandchildren = false; // SP는 직계 자식만 보이게 설정
+                        includeGrandchildren = false;
+                    } else if (parentNode.image === child) {
+                        typeClass = "type-image-content";
+                        textContent = `IMG: ${textContent}`;
+                        includeGrandchildren = false;
                     }
                 }
 
-                // --- 추가된 로직: 자식 노드가 DraggableNode일 경우 아이콘 유지 ---
                 if (child instanceof DraggableNode) {
-                    typeClass = `type-${child.assetType}`; // 자식 DraggableNode의 assetType에 맞는 클래스 사용
-                    // DraggableNode의 경우 텍스트 접두사를 붙이지 않고 원래 이름을 사용 (부모가 붙이는 것과 중복 방지)
+                    typeClass = `type-${child.assetType}`;
                     textContent = child.getName() || "Unnamed DraggableNode";
-                    // DraggableNode가 자식으로 있을 때, 그 DraggableNode의 콘텐츠 노드에 대한 재귀는
-                    // 이 DraggableNode 자체가 아니라 그 내부 콘텐츠 노드들이므로, 여기서는 grandchildren 포함 여부를
-                    // 이 DraggableNode의 assetType에 따라 결정해야 합니다.
-                    if (child.assetType === 'armature' || child.assetType === 'spine') {
-                        includeGrandchildren = false; // 자식 DraggableNode가 AR 또는 SP이면 그 하위는 숨김
+                    if (child.assetType === 'armature' || child.assetType === 'spine' || child.assetType === 'image') {
+                        includeGrandchildren = false;
                     } else {
-                        includeGrandchildren = true; // 그 외 (UI)는 계속 보이도록 유지
+                        includeGrandchildren = true;
                     }
                 }
-                // --- 추가된 로직 끝 ---
 
                 let zOrderText = child.getLocalZOrder();
                 let childNodeData = {
-                    id: child.__instanceId, // Cocos2d-JS의 instanceId를 jstree 노드 ID로 사용
+                    id: child.__instanceId,
                     text: `<span class="z-order-label">[${zOrderText}]</span> ${textContent}`,
-                    children: includeGrandchildren ? this._buildChildrenRecursive(child) : [], // includeGrandchildren 값에 따라 재귀 호출 여부 결정
+                    children: includeGrandchildren ? this._buildChildrenRecursive(child) : [],
                     data: {
                         nodeId: child.__instanceId,
-                        zOrder: child.getLocalZOrder() // 데이터에 Z-order 저장
+                        zOrder: child.getLocalZOrder()
                     },
-                    a_attr: { "class": typeClass } // 결정된 클래스 적용
+                    state: { opened: false },
+                    a_attr: { "class": typeClass }
                 };
                 childrenData.push(childNodeData);
             }
@@ -250,12 +440,10 @@ var MainLayer = cc.Layer.extend({
 
     refreshHierarchyView: function() {
         let unifiedTreeData = [];
-        const self = this; // 중첩 함수에서 'this'를 사용하기 위해 캡처
+        const self = this;
 
-        // MainLayer의 자식인 최상위 DraggableNode를 모두 가져옵니다.
         const topLevelNodes = this.getChildren().filter(node => node instanceof DraggableNode);
 
-        // 최상위 노드들을 Z-order로 정렬합니다.
         topLevelNodes.sort((a, b) => a.getLocalZOrder() - b.getLocalZOrder());
 
         topLevelNodes.forEach(draggableNode => {
@@ -264,14 +452,14 @@ var MainLayer = cc.Layer.extend({
             let typeClass = `type-${draggableNode.assetType}`;
 
             let draggableNodeData = {
-                id: draggableNode.__instanceId, // DraggableNode의 jstree 고유 ID
+                id: draggableNode.__instanceId,
                 text: `<span class="z-order-label">[${zOrderText}]</span> ${nodeName}`,
-                children: this._buildChildrenRecursive(draggableNode), // DraggableNode의 자식들을 재귀적으로 가져옵니다.
+                children: this._buildChildrenRecursive(draggableNode),
                 data: {
                     nodeId: draggableNode.__instanceId,
                     zOrder: draggableNode.getLocalZOrder()
                 },
-                state: { opened: false }, // 필요에 따라 기본 열림 상태 설정 가능
+                state: { opened: false },
                 a_attr: { "class": typeClass }
             };
             unifiedTreeData.push(draggableNodeData);
@@ -280,13 +468,12 @@ var MainLayer = cc.Layer.extend({
         this._treeView.updateTreeView(unifiedTreeData);
     },
 
-    // ID를 받아 노드를 찾아 처리하는 함수
     updateMenuWithNodeId: function(nodeId) {
-        if (!nodeId) { // 게임 뷰 빈 곳 클릭 등으로 노드 선택이 해제될 때
+        if (!nodeId) {
             Target = null;
-            this._treeView.setNode(null); // 속성 패널 비우고 기즈모 제거
-            this.setDraggableItem(null); // 모든 드래그 가능 아이템 비활성화
-            this.refreshHierarchyView(); // 추가: 노드 선택 해제 시에만 하이어라키 뷰를 새로고침하여 노드 목록이 유지되도록 합니다.
+            this._treeView.setNode(null);
+            this.setDraggableItem(null);
+            this.refreshHierarchyView();
             return;
         }
         const node = this.nodeMap[nodeId];
@@ -309,129 +496,14 @@ var MainLayer = cc.Layer.extend({
             }
         }
 
-        // Target은 항상 DraggableNode 인스턴스를 가리키도록 합니다.
         Target = selectedDraggableNode;
 
-        // _treeView.setNode에는 실제 선택된 Cocos2d-JS 노드를 전달합니다.
-        // 이렇게 해야 Properties 패널에 선택된 실제 노드의 정보가 표시됩니다.
         this._treeView.setNode(node);
 
-        // DraggableNode가 선택된 경우에만 드래그 가능 상태로 설정
         if (selectedDraggableNode) {
             this.setDraggableItem(selectedDraggableNode.getName());
         } else {
-            this.setDraggableItem(null); // DraggableNode가 아닌 다른 노드가 선택되면 드래그 비활성화
-        }
-        // 노드가 선택될 때는 refreshHierarchyView()를 호출하지 않습니다.
-        // 이렇게 하면 JSTree의 선택 효과가 유지됩니다.
-    },
-
-    createInstanceFromLibrary: function(assetName) {
-        const assetInfo = this.assetLibrary[assetName];
-        if (!assetInfo) {
-            console.error(`[Error] assetLibrary에 '${assetName}' 에셋이 존재하지 않습니다.`);
-            return;
-        }
-
-        let instanceName = assetInfo.name;
-        let count = 1;
-        while (this.sceneNodes[instanceName]) {
-            instanceName = `${assetInfo.name} (${count})`;
-            count++;
-        }
-
-        console.log(`[Instance] '${instanceName}' 인스턴스를 생성합니다. (타입: ${assetInfo.type})`);
-
-        let node = null;
-
-        switch (assetInfo.type) {
-            case 'armature':
-                var armature = new ccs.Armature(assetInfo.name);
-                node = new DraggableNode(armature.getContentSize());
-                node.setPosition(this.CX - armature.getContentSize().width * 0.5, this.CY - armature.getContentSize().height * 0.5);
-                node.addChildToCenter(armature);
-                node.armature = armature;
-                node.assetType = 'armature';
-                break;
-
-            case 'spine':
-                var spine = sp.SkeletonAnimation.createWithJsonFile(assetInfo.name + ".json", assetInfo.name +".atlas", 1.0);
-                node = new DraggableNode(spine.getContentSize());
-                node.setAnchorPoint(0.5, 0.5);
-                node.setPosition(this.CX, this.CY);
-                node.addChildToCenter(spine);
-                node.spine = spine;
-                node.assetType = 'spine';
-                break;
-
-            case 'ui':
-            case 'cocosstudio':
-                var json = ccs.load(assetInfo.url);
-                var ui = json.node;
-                var size = ui.getContentSize();
-                if (size.width < 0.01 || size.height < 0.01) {
-                    // UI 노드의 getContentSize가 0일 경우, getBoundingBoxToWorld를 사용하여 유효한 크기를 얻으려 시도합니다.
-                    // 이 크기를 DraggableNode의 _staticSize로 설정합니다.
-                    // 주의: getBoundingBoxToWorld는 렌더링 이후에 정확하므로, 초기 생성 시에는 0일 수 있습니다.
-                    // 임시 크기를 설정하거나, 로드 완료 콜백에서 다시 설정하는 로직이 필요할 수 있습니다.
-                    size = ui.getBoundingBoxToWorld();
-                    // 만약 getBoundingBoxToWorld()도 유효하지 않으면 기본값 설정
-                    if (size.width < 0.01 || size.height < 0.01) {
-                        console.warn(`UI asset '${assetInfo.name}' has invalid content size. Using default DraggableNode size.`);
-                        size = cc.size(100, 100); // 기본값
-                    } else {
-                        size = cc.size(size.width, size.height); // cc.Rect에서 cc.Size로 변환
-                    }
-                }
-                node = new DraggableNode(size); // DraggableNode 생성 시 크기 전달
-                node.setAnchorPoint(0.5, 0.5);
-                node.setPosition(this.CX, this.CY);
-
-                // ✅ UI Action의 정확한 배치를 위한 핵심 코드
-                ui.setAnchorPoint(0.5, 0.5);
-
-                node.addChildToCenter(ui);
-                node.ui = ui;
-                if (json.action) {
-                    node.cocosAction = json.action;
-                    node.runAction(node.cocosAction);
-                }
-                node.assetType = 'action';   // ✅ UI/Action 타입 꼬리표
-                node.actionUrl = assetInfo.url; // ✅ UI/Action URL 꼬리표
-                break;
-
-            default:
-                console.error(`[Error] 알 수 없는 에셋 타입입니다: ${assetInfo.type}`);
-                return;
-        }
-
-        if (node) {
-            node.setName(instanceName);
-            let maxZOrder = -1;
-            this.getChildren().forEach(child => {
-                if (child instanceof DraggableNode) {
-                    if (child.getLocalZOrder() > maxZOrder) {
-                        maxZOrder = child.getLocalZOrder();
-                    }
-                }
-            });
-            const newZOrder = maxZOrder + 1;
-            node.setLocalZOrder(newZOrder); // 새로 추가되는 DraggableNode에 Z-order를 설정합니다.
-
-            this.addChild(node); // Z-order 설정 후 MainLayer에 추가합니다.
-            this.sceneNodes[instanceName] = node;
-            // ... (nodeMap 업데이트 로직 유지) ...
-            const addNodeToMap = (n) => {
-                if (!n) return;
-                this.nodeMap[n.__instanceId] = n;
-                const children = n.getChildren();
-                if(children) {
-                    children.forEach(child => addNodeToMap(child));
-                }
-            };
-            addNodeToMap(node);
-
-            this.refreshHierarchyView();
+            this.setDraggableItem(null);
         }
     },
 
@@ -470,7 +542,7 @@ var MainLayer = cc.Layer.extend({
         if(selectNode) {
             if(Target === selectNode) {
                 Target = null;
-                this._treeView.setNode(null); // 선택 해제 시 기즈모 제거
+                this._treeView.setNode(null);
             }
 
             const removeNodeFromMap = (n) => {
@@ -484,19 +556,16 @@ var MainLayer = cc.Layer.extend({
             removeNodeFromMap(selectNode);
 
             delete this.sceneNodes[name];
-            selectNode.removeFromParent();
             this.refreshHierarchyView();
         }
     },
 
     setDraggableItem: function( name ) {
-        // 모든 노드의 드래그 상태를 우선 비활성화
         for( var nodeName in this.sceneNodes ) {
             if( typeof this.sceneNodes[ nodeName ].setDraggable === 'function' ) {
                 this.sceneNodes[ nodeName ].setDraggable( false );
             }
         }
-        // 선택된 노드만 드래그 활성화
         if( name && this.sceneNodes.hasOwnProperty( name ) ) {
             this.sceneNodes[ name ].setDraggable( true );
             Target = this.sceneNodes[ name ];
@@ -536,19 +605,16 @@ var MainLayer = cc.Layer.extend({
             case 'action':
                 try {
                     let rawJsonData = null;
-                    // ✅ [핵심 수정] 1. 원본 코드처럼, 노드에 직접 첨부된 cocosAction이 있는지 먼저 확인합니다.
                     if (node.cocosAction && node.cocosAction.animation && node.cocosAction.animation.actionlist) {
                         rawJsonData = node.cocosAction;
                     }
-                    // 2. 없다면, actionUrl을 이용해 캐시에서 찾습니다. (Fallback)
                     else {
                         const url = node.actionUrl;
                         if (url && cc.loader.cache[url]) {
-                            rawJsonData = (typeof cc.loader.cache[url] === 'string') ? JSON.parse(cc.loader.cache[url]) : cc.loader.cache[url];
+                            rawJsonData = cc.loader.cache[url];
                         }
                     }
 
-                    // 3. 찾은 데이터를 기반으로 길이를 계산하는 로직은 동일합니다.
                     if (rawJsonData && rawJsonData.animation && rawJsonData.animation.actionlist) {
                         const actionClipData = rawJsonData.animation.actionlist.find(clip => clip.name === animName);
                         if (actionClipData) {
@@ -568,6 +634,9 @@ var MainLayer = cc.Layer.extend({
                     }
                 } catch (e) { console.error("UIAction 길이를 가져오는 중 오류:", e); durationInSeconds = 0; }
                 break;
+            case 'image':
+                durationInSeconds = 0;
+                break;
         }
         return Math.max(0, durationInSeconds);
     },
@@ -579,13 +648,14 @@ var MainLayer = cc.Layer.extend({
         if (this._canvasResizeListener) {
             cc.eventManager.removeListener(this._canvasResizeListener);
         }
-        if (this._nodePositionChangedListener) { // [추가] 이벤트 리스너 제거
+        if (this._nodePositionChangedListener) {
             cc.eventManager.removeListener(this._nodePositionChangedListener);
         }
         cc.eventManager.removeListener(this._loadArmatureListener);
         cc.eventManager.removeListener(this._loadUIListener);
         cc.eventManager.removeListener(this._loadCocosStudioListener);
         cc.eventManager.removeListener(this._loadSpineListener);
+        cc.eventManager.removeListener(this._loadImageListener);
         this._super();
     }
 });
@@ -625,11 +695,12 @@ var ManiLayerScene = cc.Scene.extend({
         GameViewManager.sync();
 
         $(cc.game.canvas).droppable({
-            accept: ".custom-tree-item", // 수정된 부분
+            accept: ".custom-tree-item",
             drop: function(event, ui) {
                 const assetName = ui.helper.data('assetName');
-                if (assetName) {
-                    layer.createInstanceFromLibrary(assetName);
+                const assetType = ui.helper.data('assetType');
+                if (assetName && assetType && layer) {
+                    layer.createInstanceFromLibrary(assetName, assetType);
                 }
             }
         });
@@ -642,11 +713,10 @@ var ManiLayerScene = cc.Scene.extend({
                 if (!mainLayer) return;
 
                 var touchedDraggableNode = null;
-                // 뒤에서부터 탐색하여 가장 앞에 있는 DraggableNode를 찾습니다.
                 var children = mainLayer.getChildren().slice().reverse();
                 for(const child of children){
                     if(child instanceof DraggableNode && child.isVisible()){
-                        const worldBoundingBox = child.getStaticHitboxWorld(); // DraggableNode의 고정 크기 바운딩 박스
+                        const worldBoundingBox = child.getStaticHitboxWorld();
                         if(cc.rectContainsPoint(worldBoundingBox, event.getLocation())){
                             touchedDraggableNode = child;
                             break;
@@ -655,19 +725,16 @@ var ManiLayerScene = cc.Scene.extend({
                 }
 
                 if (touchedDraggableNode) {
-                    // MainLayer에서 해당 DraggableNode를 선택하도록 합니다.
                     mainLayer.updateMenuWithNodeId(touchedDraggableNode.__instanceId);
                 } else {
-                    // 어떤 DraggableNode도 선택되지 않은 경우, UI 및 기즈모를 초기화합니다.
                     mainLayer.updateMenuWithNodeId(null);
                 }
             },
-            swallowTouches: true // 다른 곳으로 이벤트가 전파되지 않도록 설정
+            swallowTouches: true
         }, this );
     },
 
     getFrontTouchedNode: function( touchPos ) {
-        // 이 함수는 현재 사용되지 않으며, onMouseDown 로직으로 대체됨
         console.warn("getFrontTouchedNode is deprecated and may not be used.");
         var maxZOrderList = [], frontNode = null, frontNodeName = '', zOrderList = [], node = null;
         var updateData = function( z, n, name ) { maxZOrderList = z; frontNode = n; frontNodeName = name; };
@@ -693,7 +760,6 @@ var ManiLayerScene = cc.Scene.extend({
     },
 
     recursiveCheckNode: function(node, touchpos){
-        // 이 함수는 현재 사용되지 않음
         console.warn("recursiveCheckNode is deprecated and may not be used.");
         if(!node || !node.children) return node;
         for (var idx = 0; idx < node.children.length; idx++) {
@@ -707,7 +773,6 @@ var ManiLayerScene = cc.Scene.extend({
     },
 
     getZOrderList: function( node ) {
-        // 이 함수는 현재 사용되지 않음
         console.warn("getZOrderList is deprecated and may not be used.");
         var zOrderList = [];
         for( let p = node; !!p; p = p.getParent() ) { zOrderList.unshift( p.zIndex ); }
