@@ -20,11 +20,17 @@ var UIItemList = cc.Node.extend({
     addAsset: function (assetInfo) {
         const $container = $('#fileNameTree');
 
-        if ($container.find(`[data-asset-name="${assetInfo.name}"]`).length > 0) {
+        // [수정]: assetInfo.name과 assetInfo.type을 모두 사용하여 unique ID를 생성.
+        // 이 unique ID는 Assets 패널의 DOM 요소 ID로 사용될 수 있습니다.
+        const itemDomId = `${assetInfo.name}-${assetInfo.type}`;
+
+        // [수정]: 이미 해당 name과 type을 가진 아이템이 DOM에 있는지 확인.
+        // refreshAssetsPanel에서 empty() 후 addAsset을 호출하므로, 이 중복 체크는 사실상 필요 없지만,
+        // 만약 refreshAssetsPanel이 아닌 개별 addAsset 호출이 있다면 필요할 수 있습니다.
+        if ($container.find(`[data-asset-name="${assetInfo.name}"][data-asset-type="${assetInfo.type}"]`).length > 0) {
             return;
         }
 
-        // 아이콘 타입과 텍스트를 결정하는 로직 추가
         let iconText = '';
         let typeClass = '';
         switch (assetInfo.type) {
@@ -33,7 +39,7 @@ var UIItemList = cc.Node.extend({
                 typeClass = 'type-armature';
                 break;
             case 'ui':
-            case 'cocosstudio': // cocosstudio도 UI로 취급
+            case 'cocosstudio':
                 iconText = 'UI';
                 typeClass = 'type-action';
                 break;
@@ -41,22 +47,28 @@ var UIItemList = cc.Node.extend({
                 iconText = 'SP';
                 typeClass = 'type-spine';
                 break;
+            case 'image':
+                iconText = 'IMG';
+                typeClass = 'type-image';
+                break;
         }
 
-        // 아이콘을 포함하도록 HTML 구조 변경
+        // [수정]: data-asset-type 속성 추가
         const $item = $(`
-        <div class="custom-tree-item" data-asset-name="${assetInfo.name}" data-asset-type="${assetInfo.type}">
+        <div class="custom-tree-item" data-asset-name="${assetInfo.name}" data-asset-type="${assetInfo.type}" id="${itemDomId}">
             <span class="track-type-icon ${typeClass}">${iconText}</span>
-            ${assetInfo.name}
+            ${assetInfo.name} <span style="color:var(--font-secondary); font-size:0.8em;">(${assetInfo.type.toUpperCase()})</span>
         </div>
     `);
 
         $item.draggable({
             appendTo: "body",
             helper: function() {
-                const assetName = $(this).data('asset-name');
-                const $helper = $(`<div class="custom-drag-helper">${assetName}</div>`);
-                $helper.data('assetName', assetName);
+                const dragAssetName = $(this).data('asset-name');
+                const dragAssetType = $(this).data('asset-type'); // [수정]: assetType도 헬퍼에 추가
+                const $helper = $(`<div class="custom-drag-helper">${dragAssetName} (${dragAssetType.toUpperCase()})</div>`);
+                $helper.data('assetName', dragAssetName);
+                $helper.data('assetType', dragAssetType); // [수정]: assetType 데이터 전달
 
                 $(this).draggable("option", "cursorAt", {
                     left: 1,
@@ -77,5 +89,5 @@ var UIItemList = cc.Node.extend({
         });
 
         $container.append($item);
-    },
+    }
 });
