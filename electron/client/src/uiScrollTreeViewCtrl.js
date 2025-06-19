@@ -70,13 +70,11 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
                             if (parentJstreeNode && parentJstreeNode.data && parentJstreeNode.data.nodeId) {
                                 targetParentCocosNode = mainLayerInstance.nodeMap[parentJstreeNode.data.nodeId];
                             } else {
-                                console.error("Invalid jstree node data for non-root parent, cannot find nodeId:", parentJstreeNode);
                                 return false;
                             }
                         }
 
                         if (!targetParentCocosNode) {
-                            console.error("Target parent Cocos node is null or undefined after determination.");
                             return false;
                         }
 
@@ -87,7 +85,6 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
                             if (isTargetParentDraggableNode || isTargetParentMainLayer) {
                                 return true;
                             } else {
-                                console.warn("DraggableNode는 DraggableNode 또는 MainLayer의 자식으로만 이동할 수 있습니다.");
                                 return false;
                             }
                         }
@@ -102,7 +99,6 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
                             if (isMovingDraggableNode || isChildOfDraggableNodeContent) {
                                 return true;
                             } else {
-                                console.warn("DraggableNode는 자신의 콘텐츠 노드 또는 다른 DraggableNode만 자식으로 가질 수 있습니다.");
                                 return false;
                             }
                         }
@@ -235,7 +231,6 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
     },
 
     setup:function () {
-        var self = this;
         $('#toggleVisible').click( function(){
             this._selectNode.forEach( item => {
                 item.setVisible( !item.isVisible());
@@ -243,85 +238,96 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
         }.bind(this));
 
         $('#openAll').click( function(){
-            if( this.treeInfo ){
-                $('#widgetTree').jstree("open_all");
+            const tree = $('#widgetTree').jstree(true);
+            if (tree) {
+                tree.open_all();
             }
         }.bind(this));
 
         $('#closeAll').click( function(){
-            if( this.treeInfo ){
-                $('#widgetTree').jstree("close_all");
+            const tree = $('#widgetTree').jstree(true);
+            if (tree) {
+                tree.close_all();
             }
         }.bind(this));
 
         $('#copyBtn').click( function(){
-            if( this.treeInfo ){
+            // 원본 getTreeObjName이 _treeWidgetObj에 의존하므로, 먼저 _treeWidgetObj가 채워져 있는지 확인
+            // 이 예시에서는 _treeWidgetObj가 updateTreeView에서 채워진다고 가정합니다.
+            if (Object.keys(this._treeWidgetObj).length > 0) {
                 var obj = this.getTreeObjName();
                 this._treeString = "this._uiWidgets = {\n";
                 for( var key in obj ) {
                     this._treeString += obj[ key ].copyString;
                 }
                 this._treeString += "};";
-                copyStringToClipboard( this._treeString );
+
+                if (typeof copyStringToClipboard === 'function') {
+                    copyStringToClipboard( this._treeString );
+                } else {
+                    console.warn("copyStringToClipboard 함수가 정의되지 않았습니다.");
+                }
+            } else {
+                console.warn("복사할 트리 데이터가 없습니다. 먼저 트리를 로드하거나 선택해주세요.");
             }
         }.bind(this));
 
         $('#debugBone').click( function( sender ){
             this._selectNode.forEach( item => {
-                if( item.getDebugBonesEnabled ) {
-                    if (item.getDebugBonesEnabled()) {
+                const targetArmature = item.armature || (item instanceof ccs.Armature ? item : null);
+                if( targetArmature && targetArmature.getDebugBonesEnabled ) {
+                    if (targetArmature.getDebugBonesEnabled()) {
                         sender.target.innerText = "Show Bone";
                     } else {
                         sender.target.innerText = "Hide Bone";
                     }
-                    item.setDebugBone();
+                    targetArmature.setDebugBone();
                 }
             });
         }.bind(this));
 
         $('#debugSlot').click( function( sender ){
             this._selectNode.forEach( item => {
-                if( item.getDebugSlotsEnabled ) {
-                    if (item.getDebugSlotsEnabled()) {
+                const targetSpine = item.spine || (item instanceof sp.SkeletonAnimation ? item : null);
+                if( targetSpine && targetSpine.getDebugSlotsEnabled ) {
+                    if (targetSpine.getDebugSlotsEnabled()) {
                         sender.target.innerText = "Show Slot";
                     } else {
                         sender.target.innerText = "Hide Slot";
                     }
-                    item.setDebugSlotsEnabled( !item.getDebugSlotsEnabled() );
+                    targetSpine.setDebugSlotsEnabled( !targetSpine.getDebugSlotsEnabled() );
                 }
             });
         }.bind(this));
 
         $("input[name=opacity]").change(function(){
             this._selectNode.forEach( item => {
-                item.setOpacity($("input[name=opacity]").val());
+                item.setOpacity(parseInt($("input[name=opacity]").val(), 10));
                 $('#opacityValue').html(item.getOpacity());
             });
         }.bind(this));
 
         $("input[name=lPosX]").change(function(){
             this._selectNode.forEach( item => {
-                item.setPositionX(parseFloat($("input[name=lPosX]").val()));
-                var position = item.getPosition();
-                if ( item.getParent() instanceof  ccui.Layout  === false ){
-                    var anchorPP = item.getParent()._renderCmd._anchorPointInPoints;
-                    position.x -= anchorPP.x;
-                    position.y -= anchorPP.y;
+                const newPosX = parseFloat($("input[name=lPosX]").val());
+                if (!isNaN(newPosX)) {
+                    item.setPositionX(newPosX);
+                    if (this._mainLayer && item.__instanceId) {
+                        this._mainLayer.updateMenuWithNodeId(item.__instanceId);
+                    }
                 }
-                changePosition(g_currentObj, item.getName(), position );
             });
         }.bind(this));
 
         $("input[name=lPosY]").change(function(){
             this._selectNode.forEach( item => {
-                item.setPositionY(parseFloat($("input[name=lPosY]").val()));
-                var position = item.getPosition();
-                if ( item.getParent() instanceof  ccui.Layout  === false ){
-                    var anchorPP = item.getParent()._renderCmd._anchorPointInPoints;
-                    position.x -= anchorPP.x;
-                    position.y -= anchorPP.y;
+                const newPosY = parseFloat($("input[name=lPosY]").val());
+                if (!isNaN(newPosY)) {
+                    item.setPositionY(newPosY);
+                    if (this._mainLayer && item.__instanceId) {
+                        this._mainLayer.updateMenuWithNodeId(item.__instanceId);
+                    }
                 }
-                changePosition(g_currentObj, item.getName(), position );
             });
         }.bind(this));
     },
@@ -549,7 +555,88 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
     },
 
     updateTreeView: function(treeData) {
+        // jstree 데이터를 기반으로 _treeWidgetObj를 업데이트하는 로직 추가
+        this._treeWidgetObj = {};
+        const processNode = (nodeData) => {
+            if (nodeData.data && nodeData.data.nodeId) {
+                const cocosNode = this._mainLayer.nodeMap[nodeData.data.nodeId];
+                if (cocosNode && cocosNode.getName()) {
+                    this._treeWidgetObj[nodeData.data.nodeId] = {
+                        name: cocosNode.getName(),
+                        // copyString은 getTreeObjName에서 처리되므로 여기서는 name만 저장
+                    };
+                }
+            }
+            if (nodeData.children && nodeData.children.length > 0) {
+                nodeData.children.forEach(child => processNode(child));
+            }
+        };
+        treeData.forEach(node => processNode(node));
+
         $('#widgetTree').jstree(true).settings.core.data = treeData;
         $('#widgetTree').jstree(true).refresh();
     },
+
+    getTreeObjName: function() {
+        var length = Object.keys( this._treeWidgetObj ).length;
+        var treeArrName = {};
+        var treeObjName = [];
+
+        for( var key1 in this._treeWidgetObj ) {
+            treeArrName [ key1 ] = {};
+            treeArrName [ key1 ].name = this._treeWidgetObj[ key1 ].name;
+            treeArrName [ key1 ].copyString = this._treeWidgetObj[ key1 ].name + " : null,\n";
+            treeObjName[ treeObjName.length ] = treeArrName [ key1 ].name;
+        }
+
+        for( var loop1 = 0; loop1 < length; loop1++ ) {
+            var name = treeObjName[ loop1 ];
+            var firstSubString1 = name.substring( 0, name.length - 2 );
+            var firstSubString2 = name.substring( name.length - 2, name.length );
+
+            if( firstSubString2 === '01' ) {
+                var find = false;
+                var idx = 1;
+                var addTreeNameArr = null;
+
+                for( var loop2 = 0; loop2 < length; loop2++ ) {
+                    name = treeObjName[ loop2 ];
+                    var secondSubString1 = name.substring( 0, name.length - 2 );
+                    var secondSubString2 = name.substring( name.length - 2, name.length );
+                    secondSubString2 = name.substring( name.length - 2, name.length );
+
+                    if( firstSubString1 === secondSubString1 && secondSubString2 === '02' ) {
+                        find = true;
+                    }
+                }
+
+                while( find ) {
+                    for( var key2 in treeArrName ) {
+                        var objName = firstSubString1 + ( idx < 10 ? '0' + idx : idx );
+                        var objName2 = treeArrName[ key2 ].name;
+                        find = false;
+
+                        if( objName2 === objName ) {
+                            addTreeNameArr = firstSubString1;
+                            find = true;
+                            idx++;
+
+                            delete treeArrName[ key2 ];
+
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if( addTreeNameArr ) {
+                treeArrName [ addTreeNameArr ] = {};
+                treeArrName [ addTreeNameArr ].name = addTreeNameArr;
+                treeArrName [ addTreeNameArr ].copyString = addTreeNameArr + " : [],\n";
+                addTreeNameArr = null;
+            }
+        }
+
+        return treeArrName;
+    }
 });
