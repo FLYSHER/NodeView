@@ -181,21 +181,28 @@ var MainLayer = cc.Layer.extend({
         this._itemList.addAsset(assetInfo);
     },
 
-    // 자식 노드 데이터를 재귀적으로 생성하는 헬퍼 함수
     _buildChildrenRecursive: function(parentNode) {
         let childrenData = [];
         const children = parentNode.getChildren();
-        if (children && children.length > 0) {
-            for (const child of children) {
+        // Z-order가 낮은 노드가 먼저 오도록 정렬합니다 (즉, 화면 뒤에 있는 노드가 먼저).
+        const sortedChildren = children.slice().sort((a, b) => {
+            return a.getLocalZOrder() - b.getLocalZOrder();
+        });
+
+        if (sortedChildren && sortedChildren.length > 0) {
+            for (const child of sortedChildren) {
                 // DraggableNode에 포함된 selectMark(DrawNode)는 하이어라키에 표시하지 않습니다.
                 if (child instanceof cc.DrawNode) continue;
 
+                let zOrderText = child.getLocalZOrder();
                 let childNodeData = {
-                    text: child.getName() || "Unnamed Node",
+                    text: `<span class="z-order-label">[${zOrderText}]</span> ${child.getName() || "Unnamed Node"}`,
                     children: this._buildChildrenRecursive(child),
-                    data: { nodeId: child.__instanceId },
-                    // [수정] 자식 노드임을 나타내는 'type-child' 클래스를 추가합니다.
-                    a_attr: { "class": "type-child" }
+                    data: {
+                        nodeId: child.__instanceId,
+                        zOrder: child.getLocalZOrder() // Z-order 값도 데이터에 저장
+                    },
+                    a_attr: { "class": "type-child" } // 자식 노드임을 나타내는 'type-child' 클래스
                 };
                 childrenData.push(childNodeData);
             }
@@ -203,42 +210,127 @@ var MainLayer = cc.Layer.extend({
         return childrenData;
     },
 
-    // 하이어라키 전체를 다시 그리는 메인 함수
     refreshHierarchyView: function() {
         let unifiedTreeData = [];
-        for (const instanceName in this.sceneNodes) {
-            if (this.sceneNodes.hasOwnProperty(instanceName)) {
-                const draggableNode = this.sceneNodes[instanceName];
-                const contentNode = draggableNode.ui || draggableNode.armature || draggableNode.spine;
+        const treeNodes = {}; // nodeId를 키로 하여 jstree 노드 데이터를 저장
 
-                let childrenData;
+        // 모든 노드를 nodeId 기준으로 treeNodes 맵에 추가합니다.
+        // 이는 DraggableNode이든 일반 Cocos Node이든 모든 노드를 포함합니다.
+        for (const nodeId in this.nodeMap) {
+            const node = this.nodeMap[nodeId];
+            // selectMark (DrawNode)는 하이어라키에 표시하지 않습니다.
+            if (node instanceof cc.DrawNode && node.getParent() instanceof DraggableNode) {
+                continue;
+            }
 
-                if (draggableNode.assetType === 'armature' || draggableNode.assetType === 'spine') {
-                    childrenData = false;
+            // DraggableNode 내의 실제 콘텐츠 노드 (ui, armature, spine)는 별도로 처리되므로
+            // 여기서는 DraggableNode와 그 외 일반 Cocos Node만 직접 추가합니다.
+            // DraggableNode의 직접적인 자식인 ui, armature, spine은 나중에 DraggableNode 아래에 추가됩니다.
+            if (node instanceof DraggableNode || !(node.getParent() instanceof DraggableNode && (node.getParent().ui === node || node.getParent().armature === node || node.getParent().spine === node))) {
+                let zOrderText = node.getLocalZOrder();
+                let nodeName = node.getName() || "Unnamed Node";
+                let typeClass = "";
+
+                if (node instanceof DraggableNode) {
+                    typeClass = `type-${node.assetType}`;
+                    nodeName = `<span class="z-order-label">[${zOrderText}]</span> ${nodeName}`;
                 } else {
-                    childrenData = contentNode ? this._buildChildrenRecursive(contentNode) : [];
+                    typeClass = "type-child"; // 일반 Cocos Node
                 }
 
-                let topLevelNodeData = {
-                    text: draggableNode.getName(),
-                    children: childrenData,
-                    data: { nodeId: draggableNode.__instanceId },
+                treeNodes[nodeId] = {
+                    id: nodeId, // jstree의 고유 ID로 Cocos2d-JS의 instanceId 사용
+                    text: nodeName,
+                    children: [], // 임시로 빈 배열로 설정, 나중에 채워짐
+                    data: {
+                        nodeId: node.__instanceId,
+                        zOrder: node.getLocalZOrder()
+                    },
                     state: { opened: false },
-                    // [수정된 부분] 노드의 <a> 태그에 동적으로 클래스를 추가합니다.
-                    a_attr: { "class": `type-${draggableNode.assetType}` }
+                    a_attr: { "class": typeClass }
                 };
-                unifiedTreeData.push(topLevelNodeData);
             }
         }
+
+        // 부모-자식 관계를 설정합니다.
+        for (const nodeId in this.nodeMap) {
+            const node = this.nodeMap[nodeId];
+
+            // selectMark는 건너_buildChildrenRecursive(child)고,
+            // DraggableNode의 ui/armature/spine 같은 직접적인 콘텐츠 노드도 건너_buildChildrenRecursive(child)니다.
+            // 이들은 DraggableNode가 자체적으로 하이어라키에 추가하는 방식에 따라 처리됩니다.
+            if (node instanceof cc.DrawNode && node.getParent() instanceof DraggableNode) {
+                continue;
+            }
+            if (node.getParent() instanceof DraggableNode && (node.getParent().ui === node || node.getParent().armature === node || node.getParent().spine === node)) {
+                continue;
+            }
+
+
+            const parent = node.getParent();
+            if (parent) {
+                let parentJstreeNode = treeNodes[parent.__instanceId];
+                if (parentJstreeNode && treeNodes[nodeId]) {
+                    // 부모의 children 배열에 자식을 추가합니다.
+                    // jstree의 children은 id 문자열을 사용하므로, id만 추가합니다.
+                    parentJstreeNode.children.push(treeNodes[nodeId]);
+                } else if (!parentJstreeNode && treeNodes[nodeId] && parent === this) { // MainLayer가 부모일 경우
+                    unifiedTreeData.push(treeNodes[nodeId]);
+                }
+            } else if (treeNodes[nodeId]) { // 부모가 없으면 최상위 노드입니다.
+                unifiedTreeData.push(treeNodes[nodeId]);
+            }
+        }
+
+        // DraggableNode의 내부 콘텐츠 노드를 연결합니다.
+        for (const nodeId in this.nodeMap) {
+            const node = this.nodeMap[nodeId];
+            if (node instanceof DraggableNode) {
+                const draggableNodeJstreeData = treeNodes[node.__instanceId];
+                if (draggableNodeJstreeData) {
+                    const actualGameNode = node.ui || node.armature || node.spine;
+                    if (actualGameNode && treeNodes[actualGameNode.__instanceId]) {
+                        // 실제 게임 콘텐츠 노드를 DraggableNode의 자식으로 추가합니다.
+                        draggableNodeJstreeData.children.push(treeNodes[actualGameNode.__instanceId]);
+                    }
+                }
+            }
+        }
+
+        // Z-order에 따라 정렬 (jstree는 id를 받아 자동으로 정렬할 수도 있지만, 명시적으로 데이터 정렬)
+        // 최상위 노드들을 Z-order 기준으로 정렬
+        unifiedTreeData.sort((a, b) => {
+            const nodeA = this.nodeMap[a.data.nodeId];
+            const nodeB = this.nodeMap[b.data.nodeId];
+            return (nodeA ? nodeA.getLocalZOrder() : 0) - (nodeB ? nodeB.getLocalZOrder() : 0);
+        });
+
+        // 각 노드의 자식들을 Z-order 기준으로 정렬
+        function sortChildrenRecursive(nodes) {
+            nodes.forEach(nodeData => {
+                if (nodeData.children && nodeData.children.length > 0) {
+                    nodeData.children.sort((a, b) => {
+                        const nodeA = self.nodeMap[a.data.nodeId];
+                        const nodeB = self.nodeMap[b.data.nodeId];
+                        return (nodeA ? nodeA.getLocalZOrder() : 0) - (nodeB ? nodeB.getLocalZOrder() : 0);
+                    });
+                    sortChildrenRecursive(nodeData.children);
+                }
+            });
+        }
+        sortChildrenRecursive(unifiedTreeData);
+
+
         this._treeView.updateTreeView(unifiedTreeData);
     },
 
     // ID를 받아 노드를 찾아 처리하는 함수
     updateMenuWithNodeId: function(nodeId) {
-        if (!nodeId) {
+        if (!nodeId) { // 게임 뷰 빈 곳 클릭 등으로 노드 선택이 해제될 때
             Target = null;
-            this._treeView.setNode(null);
+            this._treeView.setNode(null); // 속성 패널 비우고 기즈모 제거
             this.setDraggableItem(null); // 모든 드래그 가능 아이템 비활성화
+            this.refreshHierarchyView(); // 추가: 노드 선택 해제 시에만 하이어라키 뷰를 새로고침하여 노드 목록이 유지되도록 합니다.
             return;
         }
         const node = this.nodeMap[nodeId];
@@ -247,19 +339,35 @@ var MainLayer = cc.Layer.extend({
             return;
         }
 
-        // Target은 항상 DraggableNode 인스턴스를 가리키도록
-        Target = (node instanceof DraggableNode) ? node : node.getParent(); // 노드의 부모가 DraggableNode일 경우
-        if (!(Target instanceof DraggableNode)) { // 혹시 최상위 DraggableNode가 아니면
-            // Hierarchy에서 자식 노드를 선택했을 경우 해당 자식 노드가 UI에 표시되도록
-            this._treeView.setNode(node); // 선택된 자식 노드 정보를 넘김
-            this.setDraggableItem(null); // 부모 DraggableNode가 아닌 다른 노드가 선택되면 드래그 비활성화
-            return;
+        let selectedDraggableNode = null;
+        if (node instanceof DraggableNode) {
+            selectedDraggableNode = node;
+        } else {
+            let parent = node.getParent();
+            while (parent) {
+                if (parent instanceof DraggableNode) {
+                    selectedDraggableNode = parent;
+                    break;
+                }
+                parent = parent.getParent();
+            }
         }
 
+        // Target은 항상 DraggableNode 인스턴스를 가리키도록 합니다.
+        Target = selectedDraggableNode;
 
-        this._treeView.setNode(Target); // DraggableNode 인스턴스를 setNode에 전달
-        // 하이어라키에서 노드를 클릭했을 때도 드래그 가능 상태가 되도록 설정
-        this.setDraggableItem(Target.getName());
+        // _treeView.setNode에는 실제 선택된 Cocos2d-JS 노드를 전달합니다.
+        // 이렇게 해야 Properties 패널에 선택된 실제 노드의 정보가 표시됩니다.
+        this._treeView.setNode(node);
+
+        // DraggableNode가 선택된 경우에만 드래그 가능 상태로 설정
+        if (selectedDraggableNode) {
+            this.setDraggableItem(selectedDraggableNode.getName());
+        } else {
+            this.setDraggableItem(null); // DraggableNode가 아닌 다른 노드가 선택되면 드래그 비활성화
+        }
+        // 노드가 선택될 때는 refreshHierarchyView()를 호출하지 않습니다.
+        // 이렇게 하면 JSTree의 선택 효과가 유지됩니다.
     },
 
     createInstanceFromLibrary: function(assetName) {
@@ -343,9 +451,20 @@ var MainLayer = cc.Layer.extend({
 
         if (node) {
             node.setName(instanceName);
-            this.addChild(node);
-            this.sceneNodes[instanceName] = node;
+            let maxZOrder = -1;
+            this.getChildren().forEach(child => {
+                if (child instanceof DraggableNode) {
+                    if (child.getLocalZOrder() > maxZOrder) {
+                        maxZOrder = child.getLocalZOrder();
+                    }
+                }
+            });
+            const newZOrder = maxZOrder + 1;
+            node.setLocalZOrder(newZOrder); // 새로 추가되는 DraggableNode에 Z-order를 설정합니다.
 
+            this.addChild(node); // Z-order 설정 후 MainLayer에 추가합니다.
+            this.sceneNodes[instanceName] = node;
+            // ... (nodeMap 업데이트 로직 유지) ...
             const addNodeToMap = (n) => {
                 if (!n) return;
                 this.nodeMap[n.__instanceId] = n;

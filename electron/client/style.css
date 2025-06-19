@@ -931,3 +931,43 @@ ul.tabs li.current {
     background-color: var(--accent-color);  /* 선택된 체크박스 배경색 */
     border-color: var(--accent-color);      /* 선택된 체크박스 테두리 색상 */
 }
+
+.z-order-label {
+    margin-right: 5px;
+    font-weight: bold;
+    color: #88aaff; /* 연한 파란색 계열 */
+    width: 30px; /* Z-order 텍스트가 잘리지 않도록 충분한 공간 확보 */
+    display: inline-block; /* 텍스트와 함께 한 줄에 표시 */
+    text-align: right; /* 숫자를 오른쪽 정렬 */
+}
+
+/* jstree 앵커의 패딩을 조정하여 Z-order 라벨 공간 확보 */
+.jstree-default .jstree-anchor {
+    padding-left: 5px; /* 기본 패딩 조정 */
+}
+
+/* 드래그 앤 드롭시 대상 노드를 시각적으로 표시 */
+.jstree-default .jstree-wholerow-hovered,
+.jstree-default .jstree-wholerow-clicked,
+.jstree-default .jstree-wholerow-selected {
+    background: #555 !important; /* 배경색 변경 */
+    box-shadow: none;
+}
+
+/* DraggableNode의 자식인 실제 콘텐츠 노드의 스타일 */
+.jstree-default .jstree-anchor.type-armature-content {
+    color: #e0e0e0; /* 연한 회색 */
+    font-style: italic;
+}
+.jstree-default .jstree-anchor.type-spine-content {
+    color: #e0e0e0;
+    font-style: italic;
+}
+.jstree-default .jstree-anchor.type-action-content {
+    color: #e0e0e0;
+    font-style: italic;
+}
+/* 일반 자식 노드의 스타일 (기존 type-child) */
+.jstree-default .jstree-anchor.type-child {
+    color: #aaaaaa;
+}
