@@ -444,7 +444,9 @@ var MainLayer = cc.Layer.extend({
 
         const topLevelNodes = this.getChildren().filter(node => node instanceof DraggableNode);
 
-        topLevelNodes.sort((a, b) => a.getLocalZOrder() - b.getLocalZOrder());
+        topLevelNodes.sort((a, b) => {
+            return a.getLocalZOrder() - b.getLocalZOrder();
+        });
 
         topLevelNodes.forEach(draggableNode => {
             let zOrderText = draggableNode.getLocalZOrder();
@@ -537,26 +539,49 @@ var MainLayer = cc.Layer.extend({
             }.bind(this));
     },
 
-    deleteItem : function (name) {
-        var selectNode = this.sceneNodes[name];
+    deleteItem : function (cocosNodeIdToDelete) {
+        var selectNode = this.nodeMap[cocosNodeIdToDelete];
+
         if(selectNode) {
             if(Target === selectNode) {
                 Target = null;
                 this._treeView.setNode(null);
             }
 
-            const removeNodeFromMap = (n) => {
+            if (selectNode.getParent()) { // 부모가 있다면 부모로부터 제거
+                selectNode.removeFromParent(true);
+            }
+
+            const removeNodeFromMapRecursive = (n) => {
                 if (!n) return;
                 delete this.nodeMap[n.__instanceId];
+                if (n instanceof DraggableNode) {
+                    if (n.ui && this.nodeMap[n.ui.__instanceId]) delete this.nodeMap[n.ui.__instanceId];
+                    if (n.armature && this.nodeMap[n.armature.__instanceId]) delete this.nodeMap[n.armature.__instanceId];
+                    if (n.spine && this.nodeMap[n.spine.__instanceId]) delete this.nodeMap[n.spine.__instanceId];
+                    if (n.image && this.nodeMap[n.image.__instanceId]) delete this.nodeMap[n.image.__instanceId];
+                }
                 const children = n.getChildren();
                 if(children) {
-                    children.forEach(child => removeNodeFromMap(child));
+                    children.forEach(child => removeNodeFromMapRecursive(child));
                 }
             };
-            removeNodeFromMap(selectNode);
+            removeNodeFromMapRecursive(selectNode);
 
-            delete this.sceneNodes[name];
+            // this.sceneNodes에서 해당 DraggableNode 인스턴스 이름 찾아서 삭제
+            for (const name in this.sceneNodes) {
+                if (this.sceneNodes.hasOwnProperty(name) && this.sceneNodes[name].__instanceId === cocosNodeIdToDelete) {
+                    delete this.sceneNodes[name];
+                    break;
+                }
+            }
+
+            // [수정]: jstree에서 직접 노드를 삭제하는 대신, refreshHierarchyView를 통해 전체 계층구조를 새로고침.
             this.refreshHierarchyView();
+
+            console.log(`Node with ID ${cocosNodeIdToDelete} deleted.`);
+        } else {
+            console.warn(`Cocos2d-JS Node with ID ${cocosNodeIdToDelete} not found for deletion.`);
         }
     },
 

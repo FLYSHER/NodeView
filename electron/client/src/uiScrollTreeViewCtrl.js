@@ -254,8 +254,6 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
         }.bind(this));
 
         $('#copyBtn').click( function(){
-            // 원본 getTreeObjName이 _treeWidgetObj에 의존하므로, 먼저 _treeWidgetObj가 채워져 있는지 확인
-            // 이 예시에서는 _treeWidgetObj가 updateTreeView에서 채워진다고 가정합니다.
             if (Object.keys(this._treeWidgetObj).length > 0) {
                 var obj = this.getTreeObjName();
                 this._treeString = "this._uiWidgets = {\n";
@@ -273,6 +271,25 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
                 console.warn("복사할 트리 데이터가 없습니다. 먼저 트리를 로드하거나 선택해주세요.");
             }
         }.bind(this));
+
+        // [수정]: deleteNodeBtn 클릭 이벤트 리스너 추가
+        $('#deleteNodeBtn').click(function() {
+            const tree = $('#widgetTree').jstree(true);
+            const selectedNodeJstreeId = tree.get_selected(true);
+
+            if (selectedNodeJstreeId && selectedNodeJstreeId.length > 0) {
+                const selectedNode = selectedNodeJstreeId[0];
+                if (selectedNode.data && selectedNode.data.nodeId) {
+                    const cocosNodeIdToDelete = selectedNode.data.nodeId;
+                    this._mainLayer.deleteItem(cocosNodeIdToDelete); // MainLayer의 deleteItem 호출
+                } else {
+                    console.warn("삭제할 수 있는 노드가 선택되지 않았습니다.");
+                }
+            } else {
+                console.warn("계층구조 패널에서 삭제할 노드를 선택해주세요.");
+            }
+        }.bind(this));
+
 
         $('#debugBone').click( function( sender ){
             this._selectNode.forEach( item => {
@@ -302,14 +319,19 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
             });
         }.bind(this));
 
-        $("input[name=opacity]").change(function(){
+        // [수정]: opacity 슬라이더 이벤트를 'change'에서 'input'으로 변경
+        $("input[name=opacity]").off('change').on('input', function(){
             this._selectNode.forEach( item => {
                 item.setOpacity(parseInt($("input[name=opacity]").val(), 10));
                 $('#opacityValue').html(item.getOpacity());
+                if (this._mainLayer && item.__instanceId) {
+                    this._mainLayer.updateMenuWithNodeId(item.__instanceId);
+                }
             });
         }.bind(this));
 
-        $("input[name=lPosX]").change(function(){
+        // [수정]: lPosX 입력 필드 이벤트를 'change'에서 'input'으로 변경
+        $("input[name=lPosX]").off('change').on('input', function(){
             this._selectNode.forEach( item => {
                 const newPosX = parseFloat($("input[name=lPosX]").val());
                 if (!isNaN(newPosX)) {
@@ -321,9 +343,10 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
             });
         }.bind(this));
 
-        $("input[name=lPosY]").change(function(){
+        // [수정]: lPosY 입력 필드 이벤트를 'change'에서 'input'으로 변경
+        $("input[name=lPosY]").off('change').on('input', function(){
             this._selectNode.forEach( item => {
-                const newPosY = parseFloat(parseFloat($("input[name=lPosY]").val()));
+                const newPosY = parseFloat($("input[name=lPosY]").val());
                 if (!isNaN(newPosY)) {
                     item.setPositionY(newPosY);
                     if (this._mainLayer && item.__instanceId) {
@@ -331,6 +354,20 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
                     }
                 }
             });
+        }.bind(this));
+
+        // [추가]: WorldPos 입력 필드도 실시간 업데이트 (UI 갱신 목적)
+        $("input[name=wPosX]").off('change').on('input', function(){
+            if (this._selectNode.length > 0 && this._mainLayer) {
+                this._mainLayer.updateMenuWithNodeId(this._selectNode[0].__instanceId);
+            }
+        }.bind(this));
+
+        // [추가]: WorldPos 입력 필드도 실시간 업데이트 (UI 갱신 목적)
+        $("input[name=wPosY]").off('change').on('input', function(){
+            if (this._selectNode.length > 0 && this._mainLayer) {
+                this._mainLayer.updateMenuWithNodeId(this._selectNode[0].__instanceId);
+            }
         }.bind(this));
     },
 
