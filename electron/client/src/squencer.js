@@ -1,4 +1,3 @@
-
 var Sequencer = (function() {
     let PIXELS_PER_SECOND = 100;
     const ZOOM_FACTOR = 1.5;
@@ -118,7 +117,6 @@ var Sequencer = (function() {
                 typeClass = 'type-action';
             }
 
-// 새로운 HTML 구조로 라벨을 생성합니다.
             const labelHtml = `
     <div class="track-label" title="${trackData.node.getName()}">
         <span class="track-type-icon ${typeClass}">${iconText}</span>
@@ -132,7 +130,6 @@ var Sequencer = (function() {
             $timelineContent.append($track);
 
             trackData.clips.forEach(clip => {
-                // [수정] 스파인 타입에 대한 클래스 추가
                 let clipTypeClass = '';
                 if (clip.type === 'action') clipTypeClass = 'type-action';
                 if (clip.type === 'spine') clipTypeClass = 'type-spine';
@@ -155,6 +152,16 @@ var Sequencer = (function() {
                     left: _timeToPixel(clip.startTime) + 'px',
                     width: _timeToPixel(clip.duration) + 'px',
                 });
+
+                if (clip.duration > clip.originalDuration) {
+                    const numLoops = Math.floor(clip.duration / clip.originalDuration);
+                    for (let i = 1; i <= numLoops; i++) {
+                        const markerLeft = (clip.originalDuration * i) * PIXELS_PER_SECOND;
+                        if (markerLeft < _timeToPixel(clip.duration)) {
+                            $clip.append(`<div class="timeline-clip-loop-marker" style="left: ${markerLeft}px;"></div>`);
+                        }
+                    }
+                }
 
                 $track.append($clip);
 
@@ -181,7 +188,7 @@ var Sequencer = (function() {
                             left: _timeToPixel(clip.startTime) + 'px',
                             top: '2px'
                         });
-                        _updateOverlapsForTrack(trackData, $track);
+                        _renderTimeline(); // Re-render to update loop markers and overlaps
                     }
                 }).resizable({
                     handles: 'e, w',
@@ -198,6 +205,7 @@ var Sequencer = (function() {
                     stop: function(event, ui) {
                         const snappedLeft = _getSnappedPixel(ui.position.left);
                         const snappedWidth = _getSnappedPixel(ui.size.width);
+
                         const snappedStartTime = _pixelToTime(Math.max(0, snappedLeft));
                         const snappedDuration = _pixelToTime(Math.max(_timeToPixel(GRID_TIME_INTERVAL), snappedWidth));
 
@@ -216,7 +224,7 @@ var Sequencer = (function() {
                         $(this).css('top', '2px');
 
                         _updateClipDurationText($(this), clip);
-                        _updateOverlapsForTrack(trackData, $track);
+                        _renderTimeline(); // Re-render to update loop markers and overlaps
                     }
                 });
             });
@@ -287,16 +295,13 @@ var Sequencer = (function() {
 
     function _onAdd() {
         let selectedAnimName, animType;
-        const $selectedItem = $('#actionTree').find('.custom-tree-item.selected');
-
-        if ($selectedItem.length > 0) {
-            // 선택된 아이템에서 이름과 타입을 모두 가져옵니다.
-            selectedAnimName = $selectedItem.data('anim-name');
-            animType = $selectedItem.data('anim-type'); // ✅ 핵심 수정사항
+        const $selectedAction = $('#actionTree').find('.custom-tree-item.selected');
+        if ($selectedAction.length > 0) {
+            selectedAnimName = $selectedAction.data('anim-name');
+            animType = $selectedAction.data('anim-type');
         }
 
         if (selectedAnimName && animType && Target) {
-            // _addClipToTrack 함수는 수정할 필요 없이 그대로 사용합니다.
             _addClipToTrack(selectedAnimName, animType, Target);
         } else {
             alert("목록에서 추가할 애니메이션과 씬에서 적용할 타겟을 먼저 선택하세요.");
@@ -319,17 +324,11 @@ var Sequencer = (function() {
     }
 
     function _onPlay() {
-        // --- 여기서부터 디버깅 코드 추가 ---
-        console.log("%c[Sequencer] Playback sequence started.", "color: #3498db; font-weight: bold;");
-
         isPlaying = true; isPaused = false; sequenceStartTime = Date.now();
 
         const $playhead = $('#timeline-playhead');
         $('#playSequenceBtn').html(pauseIcon);
-
-        const labelWidth = $('#track-labels-container').outerWidth();
-        $playhead.show().stop().css('left', labelWidth);
-
+        $playhead.show().stop().css('left', $('#track-labels-container').outerWidth());
         $('#timeline-interaction-overlay').show();
 
         runnerNode = mainLayerInstance.getChildByTag(999);
@@ -337,44 +336,44 @@ var Sequencer = (function() {
         runnerNode.stopAllActions();
 
         if (tracks.size === 0) {
-            console.warn("[Sequencer] No tracks to play.");
+            _onStop(true);
+            return;
         }
 
         tracks.forEach(trackData => {
-            const targetNode = trackData.node;
-            console.log(`[Sequencer] Processing track for node: "${targetNode.getName()}"`, targetNode);
-
-            if (trackData.clips.length === 0) {
-                console.log(`[Sequencer] Node "${targetNode.getName()}" has no clips.`);
-                return;
-            }
-
             trackData.clips.forEach(clip => {
-                const isLooping = clip.duration > clip.originalDuration;
-                console.log(`%c[Sequencer] Scheduling clip: "${clip.animName}"`, "color: #2ecc71;", {
-                    target: targetNode.getName(),
-                    startTime: clip.startTime.toFixed(2) + 's',
-                    duration: clip.duration.toFixed(2) + 's',
-                    isLooping: isLooping,
-                    type: clip.type
-                });
+                const targetNode = trackData.node;
+                const isLooping = clip.duration > clip.originalDuration; // 클립 길이가 원본 길이보다 길면 루핑
 
                 const playAction = cc.callFunc(() => {
-                    console.log(`%c[Sequencer] >> Playing clip: "${clip.animName}" on "${targetNode.getName()}"`, "color: #e67e22;");
-
                     if (clip.type === 'spine' && targetNode.spine) {
                         targetNode.spine.setAnimation(0, clip.animName, isLooping);
                     } else if (clip.type === 'armature' && targetNode.armature) {
-                        targetNode.armature.getAnimation().play(clip.animName, -1, isLooping ? 0 : 1);
-                    }
-                    else if (clip.type === 'action' && targetNode.cocosAction) {
+                        // AR 애니메이션 루프 횟수 계산 및 적용
+                        let loopCount = 1; // 기본은 1회 재생
+                        if (isLooping && clip.originalDuration > 0) {
+                            loopCount = Math.ceil(clip.duration / clip.originalDuration);
+                            if (loopCount === Infinity) loopCount = 0; // 무한루프
+                        }
+                        targetNode.armature.getAnimation().play(clip.animName, -1, loopCount);
+                    } else if (clip.type === 'action' && targetNode.cocosAction) {
+                        // cocosAction wrapper는 isLooping을 받도록 가정
                         targetNode.cocosAction.play(clip.animName, isLooping);
-                    }
-                    else if (clip.type === 'action' && targetNode.ui) {
-                        if (targetNode.actionUrl) {
+                    } else if (clip.type === 'action' && targetNode.ui) {
+                        // UI 액션 (ccs.actionManager) 처리
+                        targetNode.ui.stopAllActions(); // 기존 액션 정지
+
+                        const singlePlayAction = cc.callFunc(() => {
                             ccs.actionManager.playActionByName(targetNode.actionUrl, clip.animName);
+                        });
+
+                        if (isLooping && clip.originalDuration > 0) {
+                            const numRepeats = Math.max(1, Math.ceil(clip.duration / clip.originalDuration));
+                            const loopSequence = cc.repeat(cc.sequence(singlePlayAction, cc.delayTime(clip.originalDuration)), numRepeats);
+                            targetNode.ui.runAction(loopSequence);
                         } else {
-                            console.error(`[Sequencer] Could not play UIAction. Target node "${targetNode.getName()}" is missing the 'actionUrl' property.`);
+                            // 한 번만 재생
+                            targetNode.ui.runAction(singlePlayAction);
                         }
                     } else {
                         console.error(`[Sequencer] Could not play clip. Target node "${targetNode.getName()}" does not have the required component for type "${clip.type}".`, targetNode);
@@ -386,43 +385,35 @@ var Sequencer = (function() {
                 const endTime = clip.startTime + clip.duration;
                 const isNextClipStarting = trackData.clips.some(nextClip => nextClip !== clip && Math.abs(nextClip.startTime - endTime) < 0.001);
 
-                if (!isNextClipStarting) {
-                    const stopAction = cc.callFunc(() => {
-                        console.log(`%c[Sequencer] << Stopping animation for clip "${clip.animName}" at ${endTime.toFixed(2)}s`, "color: #f1c40f;");
-                        if (clip.type === 'spine' && targetNode.spine) {
-                            targetNode.spine.clearTrack(0);
-                        } else if (clip.type === 'armature' && targetNode.armature && targetNode.armature.getAnimation().getCurrentMovementID() === clip.animName) {
-                            targetNode.armature.getAnimation().stop();
-                        }
-                    });
-                    runnerNode.runAction(cc.sequence(cc.delayTime(endTime), stopAction));
-                }
+                // 클립 지속 시간이 끝나면 해당 애니메이션 정지
+                const stopAction = cc.callFunc(() => {
+                    if (clip.type === 'armature' && targetNode.armature && targetNode.armature.getAnimation().getCurrentMovementID() === clip.animName) {
+                        targetNode.armature.getAnimation().stop();
+                    } else if (clip.type === 'spine' && targetNode.spine) {
+                        targetNode.spine.clearTrack(0);
+                    } else if (clip.type === 'action' && targetNode.ui) {
+                        targetNode.ui.stopAllActions();
+                    }
+                });
+                runnerNode.runAction(cc.sequence(cc.delayTime(endTime), stopAction));
             });
         });
 
         const totalDuration = _getTotalDuration();
-        console.log(`[Sequencer] Total sequence duration: ${totalDuration.toFixed(2)}s`);
-
         if (totalDuration > 0) {
-            $playhead.animate({ left: labelWidth + totalDuration * PIXELS_PER_SECOND }, {
+            $playhead.animate({ left: $('#track-labels-container').outerWidth() + totalDuration * PIXELS_PER_SECOND }, {
                 duration: totalDuration * 1000, easing: 'linear',
                 step: function(now) {
                     const $container = $('#timeline-tracks-container');
-                    const playheadPos = now - labelWidth;
+                    const playheadPos = now - $('#track-labels-container').outerWidth();
                     const containerWidth = $container.width(), scrollLeft = $container.scrollLeft();
                     if (playheadPos > scrollLeft + containerWidth * 0.75 || playheadPos < scrollLeft) {
                         $container.scrollLeft(playheadPos - containerWidth / 2);
                     }
                 },
-                complete: () => {
-                    console.log("%c[Sequencer] Playback finished.", "color: #3498db; font-weight: bold;");
-                    _onStop(true);
-                }
+                complete: () => _onStop(true)
             });
-        } else {
-            console.log("[Sequencer] Playback finished immediately (total duration is 0).");
-            _onStop(true);
-        }
+        } else { _onStop(true); }
     }
 
     function _onPause() {
@@ -434,16 +425,16 @@ var Sequencer = (function() {
         if (runnerNode) cc.director.getActionManager().pauseTarget(runnerNode);
         tracks.forEach(trackData => {
             const node = trackData.node;
-
-            // [수정] 스파인 일시정지 방식을 pause() 함수로 변경합니다.
             if (node.spine) {
                 node.spine.pause();
             }
-
             if (node.armature) {
                 node.armature.getAnimation().pause();
             }
-            cc.director.getActionManager().pauseTarget(node);
+            if (node.ui) { // UI 액션도 정지
+                cc.director.getActionManager().pauseTarget(node.ui);
+            }
+            cc.director.getActionManager().pauseTarget(node); // DraggableNode 자체도 정지
         });
     }
 
@@ -455,16 +446,16 @@ var Sequencer = (function() {
         if (runnerNode) cc.director.getActionManager().resumeTarget(runnerNode);
         tracks.forEach(trackData => {
             const node = trackData.node;
-
-            // [수정] 스파인 재개 방식을 resume() 함수로 변경합니다.
             if (node.spine) {
                 node.spine.resume();
             }
-
             if (node.armature) {
                 node.armature.getAnimation().resume();
             }
-            cc.director.getActionManager().resumeTarget(node);
+            if (node.ui) { // UI 액션도 재개
+                cc.director.getActionManager().resumeTarget(node.ui);
+            }
+            cc.director.getActionManager().resumeTarget(node); // DraggableNode 자체도 재개
         });
 
         const $playhead = $('#timeline-playhead');
@@ -501,28 +492,21 @@ var Sequencer = (function() {
             runnerNode.stopAllActions();
         }
 
-        // [수정] 정지 시, 일시정지되었을 수 있는 모든 노드들을 재개시킨 후 애니메이션을 정지합니다.
         tracks.forEach(trackData => {
             const node = trackData.node;
-
-            // 1. 노드 자체의 스케줄러/액션을 '재개' 상태로 먼저 돌립니다.
+            // 모든 노드를 resume 상태로 돌린 후 액션을 정지/클리어
             if (node.spine) {
                 node.spine.resume();
-            }
-            if (node.armature) {
-                node.armature.getAnimation().resume();
-            }
-
-            // DraggableNode 래퍼 자체도 재개합니다.
-            cc.director.getActionManager().resumeTarget(node);
-
-            // 2. 현재 재생 중인 애니메이션을 정지/클리어합니다.
-            if (node.spine) {
                 node.spine.clearTracks();
             }
             if (node.armature) {
-                node.armature.getAnimation().stop();
+                node.armature.getAnimation().resume();
+                node.armature.getAnimation().stop(); // AR 정지
             }
+            if (node.ui) { // UI 액션도 정지
+                node.ui.stopAllActions();
+            }
+            cc.director.getActionManager().resumeTarget(node); // DraggableNode 자체도 재개
         });
 
         if (resetPlayhead) {
@@ -538,6 +522,7 @@ var Sequencer = (function() {
 
         PIXELS_PER_SECOND *= (direction === 'in' ? ZOOM_FACTOR : 1 / ZOOM_FACTOR);
         PIXELS_PER_SECOND = Math.max(20, Math.min(PIXELS_PER_SECOND, 5000));
+        $('#timeline-editor').get(0).style.setProperty('--pixels-per-second', PIXELS_PER_SECOND);
 
         _renderTimeline();
         _renderRuler();
@@ -576,12 +561,9 @@ var Sequencer = (function() {
                 accept: '.custom-tree-item',
                 drop: function(event, ui) {
                     if (!Target) { alert("먼저 캔버스에서 애니메이션을 적용할 타겟을 선택하세요."); return; }
-
-                    // 드래그된 아이템(ui.draggable)에서 이름과 타입을 직접 읽어옵니다.
                     const animName = ui.draggable.data('anim-name');
-                    const animType = ui.draggable.data('anim-type'); // ✅ 핵심 수정사항
+                    const animType = ui.draggable.data('anim-type');
 
-                    // 타입을 찾지 못했다면 실행하지 않습니다.
                     if (!animType) {
                         console.error("드래그된 아이템에서 'data-anim-type'을 찾을 수 없습니다.");
                         return;

@@ -971,3 +971,13 @@ ul.tabs li.current {
 .jstree-default .jstree-anchor.type-child {
     color: #aaaaaa;
 }
+
+.timeline-clip-loop-marker {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    width: 1px; /* 얇은 선 */
+    background-color: rgba(0, 0, 0, 0.4); /* 반투명 검은색 */
+    pointer-events: none; /* 클릭 불가 */
+    z-index: 3; /* 클립 위에 표시 */
+}
