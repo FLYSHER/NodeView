@@ -192,17 +192,55 @@ var MainLayer = cc.Layer.extend({
         if (sortedChildren && sortedChildren.length > 0) {
             for (const child of sortedChildren) {
                 // DraggableNode에 포함된 selectMark(DrawNode)는 하이어라키에 표시하지 않습니다.
-                if (child instanceof cc.DrawNode) continue;
+                if (child instanceof cc.DrawNode && child.getParent() instanceof DraggableNode) {
+                    continue;
+                }
+
+                let textContent = child.getName() || "Unnamed Node";
+                let typeClass = "type-child"; // 일반 Cocos 노드의 기본값
+                let includeGrandchildren = true; // 손주 노드를 포함할지 여부
+
+                if (parentNode instanceof DraggableNode) {
+                    if (parentNode.ui === child) {
+                        typeClass = "type-action-content"; // DraggableNode 내부 UI 콘텐츠의 클래스
+                        textContent = `UI: ${textContent}`;
+                    } else if (parentNode.armature === child) {
+                        typeClass = "type-armature-content"; // Armature 콘텐츠의 클래스
+                        textContent = `AR: ${textContent}`;
+                        includeGrandchildren = false; // AR은 직계 자식만 보이게 설정
+                    } else if (parentNode.spine === child) {
+                        typeClass = "type-spine-content"; // Spine 콘텐츠의 클래스
+                        textContent = `SP: ${textContent}`;
+                        includeGrandchildren = false; // SP는 직계 자식만 보이게 설정
+                    }
+                }
+
+                // --- 추가된 로직: 자식 노드가 DraggableNode일 경우 아이콘 유지 ---
+                if (child instanceof DraggableNode) {
+                    typeClass = `type-${child.assetType}`; // 자식 DraggableNode의 assetType에 맞는 클래스 사용
+                    // DraggableNode의 경우 텍스트 접두사를 붙이지 않고 원래 이름을 사용 (부모가 붙이는 것과 중복 방지)
+                    textContent = child.getName() || "Unnamed DraggableNode";
+                    // DraggableNode가 자식으로 있을 때, 그 DraggableNode의 콘텐츠 노드에 대한 재귀는
+                    // 이 DraggableNode 자체가 아니라 그 내부 콘텐츠 노드들이므로, 여기서는 grandchildren 포함 여부를
+                    // 이 DraggableNode의 assetType에 따라 결정해야 합니다.
+                    if (child.assetType === 'armature' || child.assetType === 'spine') {
+                        includeGrandchildren = false; // 자식 DraggableNode가 AR 또는 SP이면 그 하위는 숨김
+                    } else {
+                        includeGrandchildren = true; // 그 외 (UI)는 계속 보이도록 유지
+                    }
+                }
+                // --- 추가된 로직 끝 ---
 
                 let zOrderText = child.getLocalZOrder();
                 let childNodeData = {
-                    text: `<span class="z-order-label">[${zOrderText}]</span> ${child.getName() || "Unnamed Node"}`,
-                    children: this._buildChildrenRecursive(child),
+                    id: child.__instanceId, // Cocos2d-JS의 instanceId를 jstree 노드 ID로 사용
+                    text: `<span class="z-order-label">[${zOrderText}]</span> ${textContent}`,
+                    children: includeGrandchildren ? this._buildChildrenRecursive(child) : [], // includeGrandchildren 값에 따라 재귀 호출 여부 결정
                     data: {
                         nodeId: child.__instanceId,
-                        zOrder: child.getLocalZOrder() // Z-order 값도 데이터에 저장
+                        zOrder: child.getLocalZOrder() // 데이터에 Z-order 저장
                     },
-                    a_attr: { "class": "type-child" } // 자식 노드임을 나타내는 'type-child' 클래스
+                    a_attr: { "class": typeClass } // 결정된 클래스 적용
                 };
                 childrenData.push(childNodeData);
             }
@@ -212,114 +250,32 @@ var MainLayer = cc.Layer.extend({
 
     refreshHierarchyView: function() {
         let unifiedTreeData = [];
-        const treeNodes = {}; // nodeId를 키로 하여 jstree 노드 데이터를 저장
+        const self = this; // 중첩 함수에서 'this'를 사용하기 위해 캡처
 
-        // 모든 노드를 nodeId 기준으로 treeNodes 맵에 추가합니다.
-        // 이는 DraggableNode이든 일반 Cocos Node이든 모든 노드를 포함합니다.
-        for (const nodeId in this.nodeMap) {
-            const node = this.nodeMap[nodeId];
-            // selectMark (DrawNode)는 하이어라키에 표시하지 않습니다.
-            if (node instanceof cc.DrawNode && node.getParent() instanceof DraggableNode) {
-                continue;
-            }
+        // MainLayer의 자식인 최상위 DraggableNode를 모두 가져옵니다.
+        const topLevelNodes = this.getChildren().filter(node => node instanceof DraggableNode);
 
-            // DraggableNode 내의 실제 콘텐츠 노드 (ui, armature, spine)는 별도로 처리되므로
-            // 여기서는 DraggableNode와 그 외 일반 Cocos Node만 직접 추가합니다.
-            // DraggableNode의 직접적인 자식인 ui, armature, spine은 나중에 DraggableNode 아래에 추가됩니다.
-            if (node instanceof DraggableNode || !(node.getParent() instanceof DraggableNode && (node.getParent().ui === node || node.getParent().armature === node || node.getParent().spine === node))) {
-                let zOrderText = node.getLocalZOrder();
-                let nodeName = node.getName() || "Unnamed Node";
-                let typeClass = "";
+        // 최상위 노드들을 Z-order로 정렬합니다.
+        topLevelNodes.sort((a, b) => a.getLocalZOrder() - b.getLocalZOrder());
 
-                if (node instanceof DraggableNode) {
-                    typeClass = `type-${node.assetType}`;
-                    nodeName = `<span class="z-order-label">[${zOrderText}]</span> ${nodeName}`;
-                } else {
-                    typeClass = "type-child"; // 일반 Cocos Node
-                }
+        topLevelNodes.forEach(draggableNode => {
+            let zOrderText = draggableNode.getLocalZOrder();
+            let nodeName = draggableNode.getName() || "Unnamed DraggableNode";
+            let typeClass = `type-${draggableNode.assetType}`;
 
-                treeNodes[nodeId] = {
-                    id: nodeId, // jstree의 고유 ID로 Cocos2d-JS의 instanceId 사용
-                    text: nodeName,
-                    children: [], // 임시로 빈 배열로 설정, 나중에 채워짐
-                    data: {
-                        nodeId: node.__instanceId,
-                        zOrder: node.getLocalZOrder()
-                    },
-                    state: { opened: false },
-                    a_attr: { "class": typeClass }
-                };
-            }
-        }
-
-        // 부모-자식 관계를 설정합니다.
-        for (const nodeId in this.nodeMap) {
-            const node = this.nodeMap[nodeId];
-
-            // selectMark는 건너_buildChildrenRecursive(child)고,
-            // DraggableNode의 ui/armature/spine 같은 직접적인 콘텐츠 노드도 건너_buildChildrenRecursive(child)니다.
-            // 이들은 DraggableNode가 자체적으로 하이어라키에 추가하는 방식에 따라 처리됩니다.
-            if (node instanceof cc.DrawNode && node.getParent() instanceof DraggableNode) {
-                continue;
-            }
-            if (node.getParent() instanceof DraggableNode && (node.getParent().ui === node || node.getParent().armature === node || node.getParent().spine === node)) {
-                continue;
-            }
-
-
-            const parent = node.getParent();
-            if (parent) {
-                let parentJstreeNode = treeNodes[parent.__instanceId];
-                if (parentJstreeNode && treeNodes[nodeId]) {
-                    // 부모의 children 배열에 자식을 추가합니다.
-                    // jstree의 children은 id 문자열을 사용하므로, id만 추가합니다.
-                    parentJstreeNode.children.push(treeNodes[nodeId]);
-                } else if (!parentJstreeNode && treeNodes[nodeId] && parent === this) { // MainLayer가 부모일 경우
-                    unifiedTreeData.push(treeNodes[nodeId]);
-                }
-            } else if (treeNodes[nodeId]) { // 부모가 없으면 최상위 노드입니다.
-                unifiedTreeData.push(treeNodes[nodeId]);
-            }
-        }
-
-        // DraggableNode의 내부 콘텐츠 노드를 연결합니다.
-        for (const nodeId in this.nodeMap) {
-            const node = this.nodeMap[nodeId];
-            if (node instanceof DraggableNode) {
-                const draggableNodeJstreeData = treeNodes[node.__instanceId];
-                if (draggableNodeJstreeData) {
-                    const actualGameNode = node.ui || node.armature || node.spine;
-                    if (actualGameNode && treeNodes[actualGameNode.__instanceId]) {
-                        // 실제 게임 콘텐츠 노드를 DraggableNode의 자식으로 추가합니다.
-                        draggableNodeJstreeData.children.push(treeNodes[actualGameNode.__instanceId]);
-                    }
-                }
-            }
-        }
-
-        // Z-order에 따라 정렬 (jstree는 id를 받아 자동으로 정렬할 수도 있지만, 명시적으로 데이터 정렬)
-        // 최상위 노드들을 Z-order 기준으로 정렬
-        unifiedTreeData.sort((a, b) => {
-            const nodeA = this.nodeMap[a.data.nodeId];
-            const nodeB = this.nodeMap[b.data.nodeId];
-            return (nodeA ? nodeA.getLocalZOrder() : 0) - (nodeB ? nodeB.getLocalZOrder() : 0);
+            let draggableNodeData = {
+                id: draggableNode.__instanceId, // DraggableNode의 jstree 고유 ID
+                text: `<span class="z-order-label">[${zOrderText}]</span> ${nodeName}`,
+                children: this._buildChildrenRecursive(draggableNode), // DraggableNode의 자식들을 재귀적으로 가져옵니다.
+                data: {
+                    nodeId: draggableNode.__instanceId,
+                    zOrder: draggableNode.getLocalZOrder()
+                },
+                state: { opened: false }, // 필요에 따라 기본 열림 상태 설정 가능
+                a_attr: { "class": typeClass }
+            };
+            unifiedTreeData.push(draggableNodeData);
         });
-
-        // 각 노드의 자식들을 Z-order 기준으로 정렬
-        function sortChildrenRecursive(nodes) {
-            nodes.forEach(nodeData => {
-                if (nodeData.children && nodeData.children.length > 0) {
-                    nodeData.children.sort((a, b) => {
-                        const nodeA = self.nodeMap[a.data.nodeId];
-                        const nodeB = self.nodeMap[b.data.nodeId];
-                        return (nodeA ? nodeA.getLocalZOrder() : 0) - (nodeB ? nodeB.getLocalZOrder() : 0);
-                    });
-                    sortChildrenRecursive(nodeData.children);
-                }
-            });
-        }
-        sortChildrenRecursive(unifiedTreeData);
-
 
         this._treeView.updateTreeView(unifiedTreeData);
     },

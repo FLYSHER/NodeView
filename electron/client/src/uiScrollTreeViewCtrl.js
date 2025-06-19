@@ -8,9 +8,12 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
     _treeWidgetObj : {},
     _treeString : "",
     _mainLayer: null,
+
     ctor : function (mainLayer) {
         this._super("");
         this._mainLayer = mainLayer;
+
+        const self = this;
 
         cc.eventManager.addCustomListener('node_drag_started', function(event) {
             const eventData = event.getUserData();
@@ -29,7 +32,6 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
                 if (targetNodeIdInTree) {
                     tree.deselect_all();
                     tree.select_node(targetNodeIdInTree);
-
                     const $selectedNodeLI = tree.get_node(targetNodeIdInTree, true);
                     if ($selectedNodeLI) {
                         $selectedNodeLI.find('> .jstree-anchor').addClass('jstree-clicked');
@@ -41,7 +43,73 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
         $('#widgetTree').jstree({
             'core' : {
                 'data' : [],
-                "check_callback" : true
+                "check_callback" : function (operation, node, parent, position, more) {
+                    const mainLayerInstance = self._mainLayer;
+
+                    if (!node || !node.data || !node.data.nodeId) {
+                        return false;
+                    }
+
+                    const movingCocosNode = mainLayerInstance.nodeMap[node.data.nodeId];
+                    const isMovingDraggableNode = (movingCocosNode instanceof DraggableNode);
+
+                    const targetParentId = (typeof parent === 'object' && parent !== null && parent.id) ? parent.id : parent;
+
+                    if (operation === "move_node") {
+                        if (targetParentId === '#') {
+                            if (isMovingDraggableNode) {
+                                return true;
+                            }
+                        }
+
+                        let targetParentCocosNode = null;
+                        if (targetParentId === '#') {
+                            targetParentCocosNode = mainLayerInstance;
+                        } else {
+                            const parentJstreeNode = this.get_node(targetParentId);
+                            if (parentJstreeNode && parentJstreeNode.data && parentJstreeNode.data.nodeId) {
+                                targetParentCocosNode = mainLayerInstance.nodeMap[parentJstreeNode.data.nodeId];
+                            } else {
+                                console.error("Invalid jstree node data for non-root parent, cannot find nodeId:", parentJstreeNode);
+                                return false;
+                            }
+                        }
+
+                        if (!targetParentCocosNode) {
+                            console.error("Target parent Cocos node is null or undefined after determination.");
+                            return false;
+                        }
+
+                        const isTargetParentMainLayer = (targetParentCocosNode === mainLayerInstance);
+                        const isTargetParentDraggableNode = (targetParentCocosNode instanceof DraggableNode);
+
+                        if (isMovingDraggableNode) {
+                            if (isTargetParentDraggableNode || isTargetParentMainLayer) {
+                                return true;
+                            } else {
+                                console.warn("DraggableNode는 DraggableNode 또는 MainLayer의 자식으로만 이동할 수 있습니다.");
+                                return false;
+                            }
+                        }
+
+                        if (isTargetParentDraggableNode) {
+                            const isChildOfDraggableNodeContent = (
+                                targetParentCocosNode.ui === movingCocosNode ||
+                                targetParentCocosNode.armature === movingCocosNode ||
+                                targetParentCocosNode.spine === movingCocosNode
+                            );
+
+                            if (isMovingDraggableNode || isChildOfDraggableNodeContent) {
+                                return true;
+                            } else {
+                                console.warn("DraggableNode는 자신의 콘텐츠 노드 또는 다른 DraggableNode만 자식으로 가질 수 있습니다.");
+                                return false;
+                            }
+                        }
+                        return true;
+                    }
+                    return true;
+                },
             },
             "plugins": ["search", "dnd"],
             "search": {
@@ -50,13 +118,10 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
             }
         });
 
-        const self = this;
-
         $('#widgetTree').droppable({
             accept: ".custom-tree-item",
             drop: function(event, ui) {
                 $(this).removeClass('track-drop-hover');
-
                 const assetName = ui.helper.data('assetName');
                 if (assetName && self._mainLayer) {
                     self._mainLayer.createInstanceFromLibrary(assetName);
@@ -106,10 +171,6 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
             }
         });
 
-        $('#actionTree').addClass('custom-tree-container');
-
-        this._jsonName = null;
-
         $('#widgetTree').on('move_node.jstree', function (e, data) {
             const movedNodeId = data.node.data.nodeId;
             const oldParentNodeId = data.old_parent === '#' ? null : data.instance.get_node(data.old_parent).data.nodeId;
@@ -118,90 +179,53 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
             const movedCocosNode = self._mainLayer.nodeMap[movedNodeId];
 
             if (!movedCocosNode) {
-                console.error("Moved Cocos2d-JS node not found in nodeMap:", movedNodeId);
                 return;
             }
 
-            // 노드의 현재 월드 위치를 저장합니다.
             const currentWorldPos = movedCocosNode.getParent().convertToWorldSpace(movedCocosNode.getPosition());
-            const currentAnchorPoint = movedCocosNode.getAnchorPoint(); // 앵커 포인트도 저장
 
-            // 이전 부모에서 제거합니다.
             if (movedCocosNode.getParent()) {
                 movedCocosNode.retain();
                 movedCocosNode.removeFromParent(false);
                 movedCocosNode.release();
             }
 
-            let oldParentCocosNodeInstance = null;
-            if (oldParentNodeId) {
-                oldParentCocosNodeInstance = self._mainLayer.nodeMap[oldParentNodeId];
-            }
-
             let newParentCocosNodeInstance = null;
             if (newParentNodeId) {
                 newParentCocosNodeInstance = self._mainLayer.nodeMap[newParentNodeId];
+            } else {
+                newParentCocosNodeInstance = self._mainLayer;
             }
 
-            // 새로운 부모에 추가합니다.
             if (newParentCocosNodeInstance) {
                 const newLocalPos = newParentCocosNodeInstance.convertToNodeSpace(currentWorldPos);
                 movedCocosNode.setPosition(newLocalPos);
 
                 newParentCocosNodeInstance.addChild(movedCocosNode);
-                console.log(`Moved Cocos2d-JS node ${movedCocosNode.getName()} from ${oldParentCocosNodeInstance ? oldParentCocosNodeInstance.getName() : 'root'} to ${newParentCocosNodeInstance.getName()} while maintaining world position.`);
 
-                // 새로운 부모의 모든 자식 노드들의 Z-order를 jstree 순서에 맞춰 재정렬합니다.
                 const tree = $('#widgetTree').jstree(true);
                 const childrenOfNewParent = tree.get_children_dom(data.parent);
+
+                const zOrderMap = new Map();
                 childrenOfNewParent.each((index, domElement) => {
                     const childJstreeId = $(domElement).attr('id');
                     const childJstreeNodeData = tree.get_node(childJstreeId).data;
-                    const childCocosNodeId = childJstreeNodeData.nodeId;
-                    const childCocosNode = self._mainLayer.nodeMap[childCocosNodeId];
-                    if (childCocosNode) {
-                        const newChildZ = index;
+                    if (childJstreeNodeData && childJstreeNodeData.nodeId) {
+                        zOrderMap.set(childJstreeNodeData.nodeId, index);
+                    }
+                });
+
+                newParentCocosNodeInstance.getChildren().forEach(childCocosNode => {
+                    if (childCocosNode instanceof cc.DrawNode) return;
+                    const childCocosNodeId = childCocosNode.__instanceId;
+                    if (zOrderMap.has(childCocosNodeId)) {
+                        const newChildZ = zOrderMap.get(childCocosNodeId);
                         if (childCocosNode.getLocalZOrder() !== newChildZ) {
                             childCocosNode.setLocalZOrder(newChildZ);
-                            console.log(`Updated Z-order for child node ${childCocosNode.getName()} to ${newChildZ} within new parent`);
                         }
                     }
                 });
-
-            } else { // 새로운 부모가 루트인 '#'인 경우 (MainLayer의 직속 자식이 됨)
-                // MainLayer의 로컬 좌표로 변환하여 위치를 설정합니다. MainLayer는 씬의 root이므로 worldPos 자체가 MainLayer의 로컬 좌표입니다.
-                movedCocosNode.setPosition(currentWorldPos);
-
-                self._mainLayer.addChild(movedCocosNode);
-                console.log(`Moved Cocos2d-JS node ${movedCocosNode.getName()} to root (MainLayer) while maintaining world position.`);
-
-                // MainLayer의 직속 자식들의 Z-order를 jstree 순서에 맞춰 재정렬합니다.
-                const tree = $('#widgetTree').jstree(true);
-                const topLevelJstreeNodes = tree.get_children_dom('#');
-                const newZOrderMap = new Map();
-
-                topLevelJstreeNodes.each((index, domElement) => {
-                    const jstreeNodeId = $(domElement).attr('id');
-                    const jstreeNodeData = tree.get_node(jstreeNodeId).data;
-                    const cocosNodeId = jstreeNodeData.nodeId;
-                    newZOrderMap.set(cocosNodeId, index);
-                });
-
-                for (const nodeKey in self._mainLayer.sceneNodes) {
-                    if (self._mainLayer.sceneNodes.hasOwnProperty(nodeKey)) {
-                        const sceneNode = self._mainLayer.sceneNodes[nodeKey]; // DraggableNode가 될 수 있음
-                        const sceneNodeInstanceId = sceneNode.__instanceId;
-                        if (newZOrderMap.has(sceneNodeInstanceId)) {
-                            const newZ = newZOrderMap.get(sceneNodeInstanceId);
-                            if (sceneNode.getLocalZOrder() !== newZ) {
-                                sceneNode.setLocalZOrder(newZ);
-                                console.log(`Updated Z-order for top-level node ${sceneNode.getName()} to ${newZ}`);
-                            }
-                        }
-                    }
-                }
             }
-            // 모든 변경 사항을 반영하기 위해 전체 Hierarchy 뷰를 갱신합니다.
             self._mainLayer.refreshHierarchyView();
         });
 
@@ -281,7 +305,6 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
                 var position = item.getPosition();
                 if ( item.getParent() instanceof  ccui.Layout  === false ){
                     var anchorPP = item.getParent()._renderCmd._anchorPointInPoints;
-                    console.log("lposx change" , anchorPP );
                     position.x -= anchorPP.x;
                     position.y -= anchorPP.y;
                 }
@@ -295,7 +318,6 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
                 var position = item.getPosition();
                 if ( item.getParent() instanceof  ccui.Layout  === false ){
                     var anchorPP = item.getParent()._renderCmd._anchorPointInPoints;
-                    console.log("lposx change" , anchorPP );
                     position.x -= anchorPP.x;
                     position.y -= anchorPP.y;
                 }
@@ -456,24 +478,22 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
         $("input[name=lPosY]").val(nodeObj.getPosition().y.toFixed(2));
         $('#LocalSize').html("(" + nodeObj.getContentSize().width.toFixed(2) + " , " +nodeObj.getContentSize().height.toFixed(2) + ")");
 
-        $("input[name=opacity]").val(nodeObj.getOpacity());
-        $('#opacityValue').html(nodeObj.getOpacity());
+        $("input[name=opacity]").val( opa);
+        $('#opacityValue').html( opa );
 
-        $('#anchorValue').html("("+ nodeObj.getAnchorPoint().x+" , "+nodeObj.getAnchorPoint().y+")");
+        $('#anchorValue').html("("+ ancX+" , "+ancY+")");
 
-        $('#zOrderValue').html(nodeObj.getLocalZOrder());
+        $('#zOrderValue').html(zOrder);
 
-        var rect = nodeObj.getBoundingBox();
-        var po =   nodeObj.getParent().convertToWorldSpace( cc.p(rect.x, rect.y));
-
-        if(rect.width < 5)
-            rect.width = 10;
-        if (rect.height < 5 )
-            rect.height = 10;
-
-        Gizmo_DrawTouchLayerByRect(
-            cc.rect(po.x, po.y, rect.width, rect.height)
-        );
+        var rectNode = cc.director.getRunningScene().getChildByTag(gizmoNodTag);
+        if(!rectNode) {
+            rectNode = new cc.DrawNode();
+            rectNode.setTag(gizmoNodTag);
+            cc.director.getRunningScene().addChild(rectNode, 999999, gizmoNodTag);
+        }
+        else{
+            rectNode.clear();
+        }
     },
 
     selectNodeMulti :function (nodeArr) {
