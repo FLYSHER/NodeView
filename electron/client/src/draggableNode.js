@@ -28,7 +28,6 @@ var DraggableNode = cc.Node.extend({
             event: cc.EventListener.MOUSE,
             onMouseMove: function(event) {
                 if (!self._draggable) {
-                    // 드래그 불가능할 때는 기즈모를 여기서 직접 그리지 않음
                     return;
                 }
 
@@ -40,28 +39,24 @@ var DraggableNode = cc.Node.extend({
                 if (event.getButton() !== cc.EventMouse.BUTTON_LEFT) {
                     isOver = cc.rectContainsPoint(worldRect, pos);
                     touchStart = false;
-
-                    // 마우스 오버 상태만으로 기즈모를 그리지 않음. MainLayer의 mousedown에서 선택 시 그림
                 } else if (event.getButton() === cc.EventMouse.BUTTON_LEFT && isOver) {
                     if (!touchStart) {
                         touchStart = true;
                         var centerPos = self.getPosition();
                         centerPointDiff = cc.p(pos.x - centerPos.x, pos.y - centerPos.y);
 
-                        // 드래그 시작 시 MainLayer에 이벤트 알림. MainLayer가 선택된 노드를 업데이트하고 기즈모를 그림
+                        // 드래그 시작 시 이벤트 알림 (기존 로직 유지)
                         cc.eventManager.dispatchCustomEvent('node_drag_started', { nodeId: self.__instanceId });
                     }
 
                     var nodePoint = self.getParent().convertToNodeSpace(cc.p(pos.x - centerPointDiff.x, pos.y - centerPointDiff.y));
                     event.getCurrentTarget().setPosition(nodePoint);
 
-                    // [핵심 수정]: 드래그 중에는 MainLayer에 'node_position_changed' 이벤트를 디스패치하여
-                    // MainLayer가 다시 _treeView.setNode()를 호출하고 그 안에서 기즈모를 그리도록 합니다.
+                    // [수정]: 드래그 중에도 'node_position_changed' 이벤트를 지속적으로 디스패치
                     cc.eventManager.dispatchCustomEvent('node_position_changed', { nodeId: self.__instanceId });
 
                 } else {
                     touchStart = false;
-                    // 드래그 종료 시 기즈모를 여기서 직접 지우지 않음. MainLayer의 mousedown에서 처리
                 }
 
                 if (!prevOver && isOver) {

@@ -1,4 +1,3 @@
-// uiScrollTreeViewCtrl.js
 var UIScrollTreeViewCtrl = cc.Node.extend({
     _scrolling:false,
     _lastPoint:null,

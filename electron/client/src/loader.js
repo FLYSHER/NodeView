@@ -1,4 +1,3 @@
-// loader.js
 /**
  * Created by flysherdev11 on 2017. 6. 20..
  * Modified by OBG on 2017.11.19
