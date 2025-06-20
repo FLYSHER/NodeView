@@ -86,16 +86,36 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
                     return true;
                 },
             },
-            "plugins": ["search", "dnd", "state"], // 'state' 플러그인 다시 추가
+            "plugins": ["search", "dnd", "state"], // "contextmenu" 추가
             "search": {
                 "case_sensitive": false,
                 "show_only_matches": true
             },
-            "state": { // 'state' 플러그인 설정
-                "key": "widgetTreeOpenState", // 상태 저장에 사용할 고유 키
-                "events": "open_node.jstree close_node.jstree", // 노드 열림/닫힘 이벤트에만 반응하여 상태 저장
-                "ttl": false // 세션 동안 유지되도록 ttl을 false로 설정하여 브라우저 닫기 전까지 유지
+            "state": {
+                "key": "widgetTreeOpenState",
+                "events": "open_node.jstree close_node.jstree",
+                "ttl": false
             }
+        });
+
+        $('#widgetTree').on('contextmenu.jstree', '.jstree-anchor', function(e) {
+            e.preventDefault();
+
+            const $anchor = $(this);
+            const nodeId = $anchor.closest('.jstree-node').attr('id');
+            const tree = $('#widgetTree').jstree(true);
+            const selectedNode = tree.get_node(nodeId);
+
+            // 삭제 가능 여부 확인 로직
+            let canDelete = false;
+            if (selectedNode?.data?.nodeId) {
+                const cocosNode = self._mainLayer.nodeMap[selectedNode.data.nodeId];
+                canDelete = (cocosNode instanceof DraggableNode) ||
+                    (cocosNode.getParent() instanceof DraggableNode);
+            }
+
+            // 기존 showContextMenu 함수 재사용하되, jsTree 전용 로직 추가
+            showJsTreeContextMenu(e, this, selectedNode, canDelete);
         });
 
         $('#widgetTree').droppable({

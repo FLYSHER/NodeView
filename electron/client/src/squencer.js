@@ -138,14 +138,13 @@ var Sequencer = (function() {
                 const clipHtml = `<div class="timeline-clip ${clipTypeClass}" data-clip-id="${clip.id}" title="${clip.animName} ${clip.duration.toFixed(1)}s">
                     <span class="clip-name">${clip.animName}</span>
                     <span class="clip-duration"></span>
-                    <div class="clip-delete-btn" title="삭제">&times;</div>
                 </div>`;
                 const $clip = $(clipHtml);
 
                 _updateClipDurationText($clip, clip);
-                $clip.find('.clip-delete-btn').on('mousedown', (e) => {
-                    e.stopPropagation();
-                    _deleteClip(nodeId, clip.id);
+
+                $clip.on('contextmenu', function(e) {
+                    showContextMenu(e, this, null);
                 });
 
                 $clip.css({
@@ -540,6 +539,7 @@ var Sequencer = (function() {
     }
 
     return {
+        _deleteClip: _deleteClip,
         initialize: function(layerInstance) {
             mainLayerInstance = layerInstance;
             const $tracksContainer = $('#timeline-tracks-container');

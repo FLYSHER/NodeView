@@ -18,6 +18,11 @@
 
     <script>if (window.module) module = window.module;</script>
 
+    <script>
+        // 브라우저 기본 컨텍스트 메뉴 비활성화
+        document.addEventListener('contextmenu', event => event.preventDefault());
+    </script>
+
     <meta charset="utf-8">
     <title>NodeView - Flysher</title>
     <link rel="icon" type="image/GIF" href="res/favicon.ico"/>
@@ -67,6 +72,13 @@
 </div>
 
 <div id="original-content-templates">
+
+    <div id="custom-context-menu" class="context-menu" style="display: none;">
+        <ul>
+            <li data-action="delete">삭제</li>
+        </ul>
+    </div>'
+
     <div id="fileContainer" class="fileContainer">
         <div id="tab-1" class="tab-fileContent current">
             <div class = "smallWidget">

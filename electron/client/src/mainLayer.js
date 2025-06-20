@@ -5,7 +5,7 @@ var TempTargetScale = null;
 var TempTargetRot = null;
 var TargetRunActionData = null;
 
-var RunAction = function (script) {
+/*var RunAction = function (script) {
     if(Target !== null) {
         if(TargetRunActionData !== null)
             Target.stopAction(TargetRunActionData);
@@ -32,7 +32,146 @@ var ResetAction = function () {
         TempTargetScale = null;
         TempTargetRot = null;
     }
-};
+};*/
+
+let activeContextMenu = null;
+let contextMenuTargetElement = null; // 현재 우클릭된 DOM 요소
+let contextMenuTargetNodeId = null;  // 현재 우클릭된 Cocos Node의 __instanceId (jstree/timeline 용)
+
+// jsTree 전용 컨텍스트 메뉴 함수
+function showJsTreeContextMenu(event, targetElement, selectedNode, canDelete) {
+    event.preventDefault();
+
+    // 이전에 열려있던 메뉴 닫기
+    if (activeContextMenu) {
+        activeContextMenu.hide();
+    }
+
+    const $menu = $('#custom-context-menu');
+    activeContextMenu = $menu;
+    contextMenuTargetElement = targetElement;
+    contextMenuTargetNodeId = selectedNode?.data?.nodeId;
+
+    // 삭제 메뉴 항목 활성화/비활성화
+    const $deleteItem = $menu.find('li[data-action="delete"]');
+    if (canDelete) {
+        $deleteItem.removeClass('disabled').css('pointer-events', 'auto');
+    } else {
+        $deleteItem.addClass('disabled').css('pointer-events', 'none');
+    }
+
+    // 메뉴 위치 설정 (기존 로직과 동일)
+    let x = event.pageX;
+    let y = event.pageY;
+
+    const menuWidth = $menu.outerWidth();
+    const menuHeight = $menu.outerHeight();
+    const windowWidth = $(window).width();
+    const windowHeight = $(window).height();
+
+    if (x + menuWidth > windowWidth) {
+        x = windowWidth - menuWidth - 10;
+    }
+    if (y + menuHeight > windowHeight) {
+        y = windowHeight - menuHeight - 10;
+    }
+
+    $menu.css({ left: x, top: y }).show();
+
+    // 메뉴 항목 클릭 이벤트 (jsTree 전용)
+    $menu.off('click.jstree').on('click.jstree', 'li[data-action="delete"]:not(.disabled)', function() {
+        if (contextMenuTargetNodeId && window.MainLayerInstance) {
+            window.MainLayerInstance.deleteItem(contextMenuTargetNodeId);
+        }
+        hideContextMenu();
+    });
+
+    // 외부 클릭 시 메뉴 숨기기
+    $(document).on('mousedown.contextMenu', function(e) {
+        if (!$(e.target).closest('.context-menu').length && activeContextMenu) {
+            hideContextMenu();
+        }
+    });
+}
+
+// 기존 showContextMenu 함수 수정 (jsTree 제외)
+function showContextMenu(event, targetElement, nodeId) {
+    // jsTree 노드인지 확인
+    if ($(targetElement).closest('#widgetTree').length) {
+        return; // jsTree 노드는 별도 처리
+    }
+
+    // 기존 로직 그대로...
+    event.preventDefault();
+
+    if (activeContextMenu) {
+        activeContextMenu.hide();
+    }
+
+    const $menu = $('#custom-context-menu');
+    activeContextMenu = $menu;
+    contextMenuTargetElement = targetElement;
+    contextMenuTargetNodeId = nodeId;
+
+    // 메뉴 위치 설정
+    let x = event.pageX;
+    let y = event.pageY;
+
+    const menuWidth = $menu.outerWidth();
+    const menuHeight = $menu.outerHeight();
+    const windowWidth = $(window).width();
+    const windowHeight = $(window).height();
+
+    if (x + menuWidth > windowWidth) {
+        x = windowWidth - menuWidth - 10;
+    }
+    if (y + menuHeight > windowHeight) {
+        y = windowHeight - menuHeight - 10;
+    }
+
+    $menu.css({ left: x, top: y }).show();
+
+    // Assets, Sequencer 등 다른 패널용 클릭 이벤트
+    $menu.off('click.other').on('click.other', 'li', function() {
+        const action = $(this).data('action');
+        if (action === 'delete') {
+            if (contextMenuTargetElement) {
+                if ($(contextMenuTargetElement).hasClass('custom-tree-item')) {
+                    // Assets 패널 아이템 삭제
+                    const assetName = $(contextMenuTargetElement).data('asset-name');
+                    const assetType = $(contextMenuTargetElement).data('asset-type');
+                    if (assetName && assetType && window.MainLayerInstance?.deleteAsset) {
+                        window.MainLayerInstance.deleteAsset(assetName, assetType);
+                    }
+                } else if ($(contextMenuTargetElement).hasClass('timeline-clip')) {
+                    // Sequencer 클립 삭제
+                    const clipId = $(contextMenuTargetElement).data('clip-id');
+                    const trackNodeId = $(contextMenuTargetElement).closest('.timeline-track').data('node-id');
+                    if (clipId && trackNodeId && Sequencer?._deleteClip) {
+                        Sequencer._deleteClip(trackNodeId, clipId);
+                    }
+                }
+            }
+        }
+        hideContextMenu();
+    });
+
+    $(document).on('mousedown.contextMenu', function(e) {
+        if (!$(e.target).closest('.context-menu').length && activeContextMenu) {
+            hideContextMenu();
+        }
+    });
+}
+
+function hideContextMenu() {
+    if (activeContextMenu) {
+        activeContextMenu.hide();
+        activeContextMenu = null;
+        contextMenuTargetElement = null;
+        contextMenuTargetNodeId = null;
+        $(document).off('mousedown.contextMenu'); // 이벤트 리스너 제거
+    }
+}
 
 var MainLayer = cc.Layer.extend({
     DESC_TAG: 99,
@@ -80,6 +219,17 @@ var MainLayer = cc.Layer.extend({
         NodeList = this._nodeList;
         Sequencer.initialize(this);
         return true;
+    },
+
+    deleteAsset: function(assetName, assetType) {
+        const assetKey = `${assetName}_${assetType}`;
+        if (this.assetLibrary.hasOwnProperty(assetKey)) {
+            delete this.assetLibrary[assetKey];
+            console.log(`[Asset] 에셋 '${assetName}' (타입: ${assetType})가 라이브러리에서 삭제되었습니다.`);
+            this.refreshAssetsPanel(); // Assets 패널 UI 갱신
+        } else {
+            console.warn(`[Asset] 에셋 '${assetName}' (타입: ${assetType})를 찾을 수 없어 삭제할 수 없습니다.`);
+        }
     },
 
     updateLayout: function() {
@@ -735,6 +885,7 @@ var ManiLayerScene = cc.Scene.extend({
 
         var layer = new MainLayer();
         this.addChild(layer, 1, "MainLayer");
+        window.MainLayerInstance = layer; // MainLayer 인스턴스를 전역 변수에 저장
 
         PanelManager.initialize();
 

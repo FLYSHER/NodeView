@@ -59,7 +59,13 @@ var UIItemList = cc.Node.extend({
             <span class="track-type-icon ${typeClass}">${iconText}</span>
             ${assetInfo.name} <span style="color:var(--font-secondary); font-size:0.8em;">(${assetInfo.type.toUpperCase()})</span>
         </div>
-    `);
+        `);
+
+        // 우클릭 이벤트 추가
+        $item.on('contextmenu', function(e) {
+            // Assets 항목은 Cocos 노드 ID가 없으므로 null 전달
+            showContextMenu(e, this, null);
+        });
 
         $item.draggable({
             appendTo: "body",
