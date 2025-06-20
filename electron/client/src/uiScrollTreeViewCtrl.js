@@ -56,62 +56,45 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
                     const targetParentId = (typeof parent === 'object' && parent !== null && parent.id) ? parent.id : parent;
 
                     if (operation === "move_node") {
-                        if (targetParentId === '#') {
-                            if (isMovingDraggableNode) {
-                                return true;
-                            }
-                        }
-
-                        let targetParentCocosNode = null;
-                        if (targetParentId === '#') {
-                            targetParentCocosNode = mainLayerInstance;
-                        } else {
-                            const parentJstreeNode = this.get_node(targetParentId);
-                            if (parentJstreeNode && parentJstreeNode.data && parentJstreeNode.data.nodeId) {
-                                targetParentCocosNode = mainLayerInstance.nodeMap[parentJstreeNode.data.nodeId];
-                            } else {
-                                return false;
-                            }
-                        }
-
-                        if (!targetParentCocosNode) {
-                            return false;
-                        }
-
-                        const isTargetParentMainLayer = (targetParentCocosNode === mainLayerInstance);
-                        const isTargetParentDraggableNode = (targetParentCocosNode instanceof DraggableNode);
-
                         if (isMovingDraggableNode) {
-                            if (isTargetParentDraggableNode || isTargetParentMainLayer) {
+                            let targetParentCocosNode = null;
+                            if (targetParentId === '#') {
+                                targetParentCocosNode = mainLayerInstance;
+                            } else {
+                                const parentJstreeNode = this.get_node(targetParentId);
+                                if (parentJstreeNode && parentJstreeNode.data && parentJstreeNode.data.nodeId) {
+                                    targetParentCocosNode = mainLayerInstance.nodeMap[parentJstreeNode.data.nodeId];
+                                }
+                            }
+                            if (targetParentCocosNode instanceof DraggableNode || targetParentCocosNode === mainLayerInstance) {
+                                return true;
+                            } else {
+                                return false;
+                            }
+                        } else {
+                            const oldParentJstreeNode = this.get_node(node.parent);
+                            const oldParentCocosNodeId = oldParentJstreeNode && oldParentJstreeNode.data ? oldParentJstreeNode.data.nodeId : null;
+                            const newParentCocosNodeId = targetParentId === '#' ? null : this.get_node(targetParentId).data.nodeId;
+
+                            if (oldParentCocosNodeId === newParentCocosNodeId) {
                                 return true;
                             } else {
                                 return false;
                             }
                         }
-
-                        if (isTargetParentDraggableNode) {
-                            const isChildOfDraggableNodeContent = (
-                                targetParentCocosNode.ui === movingCocosNode ||
-                                targetParentCocosNode.armature === movingCocosNode ||
-                                targetParentCocosNode.spine === movingCocosNode ||
-                                targetParentCocosNode.image === movingCocosNode // [수정]: 이미지 콘텐츠 노드 추가
-                            );
-
-                            if (isMovingDraggableNode || isChildOfDraggableNodeContent) {
-                                return true;
-                            } else {
-                                return false;
-                            }
-                        }
-                        return true;
                     }
                     return true;
                 },
             },
-            "plugins": ["search", "dnd"],
+            "plugins": ["search", "dnd", "state"], // 'state' 플러그인 다시 추가
             "search": {
                 "case_sensitive": false,
                 "show_only_matches": true
+            },
+            "state": { // 'state' 플러그인 설정
+                "key": "widgetTreeOpenState", // 상태 저장에 사용할 고유 키
+                "events": "open_node.jstree close_node.jstree", // 노드 열림/닫힘 이벤트에만 반응하여 상태 저장
+                "ttl": false // 세션 동안 유지되도록 ttl을 false로 설정하여 브라우저 닫기 전까지 유지
             }
         });
 
@@ -375,8 +358,13 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
         if (!node) {
             this._selectNode = [];
             this._masterNode = null;
-            $('#widgetTree').jstree(true).settings.core.data = [];
-            $('#widgetTree').jstree("refresh");
+
+            // ***** 수정 시작 *****
+            // jstree 데이터를 빈 배열로 설정하고 refresh하는 부분을 제거합니다.
+            // $('#widgetTree').jstree(true).settings.core.data = [];
+            // $('#widgetTree').jstree("refresh");
+            // ***** 수정 끝 *****
+
             $('#actionTree').empty();
             $('#localPos').html("( - , - )");
             $('#LocalSize').html("( - , - )");
@@ -394,6 +382,7 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
             if (uiOption) uiOption.style.visibility = 'hidden';
             if (spineOption) spineOption.style.visibility = 'hidden';
 
+            // 선택이 취소될 때 Gizmo를 제거합니다.
             if (typeof Gizmo_ClearDraw === 'function') {
                 Gizmo_ClearDraw();
             }

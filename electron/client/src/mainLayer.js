@@ -471,13 +471,27 @@ var MainLayer = cc.Layer.extend({
     },
 
     updateMenuWithNodeId: function(nodeId) {
+        // 이 함수는 jstree 노드 또는 MainLayer의 onMouseDown 이벤트에서 호출됩니다.
+        // 특정 노드를 선택하거나 (nodeId가 있을 때)
+        // 선택을 취소할 때 (nodeId가 null일 때) 사용됩니다.
+
         if (!nodeId) {
+            // 노드 선택 취소 로직
             Target = null;
-            this._treeView.setNode(null);
+            this._treeView.setNode(null); // 이 호출은 이제 jstree 데이터를 초기화하지 않습니다.
             this.setDraggableItem(null);
-            this.refreshHierarchyView();
+
+            // jstree의 선택도 명시적으로 해제합니다.
+            const tree = $('#widgetTree').jstree(true);
+            if (tree) {
+                tree.deselect_all(true); // true는 이벤트 발생을 억제합니다.
+            }
+
+            // 기즈모는 setNode(null) 내에서 이미 처리됩니다.
             return;
         }
+
+        // 특정 노드 선택 로직
         const node = this.nodeMap[nodeId];
         if (!node) {
             console.error("Node not found with ID:", nodeId);
@@ -500,14 +514,31 @@ var MainLayer = cc.Layer.extend({
 
         Target = selectedDraggableNode;
 
-        this._treeView.setNode(node);
+        this._treeView.setNode(node); // 이 호출은 노드 속성 패널을 업데이트하고 기즈모를 그립니다.
 
         if (selectedDraggableNode) {
             this.setDraggableItem(selectedDraggableNode.getName());
         } else {
             this.setDraggableItem(null);
         }
+
+        // jstree에서 해당 노드를 선택하고 부모 노드를 열어줍니다.
+        const tree = $('#widgetTree').jstree(true);
+        if (tree) {
+            // 먼저 모든 선택을 해제하여 단일 선택을 보장합니다.
+            // true는 changed.jstree 이벤트를 발생시키지 않아 무한 루프를 방지합니다.
+            tree.deselect_all(true);
+            const jstreeNode = tree.get_node(nodeId);
+            if (jstreeNode) {
+                // 선택된 노드를 선택합니다.
+                tree.select_node(jstreeNode, true);
+                // 선택된 노드의 부모 노드를 열어줍니다.
+                // false는 모든 자식 노드까지 재귀적으로 여는 것을 방지합니다.
+                tree.open_node(jstreeNode, null, false);
+            }
+        }
     },
+
 
     reOrderup : function (nodeName, orderPlus) {
         nodeName = this._itemList.getSelectedName();
@@ -750,9 +781,17 @@ var ManiLayerScene = cc.Scene.extend({
                 }
 
                 if (touchedDraggableNode) {
+                    // 노드를 클릭했을 때 해당 노드를 선택하고 메뉴를 업데이트
                     mainLayer.updateMenuWithNodeId(touchedDraggableNode.__instanceId);
                 } else {
+                    // 빈 곳을 클릭했을 때 현재 선택된 노드를 취소하고 기즈모 제거
                     mainLayer.updateMenuWithNodeId(null);
+                    // jstree의 선택을 명시적으로 해제합니다.
+                    // 이 부분은 updateMenuWithNodeId(null) 안에서 이미 처리되므로 여기서는 제거합니다.
+                    // const tree = $('#widgetTree').jstree(true);
+                    // if (tree) {
+                    //     tree.deselect_all(true);
+                    // }
                 }
             },
             swallowTouches: true
