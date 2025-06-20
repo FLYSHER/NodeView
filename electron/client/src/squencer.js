@@ -21,6 +21,14 @@ var Sequencer = (function() {
                             </svg>
                             `;
 
+    function _clearClipsForNode(nodeId) {
+        if (tracks.has(nodeId)) {
+            tracks.delete(nodeId);
+            _renderTimeline(); // 타임라인 다시 렌더링하여 변경사항 반영
+            console.log(`[Sequencer] 노드 ID ${nodeId}에 대한 모든 클립이 삭제되었습니다.`);
+        }
+    }
+
     function _updateClipDurationText($clipElement, clipData) {
         let durationText = clipData.duration.toFixed(1) + 's';
         const durationDiff = clipData.duration - clipData.originalDuration;
@@ -540,6 +548,7 @@ var Sequencer = (function() {
 
     return {
         _deleteClip: _deleteClip,
+        _clearClipsForNode: _clearClipsForNode,
         initialize: function(layerInstance) {
             mainLayerInstance = layerInstance;
             const $tracksContainer = $('#timeline-tracks-container');

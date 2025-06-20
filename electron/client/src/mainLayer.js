@@ -757,6 +757,11 @@ var MainLayer = cc.Layer.extend({
                 }
             }
 
+            // 시퀀서에 노드 삭제를 알림 (추가된 부분)
+            if (Sequencer && Sequencer._clearClipsForNode) { // Sequencer에 _clearClipsForNode 함수 추가 필요
+                Sequencer._clearClipsForNode(cocosNodeIdToDelete);
+            }
+
             // [수정]: jstree에서 직접 노드를 삭제하는 대신, refreshHierarchyView를 통해 전체 계층구조를 새로고침.
             this.refreshHierarchyView();
 
