@@ -928,7 +928,7 @@ var ManiLayerScene = cc.Scene.extend({
                 var children = mainLayer.getChildren().slice().reverse();
                 for(const child of children){
                     if(child instanceof DraggableNode && child.isVisible()){
-                        const worldBoundingBox = child.getStaticHitboxWorld();
+                        const worldBoundingBox = child.getBoundingBoxToWorld();
                         if(cc.rectContainsPoint(worldBoundingBox, event.getLocation())){
                             touchedDraggableNode = child;
                             break;
@@ -942,12 +942,6 @@ var ManiLayerScene = cc.Scene.extend({
                 } else {
                     // 빈 곳을 클릭했을 때 현재 선택된 노드를 취소하고 기즈모 제거
                     mainLayer.updateMenuWithNodeId(null);
-                    // jstree의 선택을 명시적으로 해제합니다.
-                    // 이 부분은 updateMenuWithNodeId(null) 안에서 이미 처리되므로 여기서는 제거합니다.
-                    // const tree = $('#widgetTree').jstree(true);
-                    // if (tree) {
-                    //     tree.deselect_all(true);
-                    // }
                 }
             },
             swallowTouches: true

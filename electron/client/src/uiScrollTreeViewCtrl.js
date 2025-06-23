@@ -563,11 +563,11 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
         if (selectNodeBtn) selectNodeBtn.disabled = false;
 
         if (typeof Gizmo_DrawTouchLayerByRect === 'function') {
-            var rect = draggableNodeInstance.getBoundingBox();
-            var po = draggableNodeInstance.getParent().convertToWorldSpace(cc.p(rect.x, rect.y));
-            if(rect.width < 5) rect.width = 10;
-            if (rect.height < 5 ) rect.height = 10;
-            Gizmo_DrawTouchLayerByRect(cc.rect(po.x, po.y, rect.width, rect.height));
+            var worldBoundingBox = draggableNodeInstance.getBoundingBoxToWorld();
+            if(worldBoundingBox.width < 5) worldBoundingBox.width = 10;
+            if (worldBoundingBox.height < 5 ) worldBoundingBox.height = 10;
+
+            Gizmo_DrawTouchLayerByRect(worldBoundingBox);
         }
 
         // --- Animations 패널 (actionTree)에 보낼 정보는 DraggableNode의 자식 컨텐츠 노드에서 가져옵니다. ---
