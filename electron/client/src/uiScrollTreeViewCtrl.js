@@ -1,8 +1,8 @@
 var UIScrollTreeViewCtrl = cc.Node.extend({
     _scrolling:false,
     _lastPoint:null,
-    TAG_CLIPPERNODE  : 1,
-    TAG_CONTENTNODE  : 2,
+    TAG_CLIPPERNODE : 1,
+    TAG_CONTENTNODE : 2,
     _selectNode : [],
     _masterNode : null,
     _treeWidgetObj : {},
@@ -86,7 +86,7 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
                     return true;
                 },
             },
-            "plugins": ["search", "dnd", "state"], // "contextmenu" 추가
+            "plugins": ["search", "dnd", "state"],
             "search": {
                 "case_sensitive": false,
                 "show_only_matches": true
@@ -106,7 +106,6 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
             const tree = $('#widgetTree').jstree(true);
             const selectedNode = tree.get_node(nodeId);
 
-            // 삭제 가능 여부 확인 로직
             let canDelete = false;
             if (selectedNode?.data?.nodeId) {
                 const cocosNode = self._mainLayer.nodeMap[selectedNode.data.nodeId];
@@ -114,7 +113,6 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
                     (cocosNode.getParent() instanceof DraggableNode);
             }
 
-            // 기존 showContextMenu 함수 재사용하되, jsTree 전용 로직 추가
             showJsTreeContextMenu(e, this, selectedNode, canDelete);
         });
 
@@ -123,9 +121,9 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
             drop: function(event, ui) {
                 $(this).removeClass('track-drop-hover');
                 const assetName = ui.helper.data('assetName');
-                const assetType = ui.helper.data('assetType'); // [수정]: assetType도 드롭 이벤트에서 받음
-                if (assetName && assetType && self._mainLayer) { // [수정]: assetType도 함께 전달
-                    self._mainLayer.createInstanceFromLibrary(assetName, assetType); // [수정]: assetType도 함께 전달
+                const assetType = ui.helper.data('assetType');
+                if (assetName && assetType && self._mainLayer) {
+                    self._mainLayer.createInstanceFromLibrary(assetName, assetType);
                 }
             },
             over: function(event, ui) {
@@ -283,7 +281,7 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
                 const selectedNode = selectedNodeJstreeId[0];
                 if (selectedNode.data && selectedNode.data.nodeId) {
                     const cocosNodeIdToDelete = selectedNode.data.nodeId;
-                    this._mainLayer.deleteItem(cocosNodeIdToDelete); // MainLayer의 deleteItem 호출
+                    this._mainLayer.deleteItem(cocosNodeIdToDelete);
                 } else {
                     console.warn("삭제할 수 있는 노드가 선택되지 않았습니다.");
                 }
@@ -294,6 +292,7 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
 
         $('#debugBone').click( function( sender ){
             this._selectNode.forEach( item => {
+                // UIScrollTreeViewCtrl.setNode에서 item은 DraggableNode이므로, item.armature로 접근
                 const targetArmature = item.armature || (item instanceof ccs.Armature ? item : null);
                 if( targetArmature && targetArmature.getDebugBonesEnabled ) {
                     if (targetArmature.getDebugBonesEnabled()) {
@@ -308,6 +307,7 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
 
         $('#debugSlot').click( function( sender ){
             this._selectNode.forEach( item => {
+                // UIScrollTreeViewCtrl.setNode에서 item은 DraggableNode이므로, item.spine으로 접근
                 const targetSpine = item.spine || (item instanceof sp.SkeletonAnimation ? item : null);
                 if( targetSpine && targetSpine.getDebugSlotsEnabled ) {
                     if (targetSpine.getDebugSlotsEnabled()) {
@@ -320,23 +320,12 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
             });
         }.bind(this));
 
-        // [수정]: opacity 슬라이더 이벤트를 'change'에서 'input'으로 변경
-        $("input[name=opacity]").off('change').on('input', function(){
-            this._selectNode.forEach( item => {
-                item.setOpacity(parseInt($("input[name=opacity]").val(), 10));
-                $('#opacityValue').html(item.getOpacity());
-                if (this._mainLayer && item.__instanceId) {
-                    this._mainLayer.updateMenuWithNodeId(item.__instanceId);
-                }
-            });
-        }.bind(this));
-
-        // [수정]: lPosX 입력 필드 이벤트를 'change'에서 'input'으로 변경
-        $("input[name=lPosX]").off('change').on('input', function(){
-            this._selectNode.forEach( item => {
-                const newPosX = parseFloat($("input[name=lPosX]").val());
-                if (!isNaN(newPosX)) {
-                    item.setPositionX(newPosX);
+        // Position X Input
+        document.getElementById('posX').addEventListener('input', function(e) {
+            this._selectNode.forEach(item => {
+                const val = parseFloat(e.target.value);
+                if (!isNaN(val) && item) {
+                    item.setPositionX(val);
                     if (this._mainLayer && item.__instanceId) {
                         this._mainLayer.updateMenuWithNodeId(item.__instanceId);
                     }
@@ -344,12 +333,12 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
             });
         }.bind(this));
 
-        // [수정]: lPosY 입력 필드 이벤트를 'change'에서 'input'으로 변경
-        $("input[name=lPosY]").off('change').on('input', function(){
-            this._selectNode.forEach( item => {
-                const newPosY = parseFloat($("input[name=lPosY]").val());
-                if (!isNaN(newPosY)) {
-                    item.setPositionY(newPosY);
+        // Position Y Input
+        document.getElementById('posY').addEventListener('input', function(e) {
+            this._selectNode.forEach(item => {
+                const val = parseFloat(e.target.value);
+                if (!isNaN(val) && item) {
+                    item.setPositionY(val);
                     if (this._mainLayer && item.__instanceId) {
                         this._mainLayer.updateMenuWithNodeId(item.__instanceId);
                     }
@@ -357,19 +346,145 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
             });
         }.bind(this));
 
-        // [추가]: WorldPos 입력 필드도 실시간 업데이트 (UI 갱신 목적)
-        $("input[name=wPosX]").off('change').on('input', function(){
-            if (this._selectNode.length > 0 && this._mainLayer) {
-                this._mainLayer.updateMenuWithNodeId(this._selectNode[0].__instanceId);
-            }
+        // Scale X Input
+        document.getElementById('scaleX').addEventListener('input', function(e) {
+            this._selectNode.forEach(item => {
+                const val = parseFloat(e.target.value);
+                if (!isNaN(val) && item) {
+                    item.setScaleX(val);
+                    if (this._mainLayer && item.__instanceId) {
+                        this._mainLayer.updateMenuWithNodeId(item.__instanceId);
+                    }
+                }
+            });
         }.bind(this));
 
-        // [추가]: WorldPos 입력 필드도 실시간 업데이트 (UI 갱신 목적)
-        $("input[name=wPosY]").off('change').on('input', function(){
-            if (this._selectNode.length > 0 && this._mainLayer) {
-                this._mainLayer.updateMenuWithNodeId(this._selectNode[0].__instanceId);
-            }
+        // Scale Y Input
+        document.getElementById('scaleY').addEventListener('input', function(e) {
+            this._selectNode.forEach(item => {
+                const val = parseFloat(e.target.value);
+                if (!isNaN(val) && item) {
+                    item.setScaleY(val);
+                    if (this._mainLayer && item.__instanceId) {
+                        this._mainLayer.updateMenuWithNodeId(item.__instanceId);
+                    }
+                }
+            });
         }.bind(this));
+
+        // Rotation Input
+        document.getElementById('rotation').addEventListener('input', function(e) {
+            this._selectNode.forEach(item => {
+                const val = parseFloat(e.target.value);
+                if (!isNaN(val) && item) {
+                    item.setRotation(val);
+                    if (this._mainLayer && item.__instanceId) {
+                        this._mainLayer.updateMenuWithNodeId(item.__instanceId);
+                    }
+                }
+            });
+        }.bind(this));
+
+        // Opacity Range Slider
+        document.getElementById('opacity').addEventListener('input', function(e) {
+            const val = parseInt(e.target.value, 10);
+            document.getElementById('opacityValue').textContent = val;
+            this._selectNode.forEach(item => {
+                if (item) {
+                    item.setOpacity(val);
+                    if (this._mainLayer && item.__instanceId) {
+                        this._mainLayer.updateMenuWithNodeId(item.__instanceId);
+                    }
+                }
+            });
+        }.bind(this));
+
+        // Visible Checkbox
+        document.getElementById('visible').addEventListener('change', function(e) {
+            this._selectNode.forEach(item => {
+                if (item) {
+                    item.setVisible(e.target.checked);
+                    if (this._mainLayer && item.__instanceId) {
+                        this._mainLayer.updateMenuWithNodeId(item.__instanceId);
+                    }
+                }
+            });
+        }.bind(this));
+
+        // Draggable Labels for Value Change
+        let isDraggingLabel = false;
+        let startMouseX = 0;
+        let startValue = 0;
+        let activeInputEl = null;
+        let sensitivity = 0.1;
+
+        const handleLabelMousedown = (e) => {
+            if (!this._selectNode[0] || e.button !== 0) return;
+
+            const targetLabel = e.currentTarget;
+            const targetInputId = targetLabel.dataset.target;
+            activeInputEl = document.getElementById(targetInputId);
+
+            if (!activeInputEl || activeInputEl.disabled) {
+                activeInputEl = null;
+                return;
+            }
+
+            e.preventDefault();
+            isDraggingLabel = true;
+            startMouseX = e.clientX;
+
+            startValue = parseFloat(activeInputEl.value);
+
+            if (activeInputEl.id.includes('scale')) {
+                sensitivity = 0.01;
+            } else if (activeInputEl.id === 'rotation') {
+                sensitivity = 0.2;
+            } else {
+                sensitivity = 0.5;
+            }
+
+            document.body.style.cursor = 'ew-resize';
+            $('#resize-overlay').show(); // 드래그 시작 시 오버레이 활성화
+        };
+
+        const handleLabelMousemove = (e) => {
+            if (!isDraggingLabel || !activeInputEl) return;
+
+            e.preventDefault();
+
+            const deltaX = e.clientX - startMouseX;
+            let newValue;
+
+            newValue = startValue + deltaX * sensitivity;
+            const step = parseFloat(activeInputEl.step) || 1;
+            newValue = Math.round(newValue / step) * step;
+            activeInputEl.value = newValue.toFixed(activeInputEl.step ? activeInputEl.step.split('.')[1]?.length || 0 : 2);
+            activeInputEl.dispatchEvent(new Event('input', { bubbles: true }));
+        };
+
+        const handleLabelMouseup = () => {
+            if (isDraggingLabel) {
+                isDraggingLabel = false;
+                activeInputEl = null;
+                document.body.style.cursor = 'default';
+                $('#resize-overlay').hide(); // 드래그 종료 시 오버레이 비활성화
+            }
+        };
+
+        document.addEventListener('mousemove', handleLabelMousemove);
+        document.addEventListener('mouseup', handleLabelMouseup);
+        document.addEventListener('touchmove', handleLabelMousemove);
+        document.addEventListener('touchend', handleLabelMouseup);
+
+        const draggableLabels = document.querySelectorAll('.draggable-label');
+        draggableLabels.forEach(label => {
+            // 이벤트 리스너가 중복해서 추가되지 않도록 기존 리스너 제거
+            label.removeEventListener('mousedown', handleLabelMousedown);
+            label.removeEventListener('touchstart', handleLabelMousedown);
+            label.addEventListener('mousedown', handleLabelMousedown);
+            label.addEventListener('touchstart', handleLabelMousedown);
+        });
     },
 
     setNode: function(node) {
@@ -377,21 +492,27 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
             this._selectNode = [];
             this._masterNode = null;
 
-            // ***** 수정 시작 *****
-            // jstree 데이터를 빈 배열로 설정하고 refresh하는 부분을 제거합니다.
-            // $('#widgetTree').jstree(true).settings.core.data = [];
-            // $('#widgetTree').jstree("refresh");
-            // ***** 수정 끝 *****
-
             $('#actionTree').empty();
-            $('#localPos').html("( - , - )");
-            $('#LocalSize').html("( - , - )");
-            $('#opacityValue').html("255");
-            $('#anchorValue').html("( - , - )");
-            $('#zOrderValue').html("-");
-            $("input[name=lPosX]").val("");
-            $("input[name=lPosY]").val("");
-            $("input[name=opacity]").val(255);
+            // Properties 패널의 필드들을 초기화하고 비활성화합니다.
+            // HTML 구조가 이전에 논의된 새 구조라고 가정합니다.
+            document.getElementById('nodeName').value = '';
+            document.getElementById('nodeName').disabled = true; // 읽기 전용 유지
+            document.getElementById('zOrderValue').textContent = '0'; // Z-Order 추가
+            document.getElementById('posX').value = '';
+            document.getElementById('posX').disabled = true;
+            document.getElementById('posY').value = '';
+            document.getElementById('posY').disabled = true;
+            document.getElementById('scaleX').value = '';
+            document.getElementById('scaleX').disabled = true;
+            document.getElementById('scaleY').value = '';
+            document.getElementById('scaleY').disabled = true;
+            document.getElementById('rotation').value = '';
+            document.getElementById('rotation').disabled = true;
+            document.getElementById('opacity').value = 255;
+            document.getElementById('opacity').disabled = true;
+            document.getElementById('opacityValue').textContent = '255';
+            document.getElementById('visible').checked = false;
+            document.getElementById('visible').disabled = true;
 
             var searchBox = document.getElementById("searchNode");
             var uiOption = document.getElementById("ui-option");
@@ -400,50 +521,85 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
             if (uiOption) uiOption.style.visibility = 'hidden';
             if (spineOption) spineOption.style.visibility = 'hidden';
 
-            // 선택이 취소될 때 Gizmo를 제거합니다.
             if (typeof Gizmo_ClearDraw === 'function') {
                 Gizmo_ClearDraw();
             }
             return;
         }
 
-        const targetNode = node.ui || node.armature || node.spine || node.image || node; // [수정]: image 속성 추가
-        this._selectNode = [targetNode];
+        // --- Properties 패널에 보낼 정보는 항상 DraggableNode 인스턴스에서 가져옵니다. ---
+        // `node`는 MainLayer에서 전달하는 DraggableNode 인스턴스입니다.
+        const draggableNodeInstance = node;
+        this._selectNode = [draggableNodeInstance];
 
-        $('#localPos').html("(" + targetNode.getPosition().x.toFixed(2) + " , " + targetNode.getPosition().y.toFixed(2) + ")");
-        $("input[name=lPosX]").val(targetNode.getPosition().x.toFixed(2));
-        $("input[name=lPosY]").val(targetNode.getPosition().y.toFixed(2));
-        $('#LocalSize').html("(" + targetNode.getContentSize().width.toFixed(2) + " , " + targetNode.getContentSize().height.toFixed(2) + ")");
-        $("input[name=opacity]").val(targetNode.getOpacity());
-        $('#opacityValue').html(targetNode.getOpacity());
-        $('#anchorValue').html("("+ targetNode.getAnchorPoint().x+" , "+targetNode.getAnchorPoint().y+")");
-        $('#zOrderValue').html(targetNode.getLocalZOrder());
+        document.getElementById('nodeName').value = draggableNodeInstance.getName() || "";
+        document.getElementById('nodeName').disabled = true; // 읽기 전용 유지
+
+        document.getElementById('zOrderValue').textContent = draggableNodeInstance.getLocalZOrder ? draggableNodeInstance.getLocalZOrder() : '0';
+
+        document.getElementById('posX').value = draggableNodeInstance.getPosition().x.toFixed(2);
+        document.getElementById('posY').value = draggableNodeInstance.getPosition().y.toFixed(2);
+        document.getElementById('posX').disabled = false;
+        document.getElementById('posY').disabled = false;
+
+        document.getElementById('scaleX').value = draggableNodeInstance.getScaleX ? draggableNodeInstance.getScaleX().toFixed(2) : '1.00';
+        document.getElementById('scaleY').value = draggableNodeInstance.getScaleY ? draggableNodeInstance.getScaleY().toFixed(2) : '1.00';
+        document.getElementById('scaleX').disabled = false;
+        document.getElementById('scaleY').disabled = false;
+
+        document.getElementById('rotation').value = draggableNodeInstance.getRotation ? draggableNodeInstance.getRotation().toFixed(2) : '0.00';
+        document.getElementById('rotation').disabled = false;
+
+        const currentOpacity = draggableNodeInstance.getOpacity ? draggableNodeInstance.getOpacity() : 255;
+        document.getElementById('opacity').value = currentOpacity;
+        document.getElementById('opacityValue').textContent = currentOpacity;
+        document.getElementById('opacity').disabled = false;
+
+        const isVisible = draggableNodeInstance.isVisible ? draggableNodeInstance.isVisible() : true;
+        document.getElementById('visible').checked = isVisible;
+        document.getElementById('visible').disabled = false;
+
+        const selectNodeBtn = document.getElementById('selectNodeBtn');
+        if (selectNodeBtn) selectNodeBtn.disabled = false;
 
         if (typeof Gizmo_DrawTouchLayerByRect === 'function') {
-            var rect = targetNode.getBoundingBox();
-            var po = targetNode.getParent().convertToWorldSpace(cc.p(rect.x, rect.y));
+            var rect = draggableNodeInstance.getBoundingBox();
+            var po = draggableNodeInstance.getParent().convertToWorldSpace(cc.p(rect.x, rect.y));
             if(rect.width < 5) rect.width = 10;
             if (rect.height < 5 ) rect.height = 10;
             Gizmo_DrawTouchLayerByRect(cc.rect(po.x, po.y, rect.width, rect.height));
         }
 
-        var unifiedAnimationList = [];
-        // [수정]: node.assetType을 사용하여 애니메이션 목록 구성. 이미지 노드는 제외
-        if (node.assetType === 'armature') {
-            var animNameArr = node.armature.getAnimation()._animationData.movementNames;
-            animNameArr.forEach(name => unifiedAnimationList.push({ name: name, type: 'armature' }));
-        } else if (node.assetType === 'spine') {
-            var animations = node.spine.getState().data.skeletonData.animations;
-            animations.forEach(anim => unifiedAnimationList.push({ name: anim.name, type: 'spine' }));
-        } else if (node.assetType === 'action') {
-            if (node.cocosAction) {
-                for (var key in node.cocosAction._animationInfos) {
-                    unifiedAnimationList.push({ name: key, type: 'action' });
+        // --- Animations 패널 (actionTree)에 보낼 정보는 DraggableNode의 자식 컨텐츠 노드에서 가져옵니다. ---
+        let unifiedAnimationList = [];
+        let contentNodeForAnimation = null;
+
+        // 원본 로직과 동일하게 자식 노드를 contentNodeForAnimation으로 사용합니다.
+        contentNodeForAnimation = draggableNodeInstance.ui || draggableNodeInstance.armature || draggableNodeInstance.spine || draggableNodeInstance.image;
+
+        if (contentNodeForAnimation) {
+            // `assetType`은 DraggableNode에 저장된 정보를 사용합니다.
+            if (draggableNodeInstance.assetType === 'armature') {
+                // `contentNodeForAnimation`이 `armature` 객체인지 확인하고 애니메이션 데이터를 가져옵니다.
+                if (contentNodeForAnimation.getAnimation && contentNodeForAnimation.getAnimation()._animationData && contentNodeForAnimation.getAnimation()._animationData.movementNames) {
+                    contentNodeForAnimation.getAnimation()._animationData.movementNames.forEach(name => unifiedAnimationList.push({ name: name, type: 'armature' }));
                 }
-            } else if (node.ui) {
-                const rawActionList = ccs.actionManager.getActionList(node.actionUrl);
-                if (rawActionList) {
-                    rawActionList.forEach(action => unifiedAnimationList.push({ name: action.getName(), type: 'action' }));
+            } else if (draggableNodeInstance.assetType === 'spine') {
+                // `contentNodeForAnimation`이 `spine` 객체인지 확인하고 애니메이션 데이터를 가져옵니다.
+                if (contentNodeForAnimation.getState && contentNodeForAnimation.getState().data && contentNodeForAnimation.getState().data.skeletonData && contentNodeForAnimation.getState().data.skeletonData.animations) {
+                    contentNodeForAnimation.getState().data.skeletonData.animations.forEach(anim => unifiedAnimationList.push({ name: anim.name, type: 'spine' }));
+                }
+            } else if (draggableNodeInstance.assetType === 'action' || draggableNodeInstance.assetType === 'ui') {
+                // UI Action의 경우 `draggableNodeInstance`의 `cocosAction` 또는 `actionUrl`을 사용합니다.
+                if (draggableNodeInstance.cocosAction && draggableNodeInstance.cocosAction._animationInfos) {
+                    for (let key in draggableNodeInstance.cocosAction._animationInfos) {
+                        unifiedAnimationList.push({ name: key, type: 'action' });
+                    }
+                } else if (draggableNodeInstance.actionUrl) {
+                    const rawActionList = ccs.actionManager.getActionList(draggableNodeInstance.actionUrl);
+                    if (rawActionList) {
+                        rawActionList.forEach(action => unifiedAnimationList.push({ name: action.getName(), type: 'action' }));
+                    }
                 }
             }
         }
@@ -458,12 +614,13 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
             if (item.type === 'spine') iconText = 'SP';
             if (item.type === 'action') iconText = 'UI';
 
+            // 이미지에서 발생한 텍스트 오류 수정: 템플릿 리터럴 `${}` 사용
             const $item = $(`
-                <div class="custom-tree-item" data-anim-name="${item.name}" data-anim-type="${item.type}">
-                    <span class="track-type-icon ${typeClass}">${iconText}</span>
-                    ${item.name}
-                </div>
-            `);
+            <div class="custom-tree-item" data-anim-name="${item.name}" data-anim-type="${item.type}">
+                <span class="track-type-icon ${typeClass}">${iconText}</span>
+                ${item.name}
+            </div>
+        `);
 
             $item.draggable({
                 appendTo: "body",
@@ -504,8 +661,8 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
         if (searchBox) searchBox.style.visibility = 'visible';
         if (uiOption) uiOption.style.visibility = 'visible';
 
-        // [수정]: node.assetType을 사용하여 spine-option 가시성 제어
-        if (node && node.assetType === 'spine') {
+        // spine-option 가시성 제어 (DraggableNode의 assetType 사용)
+        if (draggableNodeInstance && draggableNodeInstance.assetType === 'spine') {
             if (spineOption) spineOption.style.visibility = 'visible';
         } else {
             if (spineOption) spineOption.style.visibility ='hidden';
@@ -597,7 +754,6 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
     },
 
     updateTreeView: function(treeData) {
-        // jstree 데이터를 기반으로 _treeWidgetObj를 업데이트하는 로직 추가
         this._treeWidgetObj = {};
         const processNode = (nodeData) => {
             if (nodeData.data && nodeData.data.nodeId) {
@@ -605,7 +761,6 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
                 if (cocosNode && cocosNode.getName()) {
                     this._treeWidgetObj[nodeData.data.nodeId] = {
                         name: cocosNode.getName(),
-                        // copyString은 getTreeObjName에서 처리되므로 여기서는 name만 저장
                     };
                 }
             }

@@ -124,63 +124,45 @@
     </div>
 
     <div id="nodeInfoContainer" class="nodeInfoContainer">
-        <div id="tab-1" class="tab-propertiesContent current">
-            <table style="width:100%; background-color: #353535;" style="table-layout: fixed">
-                <tr>
-                    <td>
-                        <label class="styleLabel">LocalPos : </label>
-                    </td>
-                    <td>
-                        <label id = "localPos" class="styleLabel">(0, 0) </label>
-                        <div id = "localPosition"  style="display: none;">
-                            <input type="text" class="positionInput" id ="lPosX" name="lPosX" value="">
-                            <input type="text" class="positionInput" id ="lPosY" name="lPosY" value="">
-                        </div>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <label class="styleLabel">LocalSize : </label>
-                    </td>
-                    <td>
-                        <label id = "LocalSize" class="styleLabel">(0, 0) </label>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <label class="styleLabel">WorldPos : </label>
-                    </td>
-                    <td>
-                        <input type="text" class="positionInput" name="wPosX" value="">
-                        <input type="text" class="positionInput" name="wPosY" value="">
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <label class="styleLabel">Opacity : </label>
-                    </td>
-                    <td>
-                        <input type="range" id="opacity" name="opacity" value="10" min="0" max="255" style="width:50%">
-                        <label id = "opacityValue" class="styleLabel" style="font-size: 14px">0</label>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <label class="styleLabel">Scale : </label>
-                    </td>
-                    <td>
-                        <label id = "scaleValue" class="styleLabel">(0, 0) </label>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <label class="styleLabel">Anchor : </label>
-                    </td>
-                    <td>
-                        <label id = "anchorValue" class="styleLabel">(0, 0) </label>
-                    </td>
-                </tr>
-            </table>
+        <div class="inspector-top-area">
+            <i class="fas fa-cube inspector-name-icon"></i> <input type="text" id="nodeName" name="nodeName" class="positionInput inspector-name-input"> </div>
+
+        <div class="panel-content-inner">
+            <div class="section-header">Render</div>
+            <div class="input-group">
+                <label class="styleLabel" for="zOrderValue">Z-Order:</label> <span id="zOrderValue" class="value-label">0</span>
+            </div>
+            <div class="input-group">
+                <label class="styleLabel" for="opacity">Opacity:</label>
+                <input type="range" id="opacity" name="opacity" min="0" max="255" value="255">
+                <span id="opacityValue" class="value-label">255</span>
+            </div>
+            <div class="checkbox-group">
+                <label class="styleLabel" for="visible">Visible:</label>
+                <input type="checkbox" id="visible" name="visible" checked>
+            </div>
+
+            <div class="section-header">Transform</div>
+            <div class="input-group">
+                <label class="styleLabel draggable-label" data-target="posX">Position X:</label>
+                <input type="number" id="posX" name="posX" class="positionInput text-right">
+            </div>
+            <div class="input-group">
+                <label class="styleLabel draggable-label" data-target="posY">Position Y:</label>
+                <input type="number" id="posY" name="posY" class="positionInput text-right">
+            </div>
+            <div class="input-group">
+                <label class="styleLabel draggable-label" data-target="scaleX">Scale X:</label>
+                <input type="number" id="scaleX" name="scaleX" step="0.01" class="positionInput text-right">
+            </div>
+            <div class="input-group">
+                <label class="styleLabel draggable-label" data-target="scaleY">Scale Y:</label>
+                <input type="number" id="scaleY" name="scaleY" step="0.01" class="positionInput text-right">
+            </div>
+            <div class="input-group">
+                <label class="styleLabel draggable-label" data-target="rotation">Rotation:</label>
+                <input type="number" id="rotation" name="rotation" step="0.1" class="positionInput text-right">
+            </div>
         </div>
     </div>
 
