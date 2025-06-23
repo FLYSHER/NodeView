@@ -275,6 +275,23 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
             }
         }.bind(this));
 
+        $('#deleteNodeBtn').click(function() {
+            const tree = $('#widgetTree').jstree(true);
+            const selectedNodeJstreeId = tree.get_selected(true);
+
+            if (selectedNodeJstreeId && selectedNodeJstreeId.length > 0) {
+                const selectedNode = selectedNodeJstreeId[0];
+                if (selectedNode.data && selectedNode.data.nodeId) {
+                    const cocosNodeIdToDelete = selectedNode.data.nodeId;
+                    this._mainLayer.deleteItem(cocosNodeIdToDelete); // MainLayer의 deleteItem 호출
+                } else {
+                    console.warn("삭제할 수 있는 노드가 선택되지 않았습니다.");
+                }
+            } else {
+                console.warn("계층구조 패널에서 삭제할 노드를 선택해주세요.");
+            }
+        }.bind(this));
+
         $('#debugBone').click( function( sender ){
             this._selectNode.forEach( item => {
                 const targetArmature = item.armature || (item instanceof ccs.Armature ? item : null);
