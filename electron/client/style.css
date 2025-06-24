@@ -744,7 +744,7 @@ ul.tabs li.current {
     margin-right: 0;
 }
 .jstree-anchor.type-armature::before,
-.jstree-anchor.type-action::before,
+.jstree-anchor.type-ui::before,
 .jstree-anchor.type-spine::before,
 .jstree-anchor.type-image::before {
     width: 28px;
@@ -763,7 +763,7 @@ ul.tabs li.current {
     content: 'AR';
     background-color: #8e44ad;
 }
-.jstree-anchor.type-action::before {
+.jstree-anchor.type-ui::before {
     content: 'UI';
     background-color: #3498db;
 }
@@ -851,7 +851,7 @@ ul.tabs li.current {
     color: white;
 }
 
-.jstree-anchor.type-action::before {
+.jstree-anchor.type-ui::before {
     background-color: #3498db;
     color: white;
 }
@@ -901,7 +901,7 @@ ul.tabs li.current {
 
 .jstree-default .jstree-anchor.type-armature-content,
 .jstree-default .jstree-anchor.type-spine-content,
-.jstree-default .jstree-anchor.type-action-content,
+.jstree-default .jstree-anchor.type-ui-content,
 .jstree-default .jstree-anchor.type-image-content {
     color: #e0e0e0;
     font-style: italic;

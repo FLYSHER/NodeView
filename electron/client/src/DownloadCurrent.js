@@ -108,16 +108,16 @@ function changePosition( obj, name, position){
     return false;
 }
 
-function toggleJSONUI( isJson){
-    if ( isJson ){
-        document.getElementById( "localPos" ).style.display = "none";
-        document.getElementById( "localPosition" ).style.display = "block";
-        document.getElementById( "DownloadBtn" ).style.visibility = 'visible';
+var toggleJSONUI = function (json) {
+    // "DownloadBtn" 요소를 찾고, 존재할 경우에만 style 속성에 접근합니다.
+    const downloadBtn = document.getElementById("DownloadBtn"); // 추가
+    if (downloadBtn) { // 추가
+        if (json) {
+            downloadBtn.style.visibility = 'visible'; // 수정
+        } else {
+            downloadBtn.style.visibility = 'hidden'; // 수정
+        }
+    } else {
+        console.warn("[DownloadCurrent.js] 'DownloadBtn' 요소를 찾을 수 없습니다. UI 상태를 업데이트할 수 없습니다."); // 추가: 디버그를 위한 경고
     }
-    else {
-        document.getElementById( "localPos" ).style.display = "block";
-        document.getElementById( "localPosition" ).style.display = "none";
-        document.getElementById( "DownloadBtn" ).style.visibility = 'hidden';
-    }
-
-}
+};

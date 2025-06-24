@@ -14,20 +14,18 @@ var UIItemList = cc.Node.extend({
 
         this.itemCallbacks = {};
 
+        console.log("[DEBUG - UIItemList Ctor] UIItemList 초기화 완료."); // 추가
         return true;
     },
 
     addAsset: function (assetInfo) {
         const $container = $('#fileNameTree');
 
-        // [수정]: assetInfo.name과 assetInfo.type을 모두 사용하여 unique ID를 생성.
-        // 이 unique ID는 Assets 패널의 DOM 요소 ID로 사용될 수 있습니다.
         const itemDomId = `${assetInfo.name}-${assetInfo.type}`;
 
-        // [수정]: 이미 해당 name과 type을 가진 아이템이 DOM에 있는지 확인.
-        // refreshAssetsPanel에서 empty() 후 addAsset을 호출하므로, 이 중복 체크는 사실상 필요 없지만,
-        // 만약 refreshAssetsPanel이 아닌 개별 addAsset 호출이 있다면 필요할 수 있습니다.
-        if ($container.find(`[data-asset-name="${assetInfo.name}"][data-asset-type="${assetInfo.type}"]`).length > 0) {
+        const selector = '[data-asset-name="' + assetInfo.name + '"][data-asset-type="' + assetInfo.type + '"]';
+        if ($container.find(selector).length > 0) {
+            console.log(`[DEBUG - UIItemList] 에셋 '${assetInfo.name}' (타입: ${assetInfo.type})는 이미 Assets 패널에 존재합니다. 건너뜀.`);
             return;
         }
 
@@ -53,7 +51,6 @@ var UIItemList = cc.Node.extend({
                 break;
         }
 
-        // [수정]: data-asset-type 속성 추가
         const $item = $(`
         <div class="custom-tree-item" data-asset-name="${assetInfo.name}" data-asset-type="${assetInfo.type}" id="${itemDomId}">
             <span class="track-type-icon ${typeClass}">${iconText}</span>
@@ -62,10 +59,18 @@ var UIItemList = cc.Node.extend({
         `);
 
         // 우클릭 이벤트 추가
-        $item.on('contextmenu', function(e) {
-            // Assets 항목은 Cocos 노드 ID가 없으므로 null 전달
-            showContextMenu(e, this, null);
+        console.log(`[DEBUG - UIItemList] 에셋 '${assetInfo.name}' (타입: ${assetInfo.type})에 컨텍스트 메뉴 리스너 바인딩 시도.`);
+        $item.on('contextmenu', (e) => { // 화살표 함수 사용하여 'this' 컨텍스트 유지
+            console.log(`[DEBUG - UIItemList - ContextMenu] Assets 패널 항목 우클릭 이벤트 발생: ${$(e.currentTarget).data('asset-name')} (${$(e.currentTarget).data('asset-type')})`); // e.currentTarget으로 변경
+            // _mainLayer._contextMenuManager가 유효한지 여기서 확인합니다.
+            if (this._mainLayer && this._mainLayer._contextMenuManager) {
+                console.log("[DEBUG - UIItemList - ContextMenu] _mainLayer._contextMenuManager.showOtherContextMenu 호출 시도."); // 추가
+                this._mainLayer._contextMenuManager.showOtherContextMenu(e, e.currentTarget, null);
+            } else {
+                console.error("[ERROR - UIItemList - ContextMenu] _mainLayer 또는 _mainLayer._contextMenuManager가 유효하지 않습니다!"); // 추가
+            }
         });
+
 
         $item.draggable({
             appendTo: "body",
@@ -95,5 +100,6 @@ var UIItemList = cc.Node.extend({
         });
 
         $container.append($item);
+        console.log(`[DEBUG - UIItemList] 에셋 '${assetInfo.name}' (타입: ${assetInfo.type}) Assets 패널에 추가 완료.`);
     }
 });

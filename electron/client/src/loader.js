@@ -33,8 +33,8 @@ Loader.init = function() {
         path = path || "";
         if (item.isFile) {
             item.file(function( file ) {
-                // 폴더 내 파일은 Asset 패널에 추가하지 않음 (false)
-                Loader.readFile( file ); // addToAssetPanel 인자를 생략하여 기본값 false 사용
+                // 폴더 내 파일은 Asset 패널에 추가하지 않음 (addToAssetPanel 기본값 false 사용)
+                Loader.readFile( file );
             });
         }
         else if (item.isDirectory) {
@@ -63,43 +63,95 @@ Loader.init = function() {
         evt.stopPropagation();
         evt.preventDefault();
 
-        var items = event.dataTransfer.items;
-        var handledByItems = false;
+        const droppedFiles = []; // 드롭된 파일들을 임시로 저장할 리스트
+        const items = evt.dataTransfer.items;
+        let pendingFileReads = 0; // 비동기 파일 읽기 작업 수 추적 (웹킷 파일 시스템 엔트리용)
 
+        // Webkit-specific DataTransferItem.webkitGetAsEntry() for folder drag
         if (items && items.length > 0) {
-            for (var i=0; i<items.length; i++) {
-                var item = items[i].webkitGetAsEntry();
+            for (let i = 0; i < items.length; i++) {
+                const item = items[i].webkitGetAsEntry();
                 if (item) {
                     if (item.isFile) {
-                        var fileNameExt = item.name.toLowerCase();
-                        // [수정]: 직접 드롭된 파일이 PNG일 때만 addToAssetPanel을 true로 설정
-                        var shouldAddToAssetPanel = fileNameExt.endsWith('.png');
-
+                        pendingFileReads++; // 파일 읽기 시작 카운트
                         item.file(function(file) {
-                            Loader.readFile(file, null, shouldAddToAssetPanel);
+                            droppedFiles.push(file);
+                            pendingFileReads--; // 파일 읽기 완료 카운트
+                            if (pendingFileReads === 0) {
+                                processDroppedFiles(droppedFiles); // 모든 파일 읽기가 완료되면 처리 시작
+                            }
                         });
-                        handledByItems = true;
                     } else if (item.isDirectory) {
+                        // 폴더는 기존 로직대로 즉시 처리 (여기서 파일 순서 제어는 어렵고 복잡합니다)
                         traverseFileTree(item);
-                        handledByItems = true;
                     }
                 }
             }
         }
-
-        if (!handledByItems && event.dataTransfer.files && event.dataTransfer.files.length > 0) {
-            var files = event.dataTransfer.files;
-            for (var i = 0; i < files.length; i++) {
-                var fileNameExt = files[i].name.toLowerCase();
-                // [수정]: 직접 드롭된 파일이 PNG일 때만 addToAssetPanel을 true로 설정
-                var shouldAddToAssetPanel = fileNameExt.endsWith('.png');
-
-                Loader.readFile(files[i], null, shouldAddToAssetPanel);
+            // Fallback for non-webkit browsers or when items are not handled
+        // This path directly gets File objects, no need for pendingFileReads
+        else if (evt.dataTransfer.files && evt.dataTransfer.files.length > 0) {
+            const files = evt.dataTransfer.files;
+            for (let i = 0; i < files.length; i++) {
+                droppedFiles.push(files[i]);
             }
+            // File 객체는 즉시 사용 가능하므로, 바로 처리 함수 호출
+            processDroppedFiles(droppedFiles);
         }
     };
     canvas.addEventListener("drop",this.onDropHandler, false);
 };
+
+// 드롭된 파일들을 우선순위에 따라 처리하는 새 함수 (주요 수정)
+function processDroppedFiles(files) {
+    // 1. 파일들을 우선순위에 따라 정렬합니다.
+    const sortedFiles = files.sort((a, b) => {
+        const extA = cc.path.extname(a.name).toLowerCase();
+        const extB = cc.path.extname(b.name).toLowerCase();
+
+        // **수정된 우선순위 정의 (숫자가 낮을수록 우선순위 높음)**
+        // 이미지/아틀라스 파일이 먼저 로드되고, 그 다음 정의 파일이 로드됩니다.
+        const getPriority = (ext) => {
+            if (ext === ".png") return 1; // 이미지 파일 최우선
+            if (ext === ".atlas" || ext === ".plist" || ext === ".fnt") return 2; // 데이터/맵 파일 다음
+            if (ext === ".json" || ext === ".exportjson") return 3; // 정의 파일 마지막
+            return 99; // 기타 파일
+        };
+
+        return getPriority(extA) - getPriority(extB);
+    });
+
+    // 2. 정렬된 파일을 순차적으로 로드합니다.
+    // 각 파일 로딩이 완료된 후 다음 파일을 로드하도록 Promise를 사용하면 안정적입니다.
+    let promiseChain = Promise.resolve();
+    sortedFiles.forEach(file => {
+        promiseChain = promiseChain.then(() => {
+            return new Promise(resolve => {
+                const fileNameExt = file.name.toLowerCase();
+
+                // PNG 파일인 경우에만 Assets 패널에 추가할지 여부를 결정합니다.
+                // Spine의 PNG (예: xxx.atlas.png)는 일반적으로 Assets 패널에 직접 추가하지 않습니다.
+                const shouldAddToAssetPanel = fileNameExt.endsWith('.png') && !fileNameExt.includes('.atlas.png') && !fileNameExt.includes('.plist.png'); // 예를 들어, spine.atlas.png, ui.plist.png 같은 이름은 제외
+
+                Loader.readFile(file, () => {
+                    resolve(); // readFile 내부의 cb가 호출되면 Promise를 resolve
+                }, shouldAddToAssetPanel);
+            });
+        });
+    });
+
+    promiseChain.then(() => {
+        console.log("[DEBUG - Loader] 모든 드롭된 파일 로딩 및 처리 완료.");
+        // 모든 파일이 로드된 후 필요한 추가 작업 (예: 씬 새로고침 등)은 이곳에서 호출할 수 있습니다.
+        // 현재 MainLayer 인스턴스는 외부에서 접근 가능하다고 가정합니다.
+        // if (window.MainLayerInstance) {
+        //     window.MainLayerInstance.refreshAssetsPanel(); // 모든 파일 로드 후 Assets 패널 전체 새로고침 (필요 시)
+        // }
+    }).catch(error => {
+        console.error("[DEBUG - Loader] 파일 로딩 중 오류 발생:", error);
+    });
+}
+
 
 Loader.reset = function() {
     this.armatureIDs = {};
@@ -110,7 +162,7 @@ Loader.reset = function() {
     };
 };
 
-Loader.readFile = function( file , cb, addToAssetPanel = false) {
+Loader.readFile = function( file , cb, addToAssetPanel = false) { // addToAssetPanel 기본값 유지
     var self = this;
     var i, reader, ext;
 
@@ -141,18 +193,13 @@ Loader.readFile = function( file , cb, addToAssetPanel = false) {
             var fileContents = e.target.result;
             var ext = cc.path.extname(f.name).toLowerCase();
 
-            // [핵심 수정]: PNG 파일인 경우, addToAssetPanel을 항상 명시적으로 전달
-            // 이렇게 함으로써, Loader.readSpineResoueces에서 Loader.readFile을 호출할 때
-            // addToAssetPanel이 false로 전달되어 Spine PNG가 Image 에셋으로 등록되는 것을 방지합니다.
-            if (ext === ".png") {
-                self._processFileData(url, fileContents, ext, cb, addToAssetPanel);
-            }
-            else {
-                // 다른 파일 타입은 기존 로직 유지 (addToAssetPanel은 드롭 이벤트를 통해 전달된 값 사용)
-                self._processFileData(url, fileContents, ext, cb, addToAssetPanel);
-            }
+            // _processFileData 호출 시 addToAssetPanel 인자를 명시적으로 전달
+            // 이를 통해 _processFileData 내부에서 PNG가 Assets 패널에 추가될지 여부를 정확히 제어할 수 있습니다.
+            self._processFileData(url, fileContents, ext, cb, addToAssetPanel);
 
             if ( ext === ".json" ){
+                // g_fileName과 g_fileContext는 DownloadCurrent.js에서 사용될 수 있습니다.
+                // toggleJSONUI는 DownloadCurrent.js에 정의되어 있으므로 그대로 둡니다.
                 toggleJSONUI( true );
             } else if ( ext === ".exportjson" ){
                 toggleJSONUI( false );
@@ -166,7 +213,7 @@ Loader.readFile = function( file , cb, addToAssetPanel = false) {
     } )( file );
 };
 
-Loader._processFileData = function( url, fileContents, ext, cb, addToAssetPanel) {
+Loader._processFileData = function( url, fileContents, ext, cb, addToAssetPanel) { // addToAssetPanel 인자 추가
     var self = this,
         armatureDataArr, i,dic;
 
@@ -184,9 +231,7 @@ Loader._processFileData = function( url, fileContents, ext, cb, addToAssetPanel)
             this.checkFiles( fileName, 'plist' );
             break;
         case ".atlas":
-            // [확인/수정]: cc.loader.cache[ url ] 에 파일 내용이 제대로 저장되는지 확인.
-            // url은 파일의 원래 이름 (예: "mySpine.atlas")
-            cc.loader.cache[ url ] = fileContents;
+            cc.loader.cache[ url ] = fileContents; // .atlas 파일 내용 캐시
             this.atlasFiles[ fileName ] = fileContents;
             this.atlasList.push( fileName );
             console.log(`[Loader] Cached .atlas: ${url}`); // 디버그 로그 추가
@@ -196,14 +241,14 @@ Loader._processFileData = function( url, fileContents, ext, cb, addToAssetPanel)
                 fileContents,
                 {isCrossOrigin: false},
                 function (err, img) {
-                    var tex2d = new cc.Texture2D(); // [수정]: 오타 수정: cc.Texture2d -> cc.Texture2D
+                    var tex2d = new cc.Texture2D(); // cc.Texture2d -> cc.Texture2D 오타 수정
                     tex2d.initWithElement(img);
                     tex2d.handleLoadedTexture();
                     self.textures[ fileName ] = tex2d;
                     if( self.textureList.indexOf( fileName ) < 0 )
                         self.textureList.push( fileName );
 
-                    // [수정]: PNG 캐싱 방식. 두 가지 키로 캐시 유지.
+                    // PNG 캐싱 방식. 두 가지 키로 캐시 유지.
                     // Spine 런타임이 어떤 키를 사용할지 모르므로, 둘 다 제공하여 호환성 최대화.
                     cc.loader.cache[url] = tex2d; // filename.png 형태로 캐시
                     if (!cc.loader.cache['image/' + url]) { // image/filename.png 형태로도 캐시 (fnt/UI 호환성)
@@ -211,33 +256,33 @@ Loader._processFileData = function( url, fileContents, ext, cb, addToAssetPanel)
                     }
 
                     self.checkFiles( fileName, 'png' );
-                    // [수정]: addToAssetPanel이 true일 때만 'loadImage' 이벤트를 디스패치합니다.
+                    // addToAssetPanel이 true일 때만 'loadImage' 이벤트를 디스패치합니다.
                     if (addToAssetPanel) {
                         console.log(`[Loader] Dispatched 'loadImage' for: ${fileName}`);
                         cc.eventManager.dispatchCustomEvent('loadImage', fileName);
                     } else {
-                        // Spine의 PNG는 이 경로를 타서 Assets에 추가되지 않아야 합니다. (이전 구현과 동일)
+                        // Spine/UI/Armature의 연관 PNG는 이 경로를 타서 Assets에 추가되지 않아야 합니다.
                         console.log(`[Loader] Not adding ${fileName}.png to Assets (addToAssetPanel is false).`);
                     }
-                    cb && cb();
+                    cb && cb(); // 콜백 호출
                 }
             );
-            break;
+            return; // PNG는 비동기 로딩이므로 여기서 함수 종료를 위해 return
         case ".json":
             dic = JSON.parse(fileContents);
 
             if(dic["skeleton"] && dic["skeleton"]["spine"]) {
-                // [확인/수정]: cc.loader.cache[ url ] 에 JSON 내용이 제대로 저장되는지 확인.
-                // url은 파일의 원래 이름 (예: "mySpine.json")
-                cc.loader.cache[ url ] = fileContents;
+                // Spine JSON
+                cc.loader.cache[ url ] = fileContents; // JSON 내용 캐시
                 this.spineData[ fileName ] = fileContents;
                 this.spineList.push( fileName );
-                this.readSpineResoueces( fileName );
-                this.uiTextures[ fileName ] = fileName + ".atlas"; // uiTextures는 Spine에서는 사용되지 않을 수 있음
+                this.readSpineResoueces( fileName ); // Spine 관련 리소스 읽기
+                // this.uiTextures[ fileName ] = fileName + ".atlas"; // uiTextures는 Spine에서 사용되지 않으므로 삭제 또는 주석 처리
                 this.checkFiles( fileName, 'spine' );
                 console.log(`[Loader] Cached .json (Spine): ${url}`); // 디버그 로그 추가
             }
             else {
+                // CocosStudio JSON (프로젝트 파일)
                 this.cocosStudioURL [ fileName ] = url;
                 cc.loader.cache[url] = dic;
                 if(dic["Content"] && dic["Content"]["Content"] && dic["Content"]["Content"]["UsedResources"]){
@@ -257,7 +302,9 @@ Loader._processFileData = function( url, fileContents, ext, cb, addToAssetPanel)
                             pngList.push(resArray[n]);
                         }
                     }
+                    // CocosStudio 리소스 로딩은 loadFnt를 통해 순차적으로 진행됩니다.
                     this.loadFnt( fntList, function (){
+                        // readResoueces는 다시 addToAssetPanel=false로 호출되므로 문제가 없습니다.
                         this.readResoueces(plistList, pngList );
                         this.uiTextures[ fileName ] = plistList;
                         this.checkFiles( fileName, 'cocosStudio' );
@@ -269,17 +316,18 @@ Loader._processFileData = function( url, fileContents, ext, cb, addToAssetPanel)
         case ".exportjson":
             dic = JSON.parse(fileContents);
             if( dic[ "widgetTree" ] ) {
-                // UI
+                // UI Project File
                 cc.loader.cache[url] = dic;
                 this.uiURL[ fileName ] = url;
 
                 var loadFntFinishCallback = function(){
+                    // readResoueces는 다시 addToAssetPanel=false로 호출되므로 문제가 없습니다.
                     this.readResoueces(dic['textures'], dic['texturesPng'] );
                     this.uiTextures[ fileName ] = dic[ "textures" ];
                     this.checkFiles( fileName, 'ui' );
                 }.bind(this);
 
-
+                // FNT 리소스 로딩 (UI 프로젝트 내 BMFont)
                 var fntList = [];
                 function findChild( obj ){
                     var children = obj['children'];
@@ -299,11 +347,13 @@ Loader._processFileData = function( url, fileContents, ext, cb, addToAssetPanel)
                     var fntFileName = fntFile.split('/');
                     var item =  ResourceMapData[ fntFileName[ fntFileName.length - 1 ]];
                     item.file(function( file ) {
+                        // readFile 호출 시 addToAssetPanel=false로 전달 (FNT 파일의 경우)
                         Loader.readFile( file , function(){
                             var newConf = cc.loader.getRes(fntFile);
                             var pngName = newConf.atlasName.split('/');
                             var pngItem = ResourceMapData[ pngName[ pngName.length - 1 ]];
                             pngItem.file( function( pngfile ) {
+                                // readFile 호출 시 addToAssetPanel=false로 전달 (FNT에 연결된 PNG)
                                 Loader.readFile( pngfile , function(){
                                     loadCount++;
                                     if( loadCount < fntList.length)
@@ -316,16 +366,15 @@ Loader._processFileData = function( url, fileContents, ext, cb, addToAssetPanel)
                     });
                 }
 
-
                 if( loadCount < fntList.length)
                     loadFnt( fntList[loadCount]);
                 else
                     loadFntFinishCallback();
 
-
             } else if( dic[ ccs.CONST_ARMATURE_DATA ] ) {
-                // Armature
+                // Armature Project File
                 this.armatureData[ fileName ] = dic;
+                // readResoueces는 다시 addToAssetPanel=false로 호출되므로 문제가 없습니다.
                 this.readResoueces(dic['config_png_path'], dic['config_file_path'] );
 
 
@@ -346,27 +395,26 @@ Loader._processFileData = function( url, fileContents, ext, cb, addToAssetPanel)
             }
             break;
     }
-    cb && cb();
+    // PNG는 비동기이므로 이미 위에서 return 되었고, 다른 타입은 cb를 여기서 호출합니다.
+    if (ext !== ".png") {
+        cb && cb();
+    }
 };
 
 Loader.readResoueces = function ( pngData, plistData ) {
-
     var i, pngNameSplit, plistgNameSplit;
     var pngNames = [];
     var plistNames = [];
-
 
     for( i = 0;i < pngData.length;i++){
         pngNameSplit =  pngData[i].split('/');
         pngNames.push(pngNameSplit[pngNameSplit.length - 1 ]);
     }
 
-
     for( i = 0;i < plistData.length;i++) {
         plistgNameSplit = plistData[i].split('/');
         plistNames.push(plistgNameSplit[plistgNameSplit.length - 1]);
     }
-
 
     var item = null;
     for (i=0; i<pngNames.length; i++) {
@@ -376,25 +424,22 @@ Loader.readResoueces = function ( pngData, plistData ) {
             continue;
         }
         item.file(function( file ) {
-            // 여기서는 addToAssetPanel을 false로 전달하여, 폴더 안의 리소스는 Assets 패널에 추가되지 않음
-            Loader.readFile( file );
+            // 폴더 안의 리소스는 Assets 패널에 추가되지 않음 (false 명시)
+            Loader.readFile( file, null, false );
         });
-        //Loader.readFile(file);
     }
 
     for (i=0; i<plistNames.length; i++) {
         item = ResourceMapData[plistNames[i] ];
         if( !!item === false){
-            //console.log("There is no ", plistNames[i]);
             printLog( "No resource file : "+ plistNames[i]);
             continue;
         }
         item.file(function( file ) {
-            // 여기서는 addToAssetPanel을 false로 전달
-            Loader.readFile( file );
+            // 폴더 안의 리소스는 Assets 패널에 추가되지 않음 (false 명시)
+            Loader.readFile( file, null, false );
         });
     }
-
 };
 
 Loader.readSpineResoueces = function ( fileName ) {
@@ -415,7 +460,7 @@ Loader.readSpineResoueces = function ( fileName ) {
             }
 
             item.file(function( file ) {
-                // [수정]: Spine의 연관 리소스는 Assets에 추가 안 함 (false 명시)
+                // Spine의 연관 리소스는 Assets에 추가 안 함 (false 명시)
                 Loader.readFile( file, null, false );
             });
         } else {
@@ -436,13 +481,13 @@ Loader.loadFnt = function ( fntFileList , endCallback) {
         var fntFileName = fntFile.split('/');
         var item = ResourceMapData[fntFileName[fntFileName.length - 1]];
         item.file(function (file) {
-            // 여기서는 addToAssetPanel을 false로 전달
+            // FNT 파일 로드 시 addToAssetPanel=false
             Loader.readFile(file, function () {
                 var newConf = cc.loader.getRes(fntFile);
                 var pngName = newConf.atlasName.split('/');
                 var pngItem = ResourceMapData[pngName[pngName.length - 1]];
                 pngItem.file(function (pngfile) {
-                    // 여기서는 addToAssetPanel을 false로 전달
+                    // FNT에 연결된 PNG 로드 시 addToAssetPanel=false
                     Loader.readFile(pngfile, function () {
                         count--
                         if (count <= 0)
@@ -488,8 +533,8 @@ Loader.checkFiles = function ( fileName, type ) {
                 }
             }
             break;
-        case 'png': // [수정] PNG 로드 시 loadImage 이벤트는 _processFileData에서 addToAssetPanel 조건부로 처리
-                    // 기존 PNG 로딩 후 armature, UI 체크 로직은 그대로 유지
+        case 'png': // PNG 로드 시 loadImage 이벤트는 _processFileData에서 addToAssetPanel 조건부로 처리
+            // 기존 PNG 로딩 후 armature, UI 체크 로직은 그대로 유지
             if( this.plistList.indexOf( fileName ) >= 0 ) {
                 this._addSpriteFrames( fileName );
                 fileNames = this._checkAllArmatureFrames();
@@ -601,19 +646,14 @@ Loader._checkUIFile = function( fileName ) {
 };
 
 Loader._checkSpineFile = function( fileName ) {
-    if( !this.uiTextures.hasOwnProperty( fileName ) ) {
-        return false;
-    }
-    // if( this.loadedFileNames.indexOf( fileName ) >= 0 ) {
-    //     return false;
-    // }
+    const isJsonDataLoaded = this.spineData.hasOwnProperty(fileName);
+    const isAtlasFileLoaded = this.atlasList.indexOf(fileName) >= 0;
+    const isTextureFileLoaded = this.textureList.indexOf(fileName) >= 0;
 
-    var textures = this.uiTextures[ fileName ];
-    var loaded = true;
-    var path = cc.path.basename( textures, '.atlas' );
-    if( this.atlasList.indexOf( fileName ) < 0 || this.textureList.indexOf( fileName ) < 0 ) {
-        loaded = false;
-    }
+    const loaded = isJsonDataLoaded && isAtlasFileLoaded && isTextureFileLoaded;
+
+    // *** 이 로그를 반드시 추가합니다. (이전 답변에서 추가하라고 했으나 로그에 없었음) ***
+    console.log(`[DEBUG - Loader] _checkSpineFile for '${fileName}': JSON Data=${isJsonDataLoaded}, ATLAS File=${isAtlasFileLoaded}, PNG Texture=${isTextureFileLoaded}. Result=${loaded}`);
 
     return loaded;
 };
