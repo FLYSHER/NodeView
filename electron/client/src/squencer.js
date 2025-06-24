@@ -4,7 +4,7 @@ var Sequencer = (function() {
     const GRID_TIME_INTERVAL = 0.1;
 
     let tracks = new Map();
-    let mainLayerInstance = null;
+    let mainLayerInstance = null; // mainLayerInstance는 initialize 시 할당됩니다.
     let isSyncingScroll = false;
     let isPlaying = false;
     let isPaused = false;
@@ -151,7 +151,14 @@ var Sequencer = (function() {
                 _updateClipDurationText($clip, clip);
 
                 $clip.on('contextmenu', function(e) {
-                    showContextMenu(e, this, null);
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    // *** 수정: showContextMenu 대신 mainLayerInstance._contextMenuManager.showOtherContextMenu 호출 ***
+                    if (mainLayerInstance && mainLayerInstance._contextMenuManager) {
+                        mainLayerInstance._contextMenuManager.showOtherContextMenu(e, this, null);
+                    }
+                    // *** 수정 끝 ***
                 });
 
                 $clip.css({
@@ -173,6 +180,19 @@ var Sequencer = (function() {
 
                 $clip.draggable({
                     axis: 'x',
+                    // *** 수정: start 콜백에서 우클릭 시 드래그 취소 (이전 수정 반영) ***
+                    start: function(event, ui) {
+                        if (event.button === 2) { // 마우스 오른쪽 버튼
+                            event.stopPropagation();
+                            return false; // 드래그 동작 취소
+                        }
+                        // 기존 draggable의 start 로직
+                        // Note: body.is-interacting 및 resize-overlay 로직은 panelManager.js에서 draggable.start에 포함되어 있습니다.
+                        // 이곳에서 중복될 경우 제거하는 것을 고려해야 합니다. (여기서는 기존 코드를 유지합니다.)
+                        $('body').addClass('is-interacting');
+                        $('#resize-overlay').show();
+                    },
+                    // *** 수정 끝 ***
                     helper: function() {
                         return $(this).clone().css({
                             width: $(this).outerWidth(),
@@ -195,6 +215,10 @@ var Sequencer = (function() {
                             top: '2px'
                         });
                         _renderTimeline();
+                        // draggable.stop 로직의 마지막 부분: body.is-interacting 제거 및 resize-overlay 숨김
+                        $('body').removeClass('is-interacting');
+                        $('.vertical-guide, .horizontal-guide').hide();
+                        $('#resize-overlay').hide();
                     }
                 }).resizable({
                     handles: 'e, w',
