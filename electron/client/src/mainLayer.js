@@ -108,62 +108,6 @@ var MainLayer = cc.Layer.extend({
     },
     // *** 수정 끝 ***
 
-    updateMenuWithNodeId: function (nodeId) {
-        if (!nodeId) {
-            if (this._currentlySelectedNode !== null) {
-                this._currentlySelectedNode = null;
-            }
-            this._treeView.setNode(null);
-            const tree = $('#widgetTree').jstree(true);
-            if (tree) {
-                tree.deselect_all(true);
-            }
-            return;
-        }
-
-        const node = this.nodeMap[nodeId];
-        if (!node) {
-            this.updateMenuWithNodeId(null);
-            return;
-        }
-
-        let selectedDraggableNode = null;
-        if (node instanceof DraggableNode) {
-            selectedDraggableNode = node;
-        } else {
-            let parent = node.getParent();
-            while (parent) {
-                if (parent instanceof DraggableNode) {
-                    selectedDraggableNode = parent;
-                    break;
-                }
-                parent = parent.getParent();
-            }
-        }
-
-        if (!selectedDraggableNode) {
-            this.updateMenuWithNodeId(null);
-            return;
-        }
-
-        if (this._currentlySelectedNode !== selectedDraggableNode) {
-            this._currentlySelectedNode = selectedDraggableNode;
-        }
-
-        this._treeView.setNode(selectedDraggableNode);
-        this.setDraggableItem(selectedDraggableNode.getName());
-
-        const tree = $('#widgetTree').jstree(true);
-        if (tree) {
-            tree.deselect_all(true);
-            const jstreeNode = tree.get_node(nodeId);
-            if (jstreeNode) {
-                tree.select_node(jstreeNode, true);
-                tree.open_node(jstreeNode, null, false);
-            }
-        }
-    },
-
     refreshAssetsPanel: function () {
         const $container = $('#fileNameTree');
         $container.empty();
@@ -554,16 +498,6 @@ var MainLayer = cc.Layer.extend({
 
         this._treeView.setNode(selectedDraggableNode);
         this.setDraggableItem(selectedDraggableNode.getName());
-
-        const tree = $('#widgetTree').jstree(true);
-        if (tree) {
-            tree.deselect_all(true);
-            const jstreeNode = tree.get_node(nodeId);
-            if (jstreeNode) {
-                tree.select_node(jstreeNode, true);
-                tree.open_node(jstreeNode, null, false);
-            }
-        }
     },
 
     setDraggableItem: function (name) {
