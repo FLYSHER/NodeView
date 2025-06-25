@@ -27,10 +27,10 @@
         "src/eventDispatcher.js",
         "src/uiErrorLog.js",
         "src/engineoverride.js",
-        "src/layoutManager.js",
-        "src/panelManager.js",
-        "src/gameViewManager.js",
         "src/squencer.js",
+        "src/managers/layoutManager.js",
+        "src/managers/panelManager.js",
+        "src/managers/gameViewManager.js",
         "src/managers/contextMenuManager.js",
         "src/managers/deletionManager.js"
     ]

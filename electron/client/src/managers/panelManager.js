@@ -155,6 +155,35 @@ var PanelManager = (function() {
                 $(this).toggleClass('is-active'); // 클릭된 버튼 자신에게 is-active 클래스를 추가/제거
                 $('.toggleable-control').toggle('slide', { direction: 'right' }, 150);
             });
+
+            $('#toggle-fullscreen-btn').on('click', function() {
+                if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+                    // 전체화면 모드로 진입
+                    if (document.documentElement.requestFullscreen) {
+                        document.documentElement.requestFullscreen();
+                    } else if (document.documentElement.webkitRequestFullscreen) { // Chrome, Safari, Opera
+                        document.documentElement.webkitRequestFullscreen();
+                    }
+                } else {
+                    // 전체화면 모드에서 해제
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen();
+                    } else if (document.webkitExitFullscreen) { // Chrome, Safari, Opera
+                        document.webkitExitFullscreen();
+                    }
+                }
+            });
+
+            // 전체화면 상태 변경 감지 (ESC 키로 해제 시 아이콘 변경 등)
+            $(document).on('fullscreenchange webkitfullscreenchange', function() {
+                const isFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement);
+                const $icon = $('#toggle-fullscreen-btn').find('i');
+                if (isFullscreen) {
+                    $icon.removeClass('fa-expand').addClass('fa-compress');
+                } else {
+                    $icon.removeClass('fa-compress').addClass('fa-expand');
+                }
+            });
         }
     };
 })();

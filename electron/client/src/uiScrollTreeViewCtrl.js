@@ -66,11 +66,34 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
                                     targetParentCocosNode = mainLayerInstance.nodeMap[parentJstreeNode.data.nodeId];
                                 }
                             }
+
+                            // --- 새로운 규칙 추가 ---
+                            // 1. 드롭 대상이 DraggableNode이거나, 씬의 루트일 경우 (기존 규칙)
                             if (targetParentCocosNode instanceof DraggableNode || targetParentCocosNode === mainLayerInstance) {
                                 return true;
-                            } else {
-                                return false;
                             }
+
+                            // 2. 드롭 대상이 다른 UI 에셋의 자식 노드일 경우 (새로운 예외 규칙)
+                            if (targetParentCocosNode) {
+                                let ancestor = targetParentCocosNode;
+                                // 대상의 최상위 DraggableNode 조상을 찾음
+                                while (ancestor.getParent() && !(ancestor instanceof DraggableNode)) {
+                                    ancestor = ancestor.getParent();
+                                    if (ancestor instanceof MainLayer) { // MainLayer에 도달하면 중지
+                                        ancestor = null;
+                                        break;
+                                    }
+                                }
+
+                                // 조상이 UI 또는 CocosStudio 타입이면 드롭 허용
+                                if (ancestor instanceof DraggableNode && (ancestor.assetType === 'ui' || ancestor.assetType === 'cocosstudio')) {
+                                    return true;
+                                }
+                            }
+
+                            // 모든 규칙에 해당하지 않으면 드롭 비허용
+                            return false;
+
                         } else {
                             const oldParentJstreeNode = this.get_node(node.parent);
                             const oldParentCocosNodeId = oldParentJstreeNode && oldParentJstreeNode.data ? oldParentJstreeNode.data.nodeId : null;
