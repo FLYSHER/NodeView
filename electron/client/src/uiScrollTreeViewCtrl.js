@@ -460,13 +460,15 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
 
             startValue = parseFloat(activeInputEl.value);
 
+            // *** 수정: 드래그 민감도 조정 ***
             if (activeInputEl.id.includes('scale')) {
-                sensitivity = 0.01;
+                sensitivity = 0.01; // 스케일은 그대로 유지
             } else if (activeInputEl.id === 'rotation') {
-                sensitivity = 0.2;
+                sensitivity = 0.1; // 회전 민감도 감소 (기존 0.2)
             } else {
-                sensitivity = 0.5;
+                sensitivity = 0.2; // 위치 민감도 감소 (기존 0.5)
             }
+            // *** 수정 끝 ***
 
             document.body.style.cursor = 'ew-resize';
             $('#resize-overlay').show(); // 드래그 시작 시 오버레이 활성화
@@ -552,6 +554,7 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
 
         // --- Properties 패널에 보낼 정보는 항상 DraggableNode 인스턴스에서 가져옵니다. ---
         const draggableNodeInstance = node; // `node`는 MainLayer에서 전달하는 DraggableNode 인스턴스입니다.
+        const self = this; // *** 추가: 클릭 핸들러에서 this 컨텍스트를 유지하기 위해 self 변수 사용 ***
         this._selectNode = [draggableNodeInstance];
 
         document.getElementById('nodeName').value = draggableNodeInstance.getName() || "";
@@ -677,10 +680,50 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
                 }
             });
 
-            $item.on('click', () => {
+            // *** 수정: 클릭 시 애니메이션 즉시 재생 기능 추가 ***
+            $item.on('click', function() { // 화살표 함수 대신 function 키워드 사용으로 this가 DOM 요소를 가리키게 함
                 $actionContainer.find('.custom-tree-item').removeClass('selected');
-                $item.addClass('selected');
+                $(this).addClass('selected');
+
+                const animName = $(this).data('anim-name');
+                const animType = $(this).data('anim-type');
+                const draggableNode = self._selectNode[0];
+
+                if (!draggableNode) return;
+
+                // 기존 애니메이션 정지
+                if (draggableNode.spine) {
+                    draggableNode.spine.clearTrack(0);
+                }
+                if (draggableNode.armature) {
+                    draggableNode.armature.getAnimation().stop();
+                }
+                if (draggableNode.ui) {
+                    draggableNode.ui.stopAllActions();
+                }
+
+                // 새 애니메이션 재생
+                if (animType === 'spine' && draggableNode.spine) {
+                    // Spine: 마지막 인자를 true로 변경하여 기본적으로 반복 재생되도록 합니다.
+                    draggableNode.spine.setAnimation(0, animName, true);
+                }
+                else if (animType === 'armature' && draggableNode.armature) {
+                    // Armature: 마지막 인자를 -1로 변경하여 무한 반복하도록 합니다.
+                    draggableNode.armature.getAnimation().play(animName, -1, -1);
+                }
+                else if (animType === 'action') {
+                    if (draggableNode.cocosAction) {
+                        // CocosAction: 마지막 인자를 true로 변경하여 반복 재생되도록 합니다.
+                        draggableNode.cocosAction.play(animName, true);
+                    }
+                    else if (draggableNode.ui && draggableNode.actionUrl) {
+                        // UI(CocosStudio): callFunc 래퍼를 제거하고 직접 호출합니다.
+                        // 이렇게 하면 CocosStudio에서 설정한 액션의 원본 속성(반복 포함)을 따르게 됩니다.
+                        ccs.actionManager.playActionByName(draggableNode.actionUrl, animName);
+                    }
+                }
             });
+            // *** 수정 끝 ***
 
             $actionContainer.append($item);
         });

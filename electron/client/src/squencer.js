@@ -17,7 +17,7 @@ var Sequencer = (function() {
                     </svg>`;
 
     let pauseIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
-                              <path d="M5.75 3a.75.75 0 0 0-.75.75v12.5c0 .414.336.75.75.75h1.5a.75.75 0 0 0 .75-.75V3.75A.75.75 0 0 0 7.25 3h-1.5ZM12.75 3a.75.75 0 0 0-.75.75v12.5c0 .414.336.75.75.75h1.5a.75.75 0 0 0 .75-.75V3.75a.75.75 0 0 0-.75-.75h-1.5Z" />
+                              <path d="M5.75 3a.75.75 0 0 0-.75.75v12.5c0 .414.336.75.75.75h1.5a.75.75 0 0 0 .75-.75V3.75A.75.75 0 0 0 7.25 3h-1.5ZM12.75 3a.75.75 0 0 0-.75.75v12.5c0 .414.336.75.75.75h1.5a.75.75 0 0 0 .75-.75V3.75A.75.75 0 0 0-.75-.75h-1.5Z" />
                             </svg>
                             `;
 
@@ -29,13 +29,13 @@ var Sequencer = (function() {
     }
 
     function _updateClipDurationText($clipElement, clipData) {
-        let durationText = clipData.duration.toFixed(1) + 's';
+        let durationText = clipData.duration.toFixed(2) + 's';
         const durationDiff = clipData.duration - clipData.originalDuration;
 
         if (Math.abs(durationDiff) > 0.05) {
             const sign = durationDiff > 0 ? '+' : '';
             const diffClass = durationDiff > 0 ? 'increased' : 'decreased';
-            durationText += ` <span class="modified ${diffClass}">(${sign}${durationDiff.toFixed(1)})</span>`;
+            durationText += ` <span class="modified ${diffClass}">(${sign}${durationDiff.toFixed(2)})</span>`;
         }
         $clipElement.find('.clip-duration').html(durationText);
     }
@@ -186,9 +186,6 @@ var Sequencer = (function() {
                             event.stopPropagation();
                             return false; // 드래그 동작 취소
                         }
-                        // 기존 draggable의 start 로직
-                        // Note: body.is-interacting 및 resize-overlay 로직은 panelManager.js에서 draggable.start에 포함되어 있습니다.
-                        // 이곳에서 중복될 경우 제거하는 것을 고려해야 합니다. (여기서는 기존 코드를 유지합니다.)
                         $('body').addClass('is-interacting');
                         $('#resize-overlay').show();
                     },
@@ -200,22 +197,51 @@ var Sequencer = (function() {
                             zIndex: 1000
                         }).addClass('dragging-helper');
                     },
+                    // *** 수정: 드래그 시 클립끼리 스냅되도록 로직 변경 ***
                     drag: function(event, ui) {
-                        ui.position.top = 2;
-                        const snappedLeft = _getSnappedPixel(ui.position.left);
-                        ui.position.left = Math.max(0, snappedLeft);
+                        ui.position.top = 2; // 세로 위치 고정
+                        let newPosLeft = ui.position.left;
+                        const clipWidth = ui.helper.outerWidth();
+                        const snapTolerance = 8; // 스냅 민감도 (픽셀)
+                        let snapped = false;
+
+                        // 같은 트랙에 있는 다른 클립들을 대상으로 스냅 검사
+                        $(this).siblings('.timeline-clip').not('.ui-draggable-dragging').each(function() {
+                            const targetPos = $(this).position();
+                            const targetWidth = $(this).outerWidth();
+                            const targetLeft = targetPos.left;
+                            const targetRight = targetPos.left + targetWidth;
+
+                            // 현재 드래그 중인 클립의 왼쪽/오른쪽 가장자리
+                            const currentLeft = newPosLeft;
+                            const currentRight = newPosLeft + clipWidth;
+
+                            // 1. 현재 클립의 왼쪽 -> 타겟 클립의 왼쪽
+                            if (Math.abs(currentLeft - targetLeft) < snapTolerance) { newPosLeft = targetLeft; snapped = true; }
+                            // 2. 현재 클립의 왼쪽 -> 타겟 클립의 오른쪽
+                            if (!snapped && Math.abs(currentLeft - targetRight) < snapTolerance) { newPosLeft = targetRight; snapped = true; }
+                            // 3. 현재 클립의 오른쪽 -> 타겟 클립의 왼쪽
+                            if (!snapped && Math.abs(currentRight - targetLeft) < snapTolerance) { newPosLeft = targetLeft - clipWidth; snapped = true; }
+                            // 4. 현재 클립의 오른쪽 -> 타겟 클립의 오른쪽
+                            if (!snapped && Math.abs(currentRight - targetRight) < snapTolerance) { newPosLeft = targetRight - clipWidth; snapped = true; }
+
+                            if (snapped) return false; // 하나라도 스냅되면 루프 종료
+                        });
+
+                        ui.position.left = Math.max(0, newPosLeft); // 0 이하로 가지 않도록
                         ui.helper.css('left', ui.position.left + 'px');
                     },
                     stop: function(event, ui) {
-                        const snappedLeft = _getSnappedPixel(ui.position.left);
-                        const snappedTime = _pixelToTime(Math.max(0, snappedLeft));
-                        clip.startTime = snappedTime;
+                        // *** 수정: 그리드 스냅 로직 제거 ***
+                        const newTime = _pixelToTime(Math.max(0, ui.position.left));
+                        clip.startTime = newTime;
+
                         $(this).css({
                             left: _timeToPixel(clip.startTime) + 'px',
                             top: '2px'
                         });
                         _renderTimeline();
-                        // draggable.stop 로직의 마지막 부분: body.is-interacting 제거 및 resize-overlay 숨김
+
                         $('body').removeClass('is-interacting');
                         $('.vertical-guide, .horizontal-guide').hide();
                         $('#resize-overlay').hide();
@@ -225,22 +251,20 @@ var Sequencer = (function() {
                     start: function(event, ui) {
                         $(this).css('top', '2px');
                     },
+                    // *** 수정: 리사이즈 시 그리드 스냅 제거 ***
                     resize: function(event, ui) {
                         ui.position.top = 2;
-                        const snappedLeft = _getSnappedPixel(ui.position.left);
-                        const snappedWidth = _getSnappedPixel(ui.size.width);
-                        ui.position.left = Math.max(0, snappedLeft);
-                        ui.size.width = Math.max(_timeToPixel(GRID_TIME_INTERVAL), snappedWidth);
+                        // 최소 크기만 유지하고 자유롭게 조절
+                        ui.position.left = Math.max(0, ui.position.left);
+                        ui.size.width = Math.max(_timeToPixel(GRID_TIME_INTERVAL), ui.size.width);
                     },
                     stop: function(event, ui) {
-                        const snappedLeft = _getSnappedPixel(ui.position.left);
-                        const snappedWidth = _getSnappedPixel(ui.size.width);
+                        // *** 수정: 리사이즈 종료 시 그리드 스냅 제거 ***
+                        const newStartTime = _pixelToTime(Math.max(0, ui.position.left));
+                        const newDuration = _pixelToTime(Math.max(_timeToPixel(GRID_TIME_INTERVAL), ui.size.width));
 
-                        const snappedStartTime = _pixelToTime(Math.max(0, snappedLeft));
-                        const snappedDuration = _pixelToTime(Math.max(_timeToPixel(GRID_TIME_INTERVAL), snappedWidth));
-
-                        clip.startTime = snappedStartTime;
-                        clip.duration = snappedDuration;
+                        clip.startTime = newStartTime;
+                        clip.duration = newDuration;
 
                         const wrapper = $(this).parent('.ui-wrapper');
                         const targetElement = wrapper.length ? wrapper : $(this);
@@ -272,8 +296,10 @@ var Sequencer = (function() {
         _renderTimeline();
     }
 
+    // *** 수정: 그리드 스냅을 끄기 위해 원래 값을 그대로 반환하도록 변경 ***
     function _snapToGrid(timeValue) {
-        return Math.round(timeValue / GRID_TIME_INTERVAL) * GRID_TIME_INTERVAL;
+        // return Math.round(timeValue / GRID_TIME_INTERVAL) * GRID_TIME_INTERVAL;
+        return timeValue;
     }
 
     function _timeToPixel(time) {
@@ -284,10 +310,12 @@ var Sequencer = (function() {
         return pixel / PIXELS_PER_SECOND;
     }
 
+    // *** 수정: 그리드 스냅을 끄기 위해 원래 픽셀 값을 그대로 반환하도록 변경 ***
     function _getSnappedPixel(pixel) {
-        const time = _pixelToTime(pixel);
-        const snappedTime = _snapToGrid(time);
-        return _timeToPixel(snappedTime);
+        // const time = _pixelToTime(pixel);
+        // const snappedTime = _snapToGrid(time);
+        // return _timeToPixel(snappedTime);
+        return pixel;
     }
 
     function _addClipToTrack(animName, animType, targetNode, preferredTime) {
@@ -301,22 +329,25 @@ var Sequencer = (function() {
         let startTime = 0;
 
         if (typeof preferredTime === 'number' && preferredTime >= 0) {
-            startTime = _snapToGrid(preferredTime);
+            // *** 수정: 그리드 스냅 제거 ***
+            startTime = preferredTime;
         } else {
             const maxEndTime = trackData.clips.reduce((max, clip) =>
                 Math.max(max, clip.startTime + clip.duration), 0);
-            startTime = _snapToGrid(maxEndTime);
+            // *** 수정: 그리드 스냅 제거 ***
+            startTime = maxEndTime;
         }
 
         const animDuration = mainLayerInstance.getAnimationLength(targetNode, animName) || GRID_TIME_INTERVAL;
-        const snappedDuration = Math.max(GRID_TIME_INTERVAL, _snapToGrid(animDuration));
+        // *** 수정: 그리드 스냅 제거 ***
+        const newDuration = Math.max(GRID_TIME_INTERVAL, animDuration);
 
         const newClip = {
             id: Date.now() + Math.random(),
             animName,
             type: animType,
-            duration: snappedDuration,
-            originalDuration: snappedDuration,
+            duration: newDuration,
+            originalDuration: newDuration,
             startTime
         };
         trackData.clips.push(newClip);
