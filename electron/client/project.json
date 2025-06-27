@@ -27,7 +27,7 @@
         "src/eventDispatcher.js",
         "src/uiErrorLog.js",
         "src/engineoverride.js",
-        "src/squencer.js",
+        "src/sequencer.js",
         "src/managers/layoutManager.js",
         "src/managers/panelManager.js",
         "src/managers/gameViewManager.js",
