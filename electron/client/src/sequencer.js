@@ -11,6 +11,7 @@ var Sequencer = (function() {
     let runnerNode = null;
     let sequenceStartTime = 0;
     let pausedTime = 0;
+    let animationFrameId = null; // *** 추가: requestAnimationFrame ID 저장을 위한 변수 ***
 
     let playIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
                         <path d="M6.3 2.84A1.5 1.5 0 0 0 4 4.11v11.78a1.5 1.5 0 0 0 2.3 1.27l9.344-5.891a1.5 1.5 0 0 0 0-2.538L6.3 2.841Z" />
@@ -153,12 +154,9 @@ var Sequencer = (function() {
                 $clip.on('contextmenu', function(e) {
                     e.preventDefault();
                     e.stopPropagation();
-
-                    // *** 수정: showContextMenu 대신 mainLayerInstance._contextMenuManager.showOtherContextMenu 호출 ***
                     if (mainLayerInstance && mainLayerInstance._contextMenuManager) {
                         mainLayerInstance._contextMenuManager.showOtherContextMenu(e, this, null);
                     }
-                    // *** 수정 끝 ***
                 });
 
                 $clip.css({
@@ -180,16 +178,14 @@ var Sequencer = (function() {
 
                 $clip.draggable({
                     axis: 'x',
-                    // *** 수정: start 콜백에서 우클릭 시 드래그 취소 (이전 수정 반영) ***
                     start: function(event, ui) {
-                        if (event.button === 2) { // 마우스 오른쪽 버튼
+                        if (event.button === 2) {
                             event.stopPropagation();
-                            return false; // 드래그 동작 취소
+                            return false;
                         }
                         $('body').addClass('is-interacting');
                         $('#resize-overlay').show();
                     },
-                    // *** 수정 끝 ***
                     helper: function() {
                         return $(this).clone().css({
                             width: $(this).outerWidth(),
@@ -197,42 +193,34 @@ var Sequencer = (function() {
                             zIndex: 1000
                         }).addClass('dragging-helper');
                     },
-                    // *** 수정: 드래그 시 클립끼리 스냅되도록 로직 변경 ***
                     drag: function(event, ui) {
-                        ui.position.top = 2; // 세로 위치 고정
+                        ui.position.top = 2;
                         let newPosLeft = ui.position.left;
                         const clipWidth = ui.helper.outerWidth();
-                        const snapTolerance = 8; // 스냅 민감도 (픽셀)
+                        const snapTolerance = 8;
                         let snapped = false;
 
-                        // 같은 트랙에 있는 다른 클립들을 대상으로 스냅 검사
                         $(this).siblings('.timeline-clip').not('.ui-draggable-dragging').each(function() {
                             const targetPos = $(this).position();
                             const targetWidth = $(this).outerWidth();
                             const targetLeft = targetPos.left;
                             const targetRight = targetPos.left + targetWidth;
 
-                            // 현재 드래그 중인 클립의 왼쪽/오른쪽 가장자리
                             const currentLeft = newPosLeft;
                             const currentRight = newPosLeft + clipWidth;
 
-                            // 1. 현재 클립의 왼쪽 -> 타겟 클립의 왼쪽
                             if (Math.abs(currentLeft - targetLeft) < snapTolerance) { newPosLeft = targetLeft; snapped = true; }
-                            // 2. 현재 클립의 왼쪽 -> 타겟 클립의 오른쪽
                             if (!snapped && Math.abs(currentLeft - targetRight) < snapTolerance) { newPosLeft = targetRight; snapped = true; }
-                            // 3. 현재 클립의 오른쪽 -> 타겟 클립의 왼쪽
                             if (!snapped && Math.abs(currentRight - targetLeft) < snapTolerance) { newPosLeft = targetLeft - clipWidth; snapped = true; }
-                            // 4. 현재 클립의 오른쪽 -> 타겟 클립의 오른쪽
                             if (!snapped && Math.abs(currentRight - targetRight) < snapTolerance) { newPosLeft = targetRight - clipWidth; snapped = true; }
 
-                            if (snapped) return false; // 하나라도 스냅되면 루프 종료
+                            if (snapped) return false;
                         });
 
-                        ui.position.left = Math.max(0, newPosLeft); // 0 이하로 가지 않도록
+                        ui.position.left = Math.max(0, newPosLeft);
                         ui.helper.css('left', ui.position.left + 'px');
                     },
                     stop: function(event, ui) {
-                        // *** 수정: 그리드 스냅 로직 제거 ***
                         const newTime = _pixelToTime(Math.max(0, ui.position.left));
                         clip.startTime = newTime;
 
@@ -251,15 +239,12 @@ var Sequencer = (function() {
                     start: function(event, ui) {
                         $(this).css('top', '2px');
                     },
-                    // *** 수정: 리사이즈 시 그리드 스냅 제거 ***
                     resize: function(event, ui) {
                         ui.position.top = 2;
-                        // 최소 크기만 유지하고 자유롭게 조절
                         ui.position.left = Math.max(0, ui.position.left);
                         ui.size.width = Math.max(_timeToPixel(GRID_TIME_INTERVAL), ui.size.width);
                     },
                     stop: function(event, ui) {
-                        // *** 수정: 리사이즈 종료 시 그리드 스냅 제거 ***
                         const newStartTime = _pixelToTime(Math.max(0, ui.position.left));
                         const newDuration = _pixelToTime(Math.max(_timeToPixel(GRID_TIME_INTERVAL), ui.size.width));
 
@@ -296,9 +281,7 @@ var Sequencer = (function() {
         _renderTimeline();
     }
 
-    // *** 수정: 그리드 스냅을 끄기 위해 원래 값을 그대로 반환하도록 변경 ***
     function _snapToGrid(timeValue) {
-        // return Math.round(timeValue / GRID_TIME_INTERVAL) * GRID_TIME_INTERVAL;
         return timeValue;
     }
 
@@ -310,11 +293,7 @@ var Sequencer = (function() {
         return pixel / PIXELS_PER_SECOND;
     }
 
-    // *** 수정: 그리드 스냅을 끄기 위해 원래 픽셀 값을 그대로 반환하도록 변경 ***
     function _getSnappedPixel(pixel) {
-        // const time = _pixelToTime(pixel);
-        // const snappedTime = _snapToGrid(time);
-        // return _timeToPixel(snappedTime);
         return pixel;
     }
 
@@ -329,17 +308,14 @@ var Sequencer = (function() {
         let startTime = 0;
 
         if (typeof preferredTime === 'number' && preferredTime >= 0) {
-            // *** 수정: 그리드 스냅 제거 ***
             startTime = preferredTime;
         } else {
             const maxEndTime = trackData.clips.reduce((max, clip) =>
                 Math.max(max, clip.startTime + clip.duration), 0);
-            // *** 수정: 그리드 스냅 제거 ***
             startTime = maxEndTime;
         }
 
         const animDuration = mainLayerInstance.getAnimationLength(targetNode, animName) || GRID_TIME_INTERVAL;
-        // *** 수정: 그리드 스냅 제거 ***
         const newDuration = Math.max(GRID_TIME_INTERVAL, animDuration);
 
         const newClip = {
@@ -384,8 +360,60 @@ var Sequencer = (function() {
         return totalDuration;
     }
 
+    // *** 추가: requestAnimationFrame을 사용한 새로운 재생 애니메이션 함수 ***
+    function _animatePlayhead() {
+        if (!isPlaying || isPaused) {
+            return;
+        }
+
+        const $container = $('#timeline-tracks-container');
+        const $playhead = $('#timeline-playhead');
+        const labelWidth = $('#track-labels-container').outerWidth();
+
+        const totalDuration = _getTotalDuration();
+        const elapsedTimeMs = Date.now() - sequenceStartTime;
+        const elapsedTimeSec = elapsedTimeMs / 1000;
+
+        if (elapsedTimeSec >= totalDuration) {
+            _onStop(true);
+            return;
+        }
+
+        const currentPixelPos = elapsedTimeSec * PIXELS_PER_SECOND;
+        const containerWidth = $container.width();
+        const scrollLeft = $container.scrollLeft();
+
+        // 플레이헤드를 고정시키고 스크롤을 시작할 지점 (컨테이너의 75% 지점)
+        const triggerPointAbsolute = scrollLeft + (containerWidth * 0.75);
+
+        // ★★★ 수정된 부분 ★★★
+        // 플레이헤드가 뷰포트 내에서 고정될 시점의 시각적 left 위치
+        const stickyPlayheadLeft = labelWidth + (containerWidth * 0.75);
+
+        if (currentPixelPos <= triggerPointAbsolute) {
+            // Mode 1: 플레이헤드 이동, 스크롤 정지
+            $playhead.css('left', labelWidth + currentPixelPos + 'px');
+        } else {
+            // Mode 2: 플레이헤드 고정, 컨테이너 스크롤
+            const newScrollLeft = currentPixelPos - (containerWidth * 0.75);
+
+            // 플레이헤드의 left를 고정된 값으로 설정하여 더 이상 움직이지 않게 합니다.
+            $playhead.css('left', stickyPlayheadLeft + 'px');
+            $container.scrollLeft(newScrollLeft);
+        }
+
+        animationFrameId = requestAnimationFrame(_animatePlayhead);
+    }
+
     function _onPlay() {
-        isPlaying = true; isPaused = false; sequenceStartTime = Date.now();
+        // ★★★ 추가된 부분 ★★★
+        // 재생 시 스크롤을 맨 앞으로 이동시킵니다.
+        $('#timeline-tracks-container').scrollLeft(0);
+
+        console.log("%c--- 시퀀서 재생 디버그 시작 ---", "color: #4CAF50; font-weight: bold;");
+
+        isPlaying = true; isPaused = false;
+        sequenceStartTime = Date.now();
 
         const $playhead = $('#timeline-playhead');
         $('#playSequenceBtn').html(pauseIcon);
@@ -401,30 +429,33 @@ var Sequencer = (function() {
             return;
         }
 
-        tracks.forEach(trackData => {
+        tracks.forEach((trackData, nodeId) => {
+            console.group(`[Track for Node ID: ${nodeId}]`);
+
             trackData.clips.forEach(clip => {
                 const targetNode = trackData.node;
                 const isLooping = clip.duration > clip.originalDuration;
 
+                console.log(`%c클립 예약: '${clip.animName}'`, "color: #2196F3;", `| 시작: ${clip.startTime.toFixed(3)}s`, `| 길이: ${clip.duration.toFixed(3)}s`);
+
                 const playAction = cc.callFunc(() => {
+                    const elapsed = ((Date.now() - sequenceStartTime) / 1000).toFixed(3);
+                    console.log(`%c▶ 실행(PLAY): '${clip.animName}' at ${elapsed}s`, "color: green;");
+
+                    if (targetNode.spine) targetNode.spine.clearTrack(0);
+                    if (targetNode.armature) targetNode.armature.getAnimation().stop();
+                    if (targetNode.ui) targetNode.ui.stopAllActions();
+
                     if (clip.type === 'spine' && targetNode.spine) {
                         targetNode.spine.setAnimation(0, clip.animName, isLooping);
                     } else if (clip.type === 'armature' && targetNode.armature) {
-                        let loopCount = 1;
-                        if (isLooping && clip.originalDuration > 0) {
-                            loopCount = Math.ceil(clip.duration / clip.originalDuration);
-                            if (loopCount === Infinity) loopCount = 0;
-                        }
+                        let loopCount = isLooping ? Math.ceil(clip.duration / clip.originalDuration) : 1;
+                        if (loopCount === Infinity) loopCount = 0;
                         targetNode.armature.getAnimation().play(clip.animName, -1, loopCount);
                     } else if (clip.type === 'action' && targetNode.cocosAction) {
                         targetNode.cocosAction.play(clip.animName, isLooping);
                     } else if (clip.type === 'action' && targetNode.ui) {
-                        targetNode.ui.stopAllActions();
-
-                        const singlePlayAction = cc.callFunc(() => {
-                            ccs.actionManager.playActionByName(targetNode.actionUrl, clip.animName);
-                        });
-
+                        const singlePlayAction = cc.callFunc(() => { ccs.actionManager.playActionByName(targetNode.actionUrl, clip.animName); });
                         if (isLooping && clip.originalDuration > 0) {
                             const numRepeats = Math.max(1, Math.ceil(clip.duration / clip.originalDuration));
                             const loopSequence = cc.repeat(cc.sequence(singlePlayAction, cc.delayTime(clip.originalDuration)), numRepeats);
@@ -435,59 +466,59 @@ var Sequencer = (function() {
                     }
                 });
 
+                console.log(`  - PLAY 액션이 ${clip.startTime.toFixed(3)}초 후에 실행되도록 예약됨`);
                 runnerNode.runAction(cc.sequence(cc.delayTime(clip.startTime), playAction));
 
                 const endTime = clip.startTime + clip.duration;
                 const isNextClipStarting = trackData.clips.some(nextClip => nextClip !== clip && Math.abs(nextClip.startTime - endTime) < 0.001);
 
-                const stopAction = cc.callFunc(() => {
-                    if (clip.type === 'armature' && targetNode.armature && targetNode.armature.getAnimation().getCurrentMovementID() === clip.animName) {
-                        targetNode.armature.getAnimation().stop();
-                    } else if (clip.type === 'spine' && targetNode.spine) {
-                        targetNode.spine.clearTrack(0);
-                    } else if (clip.type === 'action' && targetNode.ui) {
-                        targetNode.ui.stopAllActions();
-                    }
-                });
-                runnerNode.runAction(cc.sequence(cc.delayTime(endTime), stopAction));
+                if (!isNextClipStarting) {
+                    const stopAction = cc.callFunc(() => {
+                        const elapsed = ((Date.now() - sequenceStartTime) / 1000).toFixed(3);
+                        console.log(`%c■ 실행(STOP) for '${clip.animName}' at ${elapsed}s`, "color: red;");
+
+                        if (clip.type === 'armature' && targetNode.armature && targetNode.armature.getAnimation().getCurrentMovementID() === clip.animName) {
+                            targetNode.armature.getAnimation().stop();
+                        } else if (clip.type === 'spine' && targetNode.spine) {
+                            targetNode.spine.clearTrack(0);
+                        } else if (clip.type === 'action' && targetNode.ui) {
+                            targetNode.ui.stopAllActions();
+                        }
+                    });
+
+                    console.log(`  - STOP 액션이 ${endTime.toFixed(3)}초 후에 실행되도록 예약됨`);
+                    runnerNode.runAction(cc.sequence(cc.delayTime(endTime), stopAction));
+                } else {
+                    console.log(`  - STOP 액션 건너뜀: 다음 클립이 바로 시작합니다.`);
+                }
             });
+            console.groupEnd();
         });
 
         const totalDuration = _getTotalDuration();
         if (totalDuration > 0) {
-            $playhead.animate({ left: $('#track-labels-container').outerWidth() + totalDuration * PIXELS_PER_SECOND }, {
-                duration: totalDuration * 1000, easing: 'linear',
-                step: function(now) {
-                    const $container = $('#timeline-tracks-container');
-                    const playheadPos = now - $('#track-labels-container').outerWidth();
-                    const containerWidth = $container.width(), scrollLeft = $container.scrollLeft();
-                    if (playheadPos > scrollLeft + containerWidth * 0.75 || playheadPos < scrollLeft) {
-                        $container.scrollLeft(playheadPos - containerWidth / 2);
-                    }
-                },
-                complete: () => _onStop(true)
-            });
-        } else { _onStop(true); }
+            _animatePlayhead();
+        } else {
+            _onStop(true);
+        }
     }
 
     function _onPause() {
         if (!isPlaying || isPaused) return;
         isPaused = true; pausedTime = Date.now() - sequenceStartTime;
         $('#playSequenceBtn').html(playIcon);
-        $('#timeline-playhead').stop();
+
+        if (animationFrameId) {
+            cancelAnimationFrame(animationFrameId);
+            animationFrameId = null;
+        }
 
         if (runnerNode) cc.director.getActionManager().pauseTarget(runnerNode);
         tracks.forEach(trackData => {
             const node = trackData.node;
-            if (node.spine) {
-                node.spine.pause();
-            }
-            if (node.armature) {
-                node.armature.getAnimation().pause();
-            }
-            if (node.ui) {
-                cc.director.getActionManager().pauseTarget(node.ui);
-            }
+            if (node.spine) node.spine.pause();
+            if (node.armature) node.armature.getAnimation().pause();
+            if (node.ui) cc.director.getActionManager().pauseTarget(node.ui);
             cc.director.getActionManager().pauseTarget(node);
         });
     }
@@ -500,39 +531,18 @@ var Sequencer = (function() {
         if (runnerNode) cc.director.getActionManager().resumeTarget(runnerNode);
         tracks.forEach(trackData => {
             const node = trackData.node;
-            if (node.spine) {
-                node.spine.resume();
-            }
-            if (node.armature) {
-                node.armature.getAnimation().resume();
-            }
-            if (node.ui) {
-                cc.director.getActionManager().resumeTarget(node.ui);
-            }
+            if (node.spine) node.spine.resume();
+            if (node.armature) node.armature.getAnimation().resume();
+            if (node.ui) cc.director.getActionManager().resumeTarget(node.ui);
             cc.director.getActionManager().resumeTarget(node);
         });
 
-        const $playhead = $('#timeline-playhead');
-        const currentLeft = $playhead.position().left;
         const totalDuration = _getTotalDuration();
-        const labelWidth = $('#track-labels-container').outerWidth();
-        const currentTime = (currentLeft - labelWidth) / PIXELS_PER_SECOND;
-        const remainingDuration = totalDuration - currentTime;
-
-        if (remainingDuration > 0) {
-            $playhead.animate({ left: labelWidth + totalDuration * PIXELS_PER_SECOND }, {
-                duration: remainingDuration * 1000, easing: 'linear',
-                step: function(now) {
-                    const $container = $('#timeline-tracks-container');
-                    const playheadPos = now - labelWidth;
-                    const containerWidth = $container.width(), scrollLeft = $container.scrollLeft();
-                    if (playheadPos > scrollLeft + containerWidth * 0.75 || playheadPos < scrollLeft) {
-                        $container.scrollLeft(playheadPos - containerWidth / 2);
-                    }
-                },
-                complete: () => _onStop(true)
-            });
-        } else { _onStop(true); }
+        if (totalDuration > 0) {
+            _animatePlayhead();
+        } else {
+            _onStop(true);
+        }
     }
 
     function _onStop(resetPlayhead = true) {
@@ -540,7 +550,12 @@ var Sequencer = (function() {
         isPaused = false;
         $('#playSequenceBtn').html(playIcon);
         $('#timeline-interaction-overlay').hide();
+
         $('#timeline-playhead').stop();
+        if (animationFrameId) {
+            cancelAnimationFrame(animationFrameId);
+            animationFrameId = null;
+        }
 
         if (runnerNode) {
             runnerNode.stopAllActions();
