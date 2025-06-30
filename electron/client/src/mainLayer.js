@@ -604,7 +604,7 @@ var MainLayer = cc.Layer.extend({
 });
 
 
-var ManiLayerScene = cc.Scene.extend({
+var MainLayerScene = cc.Scene.extend({
     onEnter: function () {
         this._super();
 
