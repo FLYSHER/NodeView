@@ -894,3 +894,12 @@ ul.tabs li.current {
     position: absolute !important;
     top: 2px !important;
 }
+
+.timeline-overlap-indicator {
+    position: absolute;
+    height: 100%;
+    top: 0;
+    background-color: rgba(255, 255, 255, 0.5);
+    z-index: 5;
+    pointer-events: none;
+}
