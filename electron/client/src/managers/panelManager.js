@@ -1,6 +1,5 @@
 var PanelManager = (function() {
 
-    // 애플리케이션에 존재하는 모든 패널의 기본 정보
     const componentRegistry = {
         fileList:   { title: "Assets",      component: 'fileList' },
         widgetTree: { title: "Hierarchy",   component: 'widgetTree' },
@@ -10,7 +9,6 @@ var PanelManager = (function() {
         sequencer:  { title: "Sequencer",   component: 'sequencer' },
     };
 
-    // 기본 레이아웃 설정
     const defaultLayoutConfig = {
         content: [{
             type: 'row',
@@ -31,154 +29,129 @@ var PanelManager = (function() {
         }]
     };
 
+    let manualResolution = null;
+
+    function _registerComponents(myLayout) {
+        myLayout.registerComponent('gameView', function(container, componentState){
+            const content = $('#game-canvas-template').children();
+            const canvasElement = content.first();
+            container.getElement().css({'display': 'flex','justify-content': 'center','align-items': 'center','padding': '0'});
+            container.getElement().append(content);
+
+            const resizeCanvas = function() {
+                if (typeof cc === 'undefined' || !cc.view) return;
+
+                const margin = 20;
+                const panelW = container.width - margin;
+                const panelH = container.height - margin;
+                if (!panelW || !panelH || panelW <= 0 || panelH <= 0) return;
+
+                const designW = manualResolution ? manualResolution.width : panelW;
+                const designH = manualResolution ? manualResolution.height : panelH;
+
+                let contentW = designW, contentH = designH, scale = 1;
+                if (contentH < 670) { if (contentH < 400) { scale = 400 / 670; } else { scale = contentH / 670; } contentH = 670; contentW /= scale; } else if (contentH > 1000) { scale = contentH / 1000; contentH = 1000; contentW /= scale; }
+                if (contentW < 1080) { scale = scale * contentW / 1080; contentW = 1080; contentH = designH / scale; } else if (contentW > 2700) { contentW = 2700; }
+
+                canvasElement.attr('width', panelW).attr('height', panelH);
+                cc.view.setFrameSize(panelW, panelH);
+                cc.view.setDesignResolutionSize(contentW, contentH, cc.ResolutionPolicy.SHOW_ALL);
+                if (cc.eventManager) { cc.eventManager.dispatchCustomEvent("canvas-resize"); }
+            };
+
+            container.on('setManualResolution', function(w, h) {
+                manualResolution = (w && h) ? { width: w, height: h } : null;
+                resizeCanvas();
+            });
+
+            container.on('resize', function() {
+                manualResolution = null;
+                $('#res-width-input, #res-height-input').val('');
+                resizeCanvas();
+            });
+
+            setTimeout(resizeCanvas, 0);
+        });
+
+        myLayout.registerComponent('fileList', function(container, componentState) { container.getElement().append($('#original-content-templates').find('#fileContainer').children()); });
+        myLayout.registerComponent('widgetTree', function(container, componentState) { container.getElement().append($('#original-content-templates').find('#widgetContainer').children()); });
+        myLayout.registerComponent('properties', function(container, componentState) { container.getElement().append($('#original-content-templates').find('#nodeInfoContainer').children()); });
+        myLayout.registerComponent('uiAnimation', function(container, componentState) { container.getElement().append($('#original-content-templates').find('#uiAnimationContainer').children()); });
+        myLayout.registerComponent('sequencer', function(container, componentState) { container.getElement().append($('#original-content-templates').find('#sequencerContainer').children()); });
+    }
+
     return {
         initialize: function() {
             const layoutArea = $('#panels-container-area');
             layoutArea.empty();
-
             const finalLayoutConfig = LayoutManager.load() || defaultLayoutConfig;
-
             const myLayout = new GoldenLayout(finalLayoutConfig, layoutArea);
 
-            // --- 모든 컴포넌트(패널) 등록 (안정적인 function 키워드 사용으로 수정) ---
-
-            myLayout.registerComponent('gameView', function(container, componentState){
-                const content = $('#game-canvas-template').children();
-                const canvasElement = content.first();
-                container.getElement().css({'display': 'flex','justify-content': 'center','align-items': 'center','padding': '0'});
-                container.getElement().append(content);
-                const resizeCanvas = function() {
-                    if (typeof cc === 'undefined' || !cc.view) return;
-                    const margin = 20;
-                    const w = container.width - margin;
-                    const h = container.height - margin;
-                    if (!w || !h || w <= 0 || h <= 0) return;
-                    let contentW = w, contentH = h, scale = 1;
-                    if (contentH < 670) { if (contentH < 400) { scale = 400 / 670; } else { scale = contentH / 670; } contentH = 670; contentW /= scale; } else if (contentH > 1000) { scale = contentH / 1000; contentH = 1000; contentW /= scale; }
-                    if (contentW < 1080) { scale = scale * contentW / 1080; contentW = 1080; contentH = h / scale; } else if (contentW > 2700) { contentW = 2700; }
-                    canvasElement.attr('width', w).attr('height', h);
-                    cc.view.setFrameSize(w, h);
-                    cc.view.setDesignResolutionSize(contentW, contentH, cc.ResolutionPolicy.SHOW_ALL);
-                    if (cc.eventManager) { cc.eventManager.dispatchCustomEvent("canvas-resize"); }
-                };
-                setTimeout(resizeCanvas, 0);
-                container.on('resize', resizeCanvas);
-            });
-
-            myLayout.registerComponent('fileList', function(container, componentState) {
-                container.getElement().append($('#original-content-templates').find('#fileContainer').children());
-            });
-
-            myLayout.registerComponent('widgetTree', function(container, componentState) {
-                container.getElement().append($('#original-content-templates').find('#widgetContainer').children());
-            });
-
-            myLayout.registerComponent('properties', function(container, componentState) {
-                container.getElement().append($('#original-content-templates').find('#nodeInfoContainer').children());
-            });
-
-            myLayout.registerComponent('uiAnimation', function(container, componentState) {
-                container.getElement().append($('#original-content-templates').find('#uiAnimationContainer').children());
-            });
-
-            myLayout.registerComponent('sequencer', function(container, componentState) {
-                container.getElement().append($('#original-content-templates').find('#sequencerContainer').children());
-            });
-
+            _registerComponents(myLayout);
             myLayout.init();
 
-            // --- 오른쪽 위 버튼 기능 구현 ---
+            // --- 패널 목록 기능 ---
             const $dropdown = $('#panel-toggle-dropdown');
             const $toggleButton = $('#panel-toggle-button');
-
             $dropdown.empty();
             for (const key in componentRegistry) {
-                const item = componentRegistry[key];
-                $dropdown.append(`<label><input type="checkbox" data-component-type="${item.component}"> ${item.title}</label>`);
+                $dropdown.append(`<label><input type="checkbox" data-component-type="${componentRegistry[key].component}"> ${componentRegistry[key].title}</label>`);
             }
-
             function syncCheckboxes() {
                 const openComponents = new Set();
-                myLayout.root.getItemsByFilter(item => item.isComponent).forEach(item => {
-                    openComponents.add(item.componentName);
-                });
-                $dropdown.find('input[type="checkbox"]').each(function() {
-                    $(this).prop('checked', openComponents.has($(this).data('component-type')));
-                });
+                myLayout.root.getItemsByFilter(item => item.isComponent).forEach(item => { openComponents.add(item.componentName); });
+                $dropdown.find('input[type="checkbox"]').each(function() { $(this).prop('checked', openComponents.has($(this).data('component-type'))); });
             }
-
-            $toggleButton.on('click', function(e) {
-                e.stopPropagation();
-                syncCheckboxes();
-                $dropdown.slideToggle(150);
-            });
-            $(document).on('click', e => { if (!$toggleButton.is(e.target) && $toggleButton.has(e.target).length === 0) $dropdown.slideUp(150); });
-
+            $toggleButton.on('click', (e) => { e.stopPropagation(); syncCheckboxes(); $dropdown.slideToggle(150); });
             $dropdown.on('change', 'input[type="checkbox"]', function() {
                 const componentType = $(this).data('component-type');
-                const title = componentRegistry[componentType].title;
+                const existingItems = myLayout.root.getItemsByFilter(item => item.isComponent && item.componentName === componentType);
                 if ($(this).is(':checked')) {
-                    if (myLayout.root.getItemsByComponentType(componentType).length === 0) {
-                        myLayout.root.contentItems[0].addChild({ type: 'component', componentName: componentType, title: title });
+                    if (existingItems.length === 0) {
+                        const componentConfig = { type: 'component', componentName: componentType, title: componentRegistry[componentType].title };
+                        const firstStack = myLayout.root.getItemsByFilter(item => item.isStack)[0];
+                        if (firstStack) { firstStack.addChild(componentConfig); }
+                        else { myLayout.root.contentItems[0].addChild(componentConfig); }
                     }
                 } else {
-                    myLayout.root.getItemsByComponentType(componentType).forEach(item => item.remove());
+                    existingItems.forEach(item => item.remove());
                 }
             });
 
+            // --- 해상도 강제 조절 기능 ---
+            $('#res-apply-btn').on('click', function () {
+                const w = parseInt($('#res-width-input').val(), 10);
+                const h = parseInt($('#res-height-input').val(), 10);
+                if (!isNaN(w) && !isNaN(h) && w > 0 && h > 0) {
+                    const gameViewItems = myLayout.root.getItemsByFilter(item => item.isComponent && item.componentName === 'gameView');
+                    if (gameViewItems.length > 0) {
+                        gameViewItems[0].container.emit('setManualResolution', w, h);
+                    }
+                }
+            });
+
+            // --- 기타 UI 및 레이아웃 이벤트 ---
+            $(document).on('click', e => { if (!$toggleButton.is(e.target) && !$dropdown.is(e.target) && $dropdown.has(e.target).length === 0) $dropdown.slideUp(150); });
             myLayout.on('stateChanged', () => LayoutManager.save(myLayout));
-            myLayout.on('itemDestroyed', () => {
-                LayoutManager.save(myLayout);
-                syncCheckboxes();
+            myLayout.on('itemDestroyed', () => { LayoutManager.save(myLayout); syncCheckboxes(); });
+
+            // ★★★ 햄버거 버튼 이벤트 핸들러 (이 부분이 누락되었을 수 있습니다) ★★★
+            $('#main-menu-toggle-btn').on('click', function() {
+                $(this).toggleClass('is-active');
+                $('.toggleable-control').toggle('slide', { direction: 'right' }, 150);
             });
 
-            // --- 전체화면 버튼 기능 (생략 없이 모두 복구) ---
-            $('#toggle-fullscreen-btn').on('click', function() {
-                if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-                    if (document.documentElement.requestFullscreen) {
-                        document.documentElement.requestFullscreen();
-                    } else if (document.documentElement.webkitRequestFullscreen) {
-                        document.documentElement.webkitRequestFullscreen();
-                    }
-                } else {
-                    if (document.exitFullscreen) {
-                        document.exitFullscreen();
-                    } else if (document.webkitExitFullscreen) {
-                        document.webkitExitFullscreen();
-                    }
-                }
-            });
-
+            $('#toggle-fullscreen-btn').on('click', function() { if (!document.fullscreenElement) { document.documentElement.requestFullscreen(); } else { if (document.exitFullscreen) document.exitFullscreen(); } });
             $(document).on('fullscreenchange webkitfullscreenchange', function() {
-                const isFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement);
-                const $icon = $('#toggle-fullscreen-btn').find('i');
-                if (isFullscreen) {
-                    $icon.removeClass('fa-expand').addClass('fa-compress');
-                } else {
-                    $icon.removeClass('fa-compress').addClass('fa-expand');
-                }
+                const isFullscreen = !!document.fullscreenElement;
+                $('#toggle-fullscreen-btn').find('i').toggleClass('fa-compress', isFullscreen).toggleClass('fa-expand', !isFullscreen);
             });
 
-            // --- 패널 리사이즈 시 오버레이 기능 ---
             $(document).on('mousedown', '.lm_splitter', () => $('#resize-overlay').show());
             $(document).on('mouseup', () => { if ($('#resize-overlay').is(':visible')) $('#resize-overlay').hide(); });
 
-            function debounce(func, delay) {
-                let timeout;
-                return function(...args) {
-                    clearTimeout(timeout);
-                    timeout = setTimeout(() => func.apply(this, args), delay);
-                };
-            }
-
-            // myLayout.updateSize 함수를 디바운스 처리
-            const debouncedResize = debounce(function() {
-                if (myLayout) {
-                    myLayout.updateSize();
-                }
-            }, 150); // 150ms 딜레이
-
-            // window의 resize 이벤트에 디바운스 처리된 함수를 연결
+            function debounce(func, delay) { let timeout; return function(...args) { clearTimeout(timeout); timeout = setTimeout(() => func.apply(this, args), delay); }; }
+            const debouncedResize = debounce(() => { if (myLayout) myLayout.updateSize(); }, 150);
             $(window).on('resize', debouncedResize);
         }
     };

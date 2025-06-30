@@ -568,7 +568,7 @@ ul.tabs li.current {
 #widgetTree {
     flex-grow: 1;
     min-height: 100px;
-    height: 100%;
+    height: 99%;
 }
 
 .jstree-default > .jstree-container-ul,
@@ -887,4 +887,10 @@ ul.tabs li.current {
 }
 .draggable-label:active {
     color: white;
+}
+
+.timeline-track > .ui-wrapper,
+.timeline-clip {
+    position: absolute !important;
+    top: 2px !important;
 }
