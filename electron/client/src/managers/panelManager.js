@@ -1,180 +1,154 @@
 var PanelManager = (function() {
 
-    // --- Private Members ---
-
-    const panelLayoutConfig = {
-        gameView:   { id: "panel-game-view",   title: "Game View",      left: 470, top: 20,  width: 800, height: 600, visible: true },
-        fileList:   { id: "panel-file-list",   title: "Assets",      left: 20,  top: 20,  width: 430, height: 200, visible: true },
-        widgetTree: { id: "panel-widget-tree", title: "Hierarchy",         left: 20,  top: 240, width: 430, height: 280, visible: true },
-        properties: { id: "panel-properties",  title: "Properties",     left: 20,  top: 540, width: 430, height: 240, visible: true },
-        uiAnimation:{ id: "panel-ui-animation",title: "Animations",   left: 470, top: 640, width: 395, height: 140, visible: false },
-        sequencer:  { id: "panel-sequencer",   title: "Sequencer",      left: 885, top: 640, width: 385, height: 140, visible: false },
+    // 애플리케이션에 존재하는 모든 패널의 기본 정보
+    const componentRegistry = {
+        fileList:   { title: "Assets",      component: 'fileList' },
+        widgetTree: { title: "Hierarchy",   component: 'widgetTree' },
+        properties: { title: "Properties",  component: 'properties' },
+        gameView:   { title: "Game View",   component: 'gameView' },
+        uiAnimation:{ title: "Animations",  component: 'uiAnimation' },
+        sequencer:  { title: "Sequencer",   component: 'sequencer' },
     };
 
-    function handleSmartSnap(ui, currentElement, isResizing = false) {
-        const $guideV = $('.vertical-guide');
-        const $guideH = $('.horizontal-guide');
-        $guideV.hide(); $guideH.hide();
-        const $this = $(currentElement);
-        const originalPos = $this.data('originalPosition');
-        const originalSize = $this.data('originalSize');
-        let newPos = { left: ui.position.left, top: ui.position.top };
-        let newSize = isResizing ? { width: ui.size.width, height: ui.size.height } : { width: $this.outerWidth(), height: $this.outerHeight() };
-        const currentRect = { left: newPos.left, top: newPos.top, width: newSize.width, height: newSize.height };
-        currentRect.right = currentRect.left + currentRect.width;
-        currentRect.bottom = currentRect.top + currentRect.height;
-        let snappedV = false, snappedH = false;
-        let activeHandle = isResizing ? $this.data('activeHandle') : null;
-        const alignmentTolerance = 6;
-        $('.draggable-panel:visible').not(currentElement).each(function() {
-            const target = $(this);
-            const targetPos = target.position();
-            const tRect = { left: targetPos.left, top: targetPos.top, width: target.outerWidth(), height: target.outerHeight() };
-            tRect.right = tRect.left + tRect.width; tRect.bottom = tRect.top + tRect.height;
-            if (!snappedV) {
-                const vSnapPoints = [ { cEdge: currentRect.left, tEdge: tRect.left, handleMatch: ['w', 'nw', 'sw'] }, { cEdge: currentRect.left, tEdge: tRect.right, handleMatch: ['w', 'nw', 'sw'] }, { cEdge: currentRect.right, tEdge: tRect.left, handleMatch: ['e', 'ne', 'se'] }, { cEdge: currentRect.right, tEdge: tRect.right, handleMatch: ['e', 'ne', 'se'] } ];
-                for (const p of vSnapPoints) {
-                    if (isResizing && activeHandle && !p.handleMatch.some(h => activeHandle.includes(h))) continue;
-                    if (Math.abs(p.cEdge - p.tEdge) < alignmentTolerance) {
-                        if (isResizing) { if (activeHandle.includes('w')) { newPos.left = p.tEdge; newSize.width = originalPos.left + originalSize.width - newPos.left; } else if (activeHandle.includes('e')) { newSize.width = p.tEdge - originalPos.left; } } else { newPos.left = p.tEdge - (p.cEdge - currentRect.left); }
-                        $guideV.css({left: p.tEdge, top: Math.min(currentRect.top, tRect.top)-10, height: Math.max(currentRect.bottom, tRect.bottom) - Math.min(currentRect.top, tRect.top) + 20 }).show();
-                        snappedV = true; break;
-                    }
-                }
-            }
-            if (!snappedH) {
-                const hSnapPoints = [ { cEdge: currentRect.top, tEdge: tRect.top, handleMatch: ['n', 'nw', 'ne'] }, { cEdge: currentRect.top, tEdge: tRect.bottom, handleMatch: ['n', 'nw', 'ne'] }, { cEdge: currentRect.bottom, tEdge: tRect.top, handleMatch: ['s', 'sw', 'se'] }, { cEdge: currentRect.bottom, tEdge: tRect.bottom, handleMatch: ['s', 'sw', 'se'] } ];
-                for (const p of hSnapPoints) {
-                    if (isResizing && activeHandle && !p.handleMatch.some(h => activeHandle.includes(h))) continue;
-                    if (Math.abs(p.cEdge - p.tEdge) < alignmentTolerance) {
-                        if (isResizing) { if (activeHandle.includes('n')) { newPos.top = p.tEdge; newSize.height = originalPos.top + originalSize.height - newPos.top; } else if (activeHandle.includes('s')) { newSize.height = p.tEdge - originalPos.top; } } else { newPos.top = p.tEdge - (p.cEdge - currentRect.top); }
-                        $guideH.css({top: p.tEdge, left: Math.min(currentRect.left, tRect.left)-10, width: Math.max(currentRect.right, tRect.right) - Math.min(currentRect.left, tRect.left) + 20 }).show();
-                        snappedH = true; break;
-                    }
-                }
-            }
-            if (snappedV && snappedH && !isResizing) return false;
-        });
-        ui.position.left = newPos.left; ui.position.top = newPos.top;
-        if (isResizing) { ui.size.width = Math.max(newSize.width, $this.resizable("option", "minWidth")); ui.size.height = Math.max(newSize.height, $this.resizable("option", "minHeight")); }
-    }
+    // 기본 레이아웃 설정
+    const defaultLayoutConfig = {
+        content: [{
+            type: 'row',
+            content: [
+                { type: 'column', width: 30, content: [
+                        { type: 'component', componentName: 'fileList', title: 'Assets' },
+                        { type: 'component', componentName: 'widgetTree', title: 'Hierarchy' },
+                        { type: 'component', componentName: 'properties', title: 'Properties' }
+                    ]},
+                { type: 'column', width: 70, content: [
+                        { type: 'component', componentName: 'gameView', title: 'Game View', height: 75 },
+                        { type: 'stack', height: 25, minHeight: 250, content: [
+                                { type: 'component', componentName: 'uiAnimation', title: 'Animations' },
+                                { type: 'component', componentName: 'sequencer', title: 'Sequencer' }
+                            ]}
+                    ]}
+            ]
+        }]
+    };
 
     return {
-        config: panelLayoutConfig,
-
         initialize: function() {
             const layoutArea = $('#panels-container-area');
-            const dropdownMenu = $('#panel-toggle-dropdown');
-            layoutArea.find('.draggable-panel').remove();
-            dropdownMenu.empty();
+            layoutArea.empty();
 
-            for (const key in panelLayoutConfig) {
-                const config = panelLayoutConfig[key];
-                const panelHtml = `<div id="${config.id}" class="draggable-panel" style="left:${config.left}px; top:${config.top}px; width:${config.width}px; height:${config.height}px;"><div class="panel-header"><span class="panel-title-text">${config.title}</span><span class="drag-handle-visual"><i class="fas fa-arrows-alt"></i></span></div><div class="panel-content"></div></div>`;
-                const $panel = $(panelHtml);
-                $panel.data('config-key', key);
+            const finalLayoutConfig = LayoutManager.load() || defaultLayoutConfig;
 
-                if (config.id === 'panel-game-view') {
-                    $panel.find('.panel-content').append($('#gameCanvas'));
-                    $panel.find('.panel-content').css({
-                        'padding': '0',
-                        'overflow': 'auto',
-                        'background-color': '#202020',
-                        'display': 'flex',
-                        'justify-content': 'center',
-                        'align-items': 'center'
-                    });
-                } else if (config.id === 'panel-file-list') {
-                    $panel.find('.panel-content').append($('#fileContainer').children());
-                } else if (config.id === 'panel-widget-tree') {
-                    $panel.find('.panel-content').append($('#widgetContainer').children());
-                } else if (config.id === 'panel-properties') {
-                    $panel.find('.panel-content').append($('#nodeInfoContainer').children());
-                } else if (config.id === 'panel-ui-animation') {
-                    $panel.find('.panel-content').append($('#uiAnimationContainer').children());
-                } else if (config.id === 'panel-sequencer') {
-                    $panel.find('.panel-content').append($('#sequencerContainer').children());
-                }
+            const myLayout = new GoldenLayout(finalLayoutConfig, layoutArea);
 
-                if (!config.visible) { $panel.hide(); }
-                layoutArea.append($panel);
-                dropdownMenu.append(`<label><input type="checkbox" data-panel-id="${config.id}" ${config.visible ? 'checked' : ''}> ${config.title}</label>`);
+            // --- 모든 컴포넌트(패널) 등록 (안정적인 function 키워드 사용으로 수정) ---
+
+            myLayout.registerComponent('gameView', function(container, componentState){
+                const content = $('#game-canvas-template').children();
+                const canvasElement = content.first();
+                container.getElement().css({'display': 'flex','justify-content': 'center','align-items': 'center','padding': '0'});
+                container.getElement().append(content);
+                const resizeCanvas = function() {
+                    if (typeof cc === 'undefined' || !cc.view) return;
+                    const margin = 20;
+                    const w = container.width - margin;
+                    const h = container.height - margin;
+                    if (!w || !h || w <= 0 || h <= 0) return;
+                    let contentW = w, contentH = h, scale = 1;
+                    if (contentH < 670) { if (contentH < 400) { scale = 400 / 670; } else { scale = contentH / 670; } contentH = 670; contentW /= scale; } else if (contentH > 1000) { scale = contentH / 1000; contentH = 1000; contentW /= scale; }
+                    if (contentW < 1080) { scale = scale * contentW / 1080; contentW = 1080; contentH = h / scale; } else if (contentW > 2700) { contentW = 2700; }
+                    canvasElement.attr('width', w).attr('height', h);
+                    cc.view.setFrameSize(w, h);
+                    cc.view.setDesignResolutionSize(contentW, contentH, cc.ResolutionPolicy.SHOW_ALL);
+                    if (cc.eventManager) { cc.eventManager.dispatchCustomEvent("canvas-resize"); }
+                };
+                setTimeout(resizeCanvas, 0);
+                container.on('resize', resizeCanvas);
+            });
+
+            myLayout.registerComponent('fileList', function(container, componentState) {
+                container.getElement().append($('#original-content-templates').find('#fileContainer').children());
+            });
+
+            myLayout.registerComponent('widgetTree', function(container, componentState) {
+                container.getElement().append($('#original-content-templates').find('#widgetContainer').children());
+            });
+
+            myLayout.registerComponent('properties', function(container, componentState) {
+                container.getElement().append($('#original-content-templates').find('#nodeInfoContainer').children());
+            });
+
+            myLayout.registerComponent('uiAnimation', function(container, componentState) {
+                container.getElement().append($('#original-content-templates').find('#uiAnimationContainer').children());
+            });
+
+            myLayout.registerComponent('sequencer', function(container, componentState) {
+                container.getElement().append($('#original-content-templates').find('#sequencerContainer').children());
+            });
+
+            myLayout.init();
+
+            // --- 오른쪽 위 버튼 기능 구현 ---
+            const $dropdown = $('#panel-toggle-dropdown');
+            const $toggleButton = $('#panel-toggle-button');
+
+            $dropdown.empty();
+            for (const key in componentRegistry) {
+                const item = componentRegistry[key];
+                $dropdown.append(`<label><input type="checkbox" data-component-type="${item.component}"> ${item.title}</label>`);
             }
 
-            $(".draggable-panel").draggable({
-                handle: ".panel-header", containment: "#panels-container-area", stack: ".draggable-panel",
-                start: function() { $('body').addClass('is-interacting'); $('#resize-overlay').show(); },
-                drag: function(event, ui) { handleSmartSnap(ui, this); },
-                stop: function() { $('body').removeClass('is-interacting'); $('.vertical-guide, .horizontal-guide').hide(); $('#resize-overlay').hide(); LayoutManager.save(); }
-            }).resizable({
-                handles: "n, e, s, w, ne, nw, se, sw", minHeight: 100, minWidth: 200, containment: "#panels-container-area",
-                start: function(event, ui) {
-                    $('body').addClass('is-interacting');
-                    $(this).data('originalPosition', $.extend({}, ui.originalPosition));
-                    $(this).data('originalSize', $.extend({}, ui.originalSize));
-                    $(this).data('activeHandle', ui.helper.data('ui-resizable').axis);
-                    $('#resize-overlay').show();
-                },
-                resize: function(event, ui) { handleSmartSnap(ui, this, true); },
-                stop: function(event, ui) {
-                    $('body').removeClass('is-interacting');
-                    $('.vertical-guide, .horizontal-guide').hide();
-                    $(this).removeData('originalPosition').removeData('originalSize').removeData('activeHandle');
-                    $('#resize-overlay').hide();
-                    if (ui.element.attr('id') === 'panel-game-view') {
-                        GameViewManager.sync();
-                    }
-                    LayoutManager.save();
-                }
-            });
+            function syncCheckboxes() {
+                const openComponents = new Set();
+                myLayout.root.getItemsByFilter(item => item.isComponent).forEach(item => {
+                    openComponents.add(item.componentName);
+                });
+                $dropdown.find('input[type="checkbox"]').each(function() {
+                    $(this).prop('checked', openComponents.has($(this).data('component-type')));
+                });
+            }
 
-            // 오른쪽 위 버튼
-
-            // '패널 목록' 버튼 클릭 시 드롭다운 토글 (기존 기능 유지)
-            $('#panel-toggle-button').on('click', function(e) {
+            $toggleButton.on('click', function(e) {
                 e.stopPropagation();
-                $('#panel-toggle-dropdown').slideToggle(150);
+                syncCheckboxes();
+                $dropdown.slideToggle(150);
             });
+            $(document).on('click', e => { if (!$toggleButton.is(e.target) && $toggleButton.has(e.target).length === 0) $dropdown.slideUp(150); });
 
-            // '패널 목록' 드롭다운 외부 클릭 시 닫기 (기존 기능 유지)
-            $(document).on('click', function(e) {
-                const $dropdownContainer = $('#panel-toggle-menu-container');
-                if (!$dropdownContainer.is(e.target) && $dropdownContainer.has(e.target).length === 0) {
-                    $('#panel-toggle-dropdown').slideUp(150);
+            $dropdown.on('change', 'input[type="checkbox"]', function() {
+                const componentType = $(this).data('component-type');
+                const title = componentRegistry[componentType].title;
+                if ($(this).is(':checked')) {
+                    if (myLayout.root.getItemsByComponentType(componentType).length === 0) {
+                        myLayout.root.contentItems[0].addChild({ type: 'component', componentName: componentType, title: title });
+                    }
+                } else {
+                    myLayout.root.getItemsByComponentType(componentType).forEach(item => item.remove());
                 }
             });
 
-            // 각 패널 체크박스 변경 시 패널 on/off (기존 기능 유지)
-            $('#panel-toggle-dropdown').on('change', 'input[type="checkbox"]', function() {
-                $('#' + $(this).data('panel-id')).toggle($(this).is(':checked'));
-                // LayoutManager.save(); // 필요 시 주석 해제
+            myLayout.on('stateChanged', () => LayoutManager.save(myLayout));
+            myLayout.on('itemDestroyed', () => {
+                LayoutManager.save(myLayout);
+                syncCheckboxes();
             });
 
-            // 새로운 햄버거 버튼 클릭 이벤트 (주변 컨트롤 토글)
-            $('#main-menu-toggle-btn').on('click', function() {
-                $(this).toggleClass('is-active'); // 클릭된 버튼 자신에게 is-active 클래스를 추가/제거
-                $('.toggleable-control').toggle('slide', { direction: 'right' }, 150);
-            });
-
+            // --- 전체화면 버튼 기능 (생략 없이 모두 복구) ---
             $('#toggle-fullscreen-btn').on('click', function() {
                 if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-                    // 전체화면 모드로 진입
                     if (document.documentElement.requestFullscreen) {
                         document.documentElement.requestFullscreen();
-                    } else if (document.documentElement.webkitRequestFullscreen) { // Chrome, Safari, Opera
+                    } else if (document.documentElement.webkitRequestFullscreen) {
                         document.documentElement.webkitRequestFullscreen();
                     }
                 } else {
-                    // 전체화면 모드에서 해제
                     if (document.exitFullscreen) {
                         document.exitFullscreen();
-                    } else if (document.webkitExitFullscreen) { // Chrome, Safari, Opera
+                    } else if (document.webkitExitFullscreen) {
                         document.webkitExitFullscreen();
                     }
                 }
             });
 
-            // 전체화면 상태 변경 감지 (ESC 키로 해제 시 아이콘 변경 등)
             $(document).on('fullscreenchange webkitfullscreenchange', function() {
                 const isFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement);
                 const $icon = $('#toggle-fullscreen-btn').find('i');
@@ -184,6 +158,28 @@ var PanelManager = (function() {
                     $icon.removeClass('fa-compress').addClass('fa-expand');
                 }
             });
+
+            // --- 패널 리사이즈 시 오버레이 기능 ---
+            $(document).on('mousedown', '.lm_splitter', () => $('#resize-overlay').show());
+            $(document).on('mouseup', () => { if ($('#resize-overlay').is(':visible')) $('#resize-overlay').hide(); });
+
+            function debounce(func, delay) {
+                let timeout;
+                return function(...args) {
+                    clearTimeout(timeout);
+                    timeout = setTimeout(() => func.apply(this, args), delay);
+                };
+            }
+
+            // myLayout.updateSize 함수를 디바운스 처리
+            const debouncedResize = debounce(function() {
+                if (myLayout) {
+                    myLayout.updateSize();
+                }
+            }, 150); // 150ms 딜레이
+
+            // window의 resize 이벤트에 디바운스 처리된 함수를 연결
+            $(window).on('resize', debouncedResize);
         }
     };
 })();

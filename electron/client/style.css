@@ -40,12 +40,6 @@ body {
     font-family: 'Roboto', Helvetica, Verdana, Arial, sans-serif;
     overflow: hidden;
 }
-body.is-interacting .draggable-panel:not(.ui-draggable-dragging):not(.ui-resizable-resizing) {
-    pointer-events: none;
-}
-.draggable-panel:not(.ui-draggable-dragging) {
-    position: absolute !important;
-}
 canvas {
     background-color: transparent;
 }
@@ -53,68 +47,29 @@ canvas {
     width: 100%;
     height: 100%;
     position: relative;
-    overflow: visible;
+    overflow: hidden;
 }
-.vertical-guide, .horizontal-guide {
-    position: absolute;
-    background-color: var(--guide-color);
+
+/* Golden Layout 패널 내부 스크롤 처리 */
+.lm_content {
+    overflow: auto !important;
+}
+.lm_content .lm_content {
+    overflow: hidden !important;
+}
+
+/* 드래그 시 사용하는 전체 화면 오버레이 (복구) */
+#resize-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
     display: none;
-    z-index: 1001;
 }
-.vertical-guide { width: 1px; }
-.horizontal-guide { height: 1px; }
-.draggable-panel {
-    background-color: var(--bg-secondary);
-    border: 1px solid #131313;
-    display: flex;
-    flex-direction: column;
-    position: absolute !important;
-    min-width: 200px;
-    min-height: 150px;
-    transition: box-shadow 0.2s ease-in-out, border-color 0.2s ease-in-out;
-    top: auto;
-    left: auto;
-    right: auto;
-    bottom: auto;
-    float: none;
-    clear: none;
-    transform: none;
-}
-.draggable-panel.ui-draggable-dragging,
-.draggable-panel.ui-resizable-resizing {
-    z-index: 1000 !important;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.5);
-    border-color: var(--accent-color);
-    position: absolute !important;
-}
-.ui-draggable-dragging {
-    position: absolute !important;
-}
-.panel-header {
-    background-color: var(--bg-tertiary);
-    color: var(--font-primary);
-    padding: 8px 12px;
-    font-weight: 500;
-    border-bottom: 1px solid var(--border-color);
-    cursor: grab;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-shrink: 0;
-}
-.panel-header .panel-title-text { font-size: 0.95rem; }
-.panel-header .drag-handle-visual {
-    width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; opacity: 0.6;
-}
-.panel-content {
-    padding: 10px;
-    flex-grow: 1;
-    overflow-y: auto;
-    overflow-x: hidden;
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-}
+
+/* --- 상단 우측 컨트롤 버튼 및 드롭다운 메뉴 스타일 --- */
 #top-right-controls {
     position: fixed;
     top: 10px;
@@ -124,7 +79,7 @@ canvas {
     align-items: stretch;
     gap: 15px;
 }
-#main-menu-toggle-btn {
+#main-menu-toggle-btn, #toggle-fullscreen-btn {
     width: 40px;
     height: 40px;
     border-radius: 50%;
@@ -138,33 +93,13 @@ canvas {
     font-size: 16px;
     cursor: pointer;
     flex-shrink: 0;
-    transition: transform 0.3s ease;
+    transition: all 0.2s ease;
 }
-#main-menu-toggle-btn:hover {
+#main-menu-toggle-btn:hover, #toggle-fullscreen-btn:hover {
     background-color: #555;
 }
 #main-menu-toggle-btn.is-active {
     transform: rotate(90deg);
-}
-#toggle-fullscreen-btn {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    border: 1px solid #666;
-    background-color: #444;
-    color: white;
-    padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    cursor: pointer;
-    flex-shrink: 0;
-    transition: background-color 0.2s ease;
-}
-
-#toggle-fullscreen-btn:hover {
-    background-color: #555;
 }
 
 #resolution-controller {
@@ -226,6 +161,9 @@ canvas {
     margin-right: 8px;
     vertical-align: middle;
 }
+
+/* --- 내부 콘텐츠 스타일 (완전 복구) --- */
+
 .smallWidget, .treeWidget, .actionWidget {
     width: 100%;
     overflow: auto;
@@ -258,6 +196,11 @@ canvas {
     flex-direction: column;
     overflow: hidden;
     min-height: 0;
+}
+.tab-widgetContent {
+    display: flex;
+    flex-direction: column;
+    height: 90%;
 }
 .styleLabel {
     color: var(--font-primary);
@@ -415,7 +358,7 @@ ul.tabs li.current {
     display: flex;
     flex-direction: column;
     flex-grow: 1;
-    min-height: 0;
+    min-height: 150px;
     background-color: var(--bg-primary);
     border: 1px solid var(--border-color);
     position: relative;
@@ -580,12 +523,9 @@ ul.tabs li.current {
     background-color: #ff8763;
     border-color: #c63600;
 }
-.ui-draggable-dragging, .timeline-clip:active {
+.timeline-clip:active {
     cursor: grabbing;
     z-index: 3;
-}
-.timeline-track > .ui-wrapper {
-    position: absolute !important;
 }
 .clip-name {
     white-space: nowrap;
@@ -612,15 +552,6 @@ ul.tabs li.current {
     opacity: 0.7;
     border: 1px dashed white;
 }
-#timeline-interaction-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 20;
-    display: none;
-}
 .ui-resizable-handle {
     width: 7px;
     height: 100%;
@@ -634,39 +565,6 @@ ul.tabs li.current {
 .ui-resizable-w {
     left: 0;
 }
-.timeline-overlap-indicator {
-    position: absolute;
-    height: 100%;
-    top: 0;
-    background-color: rgba(255, 255, 255, 0.5);
-    z-index: 5;
-    pointer-events: none;
-}
-
-.timeline-clip {
-    position: absolute !important;
-    top: 2px !important;
-}
-
-.ui-wrapper {
-    top: 2px !important;
-}
-
-.timeline-clip.ui-draggable-dragging,
-.timeline-clip.ui-resizable-resizing {
-    top: 2px !important;
-}
-
-#resize-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 9999;
-    display: none;
-}
-
 #widgetTree {
     flex-grow: 1;
     min-height: 100px;
@@ -730,39 +628,8 @@ ul.tabs li.current {
     color: white !important;
     font-weight: bold;
 }
-.jstree-default .jstree-clicked:hover {
-    background-color: var(--accent-color) !important;
-    color: white !important;
-}
-.jstree-default .jstree-clicked:active {
-    background-color: var(--accent-color) !important;
-    color: white !important;
-}
-.jstree-default .jstree-clicked:focus {
-    background-color: var(--accent-color) !important;
-    color: white !important;
-    outline: none;
-}
-
-.jstree-default .jstree-anchor.keep-selected {
-    background-color: var(--accent-color) !important;
-    color: white !important;
-    font-weight: bold;
-}
-.jstree-default .jstree-clicked::before {
-    color: white !important;
-}
-
 .jstree-default .jstree-anchor > .jstree-icon {
     display: none;
-}
-
-.jstree-default .jstree-anchor::before {
-    content: '';
-    display: inline-block;
-    flex-shrink: 0;
-    width: 0;
-    margin-right: 0;
 }
 .jstree-anchor.type-armature::before,
 .jstree-anchor.type-ui::before,
@@ -808,171 +675,7 @@ ul.tabs li.current {
     vertical-align: middle;
 }
 
-.jstree-default .jstree-anchor {
-    background-color: var(--bg-tertiary);
-    color: var(--font-primary);
-}
-
-.jstree-default .jstree-anchor:hover {
-    background-color: #4a4a4a !important;
-    color: white !important;
-}
-
-.jstree-default .jstree-clicked {
-    background-color: var(--accent-color) !important;
-    color: white !important;
-}
-
-.jstree-default .jstree-clicked:hover {
-    background-color: var(--accent-color) !important;
-    color: white !important;
-}
-
-.jstree-default .jstree-clicked:active {
-    background-color: var(--accent-color) !important;
-    color: white !important;
-}
-
-.jstree-default .jstree-clicked:focus {
-    background-color: var(--accent-color) !important;
-    color: white !important;
-    outline: none;
-}
-
-.jstree-default .jstree-disabled {
-    background-color: #f5f5f5 !important;
-    color: #999 !important;
-}
-
-.jstree-default .jstree-dragging {
-    background-color: #e8f4f8 !important;
-    color: #333 !important;
-}
-
-.jstree-default .jstree-drop {
-    background-color: #d4edda !important;
-    color: #155724 !important;
-}
-
-.jstree-default .jstree-search {
-    background-color: #fff3cd !important;
-    color: #856404 !important;
-}
-
-.jstree-default .jstree-ocl {
-    color: var(--font-primary);
-}
-
-.jstree-default .jstree-ocl:hover {
-    color: var(--accent-color);
-}
-
-.jstree-anchor.type-armature::before {
-    background-color: #8e44ad;
-    color: white;
-}
-
-.jstree-anchor.type-ui::before {
-    background-color: #3498db;
-    color: white;
-}
-
-.jstree-anchor.type-spine::before {
-    background-color: #ff8763;
-    color: white;
-}
-
-.jstree-anchor.type-child::before {
-    background-color: #999;
-}
-
-.jstree-default .jstree-clicked::before {
-    color: white !important;
-}
-
-.jstree-default .jstree-checkbox {
-    background-color: white;
-    border-color: #ccc;
-}
-
-.jstree-default .jstree-clicked > .jstree-checkbox {
-    background-color: var(--accent-color);
-    border-color: var(--accent-color);
-}
-
-.z-order-label {
-    margin-right: 5px;
-    font-weight: bold;
-    color: #88aaff;
-    width: 30px;
-    display: inline-block;
-    text-align: right;
-}
-
-.jstree-default .jstree-anchor {
-    padding-left: 5px;
-}
-
-.jstree-default .jstree-wholerow-hovered,
-.jstree-default .jstree-wholerow-clicked,
-.jstree-default .jstree-wholerow-selected {
-    background: #555 !important;
-    box-shadow: none;
-}
-
-.jstree-default .jstree-anchor.type-armature-content,
-.jstree-default .jstree-anchor.type-spine-content,
-.jstree-default .jstree-anchor.type-ui-content,
-.jstree-default .jstree-anchor.type-image-content {
-    color: #e0e0e0;
-    font-style: italic;
-}
-
-.jstree-default .jstree-anchor.type-child {
-    color: #aaaaaa;
-}
-
-.timeline-clip-loop-marker {
-    position: absolute;
-    top: 0;
-    height: 100%;
-    width: 1px;
-    background-color: rgba(0, 0, 0, 0.4);
-    pointer-events: none;
-    z-index: 1;
-}
-
-.context-menu {
-    position: absolute;
-    background-color: var(--dropdown-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 5px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    z-index: 2000;
-    padding: 5px 0;
-    min-width: 120px;
-}
-
-.context-menu ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-}
-
-.context-menu li {
-    padding: 8px 15px;
-    color: var(--font-primary);
-    cursor: pointer;
-    font-size: 0.9rem;
-    white-space: nowrap;
-    transition: background-color 0.2s;
-}
-
-.context-menu li:hover {
-    background-color: var(--dropdown-hover-bg);
-}
-
-.jstree-contextmenu {
+.context-menu, .jstree-contextmenu {
     position: absolute;
     background-color: var(--dropdown-bg) !important;
     border: 1px solid var(--border-color) !important;
@@ -983,13 +686,13 @@ ul.tabs li.current {
     min-width: 120px !important;
 }
 
-.jstree-contextmenu ul {
+.context-menu ul, .jstree-contextmenu ul {
     list-style: none !important;
     margin: 0 !important;
     padding: 0 !important;
 }
 
-.jstree-contextmenu li {
+.context-menu li, .jstree-contextmenu li {
     padding: 8px 15px !important;
     color: var(--font-primary) !important;
     cursor: pointer !important;
@@ -998,32 +701,11 @@ ul.tabs li.current {
     transition: background-color 0.2s !important;
 }
 
-.jstree-contextmenu li:hover {
+.context-menu li:hover, .jstree-contextmenu li:hover {
     background-color: var(--dropdown-hover-bg) !important;
 }
 
-.jstree-contextmenu li.jstree-contextmenu-disabled {
-    color: var(--font-disabled, #999) !important;
-    cursor: not-allowed !important;
-}
-
-.jstree-contextmenu li.jstree-contextmenu-disabled:hover {
-    background-color: transparent !important;
-}
-
-/* New Properties Panel Specific Styles */
-.panel-container {
-    background-color: var(--bg-secondary);
-    border: 1px solid #131313;
-    border-radius: 8px;
-    box-shadow: var(--panel-shadow);
-    width: 100%;
-    max-width: 400px;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-}
-
+/* --- Properties 패널 스타일 --- */
 .inspector-top-area {
     padding: 8px 12px;
     background-color: var(--bg-secondary);
@@ -1151,23 +833,12 @@ ul.tabs li.current {
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
     border: 1px solid var(--font-primary);
 }
-.input-group input[type="range"]::-moz-range-thumb {
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    background: var(--accent-color);
-    cursor: pointer;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
-    border: 1px solid var(--font-primary);
-}
-
 .value-label {
     min-width: 50px;
     text-align: right;
     color: var(--font-primary);
     font-size: 0.9rem;
 }
-
 .checkbox-group {
     display: flex;
     align-items: center;
@@ -1204,31 +875,6 @@ ul.tabs li.current {
     font-size: 14px;
     color: var(--font-primary);
 }
-
-.select-node-btn {
-    background-color: var(--bg-tertiary);
-    color: var(--font-primary);
-    border: 1px solid var(--border-color);
-    padding: 8px 15px;
-    border-radius: 999px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    transition: all 0.2s ease;
-    align-self: center;
-    margin-top: 15px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-.select-node-btn:hover {
-    background-color: var(--accent-color);
-    border-color: var(--accent-color);
-    color: white;
-}
-.select-node-btn:active {
-    transform: translateY(1px) scale(0.98);
-}
-
 .draggable-label {
     cursor: ew-resize;
     user-select: none;

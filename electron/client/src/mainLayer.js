@@ -608,15 +608,6 @@ var MainLayerScene = cc.Scene.extend({
     onEnter: function () {
         this._super();
 
-        const savedLayout = LayoutManager.load();
-        if (savedLayout) {
-            for (const panelId in savedLayout) {
-                if (PanelManager.config[panelId]) {
-                    Object.assign(PanelManager.config[panelId], savedLayout[panelId]);
-                }
-            }
-        }
-
         Loader.init();
         if (typeof ElectronRenderer != 'undefined') ElectronRenderer.init();
 
@@ -624,19 +615,8 @@ var MainLayerScene = cc.Scene.extend({
         this.addChild(layer, 1, "MainLayer");
         window.MainLayerInstance = layer;
 
+        // 이 함수 안에서 이미 LayoutManager.load()를 호출하여 처리하고 있습니다.
         PanelManager.initialize();
-
-        const gameViewConfig = PanelManager.config.gameView;
-        $('#res-width-input').val(gameViewConfig.width);
-        $('#res-height-input').val(gameViewConfig.height);
-
-        $('#res-apply-btn').on('click', function () {
-            const w = parseInt($('#res-width-input').val(), 10);
-            const h = parseInt($('#res-height-input').val(), 10);
-            GameViewManager.setResolution(w, h);
-        });
-
-        GameViewManager.sync();
 
         $(cc.game.canvas).droppable({
             accept: ".custom-tree-item",

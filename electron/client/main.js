@@ -80,40 +80,29 @@ function copyStringToClipboard( string ) {
 }
 
 cc.game.onStart = function(){
-    // [수정] 구형 사이드바 초기화 함수 호출을 삭제합니다.
-    // initSideHrMouseEvent();
-
     var sys = cc.sys;
-    if(!sys.isNative && document.getElementById("cocosLoading")) //If referenced loading.js, please remove it
+    if(!sys.isNative && document.getElementById("cocosLoading"))
         document.body.removeChild(document.getElementById("cocosLoading"));
 
-    // Pass true to enable retina display, on Android disabled by default to improve performance
     cc.view.enableRetina(sys.os === sys.OS_IOS ? true : false);
 
-    // Disable auto full screen on baidu and wechat, you might also want to eliminate sys.BROWSER_TYPE_MOBILE_QQ
     if (sys.isMobile &&
         sys.browserType !== sys.BROWSER_TYPE_BAIDU &&
         sys.browserType !== sys.BROWSER_TYPE_WECHAT) {
         cc.view.enableAutoFullScreen(true);
     }
 
-    // Adjust viewport meta
     cc.view.adjustViewPort(true);
-
-    // Uncomment the following line to set a fixed orientation for your game
-    // cc.view.setOrientation(cc.ORIENTATION_PORTRAIT);
-
-    // set _orientationChanging to false for resize
     cc.view._orientationChanging = false;
 
-    // [수정] 충돌을 유발하는 커스텀 해상도 정책 대신, Cocos2d 엔진이 안전하게 시작되도록 표준 정책을 사용합니다.
-    // 이 해상도는 임시 값이며, 실제 해상도는 mainLayer.js에서 패널에 맞게 다시 설정됩니다.
-    cc.view.setDesignResolutionSize(1280, 720, cc.ResolutionPolicy.SHOW_ALL);
+    // ★★★ 수정: 모든 커스텀 정책을 제거하고, 가장 기본적인 값으로 설정합니다. ★★★
+    // 이 해상도는 실제 게임이 시작되면 panelManager.js가 즉시 덮어쓰므로 의미가 없습니다.
+    // 충돌을 피하기 위해 가장 안전한 SHOW_ALL 정책을 사용합니다.
+    cc.view.setDesignResolutionSize(800, 600, cc.ResolutionPolicy.SHOW_ALL);
 
-    // The game will be resized when browser size change
-    cc.view.resizeWithBrowserSize(true);
+    // ★★★ 수정: 이 함수는 resolution.js의 커스텀 정책을 활성화하므로 반드시 비활성화해야 합니다. ★★★
+    // cc.view.resizeWithBrowserSize(true);
 
-    //load resources
     cc.LoaderScene.preload(g_resources, function () {
         cc.director.runScene(new MainLayerScene());
     }, this);

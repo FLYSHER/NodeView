@@ -4,7 +4,7 @@ var Sequencer = (function() {
     const GRID_TIME_INTERVAL = 0.1;
 
     let tracks = new Map();
-    let mainLayerInstance = null; // mainLayerInstance는 initialize 시 할당됩니다.
+    let mainLayerInstance = null;
     let isSyncingScroll = false;
     let isPlaying = false;
     let isPaused = false;
@@ -154,11 +154,9 @@ var Sequencer = (function() {
                     e.preventDefault();
                     e.stopPropagation();
 
-                    // *** 수정: showContextMenu 대신 mainLayerInstance._contextMenuManager.showOtherContextMenu 호출 ***
                     if (mainLayerInstance && mainLayerInstance._contextMenuManager) {
                         mainLayerInstance._contextMenuManager.showOtherContextMenu(e, this, null);
                     }
-                    // *** 수정 끝 ***
                 });
 
                 $clip.css({
@@ -180,16 +178,14 @@ var Sequencer = (function() {
 
                 $clip.draggable({
                     axis: 'x',
-                    // *** 수정: start 콜백에서 우클릭 시 드래그 취소 (이전 수정 반영) ***
                     start: function(event, ui) {
-                        if (event.button === 2) { // 마우스 오른쪽 버튼
+                        if (event.button === 2) {
                             event.stopPropagation();
-                            return false; // 드래그 동작 취소
+                            return false;
                         }
                         $('body').addClass('is-interacting');
                         $('#resize-overlay').show();
                     },
-                    // *** 수정 끝 ***
                     helper: function() {
                         return $(this).clone().css({
                             width: $(this).outerWidth(),
@@ -197,69 +193,51 @@ var Sequencer = (function() {
                             zIndex: 1000
                         }).addClass('dragging-helper');
                     },
-                    // *** 수정: 드래그 시 클립끼리 스냅되도록 로직 변경 ***
                     drag: function(event, ui) {
-                        ui.position.top = 2; // 세로 위치 고정
                         let newPosLeft = ui.position.left;
                         const clipWidth = ui.helper.outerWidth();
-                        const snapTolerance = 8; // 스냅 민감도 (픽셀)
+                        const snapTolerance = 8;
                         let snapped = false;
 
-                        // 같은 트랙에 있는 다른 클립들을 대상으로 스냅 검사
                         $(this).siblings('.timeline-clip').not('.ui-draggable-dragging').each(function() {
                             const targetPos = $(this).position();
                             const targetWidth = $(this).outerWidth();
                             const targetLeft = targetPos.left;
                             const targetRight = targetPos.left + targetWidth;
 
-                            // 현재 드래그 중인 클립의 왼쪽/오른쪽 가장자리
                             const currentLeft = newPosLeft;
                             const currentRight = newPosLeft + clipWidth;
 
-                            // 1. 현재 클립의 왼쪽 -> 타겟 클립의 왼쪽
                             if (Math.abs(currentLeft - targetLeft) < snapTolerance) { newPosLeft = targetLeft; snapped = true; }
-                            // 2. 현재 클립의 왼쪽 -> 타겟 클립의 오른쪽
                             if (!snapped && Math.abs(currentLeft - targetRight) < snapTolerance) { newPosLeft = targetRight; snapped = true; }
-                            // 3. 현재 클립의 오른쪽 -> 타겟 클립의 왼쪽
                             if (!snapped && Math.abs(currentRight - targetLeft) < snapTolerance) { newPosLeft = targetLeft - clipWidth; snapped = true; }
-                            // 4. 현재 클립의 오른쪽 -> 타겟 클립의 오른쪽
                             if (!snapped && Math.abs(currentRight - targetRight) < snapTolerance) { newPosLeft = targetRight - clipWidth; snapped = true; }
 
-                            if (snapped) return false; // 하나라도 스냅되면 루프 종료
+                            if (snapped) return false;
                         });
 
-                        ui.position.left = Math.max(0, newPosLeft); // 0 이하로 가지 않도록
+                        ui.position.left = Math.max(0, newPosLeft);
                         ui.helper.css('left', ui.position.left + 'px');
                     },
                     stop: function(event, ui) {
-                        // *** 수정: 그리드 스냅 로직 제거 ***
                         const newTime = _pixelToTime(Math.max(0, ui.position.left));
                         clip.startTime = newTime;
 
                         $(this).css({
-                            left: _timeToPixel(clip.startTime) + 'px',
-                            top: '2px'
+                            left: _timeToPixel(clip.startTime) + 'px'
                         });
                         _renderTimeline();
 
                         $('body').removeClass('is-interacting');
-                        $('.vertical-guide, .horizontal-guide').hide();
                         $('#resize-overlay').hide();
                     }
                 }).resizable({
                     handles: 'e, w',
-                    start: function(event, ui) {
-                        $(this).css('top', '2px');
-                    },
-                    // *** 수정: 리사이즈 시 그리드 스냅 제거 ***
                     resize: function(event, ui) {
-                        ui.position.top = 2;
-                        // 최소 크기만 유지하고 자유롭게 조절
                         ui.position.left = Math.max(0, ui.position.left);
                         ui.size.width = Math.max(_timeToPixel(GRID_TIME_INTERVAL), ui.size.width);
                     },
                     stop: function(event, ui) {
-                        // *** 수정: 리사이즈 종료 시 그리드 스냅 제거 ***
                         const newStartTime = _pixelToTime(Math.max(0, ui.position.left));
                         const newDuration = _pixelToTime(Math.max(_timeToPixel(GRID_TIME_INTERVAL), ui.size.width));
 
@@ -272,10 +250,7 @@ var Sequencer = (function() {
                         targetElement.css({
                             left: _timeToPixel(clip.startTime) + 'px',
                             width: _timeToPixel(clip.duration) + 'px',
-                            top: '2px'
                         });
-
-                        $(this).css('top', '2px');
 
                         _updateClipDurationText($(this), clip);
                         _renderTimeline();
@@ -296,9 +271,7 @@ var Sequencer = (function() {
         _renderTimeline();
     }
 
-    // *** 수정: 그리드 스냅을 끄기 위해 원래 값을 그대로 반환하도록 변경 ***
     function _snapToGrid(timeValue) {
-        // return Math.round(timeValue / GRID_TIME_INTERVAL) * GRID_TIME_INTERVAL;
         return timeValue;
     }
 
@@ -310,11 +283,7 @@ var Sequencer = (function() {
         return pixel / PIXELS_PER_SECOND;
     }
 
-    // *** 수정: 그리드 스냅을 끄기 위해 원래 픽셀 값을 그대로 반환하도록 변경 ***
     function _getSnappedPixel(pixel) {
-        // const time = _pixelToTime(pixel);
-        // const snappedTime = _snapToGrid(time);
-        // return _timeToPixel(snappedTime);
         return pixel;
     }
 
@@ -329,17 +298,14 @@ var Sequencer = (function() {
         let startTime = 0;
 
         if (typeof preferredTime === 'number' && preferredTime >= 0) {
-            // *** 수정: 그리드 스냅 제거 ***
             startTime = preferredTime;
         } else {
             const maxEndTime = trackData.clips.reduce((max, clip) =>
                 Math.max(max, clip.startTime + clip.duration), 0);
-            // *** 수정: 그리드 스냅 제거 ***
             startTime = maxEndTime;
         }
 
         const animDuration = mainLayerInstance.getAnimationLength(targetNode, animName) || GRID_TIME_INTERVAL;
-        // *** 수정: 그리드 스냅 제거 ***
         const newDuration = Math.max(GRID_TIME_INTERVAL, animDuration);
 
         const newClip = {
