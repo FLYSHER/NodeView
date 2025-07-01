@@ -514,231 +514,199 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
     },
 
     setNode: function(node) {
-        if (!node) {
-            this._selectNode = [];
-            this._masterNode = null;
-
+        const resetAndDisableAllFields = () => {
             $('#actionTree').empty();
-            // Properties 패널의 필드들을 초기화하고 비활성화합니다.
+            $('#spine-option').css('display', 'none');
             document.getElementById('nodeName').value = '';
             document.getElementById('nodeName').disabled = true;
-            document.getElementById('zOrderValue').textContent = '0';
-            document.getElementById('posX').value = '';
-            document.getElementById('posX').disabled = true;
-            document.getElementById('posY').value = '';
-            document.getElementById('posY').disabled = true;
-            document.getElementById('scaleX').value = '';
-            document.getElementById('scaleX').disabled = true;
-            document.getElementById('scaleY').value = '';
-            document.getElementById('scaleY').disabled = true;
-            document.getElementById('rotation').value = '';
-            document.getElementById('rotation').disabled = true;
-            document.getElementById('opacity').value = 255;
-            document.getElementById('opacity').disabled = true;
-            document.getElementById('opacityValue').textContent = '255';
+            const fields = ['posX', 'posY', 'scaleX', 'scaleY', 'rotation', 'opacity'];
+            fields.forEach(id => {
+                const el = document.getElementById(id);
+                el.value = '';
+                el.disabled = true;
+            });
+            document.getElementById('opacityValue').textContent = '0';
             document.getElementById('visible').checked = false;
             document.getElementById('visible').disabled = true;
-
-            var searchBox = document.getElementById("searchNode");
-            var uiOption = document.getElementById("ui-option");
-            var spineOption = document.getElementById("spine-option");
-            if (searchBox) searchBox.style.visibility = 'hidden';
-            if (uiOption) uiOption.style.display = 'none'; // 'visibility' 대신 'display'로 변경하여 공간 차지 방지
-            if (spineOption) spineOption.style.display = 'none'; // 'visibility' 대신 'display'로 변경하여 공간 차지 방지
-
+            document.getElementById('zOrderValue').textContent = 'N/A';
             if (typeof Gizmo_ClearDraw === 'function') {
                 Gizmo_ClearDraw();
             }
+        };
+
+        if (!node) {
+            this._selectNode = [];
+            this._masterNode = null;
+            resetAndDisableAllFields();
             return;
         }
 
-        // --- Properties 패널에 보낼 정보는 항상 DraggableNode 인스턴스에서 가져옵니다. ---
-        const draggableNodeInstance = node; // `node`는 MainLayer에서 전달하는 DraggableNode 인스턴스입니다.
-        const self = this; // *** 추가: 클릭 핸들러에서 this 컨텍스트를 유지하기 위해 self 변수 사용 ***
-        this._selectNode = [draggableNodeInstance];
+        this._selectNode = [node];
 
-        document.getElementById('nodeName').value = draggableNodeInstance.getName() || "";
-        document.getElementById('nodeName').disabled = true; // 읽기 전용 유지
+        document.getElementById('nodeName').value = node.getName() || "Unnamed Node";
+        document.getElementById('nodeName').disabled = false;
 
-        document.getElementById('zOrderValue').textContent = draggableNodeInstance.getLocalZOrder ? draggableNodeInstance.getLocalZOrder() : '0';
+        document.getElementById('zOrderValue').textContent = node.getLocalZOrder ? node.getLocalZOrder() : '0';
 
-        document.getElementById('posX').value = draggableNodeInstance.getPosition().x.toFixed(2);
-        document.getElementById('posY').value = draggableNodeInstance.getPosition().y.toFixed(2);
-        document.getElementById('posX').disabled = false;
-        document.getElementById('posY').disabled = false;
+        const fieldsToEnable = ['posX', 'posY', 'scaleX', 'scaleY', 'rotation', 'opacity', 'visible'];
+        fieldsToEnable.forEach(id => document.getElementById(id).disabled = false);
 
-        document.getElementById('scaleX').value = draggableNodeInstance.getScaleX ? draggableNodeInstance.getScaleX().toFixed(2) : '1.00';
-        document.getElementById('scaleY').value = draggableNodeInstance.getScaleY ? draggableNodeInstance.getScaleY().toFixed(2) : '1.00';
-        document.getElementById('scaleX').disabled = false;
-        document.getElementById('scaleY').disabled = false;
+        document.getElementById('posX').value = node.getPosition().x.toFixed(2);
+        document.getElementById('posY').value = node.getPosition().y.toFixed(2);
+        document.getElementById('scaleX').value = node.getScaleX ? node.getScaleX().toFixed(2) : '1.00';
+        document.getElementById('scaleY').value = node.getScaleY ? node.getScaleY().toFixed(2) : '1.00';
+        document.getElementById('rotation').value = node.getRotation ? node.getRotation().toFixed(2) : '0.00';
 
-        document.getElementById('rotation').value = draggableNodeInstance.getRotation ? draggableNodeInstance.getRotation().toFixed(2) : '0.00';
-        document.getElementById('rotation').disabled = false;
-
-        const currentOpacity = draggableNodeInstance.getOpacity ? draggableNodeInstance.getOpacity() : 255;
+        const currentOpacity = node.getOpacity ? node.getOpacity() : 255;
         document.getElementById('opacity').value = currentOpacity;
         document.getElementById('opacityValue').textContent = currentOpacity;
-        document.getElementById('opacity').disabled = false;
 
-        const isVisible = draggableNodeInstance.isVisible ? draggableNodeInstance.isVisible() : true;
-        document.getElementById('visible').checked = isVisible;
-        document.getElementById('visible').disabled = false;
-
-        const selectNodeBtn = document.getElementById('selectNodeBtn');
-        if (selectNodeBtn) selectNodeBtn.disabled = false;
+        document.getElementById('visible').checked = node.isVisible ? node.isVisible() : true;
 
         if (typeof Gizmo_DrawTouchLayerByRect === 'function') {
-            var worldBoundingBox = draggableNodeInstance.getBoundingBoxToWorld();
-            if(worldBoundingBox.width < 5) worldBoundingBox.width = 10;
-            if (worldBoundingBox.height < 5 ) worldBoundingBox.height = 10;
-
+            var worldBoundingBox = node.getBoundingBoxToWorld();
+            if (worldBoundingBox.width < 5) worldBoundingBox.width = 10;
+            if (worldBoundingBox.height < 5) worldBoundingBox.height = 10;
             Gizmo_DrawTouchLayerByRect(worldBoundingBox);
         }
 
-        // --- Animations 패널 (actionTree)에 보낼 정보는 DraggableNode의 자식 컨텐츠 노드에서 가져옵니다. ---
-        let unifiedAnimationList = [];
-        let contentNodeForAnimation = null;
+        $('#actionTree').empty();
+        $('#spine-option').css('display', 'none');
 
-        // 원본 로직과 동일하게 자식 노드를 contentNodeForAnimation으로 사용합니다.
-        contentNodeForAnimation = draggableNodeInstance.ui || draggableNodeInstance.armature || draggableNodeInstance.spine || draggableNodeInstance.image;
+        if (node instanceof DraggableNode) {
+            const draggableNodeInstance = node;
+            let unifiedAnimationList = [];
+            let contentNodeForAnimation = draggableNodeInstance.ui || draggableNodeInstance.armature || draggableNodeInstance.spine || draggableNodeInstance.image;
 
-        if (contentNodeForAnimation) {
-            // `assetType`은 DraggableNode에 저장된 정보를 사용합니다.
-            switch (draggableNodeInstance.assetType) {
-                case 'armature':
-                    if (contentNodeForAnimation.getAnimation && contentNodeForAnimation.getAnimation()._animationData && contentNodeForAnimation.getAnimation()._animationData.movementNames) {
-                        contentNodeForAnimation.getAnimation()._animationData.movementNames.forEach(name => unifiedAnimationList.push({ name: name, type: 'armature' }));
-                    }
-                    break;
-                case 'spine':
-                    if (contentNodeForAnimation.getState && contentNodeForAnimation.getState().data && contentNodeForAnimation.getState().data.skeletonData && contentNodeForAnimation.getState().data.skeletonData.animations) {
-                        contentNodeForAnimation.getState().data.skeletonData.animations.forEach(anim => unifiedAnimationList.push({ name: anim.name, type: 'spine' }));
-                    }
-                    break;
-                // [핵심 수정]: 'action' 대신 'ui'와 'cocosstudio' 타입을 사용합니다.
-                case 'ui':
-                case 'cocosstudio':
-                    if (draggableNodeInstance.cocosAction && draggableNodeInstance.cocosAction._animationInfos) {
-                        for (let key in draggableNodeInstance.cocosAction._animationInfos) {
-                            unifiedAnimationList.push({ name: key, type: 'action' }); // UI 액션은 여전히 'action' 타입으로 표시
+            if (contentNodeForAnimation) {
+                switch (draggableNodeInstance.assetType) {
+                    case 'armature':
+                        if (contentNodeForAnimation.getAnimation && contentNodeForAnimation.getAnimation()._animationData && contentNodeForAnimation.getAnimation()._animationData.movementNames) {
+                            contentNodeForAnimation.getAnimation()._animationData.movementNames.forEach(name => unifiedAnimationList.push({
+                                name: name,
+                                type: 'armature'
+                            }));
                         }
-                    } else if (draggableNodeInstance.actionUrl) {
-                        // ccs.actionManager.getActionList는 URL 기반으로 액션 목록을 가져옵니다.
-                        const rawActionList = ccs.actionManager.getActionList(draggableNodeInstance.actionUrl);
-                        if (rawActionList) {
-                            rawActionList.forEach(action => unifiedAnimationList.push({ name: action.getName(), type: 'action' }));
-                        } else if (cc.loader.cache[draggableNodeInstance.actionUrl] && cc.loader.cache[draggableNodeInstance.actionUrl].animation && cc.loader.cache[draggableNodeInstance.actionUrl].animation.actionlist) {
-                            // 캐시된 JSON 데이터에서 직접 액션 목록을 가져오는 대체 로직
-                            cc.loader.cache[draggableNodeInstance.actionUrl].animation.actionlist.forEach(action => {
-                                unifiedAnimationList.push({ name: action.name, type: 'action' });
-                            });
+                        break;
+                    case 'spine':
+                        if (contentNodeForAnimation.getState && contentNodeForAnimation.getState().data && contentNodeForAnimation.getState().data.skeletonData && contentNodeForAnimation.getState().data.skeletonData.animations) {
+                            contentNodeForAnimation.getState().data.skeletonData.animations.forEach(anim => unifiedAnimationList.push({
+                                name: anim.name,
+                                type: 'spine'
+                            }));
                         }
-                    }
-                    break;
+                        break;
+                    case 'ui':
+                    case 'cocosstudio':
+                        if (draggableNodeInstance.cocosAction && draggableNodeInstance.cocosAction._animationInfos) {
+                            for (let key in draggableNodeInstance.cocosAction._animationInfos) {
+                                unifiedAnimationList.push({
+                                    name: key,
+                                    type: 'action'
+                                });
+                            }
+                        } else if (draggableNodeInstance.actionUrl) {
+                            const rawActionList = ccs.actionManager.getActionList(draggableNodeInstance.actionUrl);
+                            if (rawActionList) {
+                                rawActionList.forEach(action => unifiedAnimationList.push({
+                                    name: action.getName(),
+                                    type: 'action'
+                                }));
+                            } else if (cc.loader.cache[draggableNodeInstance.actionUrl] && cc.loader.cache[draggableNodeInstance.actionUrl].animation && cc.loader.cache[draggableNodeInstance.actionUrl].animation.actionlist) {
+                                cc.loader.cache[draggableNodeInstance.actionUrl].animation.actionlist.forEach(action => {
+                                    unifiedAnimationList.push({
+                                        name: action.name,
+                                        type: 'action'
+                                    });
+                                });
+                            }
+                        }
+                        break;
+                }
             }
-        }
 
-        const $actionContainer = $('#actionTree');
-        $actionContainer.empty();
+            const $actionContainer = $('#actionTree');
+            $actionContainer.empty();
+            const self = this;
 
-        unifiedAnimationList.forEach(item => {
-            let iconText = '';
-            let typeClass = `type-${item.type}`;
-            if (item.type === 'armature') iconText = 'AR';
-            if (item.type === 'spine') iconText = 'SP';
-            // UI/CocosStudio 액션은 'action' 타입으로 표시되므로 'UI' 텍스트 사용
-            if (item.type === 'action') iconText = 'UI';
+            unifiedAnimationList.forEach(item => {
+                let iconText = '';
+                let typeClass = `type-${item.type}`;
+                if (item.type === 'armature') iconText = 'AR';
+                if (item.type === 'spine') iconText = 'SP';
+                if (item.type === 'action') iconText = 'UI';
 
-            const $item = $(`
+                const $item = $(`
             <div class="custom-tree-item" data-anim-name="${item.name}" data-anim-type="${item.type}">
                 <span class="track-type-icon ${typeClass}">${iconText}</span>
                 ${item.name}
             </div>
-        `);
+            `);
 
-            $item.draggable({
-                appendTo: "body",
-                helper: function() {
-                    const assetName = $(this).data('anim-name');
-                    const $helper = $(`<div class="custom-drag-helper">${assetName}</div>`);
-                    $helper.data('animName', assetName);
-                    $helper.data('animType', $(this).data('anim-type'));
-                    $(this).draggable("option", "cursorAt", {
-                        left: 1,
-                        top: 1
-                    });
-                    return $helper;
-                },
-                revert: 'invalid',
-                revertDuration: 200,
-                zIndex: 9999,
-                start: function(event, ui) {
-                    $('#resize-overlay').show();
-                },
-                stop: function(event, ui) {
-                    $('#resize-overlay').hide();
-                }
+                $item.draggable({
+                    appendTo: "body",
+                    helper: function() {
+                        const assetName = $(this).data('anim-name');
+                        const $helper = $(`<div class="custom-drag-helper">${assetName}</div>`);
+                        $helper.data('animName', assetName);
+                        $helper.data('animType', $(this).data('anim-type'));
+                        $(this).draggable("option", "cursorAt", {
+                            left: 1,
+                            top: 1
+                        });
+                        return $helper;
+                    },
+                    revert: 'invalid',
+                    revertDuration: 200,
+                    zIndex: 9999,
+                    start: function(event, ui) {
+                        $('#resize-overlay').show();
+                    },
+                    stop: function(event, ui) {
+                        $('#resize-overlay').hide();
+                    }
+                });
+
+                $item.on('click', function() {
+                    $actionContainer.find('.custom-tree-item').removeClass('selected');
+                    $(this).addClass('selected');
+
+                    const animName = $(this).data('anim-name');
+                    const animType = $(this).data('anim-type');
+                    const draggableNode = self._selectNode[0];
+
+                    if (!draggableNode) return;
+
+                    if (draggableNode.spine) {
+                        draggableNode.spine.clearTrack(0);
+                    }
+                    if (draggableNode.armature) {
+                        draggableNode.armature.getAnimation().stop();
+                    }
+                    if (draggableNode.ui) {
+                        draggableNode.ui.getChildren().forEach(child => child.stopAllActions());
+                        draggableNode.ui.stopAllActions();
+                    }
+
+                    if (animType === 'spine' && draggableNode.spine) {
+                        draggableNode.spine.setAnimation(0, animName, false);
+                    } else if (animType === 'armature' && draggableNode.armature) {
+                        draggableNode.armature.getAnimation().play(animName, -1, 1);
+                    } else if (animType === 'action') {
+                        if (draggableNode.cocosAction) {
+                            draggableNode.cocosAction.play(animName, false);
+                        } else if (draggableNode.ui && draggableNode.actionUrl) {
+                            ccs.actionManager.playActionByName(draggableNode.actionUrl, animName);
+                        }
+                    }
+                });
+
+                $actionContainer.append($item);
             });
 
-            // *** 수정: 클릭 시 애니메이션 즉시 재생 기능 추가 ***
-            $item.on('click', function() {
-                $actionContainer.find('.custom-tree-item').removeClass('selected');
-                $(this).addClass('selected');
-
-                const animName = $(this).data('anim-name');
-                const animType = $(this).data('anim-type');
-                const draggableNode = self._selectNode[0];
-
-                if (!draggableNode) return;
-
-                // --- 이전 애니메이션 정지 로직 (최종 버전 적용) ---
-                if (draggableNode.spine) {
-                    draggableNode.spine.clearTrack(0);
-                }
-                if (draggableNode.armature) {
-                    draggableNode.armature.getAnimation().stop();
-                }
-                if (draggableNode.ui) {
-                    // UIAction의 모든 자식 노드를 직접 순회하며 정지
-                    draggableNode.ui.getChildren().forEach(child => child.stopAllActions());
-                    draggableNode.ui.stopAllActions();
-                }
-                // --- 수정 끝 ---
-
-                // 새 애니메이션을 '한 번만' 재생
-                if (animType === 'spine' && draggableNode.spine) {
-                    draggableNode.spine.setAnimation(0, animName, false);
-                }
-                else if (animType === 'armature' && draggableNode.armature) {
-                    draggableNode.armature.getAnimation().play(animName, -1, 1);
-                }
-                else if (animType === 'action') {
-                    if (draggableNode.cocosAction) {
-                        draggableNode.cocosAction.play(animName, false);
-                    }
-                    else if (draggableNode.ui && draggableNode.actionUrl) {
-                        ccs.actionManager.playActionByName(draggableNode.actionUrl, animName);
-                    }
-                }
-            });
-            // *** 수정 끝 ***
-
-            $actionContainer.append($item);
-        });
-
-        var searchBox = document.getElementById("searchNode");
-        var uiOption = document.getElementById("ui-option");
-        var spineOption = document.getElementById("spine-option");
-
-        if (searchBox) searchBox.style.visibility = 'visible';
-        // 'display' 속성을 'block'으로 설정하여 UI 옵션을 항상 표시합니다.
-        if (uiOption) uiOption.style.display = 'block';
-
-        // spine-option 가시성 제어 (DraggableNode의 assetType 사용)
-        if (draggableNodeInstance && draggableNodeInstance.assetType === 'spine') {
-            if (spineOption) spineOption.style.display = 'block'; // 'visibility' 대신 'display' 사용
-        } else {
-            if (spineOption) spineOption.style.display = 'none'; // 'visibility' 대신 'display' 사용
+            if (draggableNodeInstance.assetType === 'spine') {
+                $('#spine-option').css('display', 'block');
+            }
         }
     },
 

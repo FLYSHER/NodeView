@@ -456,10 +456,9 @@ var MainLayer = cc.Layer.extend({
 
     updateMenuWithNodeId: function (nodeId) {
         if (!nodeId) {
-            if (this._currentlySelectedNode !== null) {
-                this._currentlySelectedNode = null;
-            }
-            this._treeView.setNode(null);
+            this._currentlySelectedNode = null;
+            this._treeView.setNode(null); // 속성 창 비우기
+
             const tree = $('#widgetTree').jstree(true);
             if (tree) {
                 tree.deselect_all(true);
@@ -467,37 +466,27 @@ var MainLayer = cc.Layer.extend({
             return;
         }
 
-        const node = this.nodeMap[nodeId];
-        if (!node) {
+        // ID로 클릭된 노드를 직접 찾습니다.
+        const selectedNode = this.nodeMap[nodeId];
+
+        if (!selectedNode) {
             this.updateMenuWithNodeId(null);
             return;
         }
 
-        let selectedDraggableNode = null;
-        if (node instanceof DraggableNode) {
-            selectedDraggableNode = node;
+        // 현재 선택된 노드를 업데이트합니다.
+        this._currentlySelectedNode = selectedNode;
+
+        // 찾은 노드를 그대로 setNode 함수로 전달하여 속성 창을 업데이트합니다.
+        this._treeView.setNode(selectedNode);
+
+        // Draggable 여부 설정 (DraggableNode일 때만 활성화)
+        if (selectedNode instanceof DraggableNode) {
+            this.setDraggableItem(selectedNode.getName());
         } else {
-            let parent = node.getParent();
-            while (parent) {
-                if (parent instanceof DraggableNode) {
-                    selectedDraggableNode = parent;
-                    break;
-                }
-                parent = parent.getParent();
-            }
+            // 다른 모든 노드는 드래그 비활성화
+            this.setDraggableItem(null);
         }
-
-        if (!selectedDraggableNode) {
-            this.updateMenuWithNodeId(null);
-            return;
-        }
-
-        if (this._currentlySelectedNode !== selectedDraggableNode) {
-            this._currentlySelectedNode = selectedDraggableNode;
-        }
-
-        this._treeView.setNode(selectedDraggableNode);
-        this.setDraggableItem(selectedDraggableNode.getName());
     },
 
     setDraggableItem: function (name) {
