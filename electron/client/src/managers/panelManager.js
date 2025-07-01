@@ -73,7 +73,10 @@ var PanelManager = (function() {
             setTimeout(resizeCanvas, 0);
         });
 
-        myLayout.registerComponent('fileList', function(container, componentState) { container.getElement().append($('#original-content-templates').find('#fileContainer').children()); });
+        myLayout.registerComponent('fileList', function(container, componentState) {
+            container.getElement().attr('id', 'assets-panel-drop-zone');
+            container.getElement().append($('#original-content-templates').find('#fileContainer').children());
+        });
         myLayout.registerComponent('widgetTree', function(container, componentState) { container.getElement().append($('#original-content-templates').find('#widgetContainer').children()); });
         myLayout.registerComponent('properties', function(container, componentState) { container.getElement().append($('#original-content-templates').find('#nodeInfoContainer').children()); });
         myLayout.registerComponent('uiAnimation', function(container, componentState) { container.getElement().append($('#original-content-templates').find('#uiAnimationContainer').children()); });
@@ -90,7 +93,49 @@ var PanelManager = (function() {
             _registerComponents(myLayout);
             myLayout.init();
 
-            // --- 패널 목록 기능 ---
+            window.addEventListener('dragover', function(e) {
+                e.preventDefault();
+
+                const assetsPanel = document.getElementById('assets-panel-drop-zone');
+                if (!assetsPanel) return;
+
+                const rect = assetsPanel.getBoundingClientRect();
+
+                if (e.clientX >= rect.left && e.clientX <= rect.right &&
+                    e.clientY >= rect.top && e.clientY <= rect.bottom) {
+                    assetsPanel.classList.add('drag-over-active');
+                } else {
+                    assetsPanel.classList.remove('drag-over-active');
+                }
+            }, false);
+
+            window.addEventListener('dragleave', function(e) {
+                if (!e.relatedTarget) {
+                    const assetsPanel = document.getElementById('assets-panel-drop-zone');
+                    if (assetsPanel) {
+                        assetsPanel.classList.remove('drag-over-active');
+                    }
+                }
+            }, false);
+
+            window.addEventListener('drop', function(e) {
+                e.preventDefault();
+
+                const assetsPanel = document.getElementById('assets-panel-drop-zone');
+                if (!assetsPanel) return;
+
+                const rect = assetsPanel.getBoundingClientRect();
+                assetsPanel.classList.remove('drag-over-active');
+
+                if (e.clientX >= rect.left && e.clientX <= rect.right &&
+                    e.clientY >= rect.top && e.clientY <= rect.bottom) {
+
+                    if (typeof Loader !== 'undefined' && Loader.onDropHandler) {
+                        Loader.onDropHandler(e);
+                    }
+                }
+            }, false);
+
             const $dropdown = $('#panel-toggle-dropdown');
             const $toggleButton = $('#panel-toggle-button');
             $dropdown.empty();
@@ -99,27 +144,41 @@ var PanelManager = (function() {
             }
             function syncCheckboxes() {
                 const openComponents = new Set();
-                myLayout.root.getItemsByFilter(item => item.isComponent).forEach(item => { openComponents.add(item.componentName); });
-                $dropdown.find('input[type="checkbox"]').each(function() { $(this).prop('checked', openComponents.has($(this).data('component-type'))); });
+                myLayout.root.getItemsByFilter(item => item.isComponent).forEach(item => {
+                    openComponents.add(item.componentName);
+                });
+                $dropdown.find('input[type="checkbox"]').each(function() {
+                    $(this).prop('checked', openComponents.has($(this).data('component-type')));
+                });
             }
-            $toggleButton.on('click', (e) => { e.stopPropagation(); syncCheckboxes(); $dropdown.slideToggle(150); });
+            $toggleButton.on('click', (e) => {
+                e.stopPropagation();
+                syncCheckboxes();
+                $dropdown.slideToggle(150);
+            });
             $dropdown.on('change', 'input[type="checkbox"]', function() {
                 const componentType = $(this).data('component-type');
                 const existingItems = myLayout.root.getItemsByFilter(item => item.isComponent && item.componentName === componentType);
                 if ($(this).is(':checked')) {
                     if (existingItems.length === 0) {
-                        const componentConfig = { type: 'component', componentName: componentType, title: componentRegistry[componentType].title };
+                        const componentConfig = {
+                            type: 'component',
+                            componentName: componentType,
+                            title: componentRegistry[componentType].title
+                        };
                         const firstStack = myLayout.root.getItemsByFilter(item => item.isStack)[0];
-                        if (firstStack) { firstStack.addChild(componentConfig); }
-                        else { myLayout.root.contentItems[0].addChild(componentConfig); }
+                        if (firstStack) {
+                            firstStack.addChild(componentConfig);
+                        } else {
+                            myLayout.root.contentItems[0].addChild(componentConfig);
+                        }
                     }
                 } else {
                     existingItems.forEach(item => item.remove());
                 }
             });
 
-            // --- 해상도 강제 조절 기능 ---
-            $('#res-apply-btn').on('click', function () {
+            $('#res-apply-btn').on('click', function() {
                 const w = parseInt($('#res-width-input').val(), 10);
                 const h = parseInt($('#res-height-input').val(), 10);
                 if (!isNaN(w) && !isNaN(h) && w > 0 && h > 0) {
@@ -130,28 +189,49 @@ var PanelManager = (function() {
                 }
             });
 
-            // --- 기타 UI 및 레이아웃 이벤트 ---
-            $(document).on('click', e => { if (!$toggleButton.is(e.target) && !$dropdown.is(e.target) && $dropdown.has(e.target).length === 0) $dropdown.slideUp(150); });
+            $(document).on('click', e => {
+                if (!$toggleButton.is(e.target) && !$dropdown.is(e.target) && $dropdown.has(e.target).length === 0) $dropdown.slideUp(150);
+            });
             myLayout.on('stateChanged', () => LayoutManager.save(myLayout));
-            myLayout.on('itemDestroyed', () => { LayoutManager.save(myLayout); syncCheckboxes(); });
-
-            // ★★★ 햄버거 버튼 이벤트 핸들러 (이 부분이 누락되었을 수 있습니다) ★★★
-            $('#main-menu-toggle-btn').on('click', function() {
-                $(this).toggleClass('is-active');
-                $('.toggleable-control').toggle('slide', { direction: 'right' }, 150);
+            myLayout.on('itemDestroyed', () => {
+                LayoutManager.save(myLayout);
+                syncCheckboxes();
             });
 
-            $('#toggle-fullscreen-btn').on('click', function() { if (!document.fullscreenElement) { document.documentElement.requestFullscreen(); } else { if (document.exitFullscreen) document.exitFullscreen(); } });
+            $('#main-menu-toggle-btn').on('click', function() {
+                $(this).toggleClass('is-active');
+                $('.toggleable-control').toggle('slide', {
+                    direction: 'right'
+                }, 150);
+            });
+
+            $('#toggle-fullscreen-btn').on('click', function() {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen();
+                } else {
+                    if (document.exitFullscreen) document.exitFullscreen();
+                }
+            });
             $(document).on('fullscreenchange webkitfullscreenchange', function() {
                 const isFullscreen = !!document.fullscreenElement;
                 $('#toggle-fullscreen-btn').find('i').toggleClass('fa-compress', isFullscreen).toggleClass('fa-expand', !isFullscreen);
             });
 
             $(document).on('mousedown', '.lm_splitter', () => $('#resize-overlay').show());
-            $(document).on('mouseup', () => { if ($('#resize-overlay').is(':visible')) $('#resize-overlay').hide(); });
+            $(document).on('mouseup', () => {
+                if ($('#resize-overlay').is(':visible')) $('#resize-overlay').hide();
+            });
 
-            function debounce(func, delay) { let timeout; return function(...args) { clearTimeout(timeout); timeout = setTimeout(() => func.apply(this, args), delay); }; }
-            const debouncedResize = debounce(() => { if (myLayout) myLayout.updateSize(); }, 150);
+            function debounce(func, delay) {
+                let timeout;
+                return function(...args) {
+                    clearTimeout(timeout);
+                    timeout = setTimeout(() => func.apply(this, args), delay);
+                };
+            }
+            const debouncedResize = debounce(() => {
+                if (myLayout) myLayout.updateSize();
+            }, 150);
             $(window).on('resize', debouncedResize);
         }
     };

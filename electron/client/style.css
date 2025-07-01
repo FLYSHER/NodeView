@@ -348,7 +348,12 @@ ul.tabs li.current {
     z-index: 9999;
 }
 #timeline-top-bar {
-    padding: 0 5px 5px 5px;
+    position: relative;
+    display: flex;
+    justify-content: flex-end; /* 오른쪽 요소를 오른쪽 끝으로 밀기 */
+    align-items: center;
+    height: 50px; /* 높이 지정 필수 */
+    padding: 5px 5px 5px 5px;
 }
 #timeline-top-bar .styleButton {
     min-width: 40px;
@@ -466,10 +471,7 @@ ul.tabs li.current {
 .timeline-track:not(:last-child) {
     border-bottom: 1px solid var(--border-color);
 }
-.track-drop-hover {
-    outline: 2px dashed var(--accent-color);
-    outline-offset: -2px;
-}
+
 .track-type-icon {
     display: inline-block;
     width: 28px;
@@ -902,4 +904,12 @@ ul.tabs li.current {
     background-color: rgba(255, 255, 255, 0.5);
     z-index: 5;
     pointer-events: none;
+}
+
+#assets-panel-drop-zone.drag-over-active,
+.track-drop-hover {
+    outline: 2px solid var(--accent-color);
+    outline-offset: -4px;
+    background-color: rgba(0, 122, 204, 0.2);
+    transition: all 0.1s ease-in-out;
 }
