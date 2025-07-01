@@ -672,7 +672,8 @@ ul.tabs li.current {
     padding: 0;
     margin-right: 12px;
     margin-left: 4px;
-    background-color: #999;
+    /* 고정된 회색 대신 CSS 변수를 사용하도록 변경 (기본값은 회색) */
+    background-color: darkgray;
     border-radius: 50%;
     vertical-align: middle;
 }
@@ -937,4 +938,12 @@ ul.tabs li.current {
     cursor: not-allowed;
     /* 디버깅용 반투명 배경 (선택 사항) */
     /* background-color: rgba(0, 0, 0, 0.5); */
+}
+
+.z-order-label {
+    /* JavaScript에서 전달된 --z-order-color 변수 값을 사용합니다. */
+    /* 변수 값이 없으면 기본으로 2차 폰트 색상을 사용합니다. */
+    color: yellowgreen;
+    font-weight: bold;
+    margin-right: 6px; /* 이름과의 간격 조정 */
 }
