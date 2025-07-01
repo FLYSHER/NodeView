@@ -406,13 +406,12 @@ var Sequencer = (function() {
     }
 
     function _onPlay() {
-        // ★★★ 추가된 부분 ★★★
-        // 재생 시 스크롤을 맨 앞으로 이동시킵니다.
+        _onStop(false);
+
         $('#timeline-tracks-container').scrollLeft(0);
 
-        console.log("%c--- 시퀀서 재생 디버그 시작 ---", "color: #4CAF50; font-weight: bold;");
-
-        isPlaying = true; isPaused = false;
+        isPlaying = true;
+        isPaused = false;
         sequenceStartTime = Date.now();
 
         const $playhead = $('#timeline-playhead');
@@ -421,8 +420,11 @@ var Sequencer = (function() {
         $('#timeline-interaction-overlay').show();
 
         runnerNode = mainLayerInstance.getChildByTag(999);
-        if (!runnerNode) { runnerNode = new cc.Node(); runnerNode.setTag(999); mainLayerInstance.addChild(runnerNode); }
-        runnerNode.stopAllActions();
+        if (!runnerNode) {
+            runnerNode = new cc.Node();
+            runnerNode.setTag(999);
+            mainLayerInstance.addChild(runnerNode);
+        }
 
         if (tracks.size === 0) {
             _onStop(true);
@@ -430,18 +432,11 @@ var Sequencer = (function() {
         }
 
         tracks.forEach((trackData, nodeId) => {
-            console.group(`[Track for Node ID: ${nodeId}]`);
-
             trackData.clips.forEach(clip => {
                 const targetNode = trackData.node;
                 const isLooping = clip.duration > clip.originalDuration;
 
-                console.log(`%c클립 예약: '${clip.animName}'`, "color: #2196F3;", `| 시작: ${clip.startTime.toFixed(3)}s`, `| 길이: ${clip.duration.toFixed(3)}s`);
-
                 const playAction = cc.callFunc(() => {
-                    const elapsed = ((Date.now() - sequenceStartTime) / 1000).toFixed(3);
-                    console.log(`%c▶ 실행(PLAY): '${clip.animName}' at ${elapsed}s`, "color: green;");
-
                     if (targetNode.spine) targetNode.spine.clearTrack(0);
                     if (targetNode.armature) targetNode.armature.getAnimation().stop();
                     if (targetNode.ui) targetNode.ui.stopAllActions();
@@ -455,18 +450,10 @@ var Sequencer = (function() {
                     } else if (clip.type === 'action' && targetNode.cocosAction) {
                         targetNode.cocosAction.play(clip.animName, isLooping);
                     } else if (clip.type === 'action' && targetNode.ui) {
-                        const singlePlayAction = cc.callFunc(() => { ccs.actionManager.playActionByName(targetNode.actionUrl, clip.animName); });
-                        if (isLooping && clip.originalDuration > 0) {
-                            const numRepeats = Math.max(1, Math.ceil(clip.duration / clip.originalDuration));
-                            const loopSequence = cc.repeat(cc.sequence(singlePlayAction, cc.delayTime(clip.originalDuration)), numRepeats);
-                            targetNode.ui.runAction(loopSequence);
-                        } else {
-                            targetNode.ui.runAction(singlePlayAction);
-                        }
+                        ccs.actionManager.playActionByName(targetNode.actionUrl, clip.animName);
                     }
                 });
 
-                console.log(`  - PLAY 액션이 ${clip.startTime.toFixed(3)}초 후에 실행되도록 예약됨`);
                 runnerNode.runAction(cc.sequence(cc.delayTime(clip.startTime), playAction));
 
                 const endTime = clip.startTime + clip.duration;
@@ -474,25 +461,15 @@ var Sequencer = (function() {
 
                 if (!isNextClipStarting) {
                     const stopAction = cc.callFunc(() => {
-                        const elapsed = ((Date.now() - sequenceStartTime) / 1000).toFixed(3);
-                        console.log(`%c■ 실행(STOP) for '${clip.animName}' at ${elapsed}s`, "color: red;");
-
                         if (clip.type === 'armature' && targetNode.armature && targetNode.armature.getAnimation().getCurrentMovementID() === clip.animName) {
                             targetNode.armature.getAnimation().stop();
                         } else if (clip.type === 'spine' && targetNode.spine) {
                             targetNode.spine.clearTrack(0);
-                        } else if (clip.type === 'action' && targetNode.ui) {
-                            targetNode.ui.stopAllActions();
                         }
                     });
-
-                    console.log(`  - STOP 액션이 ${endTime.toFixed(3)}초 후에 실행되도록 예약됨`);
                     runnerNode.runAction(cc.sequence(cc.delayTime(endTime), stopAction));
-                } else {
-                    console.log(`  - STOP 액션 건너뜀: 다음 클립이 바로 시작합니다.`);
                 }
             });
-            console.groupEnd();
         });
 
         const totalDuration = _getTotalDuration();
@@ -505,7 +482,8 @@ var Sequencer = (function() {
 
     function _onPause() {
         if (!isPlaying || isPaused) return;
-        isPaused = true; pausedTime = Date.now() - sequenceStartTime;
+        isPaused = true;
+        pausedTime = Date.now() - sequenceStartTime;
         $('#playSequenceBtn').html(playIcon);
 
         if (animationFrameId) {
@@ -518,14 +496,17 @@ var Sequencer = (function() {
             const node = trackData.node;
             if (node.spine) node.spine.pause();
             if (node.armature) node.armature.getAnimation().pause();
-            if (node.ui) cc.director.getActionManager().pauseTarget(node.ui);
-            cc.director.getActionManager().pauseTarget(node);
+            if (node.ui) {
+                node.ui.getChildren().forEach(child => child.pause());
+                node.ui.pause();
+            }
         });
     }
 
     function _onResume() {
         if (!isPlaying || !isPaused) return;
-        isPaused = false; sequenceStartTime = Date.now() - pausedTime;
+        isPaused = false;
+        sequenceStartTime = Date.now() - pausedTime;
         $('#playSequenceBtn').html(pauseIcon);
 
         if (runnerNode) cc.director.getActionManager().resumeTarget(runnerNode);
@@ -533,8 +514,10 @@ var Sequencer = (function() {
             const node = trackData.node;
             if (node.spine) node.spine.resume();
             if (node.armature) node.armature.getAnimation().resume();
-            if (node.ui) cc.director.getActionManager().resumeTarget(node.ui);
-            cc.director.getActionManager().resumeTarget(node);
+            if (node.ui) {
+                node.ui.getChildren().forEach(child => child.resume());
+                node.ui.resume();
+            }
         });
 
         const totalDuration = _getTotalDuration();
@@ -571,10 +554,14 @@ var Sequencer = (function() {
                 node.armature.getAnimation().resume();
                 node.armature.getAnimation().stop();
             }
+
+            // --- UIAction 정지 최종 로직 ---
             if (node.ui) {
+                // 모든 자식 노드를 순회하며 직접 stopAllActions를 호출합니다.
+                node.ui.getChildren().forEach(child => child.stopAllActions());
+                // 부모 컨테이너의 액션도 정지시킵니다.
                 node.ui.stopAllActions();
             }
-            cc.director.getActionManager().resumeTarget(node);
         });
 
         if (resetPlayhead) {

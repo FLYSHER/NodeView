@@ -681,7 +681,7 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
             });
 
             // *** 수정: 클릭 시 애니메이션 즉시 재생 기능 추가 ***
-            $item.on('click', function() { // 화살표 함수 대신 function 키워드 사용으로 this가 DOM 요소를 가리키게 함
+            $item.on('click', function() {
                 $actionContainer.find('.custom-tree-item').removeClass('selected');
                 $(this).addClass('selected');
 
@@ -691,7 +691,7 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
 
                 if (!draggableNode) return;
 
-                // 기존 애니메이션 정지
+                // --- 이전 애니메이션 정지 로직 (최종 버전 적용) ---
                 if (draggableNode.spine) {
                     draggableNode.spine.clearTrack(0);
                 }
@@ -699,26 +699,24 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
                     draggableNode.armature.getAnimation().stop();
                 }
                 if (draggableNode.ui) {
+                    // UIAction의 모든 자식 노드를 직접 순회하며 정지
+                    draggableNode.ui.getChildren().forEach(child => child.stopAllActions());
                     draggableNode.ui.stopAllActions();
                 }
+                // --- 수정 끝 ---
 
-                // 새 애니메이션 재생
+                // 새 애니메이션을 '한 번만' 재생
                 if (animType === 'spine' && draggableNode.spine) {
-                    // Spine: 마지막 인자를 true로 변경하여 기본적으로 반복 재생되도록 합니다.
-                    draggableNode.spine.setAnimation(0, animName, true);
+                    draggableNode.spine.setAnimation(0, animName, false);
                 }
                 else if (animType === 'armature' && draggableNode.armature) {
-                    // Armature: 마지막 인자를 -1로 변경하여 무한 반복하도록 합니다.
-                    draggableNode.armature.getAnimation().play(animName, -1, -1);
+                    draggableNode.armature.getAnimation().play(animName, -1, 1);
                 }
                 else if (animType === 'action') {
                     if (draggableNode.cocosAction) {
-                        // CocosAction: 마지막 인자를 true로 변경하여 반복 재생되도록 합니다.
-                        draggableNode.cocosAction.play(animName, true);
+                        draggableNode.cocosAction.play(animName, false);
                     }
                     else if (draggableNode.ui && draggableNode.actionUrl) {
-                        // UI(CocosStudio): callFunc 래퍼를 제거하고 직접 호출합니다.
-                        // 이렇게 하면 CocosStudio에서 설정한 액션의 원본 속성(반복 포함)을 따르게 됩니다.
                         ccs.actionManager.playActionByName(draggableNode.actionUrl, animName);
                     }
                 }
