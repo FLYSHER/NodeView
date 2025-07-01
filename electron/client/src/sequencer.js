@@ -17,10 +17,9 @@ var Sequencer = (function() {
                         <path d="M6.3 2.84A1.5 1.5 0 0 0 4 4.11v11.78a1.5 1.5 0 0 0 2.3 1.27l9.344-5.891a1.5 1.5 0 0 0 0-2.538L6.3 2.841Z" />
                     </svg>`;
 
-    let pauseIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
-                              <path d="M5.75 3a.75.75 0 0 0-.75.75v12.5c0 .414.336.75.75.75h1.5a.75.75 0 0 0 .75-.75V3.75A.75.75 0 0 0 7.25 3h-1.5ZM12.75 3a.75.75 0 0 0-.75.75v12.5c0 .414.336.75.75.75h1.5a.75.75 0 0 0 .75-.75V3.75A.75.75 0 0 0-.75-.75h-1.5Z" />
-                            </svg>
-                            `;
+    let pauseIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                      <path fill-rule="evenodd" d="M6.75 5.25a.75.75 0 0 1 .75-.75H9a.75.75 0 0 1 .75.75v13.5a.75.75 0 0 1-.75.75H7.5a.75.75 0 0 1-.75-.75V5.25Zm7.5 0A.75.75 0 0 1 15 4.5h1.5a.75.75 0 0 1 .75.75v13.5a.75.75 0 0 1-.75.75H15a.75.75 0 0 1-.75-.75V5.25Z" clip-rule="evenodd" />
+                    </svg> `;
 
     function _clearClipsForNode(nodeId) {
         if (tracks.has(nodeId)) {
@@ -163,6 +162,14 @@ var Sequencer = (function() {
                     left: _timeToPixel(clip.startTime) + 'px',
                     width: _timeToPixel(clip.duration) + 'px',
                 });
+
+                if (clip.duration > clip.originalDuration && clip.originalDuration > 0.01) {
+                    const numLoops = Math.floor(clip.duration / clip.originalDuration);
+                    for (let i = 1; i < numLoops; i++) {
+                        const markerLeft = _timeToPixel(clip.originalDuration * i);
+                        $clip.append(`<div class="timeline-clip-loop-marker" style="left: ${markerLeft}px;"></div>`);
+                    }
+                }
 
                 if (clip.duration > clip.originalDuration) {
                     const numLoops = Math.floor(clip.duration / clip.originalDuration);
@@ -449,8 +456,28 @@ var Sequencer = (function() {
                         targetNode.armature.getAnimation().play(clip.animName, -1, loopCount);
                     } else if (clip.type === 'action' && targetNode.cocosAction) {
                         targetNode.cocosAction.play(clip.animName, isLooping);
-                    } else if (clip.type === 'action' && targetNode.ui) {
-                        ccs.actionManager.playActionByName(targetNode.actionUrl, clip.animName);
+                    }
+                    // --- UIAction 처리 로직 수정 ---
+                    else if (clip.type === 'action' && targetNode.ui) {
+                        // 애니메이션을 1회 재생하는 액션을 정의
+                        const singlePlayAction = cc.callFunc(() => {
+                            ccs.actionManager.playActionByName(targetNode.actionUrl, clip.animName);
+                        });
+
+                        if (isLooping && clip.originalDuration > 0.01) {
+                            // isLooping이 true이면, 클립 길이에 맞춰 반복 횟수를 계산
+                            const numRepeats = Math.ceil(clip.duration / clip.originalDuration);
+
+                            // '1회 재생 + 원본 길이만큼 딜레이'를 한 세트로 묶어 반복 실행
+                            const loopSequence = cc.repeat(
+                                cc.sequence(singlePlayAction, cc.delayTime(clip.originalDuration)),
+                                numRepeats
+                            );
+                            targetNode.ui.runAction(loopSequence);
+                        } else {
+                            // 루프가 필요 없으면 1회만 실행
+                            targetNode.ui.runAction(singlePlayAction);
+                        }
                     }
                 });
 
