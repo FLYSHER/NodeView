@@ -259,6 +259,7 @@ var Sequencer = (function() {
                         ui.position.top = 2;
 
                         const snapTolerance = 8;
+                        let guideShown = false;
 
                         const originalRight = ui.originalPosition.left + ui.originalSize.width;
                         const isResizingLeft = ui.position.left !== ui.originalPosition.left;
@@ -266,6 +267,7 @@ var Sequencer = (function() {
                         let newLeft = ui.position.left;
                         let newWidth = ui.size.width;
 
+                        // 1. 다른 클립에 대한 기존 스냅 로직 (변경 없음)
                         $('.timeline-track .timeline-clip').not($(this)).each(function() {
                             const targetPos = $(this).position();
                             const targetWidth = $(this).outerWidth();
@@ -274,16 +276,14 @@ var Sequencer = (function() {
 
                             let snapPosition = -1;
 
-                            if (isResizingLeft) { // 왼쪽 핸들 조절
+                            if (isResizingLeft) {
                                 const currentLeft = newLeft;
                                 if (Math.abs(currentLeft - targetLeft) < snapTolerance) { newLeft = targetLeft; snapPosition = targetLeft; }
                                 if (snapPosition < 0 && Math.abs(currentLeft - targetRight) < snapTolerance) { newLeft = targetRight; snapPosition = targetRight; }
-
-                                if(snapPosition >= 0) {
+                                if (snapPosition >= 0) {
                                     newWidth = originalRight - newLeft;
                                 }
-
-                            } else { // 오른쪽 핸들 조절
+                            } else {
                                 const currentRight = newLeft + newWidth;
                                 if (Math.abs(currentRight - targetLeft) < snapTolerance) { newWidth = targetLeft - newLeft; snapPosition = targetLeft; }
                                 if (snapPosition < 0 && Math.abs(currentRight - targetRight) < snapTolerance) { newWidth = targetRight - newLeft; snapPosition = targetRight; }
@@ -294,6 +294,25 @@ var Sequencer = (function() {
                             }
                         });
 
+                        // --- 2. 반복 지점에 대한 새로운 스냅 로직 (추가) ---
+                        // 오른쪽 핸들을 조절하고, 아직 다른 곳에 스냅되지 않았을 때만 작동
+                        if (!isResizingLeft && !guideShown && clip.originalDuration > 0) {
+                            const originalDurationInPixels = _timeToPixel(clip.originalDuration);
+                            const currentResizedWidth = ui.size.width;
+
+                            // 현재 너비가 원본 길이의 몇 배에 가장 가까운지 계산
+                            const closestLoopCount = Math.round(currentResizedWidth / originalDurationInPixels);
+
+                            if (closestLoopCount > 0) {
+                                // 가장 가까운 루프 지점의 너비를 계산
+                                const snapWidth = closestLoopCount * originalDurationInPixels;
+
+                                // 현재 너비와 스냅 지점의 너비가 허용 오차 내에 있는지 확인
+                                if (Math.abs(currentResizedWidth - snapWidth) < snapTolerance) {
+                                    newWidth = snapWidth; // 너비를 스냅 지점에 맞춤
+                                }
+                            }
+                        }
 
                         ui.position.left = Math.max(0, newLeft);
                         ui.size.width = Math.max(_timeToPixel(GRID_TIME_INTERVAL), newWidth);
