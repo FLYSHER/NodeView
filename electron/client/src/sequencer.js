@@ -516,12 +516,14 @@ var Sequencer = (function() {
                 const endTime = clip.startTime + clip.duration;
                 const isNextClipStarting = trackData.clips.some(nextClip => nextClip !== clip && Math.abs(nextClip.startTime - endTime) < 0.001);
 
-                if (!isNextClipStarting) {
+                if (clip.type === 'action' || !isNextClipStarting) {
                     const stopAction = cc.callFunc(() => {
                         if (clip.type === 'armature' && targetNode.armature && targetNode.armature.getAnimation().getCurrentMovementID() === clip.animName) {
                             targetNode.armature.getAnimation().stop();
                         } else if (clip.type === 'spine' && targetNode.spine) {
                             targetNode.spine.clearTrack(0);
+                        } else if (clip.type === 'action' && targetNode.ui) {
+                            ccs.actionManager.stopActionByName(targetNode.actionUrl, clip.animName);
                         }
                     });
                     runnerNode.runAction(cc.sequence(cc.delayTime(endTime), stopAction));
