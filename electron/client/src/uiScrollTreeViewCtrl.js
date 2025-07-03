@@ -43,6 +43,7 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
         $('#widgetTree').jstree({
             'core' : {
                 'data' : [],
+                'multiple': false,
                 "check_callback" : function (operation, node, parent, position, more) {
                     const mainLayerInstance = self._mainLayer;
 
@@ -261,6 +262,55 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
         this._jsonName = null;
     },
 
+    // uiScrollTreeViewCtrl.js 파일에서 이 함수를 찾아 아래 코드로 교체해주세요.
+
+    getOriginalTreeString: function(widgetTree, assetLibrary) {
+        const result = [];
+
+        // assetLibrary의 URL들을 빠르게 찾기 위해 Set으로 변환
+        const assetUrls = new Set();
+        for (const key in assetLibrary) {
+            if (assetLibrary[key].url) {
+                assetUrls.add(assetLibrary[key].url);
+            }
+        }
+
+        const traverseNode = (node) => {
+            let isNestedPrefab = false;
+
+            // 1. 자식 노드가 외부 파일을 참조하는지 확인합니다.
+            if (node.options && node.options.fileNameData && node.options.fileNameData.path) {
+                const path = node.options.fileNameData.path;
+
+                // 2. [수정된 핵심 로직]
+                // 참조하는 파일 경로(path)가 assetLibrary에 등록된 URL인지 확인합니다.
+                if (assetUrls.has(path)) {
+                    isNestedPrefab = true;
+                }
+            }
+
+            // 3. assetLibrary에 등록된 에셋인 경우 건너뜁니다.
+            if (isNestedPrefab) {
+                return;
+            }
+
+            // 4. 일반 위젯이면 이름을 결과에 추가합니다.
+            if (node.options && node.options.name) {
+                result.push(`            "${node.options.name}": null`);
+            }
+
+            // 5. 자식들을 계속 탐색합니다.
+            if (node.children && node.children.length > 0) {
+                node.children.forEach(child => traverseNode(child));
+            }
+        };
+
+        traverseNode(widgetTree);
+
+        const content = result.join(',\n');
+        return `this._uiWidgets = {\n${content}\n        };`;
+    },
+
     setup:function () {
         $('#toggleVisible').click( function(){
             this._selectNode.forEach( item => {
@@ -283,21 +333,44 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
         }.bind(this));
 
         $('#copyBtn').click( function(){
-            if (Object.keys(this._treeWidgetObj).length > 0) {
-                var obj = this.getTreeObjName();
-                this._treeString = "this._uiWidgets = {\n";
-                for( var key in obj ) {
-                    this._treeString += obj[ key ].copyString;
-                }
-                this._treeString += "};";
+            const selectedNode = this._selectNode && this._selectNode.length === 1 ? this._selectNode[0] : null;
 
-                if (typeof copyStringToClipboard === 'function') {
-                    copyStringToClipboard( this._treeString );
+            if (selectedNode instanceof DraggableNode && (selectedNode.assetType === 'ui' || selectedNode.assetType === 'cocosstudio') && selectedNode.actionUrl) {
+
+                const originalJson = cc.loader.cache[selectedNode.actionUrl];
+
+                if (originalJson && originalJson.widgetTree) {
+                    // [수정] getOriginalTreeString 호출 시 assetLibrary를 인자로 전달합니다.
+                    const treeString = this.getOriginalTreeString(originalJson.widgetTree, this._mainLayer.assetLibrary);
+
+                    if (typeof copyStringToClipboard === 'function') {
+                        copyStringToClipboard(treeString);
+                        console.log("선택된 에셋의 원본 위젯 구조를 복사했습니다.");
+                    } else {
+                        console.warn("copyStringToClipboard 함수가 정의되지 않았습니다.");
+                    }
                 } else {
-                    console.warn("copyStringToClipboard 함수가 정의되지 않았습니다.");
+                    console.warn("선택된 에셋의 원본 정보를 찾을 수 없습니다.");
                 }
+
             } else {
-                console.warn("복사할 트리 데이터가 없습니다. 먼저 트리를 로드하거나 선택해주세요.");
+                // (기존의 전체 트리 복사 로직은 그대로 유지)
+                if (Object.keys(this._treeWidgetObj).length > 0) {
+                    var obj = this.getTreeObjName();
+                    this._treeString = "this._uiWidgets = {\n";
+                    for( var key in obj ) {
+                        this._treeString += obj[ key ].copyString;
+                    }
+                    this._treeString += "};";
+
+                    if (typeof copyStringToClipboard === 'function') {
+                        copyStringToClipboard( this._treeString );
+                    } else {
+                        console.warn("copyStringToClipboard 함수가 정의되지 않았습니다.");
+                    }
+                } else {
+                    console.warn("복사할 트리 데이터가 없습니다. 먼저 트리를 로드하거나 선택해주세요.");
+                }
             }
         }.bind(this));
 
