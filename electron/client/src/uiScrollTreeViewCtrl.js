@@ -524,10 +524,11 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
                 if (item) {
                     item.setVisible(isChecked);
 
-                    // 하이어라키의 눈 아이콘 상태 동기화
+                    // 하이어라키의 눈 아이콘 상태 동기화 (오류 수정된 부분)
                     const $jstreeNode = $('#' + item.__instanceId);
                     if ($jstreeNode.length) {
-                        $jstreeNode.find('.visibility-toggle')
+                        // 자식에게 영향을 주지 않도록 부모의 앵커(<a>) 안에서만 아이콘을 찾습니다.
+                        $jstreeNode.children('.jstree-anchor').find('.visibility-toggle')
                             .toggleClass('fa-eye', isChecked)
                             .toggleClass('fa-eye-slash', !isChecked);
                     }
