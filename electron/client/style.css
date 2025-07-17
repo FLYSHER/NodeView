@@ -602,11 +602,19 @@ ul.tabs li.current {
     padding-left: 20px;
 }
 
+.visibility-toggle {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
 .jstree-default .jstree-anchor {
     flex-grow: 1;
     display: flex;
     align-items: center;
-    padding: 7px 10px;
+    padding: 7px 10px 7px 32px; /* 왼쪽 여백(padding-left)을 32px로 늘립니다 */
+    position: relative; /* 자식 요소의 위치 기준점으로 설정 */
     border-radius: 4px;
     line-height: 1.4;
     font-size: 0.9rem;

@@ -257,6 +257,27 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
             self._mainLayer.refreshHierarchyView();
         });
 
+        $('#widgetTree').on('click', '.visibility-toggle', function(e) {
+            e.stopPropagation(); // 이벤트 전파를 막아 노드가 선택되는 것을 방지
+
+            const $icon = $(this);
+            const nodeId = $icon.data('node-id');
+            const cocosNode = self._mainLayer.nodeMap[nodeId];
+
+            if (cocosNode) {
+                const newVisibility = !cocosNode.isVisible();
+                cocosNode.setVisible(newVisibility);
+
+                // 아이콘 모양 업데이트
+                $icon.toggleClass('fa-eye', newVisibility).toggleClass('fa-eye-slash', !newVisibility);
+
+                // 현재 선택된 노드일 경우, Properties 패널의 체크박스도 동기화
+                if (self._selectNode.length > 0 && self._selectNode[0].__instanceId === nodeId) {
+                    $('#visible').prop('checked', newVisibility);
+                }
+            }
+        });
+
         $('#actionTree').addClass('custom-tree-container');
 
         this._jsonName = null;
@@ -498,9 +519,19 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
 
         // Visible Checkbox
         document.getElementById('visible').addEventListener('change', function(e) {
+            const isChecked = e.target.checked; // 미리 값을 저장
             this._selectNode.forEach(item => {
                 if (item) {
-                    item.setVisible(e.target.checked);
+                    item.setVisible(isChecked);
+
+                    // 하이어라키의 눈 아이콘 상태 동기화
+                    const $jstreeNode = $('#' + item.__instanceId);
+                    if ($jstreeNode.length) {
+                        $jstreeNode.find('.visibility-toggle')
+                            .toggleClass('fa-eye', isChecked)
+                            .toggleClass('fa-eye-slash', !isChecked);
+                    }
+
                     if (this._mainLayer && item.__instanceId) {
                         this._mainLayer.updateMenuWithNodeId(item.__instanceId);
                     }

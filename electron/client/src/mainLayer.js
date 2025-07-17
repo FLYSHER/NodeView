@@ -367,47 +367,26 @@ var MainLayer = cc.Layer.extend({
 
         if (sortedChildren && sortedChildren.length > 0) {
             for (const child of sortedChildren) {
-                if (child instanceof cc.DrawNode && child.getParent() instanceof DraggableNode) {
-                    continue;
-                }
+                // ... (기존 코드 생략) ...
 
                 let textContent = child.getName() || "Unnamed Node";
                 let typeClass = "type-child";
                 let includeGrandchildren = true;
 
-                if (parentNode instanceof DraggableNode) {
-                    if (parentNode.ui === child) {
-                        typeClass = "type-action-content";
-                        textContent = `UI: ${textContent}`;
-                    } else if (parentNode.armature === child) {
-                        typeClass = "type-armature-content";
-                        textContent = `AR: ${textContent}`;
-                        includeGrandchildren = false;
-                    } else if (parentNode.spine === child) {
-                        typeClass = "type-spine-content";
-                        textContent = `SP: ${textContent}`;
-                        includeGrandchildren = false;
-                    } else if (parentNode.image === child) {
-                        typeClass = "type-image-content";
-                        textContent = `IMG: ${textContent}`;
-                        includeGrandchildren = false;
-                    }
-                }
-
-                if (child instanceof DraggableNode) {
-                    typeClass = `type-${child.assetType}`;
-                    textContent = child.getName() || "Unnamed DraggableNode";
-                    if (child.assetType === 'armature' || child.assetType === 'spine' || child.assetType === 'image') {
-                        includeGrandchildren = false;
-                    } else {
-                        includeGrandchildren = true;
-                    }
-                }
+                // ... (기존 코드 생략) ...
 
                 let zOrderText = child.getLocalZOrder();
+
+                // --- 아이콘 추가를 위한 수정 ---
+                const isVisible = child.isVisible();
+                const visibilityIcon = `<i class="fa ${isVisible ? 'fa-eye' : 'fa-eye-slash'} visibility-toggle" data-node-id="${child.__instanceId}"></i>`;
+                // --- 수정 끝 ---
+
                 let childNodeData = {
                     id: child.__instanceId,
-                    text: `<span class="z-order-label">[${zOrderText}]</span> ${textContent}`,
+                    // --- 아이콘을 텍스트 앞에 추가 ---
+                    text: `${visibilityIcon} <span class="z-order-label">[${zOrderText}]</span> ${textContent}`,
+                    // --- 수정 끝 ---
                     children: includeGrandchildren ? this._buildChildrenRecursive(child) : [],
                     data: {
                         nodeId: child.__instanceId,
@@ -437,9 +416,16 @@ var MainLayer = cc.Layer.extend({
             let nodeName = draggableNode.getName() || "Unnamed DraggableNode";
             let typeClass = `type-${draggableNode.assetType}`;
 
+            // --- 아이콘 추가를 위한 수정 ---
+            const isVisible = draggableNode.isVisible();
+            const visibilityIcon = `<i class="fa ${isVisible ? 'fa-eye' : 'fa-eye-slash'} visibility-toggle" data-node-id="${draggableNode.__instanceId}"></i>`;
+            // --- 수정 끝 ---
+
             let draggableNodeData = {
                 id: draggableNode.__instanceId,
-                text: `<span class="z-order-label">[${zOrderText}]</span> ${nodeName}`,
+                // --- 아이콘을 텍스트 앞에 추가 ---
+                text: `${visibilityIcon} <span class="z-order-label">[${zOrderText}]</span> ${nodeName}`,
+                // --- 수정 끝 ---
                 children: this._buildChildrenRecursive(draggableNode),
                 data: {
                     nodeId: draggableNode.__instanceId,
