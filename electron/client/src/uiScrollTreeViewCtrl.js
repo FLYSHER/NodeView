@@ -764,7 +764,7 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
                     if (animType === 'spine' && draggableNode.spine) {
                         draggableNode.spine.setAnimation(0, animName, false);
                     } else if (animType === 'armature' && draggableNode.armature) {
-                        draggableNode.armature.getAnimation().play(animName, -1, 1);
+                        draggableNode.armature.getAnimation().play(animName, -1, false);
                     } else if (animType === 'action') {
                         if (draggableNode.cocosAction) {
                             draggableNode.cocosAction.play(animName, false);
