@@ -742,14 +742,18 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
                 if (item.type === 'action') iconText = 'UI';
 
                 const $item = $(`
-            <div class="custom-tree-item" data-anim-name="${item.name}" data-anim-type="${item.type}">
-                <span class="track-type-icon ${typeClass}">${iconText}</span>
-                ${item.name}
-            </div>
-            `);
+        <div class="custom-tree-item" data-anim-name="${item.name}" data-anim-type="${item.type}">
+            <span class="track-type-icon ${typeClass}">${iconText}</span>
+            ${item.name}
+        </div>
+        `);
 
                 $item.draggable({
                     appendTo: "body",
+                    // *** 핵심 수정: distance 옵션 추가 ***
+                    // 마우스를 10픽셀 이상 움직여야 드래그가 시작됩니다.
+                    distance: 10,
+                    // **********************************
                     helper: function() {
                         const assetName = $(this).data('anim-name');
                         const $helper = $(`<div class="custom-drag-helper">${assetName}</div>`);
@@ -794,9 +798,9 @@ var UIScrollTreeViewCtrl = cc.Node.extend({
                     }
 
                     if (animType === 'spine' && draggableNode.spine) {
-                        draggableNode.spine.setAnimation(0, animName, false);
+                        draggableNode.spine.setAnimation(0, animName);
                     } else if (animType === 'armature' && draggableNode.armature) {
-                        draggableNode.armature.getAnimation().play(animName, -1, false);
+                        draggableNode.armature.getAnimation().play(animName, -1);
                     } else if (animType === 'action') {
                         if (draggableNode.cocosAction) {
                             draggableNode.cocosAction.play(animName, false);
