@@ -354,7 +354,9 @@ var MainLayer = cc.Layer.extend({
             };
             addNodeToMap(node);
 
-            this.refreshHierarchyView();
+            this.scheduleOnce(() => {
+                this.refreshHierarchyView();
+            }, 0);
         }
     },
 
