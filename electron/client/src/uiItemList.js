@@ -25,30 +25,17 @@ var UIItemList = cc.Node.extend({
 
         const selector = '[data-asset-name="' + assetInfo.name + '"][data-asset-type="' + assetInfo.type + '"]';
         if ($container.find(selector).length > 0) {
-            console.log(`[DEBUG - UIItemList] 에셋 '${assetInfo.name}' (타입: ${assetInfo.type})는 이미 Assets 패널에 존재합니다. 건너뜀.`);
             return;
         }
 
         let iconText = '';
         let typeClass = '';
         switch (assetInfo.type) {
-            case 'armature':
-                iconText = 'AR';
-                typeClass = 'type-armature';
-                break;
+            case 'armature': iconText = 'AR'; typeClass = 'type-armature'; break;
             case 'ui':
-            case 'cocosstudio':
-                iconText = 'UI';
-                typeClass = 'type-action';
-                break;
-            case 'spine':
-                iconText = 'SP';
-                typeClass = 'type-spine';
-                break;
-            case 'image':
-                iconText = 'IMG';
-                typeClass = 'type-image';
-                break;
+            case 'cocosstudio': iconText = 'UI'; typeClass = 'type-action'; break;
+            case 'spine': iconText = 'SP'; typeClass = 'type-spine'; break;
+            case 'image': iconText = 'IMG'; typeClass = 'type-image'; break;
         }
 
         const $item = $(`
@@ -58,47 +45,51 @@ var UIItemList = cc.Node.extend({
     </div>
     `);
 
+        // =================================================================
+        // ▼▼▼▼▼▼▼▼▼▼▼▼▼▼ 이 부분이 추가/수정됩니다 ▼▼▼▼▼▼▼▼▼▼▼▼▼
+        // =================================================================
+        // 클릭 시 선택 상태(selected 클래스)를 토글하는 로직
+        $item.on('click', (e) => {
+            // 다른 모든 아이템의 선택 상태는 해제
+            $container.find('.custom-tree-item').removeClass('selected');
+            // 현재 아이템에만 선택 상태 부여
+            $(e.currentTarget).addClass('selected');
+        });
+
         $item.on('contextmenu', (e) => {
+            // 우클릭 시에도 선택 상태가 되도록 합니다.
+            $container.find('.custom-tree-item').removeClass('selected');
+            $(e.currentTarget).addClass('selected');
+
             if (this._mainLayer && this._mainLayer._contextMenuManager) {
                 this._mainLayer._contextMenuManager.showOtherContextMenu(e, e.currentTarget, null);
             } else {
-                console.error("[ERROR - UIItemList - ContextMenu] _mainLayer 또는 _mainLayer._contextMenuManager가 유효하지 않습니다!");
+                console.error("[ERROR] _mainLayer 또는 _mainLayer._contextMenuManager가 유효하지 않습니다!");
             }
         });
-
+        // =================================================================
+        // ▲▲▲▲▲▲▲▲▲▲▲▲▲ 이 부분이 추가/수정됩니다 ▲▲▲▲▲▲▲▲▲▲▲▲▲
+        // =================================================================
 
         $item.draggable({
             appendTo: "body",
-            // *** 핵심 수정: distance 옵션 추가 ***
-            // 마우스를 10픽셀 이상 움직여야 드래그가 시작됩니다.
             distance: 10,
-            // **********************************
             helper: function() {
                 const dragAssetName = $(this).data('asset-name');
                 const dragAssetType = $(this).data('asset-type');
                 const $helper = $(`<div class="custom-drag-helper">${dragAssetName} (${dragAssetType.toUpperCase()})</div>`);
                 $helper.data('assetName', dragAssetName);
                 $helper.data('assetType', dragAssetType);
-
-                $(this).draggable("option", "cursorAt", {
-                    left: 1,
-                    top: 1
-                });
-
+                $(this).draggable("option", "cursorAt", { left: 1, top: 1 });
                 return $helper;
             },
             revert: 'invalid',
             revertDuration: 200,
             zIndex: 9999,
-            start: function(event, ui) {
-                $('#resize-overlay').show();
-            },
-            stop: function(event, ui) {
-                $('#resize-overlay').hide();
-            }
+            start: function(event, ui) { $('#resize-overlay').show(); },
+            stop: function(event, ui) { $('#resize-overlay').hide(); }
         });
 
         $container.append($item);
-        console.log(`[DEBUG - UIItemList] 에셋 '${assetInfo.name}' (타입: ${assetInfo.type}) Assets 패널에 추가 완료.`);
     }
 });

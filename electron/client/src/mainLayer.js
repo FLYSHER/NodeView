@@ -53,6 +53,47 @@ var MainLayer = cc.Layer.extend({
         this._contextMenuManager = new ContextMenuManager(this);
         this._deletionManager = new DeletionManager(this);
         Sequencer.initialize(this);
+
+        this._deleteKeyListener = (event) => {
+            // Delete 키 또는 Backspace 키를 눌렀을 때
+            if (event.key === 'Delete' || event.key === 'Backspace') {
+                // 입력 필드에 포커스가 가 있는 경우는 제외
+                if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
+                    return;
+                }
+
+                event.preventDefault(); // 브라우저의 뒤로가기 등 기본 동작 방지
+
+                // 우선순위 1: Sequencer에서 선택된 클립 삭제
+                const $selectedClip = $('.timeline-clip.selected');
+                if ($selectedClip.length > 0) {
+                    const clipId = $selectedClip.data('clip-id');
+                    const trackNodeId = $selectedClip.closest('.timeline-track').data('node-id');
+                    if (clipId && trackNodeId && Sequencer?._deleteClip) {
+                        Sequencer._deleteClip(trackNodeId, clipId);
+                    }
+                    return; // 클립 삭제 후 종료
+                }
+
+                // 우선순위 2: Hierarchy 또는 Game View에서 선택된 노드 삭제
+                if (this._currentlySelectedNode) {
+                    this.deleteItem(this._currentlySelectedNode.__instanceId);
+                    return; // 노드 삭제 후 종료
+                }
+
+                // 우선순위 3: Assets 패널에서 선택된 에셋 삭제
+                const $selectedAsset = $('#fileNameTree .custom-tree-item.selected');
+                if ($selectedAsset.length > 0) {
+                    const assetName = $selectedAsset.data('asset-name');
+                    const assetType = $selectedAsset.data('asset-type');
+                    if (assetName && assetType) {
+                        this.deleteAsset(assetName, assetType);
+                    }
+                }
+            }
+        };
+        document.addEventListener('keydown', this._deleteKeyListener);
+
         return true;
     },
 
@@ -574,6 +615,7 @@ var MainLayer = cc.Layer.extend({
         cc.eventManager.removeListener(this._loadCocosStudioListener);
         cc.eventManager.removeListener(this._loadSpineListener);
         cc.eventManager.removeListener(this._loadImageListener);
+        document.removeEventListener('keydown', this._deleteKeyListener);
         this._super();
     }
 });

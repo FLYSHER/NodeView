@@ -151,6 +151,21 @@ var Sequencer = (function() {
 
                 _updateClipDurationText($clip, clip);
 
+                // 클립 클릭 시 'selected' 클래스 추가/관리하는 이벤트 핸들러
+                $clip.on('click', function(e) {
+                    e.stopPropagation(); // 이벤트가 부모로 전파되는 것을 막음
+
+                    // 다른 모든 패널의 선택 상태를 초기화
+                    $('.timeline-clip').removeClass('selected');
+                    $('#fileNameTree .custom-tree-item').removeClass('selected');
+                    if (mainLayerInstance) {
+                        mainLayerInstance.updateMenuWithNodeId(null);
+                    }
+
+                    // 현재 클릭한 클립에만 'selected' 클래스 추가
+                    $(this).addClass('selected');
+                });
+
                 $clip.on('contextmenu', function(e) {
                     e.preventDefault();
                     e.stopPropagation();
