@@ -84,7 +84,7 @@ var PanelManager = (function() {
     }
 
     return {
-        initialize: function() {
+        initialize: function () {
             const layoutArea = $('#panels-container-area');
             layoutArea.empty();
             const finalLayoutConfig = LayoutManager.load() || defaultLayoutConfig;
@@ -93,14 +93,11 @@ var PanelManager = (function() {
             _registerComponents(myLayout);
             myLayout.init();
 
-            window.addEventListener('dragover', function(e) {
+            window.addEventListener('dragover', function (e) {
                 e.preventDefault();
-
                 const assetsPanel = document.getElementById('assets-panel-drop-zone');
                 if (!assetsPanel) return;
-
                 const rect = assetsPanel.getBoundingClientRect();
-
                 if (e.clientX >= rect.left && e.clientX <= rect.right &&
                     e.clientY >= rect.top && e.clientY <= rect.bottom) {
                     assetsPanel.classList.add('drag-over-active');
@@ -109,7 +106,7 @@ var PanelManager = (function() {
                 }
             }, false);
 
-            window.addEventListener('dragleave', function(e) {
+            window.addEventListener('dragleave', function (e) {
                 if (!e.relatedTarget) {
                     const assetsPanel = document.getElementById('assets-panel-drop-zone');
                     if (assetsPanel) {
@@ -118,18 +115,14 @@ var PanelManager = (function() {
                 }
             }, false);
 
-            window.addEventListener('drop', function(e) {
+            window.addEventListener('drop', function (e) {
                 e.preventDefault();
-
                 const assetsPanel = document.getElementById('assets-panel-drop-zone');
                 if (!assetsPanel) return;
-
                 const rect = assetsPanel.getBoundingClientRect();
                 assetsPanel.classList.remove('drag-over-active');
-
                 if (e.clientX >= rect.left && e.clientX <= rect.right &&
                     e.clientY >= rect.top && e.clientY <= rect.bottom) {
-
                     if (typeof Loader !== 'undefined' && Loader.onDropHandler) {
                         Loader.onDropHandler(e);
                     }
@@ -142,21 +135,24 @@ var PanelManager = (function() {
             for (const key in componentRegistry) {
                 $dropdown.append(`<label><input type="checkbox" data-component-type="${componentRegistry[key].component}"> ${componentRegistry[key].title}</label>`);
             }
+
             function syncCheckboxes() {
                 const openComponents = new Set();
                 myLayout.root.getItemsByFilter(item => item.isComponent).forEach(item => {
                     openComponents.add(item.componentName);
                 });
-                $dropdown.find('input[type="checkbox"]').each(function() {
+                $dropdown.find('input[type="checkbox"]').each(function () {
                     $(this).prop('checked', openComponents.has($(this).data('component-type')));
                 });
             }
+
             $toggleButton.on('click', (e) => {
                 e.stopPropagation();
                 syncCheckboxes();
                 $dropdown.slideToggle(150);
             });
-            $dropdown.on('change', 'input[type="checkbox"]', function() {
+
+            $dropdown.on('change', 'input[type="checkbox"]', function () {
                 const componentType = $(this).data('component-type');
                 const existingItems = myLayout.root.getItemsByFilter(item => item.isComponent && item.componentName === componentType);
                 if ($(this).is(':checked')) {
@@ -178,7 +174,7 @@ var PanelManager = (function() {
                 }
             });
 
-            $('#res-apply-btn').on('click', function() {
+            $('#res-apply-btn').on('click', function () {
                 const w = parseInt($('#res-width-input').val(), 10);
                 const h = parseInt($('#res-height-input').val(), 10);
                 if (!isNaN(w) && !isNaN(h) && w > 0 && h > 0) {
@@ -198,21 +194,21 @@ var PanelManager = (function() {
                 syncCheckboxes();
             });
 
-            $('#main-menu-toggle-btn').on('click', function() {
+            $('#main-menu-toggle-btn').on('click', function () {
                 $(this).toggleClass('is-active');
                 $('.toggleable-control').toggle('slide', {
                     direction: 'right'
                 }, 150);
             });
 
-            $('#toggle-fullscreen-btn').on('click', function() {
+            $('#toggle-fullscreen-btn').on('click', function () {
                 if (!document.fullscreenElement) {
                     document.documentElement.requestFullscreen();
                 } else {
                     if (document.exitFullscreen) document.exitFullscreen();
                 }
             });
-            $(document).on('fullscreenchange webkitfullscreenchange', function() {
+            $(document).on('fullscreenchange webkitfullscreenchange', function () {
                 const isFullscreen = !!document.fullscreenElement;
                 $('#toggle-fullscreen-btn').find('i').toggleClass('fa-compress', isFullscreen).toggleClass('fa-expand', !isFullscreen);
             });
@@ -224,7 +220,7 @@ var PanelManager = (function() {
 
             function debounce(func, delay) {
                 let timeout;
-                return function(...args) {
+                return function (...args) {
                     clearTimeout(timeout);
                     timeout = setTimeout(() => func.apply(this, args), delay);
                 };

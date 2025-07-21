@@ -965,3 +965,20 @@ ul.tabs li.current {
     /* 다른 요소들보다 위에 보이도록 z-index를 살짝 높여줍니다. */
     z-index: 10;
 }
+
+/* 계층 구조 X 버튼 스타일 */
+.delete-node-icon {
+    display: inline-block; /* 항상 표시되도록 변경 */
+    margin-left: auto;
+    padding: 2px 4px;
+    border-radius: 3px;
+    color: #E57373;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* 마우스를 올렸을 때 더 진하게 */
+.jstree-anchor:hover .delete-node-icon {
+    background-color: #ffcdd2;
+    color: #D32F2F;
+}

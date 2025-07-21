@@ -249,6 +249,14 @@ class UIScrollTreeViewCtrl {
             }
         });
 
+        $('#widgetTree').on('click', '.delete-node-icon', function(e) {
+            e.stopPropagation(); // 이벤트 전파를 막아 다른 동작(노드 선택 등)을 방지
+            const nodeId = $(this).data('node-id');
+            if (nodeId && self._mainLayer && self._mainLayer._deletionManager) {
+                self._mainLayer._deletionManager.deleteSceneNode(nodeId);
+            }
+        });
+
         $('#actionTree').addClass('custom-tree-container');
         this._jsonName = null;
     }

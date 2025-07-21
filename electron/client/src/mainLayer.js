@@ -418,26 +418,22 @@ var MainLayer = cc.Layer.extend({
 
         if (sortedChildren && sortedChildren.length > 0) {
             for (const child of sortedChildren) {
-                // ... (기존 코드 생략) ...
-
                 let textContent = child.getName() || "Unnamed Node";
                 let typeClass = "type-child";
                 let includeGrandchildren = true;
-
-                // ... (기존 코드 생략) ...
-
                 let zOrderText = child.getLocalZOrder();
-
-                // --- 아이콘 추가를 위한 수정 ---
                 const isVisible = child.isVisible();
                 const visibilityIcon = `<i class="fa ${isVisible ? 'fa-eye' : 'fa-eye-slash'} visibility-toggle" data-node-id="${child.__instanceId}"></i>`;
-                // --- 수정 끝 ---
+
+                // --- ▼▼▼ 신규 기능 추가 ▼▼▼ ---
+                const deleteIcon = `<i class="fa fa-times delete-node-icon" data-node-id="${child.__instanceId}"></i>`;
+                // --- ▲▲▲ 신규 기능 추가 ▲▲▲ ---
 
                 let childNodeData = {
                     id: child.__instanceId,
-                    // --- 아이콘을 텍스트 앞에 추가 ---
-                    text: `${visibilityIcon} <span class="z-order-label">[${zOrderText}]</span> ${textContent}`,
-                    // --- 수정 끝 ---
+                    // --- ▼▼▼ 신규 기능 추가 ▼▼▼ ---
+                    text: `${visibilityIcon} <span class="z-order-label">[${zOrderText}]</span> ${textContent} ${deleteIcon}`,
+                    // --- ▲▲▲ 신규 기능 추가 ▲▲▲ ---
                     children: includeGrandchildren ? this._buildChildrenRecursive(child) : [],
                     data: {
                         nodeId: child.__instanceId,
@@ -466,17 +462,18 @@ var MainLayer = cc.Layer.extend({
             let zOrderText = draggableNode.getLocalZOrder();
             let nodeName = draggableNode.getName() || "Unnamed DraggableNode";
             let typeClass = `type-${draggableNode.assetType}`;
-
-            // --- 아이콘 추가를 위한 수정 ---
             const isVisible = draggableNode.isVisible();
             const visibilityIcon = `<i class="fa ${isVisible ? 'fa-eye' : 'fa-eye-slash'} visibility-toggle" data-node-id="${draggableNode.__instanceId}"></i>`;
-            // --- 수정 끝 ---
+
+            // --- ▼▼▼ 신규 기능 추가 ▼▼▼ ---
+            const deleteIcon = `<i class="fa fa-times delete-node-icon" data-node-id="${draggableNode.__instanceId}"></i>`;
+            // --- ▲▲▲ 신규 기능 추가 ▲▲▲ ---
 
             let draggableNodeData = {
                 id: draggableNode.__instanceId,
-                // --- 아이콘을 텍스트 앞에 추가 ---
-                text: `${visibilityIcon} <span class="z-order-label">[${zOrderText}]</span> ${nodeName}`,
-                // --- 수정 끝 ---
+                // --- ▼▼▼ 신규 기능 추가 ▼▼▼ ---
+                text: `${visibilityIcon} <span class="z-order-label">[${zOrderText}]</span> ${nodeName} ${deleteIcon}`,
+                // --- ▲▲▲ 신규 기능 추가 ▲▲▲ ---
                 children: this._buildChildrenRecursive(draggableNode),
                 data: {
                     nodeId: draggableNode.__instanceId,
