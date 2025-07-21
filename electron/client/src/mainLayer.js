@@ -14,6 +14,7 @@ var MainLayer = cc.Layer.extend({
     ctor: function () {
         this._super();
 
+        this._isLayoutInitialized = false;
         this.assetLibrary = {};
         this.sceneNodes = {};
         this.nodeMap = {};
@@ -136,6 +137,12 @@ var MainLayer = cc.Layer.extend({
                     node.setPosition(newX, newY);
                 }
             }
+        }
+
+        // 레이아웃이 처음 설정된 경우, 화면을 한번 갱신해줍니다.
+        if (!this._isLayoutInitialized) {
+            this.refreshHierarchyView();
+            this._isLayoutInitialized = true;
         }
     },
 
