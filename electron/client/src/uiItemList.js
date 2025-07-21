@@ -39,27 +39,35 @@ var UIItemList = cc.Node.extend({
         }
 
         const $item = $(`
-    <div class="custom-tree-item" data-asset-name="${assetInfo.name}" data-asset-type="${assetInfo.type}" id="${itemDomId}">
-        <span class="track-type-icon ${typeClass}">${iconText}</span>
-        ${assetInfo.name} <span style="color:var(--font-secondary); font-size:0.8em;">(${assetInfo.type.toUpperCase()})</span>
-    </div>
-    `);
+<div class="custom-tree-item" data-asset-name="${assetInfo.name}" data-asset-type="${assetInfo.type}" id="${itemDomId}">
+    <span class="track-type-icon ${typeClass}">${iconText}</span>
+    ${assetInfo.name} <span style="color:var(--font-secondary); font-size:0.8em;">(${assetInfo.type.toUpperCase()})</span>
+</div>
+`);
 
-        // =================================================================
-        // ▼▼▼▼▼▼▼▼▼▼▼▼▼▼ 이 부분이 추가/수정됩니다 ▼▼▼▼▼▼▼▼▼▼▼▼▼
-        // =================================================================
-        // 클릭 시 선택 상태(selected 클래스)를 토글하는 로직
+        // --- ▼▼▼ 이 부분을 수정합니다 ▼▼▼ ---
+
         $item.on('click', (e) => {
-            // 다른 모든 아이템의 선택 상태는 해제
             $container.find('.custom-tree-item').removeClass('selected');
-            // 현재 아이템에만 선택 상태 부여
             $(e.currentTarget).addClass('selected');
+
+            // [추가된 핵심 코드]
+            // MainLayer에 이 아이템이 마지막으로 선택되었음을 알립니다.
+            this._mainLayer.setLastSelectedItem({
+                type: 'asset',
+                data: { name: assetInfo.name, type: assetInfo.type }
+            });
         });
 
         $item.on('contextmenu', (e) => {
-            // 우클릭 시에도 선택 상태가 되도록 합니다.
             $container.find('.custom-tree-item').removeClass('selected');
             $(e.currentTarget).addClass('selected');
+
+            // [추가된 핵심 코드] 우클릭 시에도 마지막 선택으로 등록합니다.
+            this._mainLayer.setLastSelectedItem({
+                type: 'asset',
+                data: { name: assetInfo.name, type: assetInfo.type }
+            });
 
             if (this._mainLayer && this._mainLayer._contextMenuManager) {
                 this._mainLayer._contextMenuManager.showOtherContextMenu(e, e.currentTarget, null);
@@ -67,9 +75,8 @@ var UIItemList = cc.Node.extend({
                 console.error("[ERROR] _mainLayer 또는 _mainLayer._contextMenuManager가 유효하지 않습니다!");
             }
         });
-        // =================================================================
-        // ▲▲▲▲▲▲▲▲▲▲▲▲▲ 이 부분이 추가/수정됩니다 ▲▲▲▲▲▲▲▲▲▲▲▲▲
-        // =================================================================
+
+        // --- ▲▲▲ 여기까지 수정 ▲▲▲ ---
 
         $item.draggable({
             appendTo: "body",

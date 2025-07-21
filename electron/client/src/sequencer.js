@@ -126,10 +126,10 @@ var Sequencer = (function() {
             }
 
             const labelHtml = `
-    <div class="track-label" title="${trackData.node.getName()}">
-        <span class="track-type-icon ${typeClass}">${iconText}</span>
-        ${trackData.node.getName()}
-    </div>`;
+<div class="track-label" title="${trackData.node.getName()}">
+    <span class="track-type-icon ${typeClass}">${iconText}</span>
+    ${trackData.node.getName()}
+</div>`;
             const $label = $(labelHtml);
             $labelsContainer.append($label);
 
@@ -144,29 +144,31 @@ var Sequencer = (function() {
                 if (clip.type === 'armature') clipTypeClass = 'type-armature';
 
                 const clipHtml = `<div class="timeline-clip ${clipTypeClass}" data-clip-id="${clip.id}" title="${clip.animName} ${clip.duration.toFixed(1)}s">
-                    <span class="clip-name">${clip.animName}</span>
-                    <span class="clip-duration"></span>
-                </div>`;
+                <span class="clip-name">${clip.animName}</span>
+                <span class="clip-duration"></span>
+            </div>`;
                 const $clip = $(clipHtml);
 
                 _updateClipDurationText($clip, clip);
 
-                // 클립 클릭 시 'selected' 클래스 추가/관리하는 이벤트 핸들러
-                $clip.on('click', function(e) {
-                    e.stopPropagation(); // 이벤트가 부모로 전파되는 것을 막음
+                $clip.on('click', function (e) {
+                    e.stopPropagation();
 
-                    // 다른 모든 패널의 선택 상태를 초기화
                     $('.timeline-clip').removeClass('selected');
-                    $('#fileNameTree .custom-tree-item').removeClass('selected');
-                    if (mainLayerInstance) {
-                        mainLayerInstance.updateMenuWithNodeId(null);
-                    }
-
-                    // 현재 클릭한 클립에만 'selected' 클래스 추가
                     $(this).addClass('selected');
+
+                    const clipId = $(this).data('clip-id');
+                    const trackNodeId = $(this).closest('.timeline-track').data('node-id');
+                    mainLayerInstance.setLastSelectedItem({
+                        type: 'sequencer',
+                        data: {
+                            clipId: clipId,
+                            nodeId: trackNodeId
+                        }
+                    });
                 });
 
-                $clip.on('contextmenu', function(e) {
+                $clip.on('contextmenu', function (e) {
                     e.preventDefault();
                     e.stopPropagation();
                     if (mainLayerInstance && mainLayerInstance._contextMenuManager) {
@@ -201,7 +203,7 @@ var Sequencer = (function() {
 
                 $clip.draggable({
                     axis: 'x',
-                    start: function(event, ui) {
+                    start: function (event, ui) {
                         if (event.button === 2) {
                             event.stopPropagation();
                             return false;
@@ -209,23 +211,21 @@ var Sequencer = (function() {
                         $('body').addClass('is-interacting');
                         $('#resize-overlay').show();
                     },
-                    helper: function() {
+                    helper: function () {
                         return $(this).clone().css({
                             width: $(this).outerWidth(),
                             height: $(this).outerHeight(),
                             zIndex: 1000
                         }).addClass('dragging-helper');
                     },
-                    // *** 수정: 드래그 시 스마트 가이드 추가 ***
-                    drag: function(event, ui) {
+                    drag: function (event, ui) {
                         ui.position.top = 2;
                         let newPosLeft = ui.position.left;
                         const clipWidth = ui.helper.outerWidth();
                         const snapTolerance = 8;
                         let snapped = false;
 
-                        // 이제 모든 트랙의 클립을 대상으로 스냅을 검사합니다.
-                        $('.timeline-track .timeline-clip').not($(this)).not('.ui-draggable-dragging').each(function() {
+                        $('.timeline-track .timeline-clip').not($(this)).not('.ui-draggable-dragging').each(function () {
                             const targetPos = $(this).position();
                             const targetWidth = $(this).outerWidth();
                             const targetLeft = targetPos.left;
@@ -236,20 +236,36 @@ var Sequencer = (function() {
 
                             let snapPosition = -1;
 
-                            if (Math.abs(currentLeft - targetLeft) < snapTolerance) { newPosLeft = targetLeft; snapped = true; snapPosition = targetLeft; }
-                            if (!snapped && Math.abs(currentLeft - targetRight) < snapTolerance) { newPosLeft = targetRight; snapped = true; snapPosition = targetRight; }
-                            if (!snapped && Math.abs(currentRight - targetLeft) < snapTolerance) { newPosLeft = targetLeft - clipWidth; snapped = true; snapPosition = targetLeft; }
-                            if (!snapped && Math.abs(currentRight - targetRight) < snapTolerance) { newPosLeft = targetRight - clipWidth; snapped = true; snapPosition = targetRight; }
+                            if (Math.abs(currentLeft - targetLeft) < snapTolerance) {
+                                newPosLeft = targetLeft;
+                                snapped = true;
+                                snapPosition = targetLeft;
+                            }
+                            if (!snapped && Math.abs(currentLeft - targetRight) < snapTolerance) {
+                                newPosLeft = targetRight;
+                                snapped = true;
+                                snapPosition = targetRight;
+                            }
+                            if (!snapped && Math.abs(currentRight - targetLeft) < snapTolerance) {
+                                newPosLeft = targetLeft - clipWidth;
+                                snapped = true;
+                                snapPosition = targetLeft;
+                            }
+                            if (!snapped && Math.abs(currentRight - targetRight) < snapTolerance) {
+                                newPosLeft = targetRight - clipWidth;
+                                snapped = true;
+                                snapPosition = targetRight;
+                            }
 
                             if (snapped) {
-                                return false; // 첫 번째 스냅 지점을 찾으면 루프 종료
+                                return false;
                             }
                         });
 
                         ui.position.left = Math.max(0, newPosLeft);
                         ui.helper.css('left', ui.position.left + 'px');
                     },
-                    stop: function(event, ui) {
+                    stop: function (event, ui) {
                         const newTime = _pixelToTime(Math.max(0, ui.position.left));
                         clip.startTime = newTime;
 
@@ -264,13 +280,12 @@ var Sequencer = (function() {
                     }
                 }).resizable({
                     handles: 'e, w',
-                    start: function(event, ui) {
+                    start: function (event, ui) {
                         $(this).css('top', '2px');
                         $('body').addClass('is-interacting');
                         $('#resize-overlay').show();
                     },
-                    // *** 수정: 리사이즈 시 스냅 및 스마트 가이드 추가 ***
-                    resize: function(event, ui) {
+                    resize: function (event, ui) {
                         ui.position.top = 2;
 
                         const snapTolerance = 8;
@@ -282,8 +297,7 @@ var Sequencer = (function() {
                         let newLeft = ui.position.left;
                         let newWidth = ui.size.width;
 
-                        // 1. 다른 클립에 대한 기존 스냅 로직 (변경 없음)
-                        $('.timeline-track .timeline-clip').not($(this)).each(function() {
+                        $('.timeline-track .timeline-clip').not($(this)).each(function () {
                             const targetPos = $(this).position();
                             const targetWidth = $(this).outerWidth();
                             const targetLeft = targetPos.left;
@@ -293,15 +307,27 @@ var Sequencer = (function() {
 
                             if (isResizingLeft) {
                                 const currentLeft = newLeft;
-                                if (Math.abs(currentLeft - targetLeft) < snapTolerance) { newLeft = targetLeft; snapPosition = targetLeft; }
-                                if (snapPosition < 0 && Math.abs(currentLeft - targetRight) < snapTolerance) { newLeft = targetRight; snapPosition = targetRight; }
+                                if (Math.abs(currentLeft - targetLeft) < snapTolerance) {
+                                    newLeft = targetLeft;
+                                    snapPosition = targetLeft;
+                                }
+                                if (snapPosition < 0 && Math.abs(currentLeft - targetRight) < snapTolerance) {
+                                    newLeft = targetRight;
+                                    snapPosition = targetRight;
+                                }
                                 if (snapPosition >= 0) {
                                     newWidth = originalRight - newLeft;
                                 }
                             } else {
                                 const currentRight = newLeft + newWidth;
-                                if (Math.abs(currentRight - targetLeft) < snapTolerance) { newWidth = targetLeft - newLeft; snapPosition = targetLeft; }
-                                if (snapPosition < 0 && Math.abs(currentRight - targetRight) < snapTolerance) { newWidth = targetRight - newLeft; snapPosition = targetRight; }
+                                if (Math.abs(currentRight - targetLeft) < snapTolerance) {
+                                    newWidth = targetLeft - newLeft;
+                                    snapPosition = targetLeft;
+                                }
+                                if (snapPosition < 0 && Math.abs(currentRight - targetRight) < snapTolerance) {
+                                    newWidth = targetRight - newLeft;
+                                    snapPosition = targetRight;
+                                }
                             }
 
                             if (snapPosition >= 0) {
@@ -309,22 +335,17 @@ var Sequencer = (function() {
                             }
                         });
 
-                        // --- 2. 반복 지점에 대한 새로운 스냅 로직 (추가) ---
-                        // 오른쪽 핸들을 조절하고, 아직 다른 곳에 스냅되지 않았을 때만 작동
                         if (!isResizingLeft && !guideShown && clip.originalDuration > 0) {
                             const originalDurationInPixels = _timeToPixel(clip.originalDuration);
                             const currentResizedWidth = ui.size.width;
 
-                            // 현재 너비가 원본 길이의 몇 배에 가장 가까운지 계산
                             const closestLoopCount = Math.round(currentResizedWidth / originalDurationInPixels);
 
                             if (closestLoopCount > 0) {
-                                // 가장 가까운 루프 지점의 너비를 계산
                                 const snapWidth = closestLoopCount * originalDurationInPixels;
 
-                                // 현재 너비와 스냅 지점의 너비가 허용 오차 내에 있는지 확인
                                 if (Math.abs(currentResizedWidth - snapWidth) < snapTolerance) {
-                                    newWidth = snapWidth; // 너비를 스냅 지점에 맞춤
+                                    newWidth = snapWidth;
                                 }
                             }
                         }
@@ -332,7 +353,7 @@ var Sequencer = (function() {
                         ui.position.left = Math.max(0, newLeft);
                         ui.size.width = Math.max(_timeToPixel(GRID_TIME_INTERVAL), newWidth);
                     },
-                    stop: function(event, ui) {
+                    stop: function (event, ui) {
                         const newStartTime = _pixelToTime(Math.max(0, ui.position.left));
                         const newDuration = _pixelToTime(Math.max(_timeToPixel(GRID_TIME_INTERVAL), ui.size.width));
 
@@ -340,7 +361,7 @@ var Sequencer = (function() {
                         clip.duration = newDuration;
 
                         _updateClipDurationText($(this), clip);
-                        _renderTimeline(); // 위치와 크기가 모두 확정된 후 타임라인 재렌더링
+                        _renderTimeline();
 
                         $('body').removeClass('is-interacting');
                         $('#resize-overlay').hide();
@@ -699,6 +720,14 @@ var Sequencer = (function() {
             $('#zoom-out-btn').on('click', () => _zoom('out'));
 
             $tracksContainer.on('scroll', (e) => syncScroll($tracksContainer, $('#track-labels-container'), e.target.scrollLeft));
+
+            $tracksContainer.on('click', function (e) {
+                if ($(e.target).hasClass('timeline-track') || e.target === this) {
+                    $tracksContainer.find('.timeline-clip').removeClass('selected');
+                    mainLayerInstance.setLastSelectedItem(null);
+                }
+            });
+
             $('#track-labels-container').on('wheel', (e) => {
                 e.preventDefault();
                 $tracksContainer.scrollTop($tracksContainer.scrollTop() + e.originalEvent.deltaY);
@@ -706,7 +735,7 @@ var Sequencer = (function() {
 
             $('#timeline-editor').droppable({
                 accept: '.custom-tree-item',
-                drop: function(event, ui) {
+                drop: function (event, ui) {
                     if (!mainLayerInstance._currentlySelectedNode) {
                         alert("먼저 캔버스에서 애니메이션을 적용할 타겟을 선택하세요.");
                         return;

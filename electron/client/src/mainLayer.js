@@ -65,37 +65,40 @@ var MainLayer = cc.Layer.extend({
 
                 event.preventDefault(); // 브라우저의 뒤로가기 등 기본 동작 방지
 
-                // 우선순위 1: Sequencer에서 선택된 클립 삭제
-                const $selectedClip = $('.timeline-clip.selected');
-                if ($selectedClip.length > 0) {
-                    const clipId = $selectedClip.data('clip-id');
-                    const trackNodeId = $selectedClip.closest('.timeline-track').data('node-id');
-                    if (clipId && trackNodeId && Sequencer?._deleteClip) {
-                        Sequencer._deleteClip(trackNodeId, clipId);
-                    }
-                    return; // 클립 삭제 후 종료
-                }
+                // [수정] 마지막으로 선택된 항목을 삭제하는 로직
+                if (this._lastSelectedItem) {
+                    const item = this._lastSelectedItem;
 
-                // 우선순위 2: Hierarchy 또는 Game View에서 선택된 노드 삭제
-                if (this._currentlySelectedNode) {
-                    this.deleteItem(this._currentlySelectedNode.__instanceId);
-                    return; // 노드 삭제 후 종료
-                }
-
-                // 우선순위 3: Assets 패널에서 선택된 에셋 삭제
-                const $selectedAsset = $('#fileNameTree .custom-tree-item.selected');
-                if ($selectedAsset.length > 0) {
-                    const assetName = $selectedAsset.data('asset-name');
-                    const assetType = $selectedAsset.data('asset-type');
-                    if (assetName && assetType) {
-                        this.deleteAsset(assetName, assetType);
+                    switch(item.type) {
+                        case 'sequencer':
+                            if (item.data.nodeId && item.data.clipId && Sequencer?._deleteClip) {
+                                Sequencer._deleteClip(item.data.nodeId, item.data.clipId);
+                            }
+                            break;
+                        case 'hierarchy':
+                            if (item.data.nodeId) {
+                                this.deleteItem(item.data.nodeId);
+                            }
+                            break;
+                        case 'asset':
+                            if (item.data.name && item.data.type) {
+                                this.deleteAsset(item.data.name, item.data.type);
+                            }
+                            break;
                     }
+                    // 삭제 후 선택 정보 초기화
+                    this._lastSelectedItem = null;
                 }
             }
         };
         document.addEventListener('keydown', this._deleteKeyListener);
 
         return true;
+    },
+
+    setLastSelectedItem: function(itemInfo) {
+        // itemInfo 예시: { type: 'hierarchy', data: { nodeId: '...' } }
+        this._lastSelectedItem = itemInfo;
     },
 
     updateLayout: function () {
