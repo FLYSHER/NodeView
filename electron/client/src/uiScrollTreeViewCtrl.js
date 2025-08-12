@@ -262,34 +262,59 @@ class UIScrollTreeViewCtrl {
     }
 
     getOriginalTreeString(widgetTree, assetLibrary) {
-        const result = [];
-        const assetUrls = new Set();
-        for (const key in assetLibrary) {
-            if (assetLibrary[key].url) {
-                assetUrls.add(assetLibrary[key].url);
-            }
-        }
-        const traverseNode = (node) => {
-            let isNestedPrefab = false;
-            if (node.options && node.options.fileNameData && node.options.fileNameData.path) {
-                const path = node.options.fileNameData.path;
-                if (assetUrls.has(path)) {
-                    isNestedPrefab = true;
-                }
-            }
-            if (isNestedPrefab) {
-                return;
-            }
+        // 1. widgetTree를 순회하며 모든 노드의 이름을 배열에 담습니다.
+        const allNames = [];
+        const traverse = (node) => {
             if (node.options && node.options.name) {
-                result.push(`            "${node.options.name}": null`);
+                allNames.push(node.options.name);
             }
             if (node.children && node.children.length > 0) {
-                node.children.forEach(child => traverseNode(child));
+                node.children.forEach(traverse);
             }
         };
-        traverseNode(widgetTree);
-        const content = result.join(',\n');
-        return `this._uiWidgets = {\n${content}\n        };`;
+        traverse(widgetTree);
+
+        // 2. getTreeObjName의 로직을 적용하여 배열로 묶을 항목을 처리합니다.
+        const processedItems = {};
+        allNames.forEach(name => {
+            processedItems[name] = { name: name, copyString: `    ${name}: null,\n` };
+        });
+
+        const nameKeys = Object.keys(processedItems);
+        for (const name of nameKeys) {
+            // 이름이 "_01"로 끝나는 경우, 시퀀스(연속된 번호)가 있는지 확인합니다.
+            const match = name.match(/^(.*?)_?(\d+)$/);
+            if (match && match[2] === '01') {
+                const baseName = match[1];
+                const sequence = [];
+                let i = 1;
+                while (true) {
+                    const nextNum = i < 10 ? '0' + i : i;
+                    const nextName = `${baseName}_${nextNum}`;
+                    if (processedItems[nextName]) {
+                        sequence.push(nextName);
+                        i++;
+                    } else {
+                        break;
+                    }
+                }
+
+                // 시퀀스가 2개 이상 발견되면 배열로 처리합니다.
+                if (sequence.length > 1) {
+                    sequence.forEach(seqName => delete processedItems[seqName]);
+                    processedItems[baseName] = { name: baseName, copyString: `    ${baseName}: [],\n` };
+                }
+            }
+        }
+
+        // 3. 최종 문자열을 조립합니다.
+        let finalString = "this._uiWidgets = {\n";
+        for (const key in processedItems) {
+            finalString += processedItems[key].copyString;
+        }
+        finalString += "};";
+
+        return finalString;
     }
 
     setup() {
