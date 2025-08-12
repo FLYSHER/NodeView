@@ -683,3 +683,47 @@ Loader._addSpriteFrames = function( fileName ) {
         spriteFrames[key] = spriteFrame;
     }
 };
+Loader.clearAssetCache = function(fileName, type) {
+    console.log(`[Loader] 캐시 삭제 시작: '${fileName}' (타입: ${type})`);
+
+    // 1. loadedFileNames 배열에서 제거
+    const loadedIndex = this.loadedFileNames.indexOf(fileName);
+    if (loadedIndex > -1) {
+        this.loadedFileNames.splice(loadedIndex, 1);
+    }
+
+    // 2. 타입에 따라 각 리스트 및 데이터 객체에서 제거
+    switch(type) {
+        case 'armature':
+            delete this.armatureData[fileName];
+            delete this.armatureFrames[fileName];
+            const armIndex = this.armatureList.indexOf(fileName);
+            if (armIndex > -1) this.armatureList.splice(armIndex, 1);
+            break;
+        case 'spine':
+            delete this.spineData[fileName];
+            const spIndex = this.spineList.indexOf(fileName);
+            if (spIndex > -1) this.spineList.splice(spIndex, 1);
+            // Spine은 .atlas, .png 파일도 함께 사용하므로 관련 캐시도 지울 수 있습니다.
+            delete this.atlasFiles[fileName];
+            const atlasIndex = this.atlasList.indexOf(fileName);
+            if (atlasIndex > -1) this.atlasList.splice(atlasIndex, 1);
+            break;
+        case 'ui':
+            delete this.uiURL[fileName];
+            delete this.uiTextures[fileName];
+            break;
+        case 'cocosstudio':
+            delete this.cocosStudioURL[fileName];
+            delete this.uiTextures[fileName]; // UI와 동일한 텍스처 리스트 사용
+            break;
+        case 'image':
+            // 독립적인 이미지는 별도의 리스트가 없으므로 loadedFileNames 제거로 충분할 수 있음
+            break;
+    }
+
+    // 참고: 여러 에셋이 공유하는 .plist, .png 텍스처는 복잡성 때문에 이 예시에서는 생략했습니다.
+    // 완벽한 구현을 위해서는 해당 리소스들의 참조 카운팅이 필요할 수 있습니다.
+
+    console.log(`[Loader] 캐시 삭제 완료: '${fileName}'`);
+};
