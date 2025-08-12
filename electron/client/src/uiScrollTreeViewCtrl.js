@@ -282,15 +282,17 @@ class UIScrollTreeViewCtrl {
 
         const nameKeys = Object.keys(processedItems);
         for (const name of nameKeys) {
-            // 이름이 "_01"로 끝나는 경우, 시퀀스(연속된 번호)가 있는지 확인합니다.
-            const match = name.match(/^(.*?)_?(\d+)$/);
+            // [변경점] 언더스코어(_)가 없는 경우도 처리하도록 정규식을 수정했습니다.
+            const match = name.match(/^(.*?)(\d+)$/);
+
+            // 숫자 부분이 '01'로 시작하는지 확인합니다.
             if (match && match[2] === '01') {
-                const baseName = match[1];
+                const baseName = match[1]; // e.g., "item_" 또는 "item"
                 const sequence = [];
                 let i = 1;
                 while (true) {
-                    const nextNum = i < 10 ? '0' + i : i;
-                    const nextName = `${baseName}_${nextNum}`;
+                    const nextNum = i < 10 ? '0' + i : String(i);
+                    const nextName = `${baseName}${nextNum}`;
                     if (processedItems[nextName]) {
                         sequence.push(nextName);
                         i++;
