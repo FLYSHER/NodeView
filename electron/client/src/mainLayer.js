@@ -419,28 +419,34 @@ var MainLayer = cc.Layer.extend({
         if (sortedChildren && sortedChildren.length > 0) {
             for (const child of sortedChildren) {
                 let textContent = child.getName() || "Unnamed Node";
-                let typeClass = "type-child";
                 let includeGrandchildren = true;
                 let zOrderText = child.getLocalZOrder();
                 const isVisible = child.isVisible();
                 const visibilityIcon = `<i class="fa ${isVisible ? 'fa-eye' : 'fa-eye-slash'} visibility-toggle" data-node-id="${child.__instanceId}"></i>`;
-
-                // --- ▼▼▼ 신규 기능 추가 ▼▼▼ ---
                 const deleteIcon = `<i class="fa fa-times delete-node-icon" data-node-id="${child.__instanceId}"></i>`;
-                // --- ▲▲▲ 신규 기능 추가 ▲▲▲ ---
+
+                // --- ▼▼▼ 핵심 수정 로직 ▼▼▼ ---
+                let typeClass = "";
+                // 자식 노드가 DraggableNode인지 먼저 확인합니다.
+                if (child instanceof DraggableNode) {
+                    // DraggableNode라면 assetType에 맞는 고유 클래스를 부여합니다.
+                    typeClass = `type-${child.assetType}`;
+                } else {
+                    // DraggableNode가 아니라면 일반 자식 클래스를 부여합니다.
+                    typeClass = "type-child";
+                }
+                // --- ▲▲▲ 핵심 수정 로직 ▲▲▲ ---
 
                 let childNodeData = {
                     id: child.__instanceId,
-                    // --- ▼▼▼ 신규 기능 추가 ▼▼▼ ---
                     text: `${visibilityIcon} <span class="z-order-label">[${zOrderText}]</span> ${textContent} ${deleteIcon}`,
-                    // --- ▲▲▲ 신규 기능 추가 ▲▲▲ ---
                     children: includeGrandchildren ? this._buildChildrenRecursive(child) : [],
                     data: {
                         nodeId: child.__instanceId,
                         zOrder: child.getLocalZOrder()
                     },
                     state: { opened: false },
-                    a_attr: { "class": typeClass }
+                    a_attr: { "class": typeClass } // 수정된 typeClass를 여기서 적용합니다.
                 };
                 childrenData.push(childNodeData);
             }
@@ -464,16 +470,11 @@ var MainLayer = cc.Layer.extend({
             let typeClass = `type-${draggableNode.assetType}`;
             const isVisible = draggableNode.isVisible();
             const visibilityIcon = `<i class="fa ${isVisible ? 'fa-eye' : 'fa-eye-slash'} visibility-toggle" data-node-id="${draggableNode.__instanceId}"></i>`;
-
-            // --- ▼▼▼ 신규 기능 추가 ▼▼▼ ---
             const deleteIcon = `<i class="fa fa-times delete-node-icon" data-node-id="${draggableNode.__instanceId}"></i>`;
-            // --- ▲▲▲ 신규 기능 추가 ▲▲▲ ---
 
             let draggableNodeData = {
                 id: draggableNode.__instanceId,
-                // --- ▼▼▼ 신규 기능 추가 ▼▼▼ ---
                 text: `${visibilityIcon} <span class="z-order-label">[${zOrderText}]</span> ${nodeName} ${deleteIcon}`,
-                // --- ▲▲▲ 신규 기능 추가 ▲▲▲ ---
                 children: this._buildChildrenRecursive(draggableNode),
                 data: {
                     nodeId: draggableNode.__instanceId,
