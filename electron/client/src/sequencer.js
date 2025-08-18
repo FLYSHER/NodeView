@@ -204,6 +204,7 @@ var Sequencer = (function() {
                 $clip.draggable({
                     axis: 'x',
                     start: function (event, ui) {
+                        if (isPlaying && !isPaused) return false;
                         if (event.button === 2) {
                             event.stopPropagation();
                             return false;
@@ -281,6 +282,7 @@ var Sequencer = (function() {
                 }).resizable({
                     handles: 'e, w',
                     start: function (event, ui) {
+                        if (isPlaying && !isPaused) return false;
                         $(this).css('top', '2px');
                         $('body').addClass('is-interacting');
                         $('#resize-overlay').show();
@@ -504,6 +506,7 @@ var Sequencer = (function() {
         animationFrameId = requestAnimationFrame(_animatePlayhead);
     }
 
+    // --- [수정됨] 재생 로직 원복 ---
     function _onPlay() {
         _onStop(false);
 
@@ -511,7 +514,8 @@ var Sequencer = (function() {
 
         isPlaying = true;
         isPaused = false;
-        sequenceStartTime = Date.now();
+        sequenceStartTime = Date.now(); // pausedTime 없이 현재 시간 기준으로 시작
+        pausedTime = 0; // 재생 시작 시 pausedTime 초기화
 
         const $playhead = $('#timeline-playhead');
         $('#playSequenceBtn').html(pauseIcon);
@@ -566,6 +570,7 @@ var Sequencer = (function() {
                     }
                 });
 
+                // 스크러빙 위치와 관계없이 클립의 원래 시작 시간 기준으로 액션 예약
                 runnerNode.runAction(cc.sequence(cc.delayTime(clip.startTime), playAction));
 
                 const endTime = clip.startTime + clip.duration;
@@ -599,6 +604,7 @@ var Sequencer = (function() {
         isPaused = true;
         pausedTime = Date.now() - sequenceStartTime;
         $('#playSequenceBtn').html(playIcon);
+        $('#timeline-interaction-overlay').hide();
 
         if (animationFrameId) {
             cancelAnimationFrame(animationFrameId);
@@ -622,6 +628,7 @@ var Sequencer = (function() {
         isPaused = false;
         sequenceStartTime = Date.now() - pausedTime;
         $('#playSequenceBtn').html(pauseIcon);
+        $('#timeline-interaction-overlay').show();
 
         if (runnerNode) cc.director.getActionManager().resumeTarget(runnerNode);
         tracks.forEach(trackData => {
@@ -678,7 +685,53 @@ var Sequencer = (function() {
         if (resetPlayhead) {
             const labelWidth = $('#track-labels-container').outerWidth();
             $('#timeline-playhead').hide().css('left', labelWidth);
+            pausedTime = 0;
         }
+    }
+
+    function _scrubToTime(time) {
+        _onStop(false);
+
+        const labelWidth = $('#track-labels-container').outerWidth();
+        const newPlayheadPixelPos = _timeToPixel(time);
+        $('#timeline-playhead').show().css('left', labelWidth + newPlayheadPixelPos + 'px');
+
+        tracks.forEach(trackData => {
+            const targetNode = trackData.node;
+            let wasActive = false;
+
+            for (const clip of trackData.clips) {
+                const isActive = (time >= clip.startTime && time < (clip.startTime + clip.duration));
+                if (isActive) {
+                    wasActive = true;
+                    const localTime = time - clip.startTime;
+                    const effectiveTime = clip.originalDuration > 0.01 ? localTime % clip.originalDuration : 0;
+                    const isLooping = clip.duration > clip.originalDuration;
+
+                    if (clip.type === 'spine' && targetNode.spine) {
+                        targetNode.spine.clearTrack(0);
+                        let trackEntry = targetNode.spine.setAnimation(0, clip.animName, isLooping);
+                        trackEntry.trackTime = effectiveTime;
+                        targetNode.spine.update(0);
+                        targetNode.spine.pause();
+                    } else if (clip.type === 'armature' && targetNode.armature) {
+                        const frameRate = 30;
+                        const frameIndex = Math.floor(effectiveTime * frameRate);
+                        targetNode.armature.getAnimation().play(clip.animName);
+                        targetNode.armature.getAnimation().gotoAndPause(frameIndex);
+                    }
+                    break;
+                }
+            }
+
+            if (!wasActive) {
+                if (targetNode.spine) targetNode.spine.clearTracks();
+                if (targetNode.armature) targetNode.armature.getAnimation().stop();
+                if (targetNode.ui) targetNode.ui.stopAllActions();
+            }
+        });
+
+        // --- [제거됨] 스크러빙 시 재생 상태를 변경하던 로직 ---
     }
 
     function _zoom(direction) {
@@ -711,6 +764,7 @@ var Sequencer = (function() {
         initialize: function(layerInstance) {
             mainLayerInstance = layerInstance;
             const $tracksContainer = $('#timeline-tracks-container');
+            const $rulerContainer = $('#timeline-header-ruler');
 
             $('#addSequenceBtn').on('click', _onAdd);
             $('#playSequenceBtn').on('click', _togglePlayback);
@@ -726,6 +780,41 @@ var Sequencer = (function() {
                     $tracksContainer.find('.timeline-clip').removeClass('selected');
                     mainLayerInstance.setLastSelectedItem(null);
                 }
+            });
+
+            let isScrubbing = false;
+            let $scrubTarget = null;
+
+            const handleScrubMove = function(e) {
+                if (!$scrubTarget) return;
+
+                let clickX = e.pageX - $scrubTarget.offset().left + $scrubTarget.scrollLeft();
+                const time = _pixelToTime(clickX);
+                _scrubToTime(time);
+            };
+
+            $($tracksContainer).add($rulerContainer).on('mousedown', function(e) {
+                if ($(e.target).closest('.timeline-clip').length > 0) return;
+
+                e.preventDefault();
+                isScrubbing = true;
+                $scrubTarget = $(this);
+
+                if (isPlaying && !isPaused) {
+                    _onPause();
+                }
+                handleScrubMove(e);
+            });
+
+            $(document).on('mousemove.sequencerScrub', function(e) {
+                if (isScrubbing) {
+                    handleScrubMove(e);
+                }
+            });
+
+            $(document).on('mouseup.sequencerScrub', function(e) {
+                isScrubbing = false;
+                $scrubTarget = null;
             });
 
             $('#track-labels-container').on('wheel', (e) => {
@@ -765,8 +854,9 @@ var Sequencer = (function() {
             if (isPlaying) _onStop(true);
             $('#addSequenceBtn, #playSequenceBtn, #stopSequenceBtn, #clearSequenceBtn, #zoom-in-btn, #zoom-out-btn').off();
             if ($('#timeline-editor').data('ui-droppable')) $('#timeline-editor').droppable('destroy');
-            $('#track-labels-container, #timeline-tracks-container').off();
+            $('#track-labels-container, #timeline-tracks-container, #timeline-header-ruler').off();
             $(window).off('resize.sequencer');
+            $(document).off('.sequencerScrub');
             tracks.clear();
             mainLayerInstance = null;
         }
