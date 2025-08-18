@@ -604,7 +604,6 @@ var Sequencer = (function() {
         isPaused = true;
         pausedTime = Date.now() - sequenceStartTime;
         $('#playSequenceBtn').html(playIcon);
-        $('#timeline-interaction-overlay').hide();
 
         if (animationFrameId) {
             cancelAnimationFrame(animationFrameId);
