@@ -10,16 +10,32 @@ var MainLayer = cc.Layer.extend({
     _animationList: null,
     _canvasResizeListener: null,
     _currentlySelectedNode: null,
+    _backgroundColorListener: null,
 
     ctor: function () {
         this._super();
+
+        var size = cc.winSize;
+        this._backgroundLayer = new cc.LayerColor(cc.color(53, 82, 133, 255), size.width, size.height);
+        this.addChild(this._backgroundLayer, -1);
 
         this._isLayoutInitialized = false;
         this.assetLibrary = {};
         this.sceneNodes = {};
         this.nodeMap = {};
 
-        var size = cc.winSize;
+        this._backgroundColorListener = cc.eventManager.addCustomListener('background_color_changed', function(event) {
+            const hexColor = event.getUserData(); // #RRGGBB 형식의 문자열
+            if (self._backgroundLayer && hexColor) {
+                // HEX 색상 문자열을 cc.Color 객체로 변환하여 적용합니다.
+                self._backgroundLayer.setColor(cc.color(
+                    parseInt(hexColor.slice(1, 3), 16),
+                    parseInt(hexColor.slice(3, 5), 16),
+                    parseInt(hexColor.slice(5, 7), 16)
+                ));
+            }
+        });
+
         this.CX = size.width / 2;
         this.CY = size.height / 2;
         this._nodeProperties = {};
@@ -56,16 +72,13 @@ var MainLayer = cc.Layer.extend({
         Sequencer.initialize(this);
 
         this._deleteKeyListener = (event) => {
-            // Delete 키 또는 Backspace 키를 눌렀을 때
             if (event.key === 'Delete' || event.key === 'Backspace') {
-                // 입력 필드에 포커스가 가 있는 경우는 제외
                 if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
                     return;
                 }
 
-                event.preventDefault(); // 브라우저의 뒤로가기 등 기본 동작 방지
+                event.preventDefault();
 
-                // [수정] 마지막으로 선택된 항목을 삭제하는 로직
                 if (this._lastSelectedItem) {
                     const item = this._lastSelectedItem;
 
@@ -86,7 +99,6 @@ var MainLayer = cc.Layer.extend({
                             }
                             break;
                     }
-                    // 삭제 후 선택 정보 초기화
                     this._lastSelectedItem = null;
                 }
             }
@@ -108,6 +120,10 @@ var MainLayer = cc.Layer.extend({
         var size = cc.winSize;
         this.CX = size.width / 2;
         this.CY = size.height / 2;
+
+        if (this._backgroundLayer) {
+            this._backgroundLayer.setContentSize(size.width, size.height);
+        }
 
         var label = this.getChildByTag(this.DESC_TAG);
         if (label) {
@@ -142,7 +158,6 @@ var MainLayer = cc.Layer.extend({
             }
         }
 
-        // 레이아웃이 처음 설정된 경우, 화면을 한번 갱신해줍니다.
         if (!this._isLayoutInitialized) {
             this.refreshHierarchyView();
             this._isLayoutInitialized = true;
@@ -623,6 +638,9 @@ var MainLayer = cc.Layer.extend({
         cc.eventManager.removeListener(this._loadCocosStudioListener);
         cc.eventManager.removeListener(this._loadSpineListener);
         cc.eventManager.removeListener(this._loadImageListener);
+        if (this._backgroundColorListener) {
+            cc.eventManager.removeListener(this._backgroundColorListener);
+        }
         document.removeEventListener('keydown', this._deleteKeyListener);
         this._super();
     }

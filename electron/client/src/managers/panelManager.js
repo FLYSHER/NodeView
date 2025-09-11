@@ -93,6 +93,17 @@ var PanelManager = (function() {
             _registerComponents(myLayout);
             myLayout.init();
 
+            const DEFAULT_BG_COLOR = '#323232';
+            const savedColor = localStorage.getItem('backgroundColor') || DEFAULT_BG_COLOR;
+
+            $('#bg-color-picker').val(savedColor);
+
+            setTimeout(function() {
+                if (cc && cc.eventManager) {
+                    cc.eventManager.dispatchCustomEvent('background_color_changed', savedColor);
+                }
+            }, 0);
+
             window.addEventListener('dragover', function (e) {
                 e.preventDefault();
                 const assetsPanel = document.getElementById('assets-panel-drop-zone');
@@ -182,6 +193,14 @@ var PanelManager = (function() {
                     if (gameViewItems.length > 0) {
                         gameViewItems[0].container.emit('setManualResolution', w, h);
                     }
+                }
+            });
+
+            $('#bg-color-picker').on('input', function() {
+                const newColor = $(this).val();
+                localStorage.setItem('backgroundColor', newColor);
+                if (cc && cc.eventManager) {
+                    cc.eventManager.dispatchCustomEvent('background_color_changed', newColor);
                 }
             });
 

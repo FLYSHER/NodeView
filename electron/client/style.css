@@ -982,3 +982,23 @@ ul.tabs li.current {
     background-color: #ffcdd2;
     color: #D32F2F;
 }
+
+#background-color-controller {
+    background-color: var(--bg-tertiary);
+    padding: 8px 12px;
+    border-radius: 5px;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--panel-shadow);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#bg-color-picker {
+    width: 50px;
+    height: 28px;
+    border: 1px solid var(--border-color);
+    background-color: transparent;
+    cursor: pointer;
+    padding: 2px;
+}
