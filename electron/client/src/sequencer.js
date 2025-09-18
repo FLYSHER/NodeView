@@ -14,10 +14,8 @@ var Sequencer = (function() {
     let animationFrameId = null;
     let isScrubbing = false;
 
-    // --- ▼▼▼ 자동 스크롤 로직 개선을 위한 변수 추가 ▼▼▼ ---
     let autoScrollDirection = null;
     let autoScrollFrameId = null;
-    // --- ▲▲▲ 변수 추가 끝 ▲▲▲ ---
 
     let playIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
                         <path d="M6.3 2.84A1.5 1.5 0 0 0 4 4.11v11.78a1.5 1.5 0 0 0 2.3 1.27l9.344-5.891a1.5 1.5 0 0 0 0-2.538L6.3 2.841Z" />
@@ -751,12 +749,30 @@ var Sequencer = (function() {
                         trackEntry.trackTime = effectiveTime;
                         targetNode.spine.update(0);
                         targetNode.spine.pause();
-                    } else if (clip.type === 'armature' && targetNode.armature) {
-                        const frameRate = 30;
-                        const frameIndex = Math.floor(effectiveTime * frameRate);
-                        targetNode.armature.getAnimation().play(clip.animName);
-                        targetNode.armature.getAnimation().gotoAndPause(frameIndex);
                     }
+                    // --- ▼▼▼ 최종 수정: 실제 FPS를 역산하여 프레임 계산 ▼▼▼ ---
+                    else if (clip.type === 'armature' && targetNode.armature) {
+                        const animation = targetNode.armature.getAnimation();
+                        const movementData = animation.getAnimationData().movementDataDic[clip.animName];
+
+                        // movementData와 원본 클립 길이가 있어야 정확한 계산 가능
+                        if (movementData && clip.originalDuration > 0.001) {
+                            const totalFrames = movementData.duration;
+
+                            // 실제 FPS = 총 프레임 수 / 원본 클립 길이(초)
+                            const effectiveFrameRate = totalFrames / clip.originalDuration;
+
+                            const frameIndex = Math.floor(effectiveTime * effectiveFrameRate);
+
+                            animation.play(clip.animName);
+                            animation.gotoAndPause(frameIndex);
+                        } else {
+                            // 데이터가 없는 경우 안전하게 첫 프레임으로 이동
+                            animation.play(clip.animName);
+                            animation.gotoAndPause(0);
+                        }
+                    }
+                    // --- ▲▲▲ 수정 끝 ▲▲▲ ---
                     break;
                 }
             }
@@ -793,15 +809,14 @@ var Sequencer = (function() {
         isSyncingScroll = false;
     }
 
-    // --- ▼▼▼ 자동 스크롤 로직 전체 재작성 ▼▼▼ ---
     function _autoScrollLoop() {
         if (!isScrubbing || !autoScrollDirection) {
-            autoScrollDirection = null; // 루프 중단 조건
+            autoScrollDirection = null;
             return;
         }
 
         const $tracksContainer = $('#timeline-tracks-container');
-        const scrollSpeed = 10; // 스크롤 속도
+        const scrollSpeed = 10;
 
         if (autoScrollDirection === 'right') {
             $tracksContainer.scrollLeft($tracksContainer.scrollLeft() + scrollSpeed);
@@ -821,7 +836,6 @@ var Sequencer = (function() {
 
         autoScrollFrameId = requestAnimationFrame(_autoScrollLoop);
     }
-    // --- ▲▲▲ 자동 스크롤 로직 전체 재작성 끝 ▲▲▲ ---
 
     return {
         _deleteClip: _deleteClip,
@@ -854,13 +868,12 @@ var Sequencer = (function() {
 
             let $scrubTarget = null;
 
-            // --- ▼▼▼ 스크러빙 및 자동 스크롤 핸들러 전체 재작성 ▼▼▼ ---
             const handleScrubMove = function(e) {
                 if (!isScrubbing) return;
 
                 const containerRect = $tracksContainer[0].getBoundingClientRect();
                 const mouseX = e.clientX;
-                const edgeThreshold = 15; // 감도(px)를 50에서 15로 낮춤
+                const edgeThreshold = 15;
 
                 let currentDirection = null;
                 if (mouseX < containerRect.left + edgeThreshold) {
@@ -869,20 +882,17 @@ var Sequencer = (function() {
                     currentDirection = 'right';
                 }
 
-                // 자동 스크롤 상태가 아니고, 새로운 스크롤 방향이 감지되었을 때
                 if (currentDirection && autoScrollDirection !== currentDirection) {
                     autoScrollDirection = currentDirection;
                     if (autoScrollFrameId) cancelAnimationFrame(autoScrollFrameId);
-                    _autoScrollLoop(); // 새 방향으로 루프 시작
+                    _autoScrollLoop();
                 }
-                // 자동 스크롤 중이었지만, 마우스가 안전 영역으로 돌아왔을 때
                 else if (!currentDirection && autoScrollDirection) {
-                    autoScrollDirection = null; // 루프 중단
+                    autoScrollDirection = null;
                     if (autoScrollFrameId) cancelAnimationFrame(autoScrollFrameId);
                     autoScrollFrameId = null;
                 }
 
-                // 자동 스크롤 상태가 아닐 때만 일반 스크러빙 수행
                 if (!autoScrollDirection) {
                     let clickX = e.pageX - $scrubTarget.offset().left + $tracksContainer.scrollLeft();
                     clickX = Math.max(0, clickX);
@@ -913,14 +923,12 @@ var Sequencer = (function() {
             $(document).on('mouseup.sequencerScrub', function(e) {
                 isScrubbing = false;
                 $scrubTarget = null;
-                // 자동 스크롤 루프 확실히 정지
                 autoScrollDirection = null;
                 if (autoScrollFrameId) {
                     cancelAnimationFrame(autoScrollFrameId);
                     autoScrollFrameId = null;
                 }
             });
-            // --- ▲▲▲ 핸들러 재작성 끝 ▲▲▲ ---
 
             $('#track-labels-container').on('wheel', (e) => {
                 e.preventDefault();
