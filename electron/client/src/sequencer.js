@@ -12,6 +12,12 @@ var Sequencer = (function() {
     let sequenceStartTime = 0;
     let pausedTime = 0;
     let animationFrameId = null;
+    let isScrubbing = false;
+
+    // --- ▼▼▼ 자동 스크롤 로직 개선을 위한 변수 추가 ▼▼▼ ---
+    let autoScrollDirection = null;
+    let autoScrollFrameId = null;
+    // --- ▲▲▲ 변수 추가 끝 ▲▲▲ ---
 
     let playIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
                         <path d="M6.3 2.84A1.5 1.5 0 0 0 4 4.11v11.78a1.5 1.5 0 0 0 2.3 1.27l9.344-5.891a1.5 1.5 0 0 0 0-2.538L6.3 2.841Z" />
@@ -63,6 +69,13 @@ var Sequencer = (function() {
                 }
             }
         }
+    }
+
+    function _updateContentWidth() {
+        const totalDuration = _getTotalDuration();
+        const totalWidth = _timeToPixel(totalDuration) + 200;
+        $('#timeline-content').width(totalWidth);
+        _renderRuler();
     }
 
     function _renderRuler() {
@@ -372,8 +385,9 @@ var Sequencer = (function() {
             });
             _updateOverlapsForTrack(trackData, $track);
         });
-    }
 
+        _updateContentWidth();
+    }
 
     function _deleteClip(nodeId, clipId) {
         if (!tracks.has(nodeId)) return;
@@ -470,43 +484,70 @@ var Sequencer = (function() {
         return totalDuration;
     }
 
+    function _getCurrentTime() {
+        if (isPaused) {
+            return pausedTime / 1000;
+        }
+        if (isPlaying) {
+            return (Date.now() - sequenceStartTime) / 1000;
+        }
+        return 0;
+    }
+
+    function _updatePlayheadPosition(optionalTime) {
+        const $playhead = $('#timeline-playhead');
+        const currentTime = (typeof optionalTime === 'number') ? optionalTime : _getCurrentTime();
+
+        if (currentTime === 0 && !isScrubbing) {
+            if ($playhead.is(':visible')) {
+                $playhead.hide();
+            }
+            return;
+        }
+
+        if (!$playhead.is(':visible')) {
+            $playhead.show();
+        }
+
+        const labelWidth = $('#track-labels-container').outerWidth();
+        const scrollLeft = $('#timeline-tracks-container').scrollLeft();
+        const currentPixelPos = _timeToPixel(currentTime);
+
+        let finalLeft = labelWidth + currentPixelPos - scrollLeft;
+        finalLeft = Math.max(labelWidth, finalLeft);
+
+        $playhead.css('left', finalLeft + 'px');
+    }
+
     function _animatePlayhead() {
         if (!isPlaying || isPaused) {
             return;
         }
 
-        const $container = $('#timeline-tracks-container');
-        const $playhead = $('#timeline-playhead');
-        const labelWidth = $('#track-labels-container').outerWidth();
-
         const totalDuration = _getTotalDuration();
-        const elapsedTimeMs = Date.now() - sequenceStartTime;
-        const elapsedTimeSec = elapsedTimeMs / 1000;
+        const elapsedTimeSec = (Date.now() - sequenceStartTime) / 1000;
 
         if (elapsedTimeSec >= totalDuration) {
             _onStop(true);
             return;
         }
 
+        _updatePlayheadPosition();
+
+        const $container = $('#timeline-tracks-container');
         const currentPixelPos = elapsedTimeSec * PIXELS_PER_SECOND;
-        const containerWidth = $container.width();
         const scrollLeft = $container.scrollLeft();
-
+        const containerWidth = $container.width();
         const triggerPointAbsolute = scrollLeft + (containerWidth * 0.75);
-        const stickyPlayheadLeft = labelWidth + (containerWidth * 0.75);
 
-        if (currentPixelPos <= triggerPointAbsolute) {
-            $playhead.css('left', labelWidth + currentPixelPos + 'px');
-        } else {
+        if (currentPixelPos > triggerPointAbsolute) {
             const newScrollLeft = currentPixelPos - (containerWidth * 0.75);
-            $playhead.css('left', stickyPlayheadLeft + 'px');
             $container.scrollLeft(newScrollLeft);
         }
 
         animationFrameId = requestAnimationFrame(_animatePlayhead);
     }
 
-    // --- [수정됨] 재생 로직 원복 ---
     function _onPlay() {
         _onStop(false);
 
@@ -514,8 +555,8 @@ var Sequencer = (function() {
 
         isPlaying = true;
         isPaused = false;
-        sequenceStartTime = Date.now(); // pausedTime 없이 현재 시간 기준으로 시작
-        pausedTime = 0; // 재생 시작 시 pausedTime 초기화
+        sequenceStartTime = Date.now();
+        pausedTime = 0;
 
         const $playhead = $('#timeline-playhead');
         $('#playSequenceBtn').html(pauseIcon);
@@ -570,7 +611,6 @@ var Sequencer = (function() {
                     }
                 });
 
-                // 스크러빙 위치와 관계없이 클립의 원래 시작 시간 기준으로 액션 예약
                 runnerNode.runAction(cc.sequence(cc.delayTime(clip.startTime), playAction));
 
                 const endTime = clip.startTime + clip.duration;
@@ -691,9 +731,7 @@ var Sequencer = (function() {
     function _scrubToTime(time) {
         _onStop(false);
 
-        const labelWidth = $('#track-labels-container').outerWidth();
-        const newPlayheadPixelPos = _timeToPixel(time);
-        $('#timeline-playhead').show().css('left', labelWidth + newPlayheadPixelPos + 'px');
+        _updatePlayheadPosition(time);
 
         tracks.forEach(trackData => {
             const targetNode = trackData.node;
@@ -729,8 +767,6 @@ var Sequencer = (function() {
                 if (targetNode.ui) targetNode.ui.stopAllActions();
             }
         });
-
-        // --- [제거됨] 스크러빙 시 재생 상태를 변경하던 로직 ---
     }
 
     function _zoom(direction) {
@@ -757,6 +793,36 @@ var Sequencer = (function() {
         isSyncingScroll = false;
     }
 
+    // --- ▼▼▼ 자동 스크롤 로직 전체 재작성 ▼▼▼ ---
+    function _autoScrollLoop() {
+        if (!isScrubbing || !autoScrollDirection) {
+            autoScrollDirection = null; // 루프 중단 조건
+            return;
+        }
+
+        const $tracksContainer = $('#timeline-tracks-container');
+        const scrollSpeed = 10; // 스크롤 속도
+
+        if (autoScrollDirection === 'right') {
+            $tracksContainer.scrollLeft($tracksContainer.scrollLeft() + scrollSpeed);
+            const containerWidth = $tracksContainer.width();
+            const labelWidth = $('#track-labels-container').outerWidth();
+            const timeAtRightEdge = _pixelToTime($tracksContainer.scrollLeft() + containerWidth);
+            _scrubToTime(timeAtRightEdge);
+            $('#timeline-playhead').css('left', (labelWidth + containerWidth) + 'px');
+
+        } else if (autoScrollDirection === 'left') {
+            $tracksContainer.scrollLeft($tracksContainer.scrollLeft() - scrollSpeed);
+            let clickX = $tracksContainer.scrollLeft();
+            clickX = Math.max(0, clickX);
+            const time = _pixelToTime(clickX);
+            _scrubToTime(time);
+        }
+
+        autoScrollFrameId = requestAnimationFrame(_autoScrollLoop);
+    }
+    // --- ▲▲▲ 자동 스크롤 로직 전체 재작성 끝 ▲▲▲ ---
+
     return {
         _deleteClip: _deleteClip,
         _clearClipsForNode: _clearClipsForNode,
@@ -772,7 +838,12 @@ var Sequencer = (function() {
             $('#zoom-in-btn').on('click', () => _zoom('in'));
             $('#zoom-out-btn').on('click', () => _zoom('out'));
 
-            $tracksContainer.on('scroll', (e) => syncScroll($tracksContainer, $('#track-labels-container'), e.target.scrollLeft));
+            $tracksContainer.on('scroll', (e) => {
+                syncScroll($tracksContainer, $('#track-labels-container'), e.target.scrollLeft);
+                if (!isPlaying) {
+                    _updatePlayheadPosition();
+                }
+            });
 
             $tracksContainer.on('click', function (e) {
                 if ($(e.target).hasClass('timeline-track') || e.target === this) {
@@ -781,15 +852,43 @@ var Sequencer = (function() {
                 }
             });
 
-            let isScrubbing = false;
             let $scrubTarget = null;
 
+            // --- ▼▼▼ 스크러빙 및 자동 스크롤 핸들러 전체 재작성 ▼▼▼ ---
             const handleScrubMove = function(e) {
-                if (!$scrubTarget) return;
+                if (!isScrubbing) return;
 
-                let clickX = e.pageX - $scrubTarget.offset().left + $scrubTarget.scrollLeft();
-                const time = _pixelToTime(clickX);
-                _scrubToTime(time);
+                const containerRect = $tracksContainer[0].getBoundingClientRect();
+                const mouseX = e.clientX;
+                const edgeThreshold = 15; // 감도(px)를 50에서 15로 낮춤
+
+                let currentDirection = null;
+                if (mouseX < containerRect.left + edgeThreshold) {
+                    currentDirection = 'left';
+                } else if (mouseX > containerRect.right - edgeThreshold) {
+                    currentDirection = 'right';
+                }
+
+                // 자동 스크롤 상태가 아니고, 새로운 스크롤 방향이 감지되었을 때
+                if (currentDirection && autoScrollDirection !== currentDirection) {
+                    autoScrollDirection = currentDirection;
+                    if (autoScrollFrameId) cancelAnimationFrame(autoScrollFrameId);
+                    _autoScrollLoop(); // 새 방향으로 루프 시작
+                }
+                // 자동 스크롤 중이었지만, 마우스가 안전 영역으로 돌아왔을 때
+                else if (!currentDirection && autoScrollDirection) {
+                    autoScrollDirection = null; // 루프 중단
+                    if (autoScrollFrameId) cancelAnimationFrame(autoScrollFrameId);
+                    autoScrollFrameId = null;
+                }
+
+                // 자동 스크롤 상태가 아닐 때만 일반 스크러빙 수행
+                if (!autoScrollDirection) {
+                    let clickX = e.pageX - $scrubTarget.offset().left + $tracksContainer.scrollLeft();
+                    clickX = Math.max(0, clickX);
+                    const time = _pixelToTime(clickX);
+                    _scrubToTime(time);
+                }
             };
 
             $($tracksContainer).add($rulerContainer).on('mousedown', function(e) {
@@ -814,7 +913,14 @@ var Sequencer = (function() {
             $(document).on('mouseup.sequencerScrub', function(e) {
                 isScrubbing = false;
                 $scrubTarget = null;
+                // 자동 스크롤 루프 확실히 정지
+                autoScrollDirection = null;
+                if (autoScrollFrameId) {
+                    cancelAnimationFrame(autoScrollFrameId);
+                    autoScrollFrameId = null;
+                }
             });
+            // --- ▲▲▲ 핸들러 재작성 끝 ▲▲▲ ---
 
             $('#track-labels-container').on('wheel', (e) => {
                 e.preventDefault();

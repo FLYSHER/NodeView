@@ -566,7 +566,8 @@ var MainLayer = cc.Layer.extend({
                     if (movementData && movementData.duration) {
                         const durationInFrames = movementData.duration;
                         const speedScale = movementData.scale || 1;
-                        durationInSeconds = (durationInFrames / speedScale) / 60.0;
+                        const animationFrameRate = animation._animationData.frameRate || 60.0;
+                        durationInSeconds = (durationInFrames / speedScale) / animationFrameRate;
                     }
                 } catch (e) { durationInSeconds = 0; }
                 break;
