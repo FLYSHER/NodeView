@@ -547,8 +547,6 @@ var Sequencer = (function() {
     }
 
     function _onPlay() {
-        _onStop(false);
-
         $('#timeline-tracks-container').scrollLeft(0);
 
         isPlaying = true;
@@ -576,7 +574,6 @@ var Sequencer = (function() {
         tracks.forEach((trackData, nodeId) => {
             trackData.clips.forEach(clip => {
                 const targetNode = trackData.node;
-                const isLooping = clip.duration > clip.originalDuration;
 
                 const playAction = cc.callFunc(() => {
                     if (targetNode.spine) targetNode.spine.clearTrack(0);
@@ -584,18 +581,26 @@ var Sequencer = (function() {
                     if (targetNode.ui) targetNode.ui.stopAllActions();
 
                     if (clip.type === 'spine' && targetNode.spine) {
+                        const isLooping = clip.duration > clip.originalDuration;
                         targetNode.spine.setAnimation(0, clip.animName, isLooping);
                     } else if (clip.type === 'armature' && targetNode.armature) {
+                        const animation = targetNode.armature.getAnimation();
+                        animation.setMovementEventCallFunc(() => {});
+
+                        const isLooping = clip.duration > clip.originalDuration;
                         let loopCount = isLooping ? Math.ceil(clip.duration / clip.originalDuration) : 1;
                         if (loopCount === Infinity) loopCount = 0;
-                        targetNode.armature.getAnimation().play(clip.animName, -1, loopCount);
+
+                        animation.play(clip.animName, -1, loopCount);
                     } else if (clip.type === 'action' && targetNode.cocosAction) {
+                        const isLooping = clip.duration > clip.originalDuration;
                         targetNode.cocosAction.play(clip.animName, isLooping);
                     } else if (clip.type === 'action' && targetNode.ui) {
                         const singlePlayAction = cc.callFunc(() => {
                             ccs.actionManager.playActionByName(targetNode.actionUrl, clip.animName);
                         });
 
+                        const isLooping = clip.duration > clip.originalDuration;
                         if (isLooping && clip.originalDuration > 0.01) {
                             const numRepeats = Math.ceil(clip.duration / clip.originalDuration);
                             const loopSequence = cc.repeat(
@@ -617,14 +622,16 @@ var Sequencer = (function() {
                 if (clip.type === 'action' || !isNextClipStarting) {
                     const stopAction = cc.callFunc(() => {
                         if (clip.type === 'armature' && targetNode.armature && targetNode.armature.getAnimation().getCurrentMovementID() === clip.animName) {
-                            targetNode.armature.getAnimation().stop();
+                            targetNode.armature.getAnimation().pause();
                         } else if (clip.type === 'spine' && targetNode.spine) {
                             targetNode.spine.clearTrack(0);
                         } else if (clip.type === 'action' && targetNode.ui) {
                             ccs.actionManager.stopActionByName(targetNode.actionUrl, clip.animName);
                         }
                     });
-                    runnerNode.runAction(cc.sequence(cc.delayTime(endTime), stopAction));
+
+                    const safeEndTime = Math.max(clip.startTime, endTime - 0.01);
+                    runnerNode.runAction(cc.sequence(cc.delayTime(safeEndTime), stopAction));
                 }
             });
         });

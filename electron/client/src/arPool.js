@@ -75,10 +75,11 @@ ARPool.ArObjectPool = cc.Node.extend({
     },
 
     _initVariable: function () {
-        this._arrARs = [];
-        this._total	= 0;
-        this._arName = null;
-        this._initCount = ARPool.DEFAULT_INIT_COUNT;
+        this._pool = null;
+        this._armatureName = null;
+        this._armature = null;
+        this._parentBone = null;
+        this._arAnimation = null;
     },
 
     onExit : function () {
@@ -540,7 +541,6 @@ var PoolArmature = cc.Node.extend({
     },
 
     _obtainArmature: function () {
-
         if (this._armature === null) {
             this._armature = this._pool.obtainAR(this);
             if (this._armature) {
@@ -548,9 +548,6 @@ var PoolArmature = cc.Node.extend({
                     this._armature.setParentBone(this._parentBone);
 
                 this._armature.setPosition(0, 0);
-                this._latestPlayStates[PROPS_ANIPLAY.MOVEMENTCOUNT] = this._armature.getAnimation().getMovementCount();
-
-                this.recoveryLatestPlayStates();
             }
         }
         return null;
@@ -558,71 +555,8 @@ var PoolArmature = cc.Node.extend({
 
     _returnArmature: function () {
         if (this._armature !== null) {
-            if (this._latestPlayStates[PROPS_ANIPLAY.PLAYTYPE] !== TYPE_AR_STATE.STOP) {
-                this._latestPlayStates[PROPS_ANIPLAY.FRAMEINDEX] = cc.director.getTotalFrames() - this._armature.getAnimation().getCurrentFrameIndex();
-            }
-            else {
-                this._latestPlayStates[PROPS_ANIPLAY.FRAMEINDEX] = -1;
-            }
-
             this._pool.returnAR(this._armature);
             this._armature = null;
-        }
-    },
-
-    recoveryLatestPlayStates: function () {
-        if (!this._armature)
-            return;
-
-
-        var opacity = this.getDisplayedOpacity();
-        if (this._armature.getDisplayedOpacity() !== opacity)
-            this._armature.updateDisplayedOpacity(this.getDisplayedOpacity());
-
-        var speedScale = this._latestPlayStates[PROPS_ANIPLAY.SPEEDSCALE];
-        this._armature.getAnimation().setSpeedScale(speedScale);
-
-        var playType = this._latestPlayStates[PROPS_ANIPLAY.PLAYTYPE];
-        var frameIndex = cc.director.getTotalFrames() - this._latestPlayStates[PROPS_ANIPLAY.FRAMEINDEX];
-        var playMode = this._latestPlayStates[PROPS_ANIPLAY.PLAYMODE];
-
-        switch (playMode) {
-            case ENUM_ANIPLAY_MODE.PLAY:
-                this.play(this._latestPlayStates[PROPS_ANIPLAY.PLAYDATA],
-                    this._latestPlayStates[PROPS_ANIPLAY.DURATIONTO],
-                    this._latestPlayStates[PROPS_ANIPLAY.LOOP]);
-                break;
-            case ENUM_ANIPLAY_MODE.PLAYWITHINDEX:
-                this.playWithIndex(this._latestPlayStates[PROPS_ANIPLAY.PLAYDATA],
-                    this._latestPlayStates[PROPS_ANIPLAY.DURATIONTO],
-                    this._latestPlayStates[PROPS_ANIPLAY.LOOP]);
-                break;
-            case ENUM_ANIPLAY_MODE.PLAYWITHNAMES:
-                this.playWithNames(this._latestPlayStates[PROPS_ANIPLAY.PLAYDATA],
-                    this._latestPlayStates[PROPS_ANIPLAY.DURATIONTO],
-                    this._latestPlayStates[PROPS_ANIPLAY.LOOP]);
-                break;
-            case ENUM_ANIPLAY_MODE.PLAYWITHINDEXES:
-                this.playWithIndexes(this._latestPlayStates[PROPS_ANIPLAY.PLAYDATA],
-                    this._latestPlayStates[PROPS_ANIPLAY.DURATIONTO],
-                    this._latestPlayStates[PROPS_ANIPLAY.LOOP]);
-                break;
-            case ENUM_ANIPLAY_MODE.STOP:
-                this.playWithIndex(0);
-                this.gotoAndPause(0);
-                this.stop();
-                return;
-        }
-
-        if (frameIndex > 0) {
-            if (frameIndex >= this.getRawDuration())
-                frameIndex = this.getRawDuration() - 1;
-
-            this.gotoAndPlay(frameIndex);
-        }
-
-        if (playType === TYPE_AR_STATE.PAUSE) {
-            this.pause();
         }
     }
 });
