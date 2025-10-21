@@ -633,11 +633,18 @@ ul.tabs li.current {
     background-color: #4a4a4a !important;
     color: white !important;
 }
+
 .jstree-default .jstree-clicked {
     background-color: var(--accent-color) !important;
     color: white !important;
     font-weight: bold;
 }
+
+.jstree-default .jstree-clicked:hover {
+    background-color: #2e9bf1 !important;
+    color: white !important;
+}
+
 .jstree-default .jstree-anchor > .jstree-icon {
     display: none;
 }
