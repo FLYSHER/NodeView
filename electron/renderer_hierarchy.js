@@ -215,6 +215,7 @@ var Renderer_hierarchy = {
                             case '.plist':
                                 cc.log("[Resource] plist spriteFrameCache 에서 삭제 : ", key);
                                 cc.spriteFrameCache.removeSpriteFramesFromFile(key);
+                                cc.spriteFrameCache.removeSpriteConfigCache(key);
                                 break;
                             case '.png':
                                 cc.log("[Resource] png textureCache 에서 삭제 : ", key);

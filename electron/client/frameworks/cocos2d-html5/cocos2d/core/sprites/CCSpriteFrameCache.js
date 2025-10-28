@@ -307,6 +307,13 @@ cc.spriteFrameCache = /** @lends cc.spriteFrameCache# */{
         }
     },
 
+    removeSpriteConfigCache : function (url) {
+        var self = this;
+        if (self._frameConfigCache[url]) {
+            delete self._frameConfigCache[url];
+        }
+    },
+
     /**
      * <p>
      *    Removes all Sprite Frames associated with the specified textures.<br/>
