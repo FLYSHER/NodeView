@@ -1,0 +1,50 @@
+{
+    "$schema": "./@types/schema/package/index.json",
+    "package_version": 2,
+    "name": "sample_extension",
+    "version": "1.0.0",
+    "author": "Cocos Creator",
+    "editor": ">=3.8.8",
+    "scripts": {
+        "preinstall": "node ./scripts/preinstall.js",
+        "build": "tsc",
+        "watch": "tsc -w"
+    },
+    "description": "i18n:sample_extension.description",
+    "main": "./dist/main.js",
+    "devDependencies": {
+        "@cocos/creator-types": "^3.8.7",
+        "@types/node": "^18.17.1",
+        "electron": "^40.1.0",
+        "typescript": "^5.8.2"
+    },
+    "contributions": {
+        "scene": {
+            "script": "./dist/scene.js"
+        },
+        "menu": [
+            {
+                "path": "sample_extension",
+                "label": "sample_extension.show_log2",
+                "message": "show-log"
+            },
+            {
+                "path": "sample_extension",
+                "label": "sample_extension.ARToPrefab",
+                "message": "ARToPrefab"
+            }
+        ],
+        "messages": {
+            "show-log": {
+                "methods": [
+                    "showLog"
+                ]
+            },
+            "ARToPrefab": {
+                "methods": [
+                    "arToPrefab"
+                ]
+            }
+        }
+    }
+}

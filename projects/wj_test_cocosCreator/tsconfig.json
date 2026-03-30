@@ -1,0 +1,17 @@
+{
+  /* Base configuration. Do not edit this field. */
+  "extends": "./temp/tsconfig.cocos.json",
+
+  /* Add your custom configuration here. */
+  "compilerOptions": {
+    "strict": false,
+    // ▼▼▼ import map ▼▼▼
+    "baseUrl": "./",
+    "paths": {
+      "foo": ["./assets/lib/foo.ts"]
+    },
+    "types" :[
+        "facebook-js-sdk" // 👈 이 부분을 추가!
+    ]
+  }
+}

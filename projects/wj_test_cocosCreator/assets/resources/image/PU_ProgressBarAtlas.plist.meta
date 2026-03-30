@@ -1,0 +1,155 @@
+{
+  "ver": "1.0.8",
+  "importer": "sprite-atlas",
+  "imported": true,
+  "uuid": "de175d83-a625-4305-bf59-10e6f446b42e",
+  "files": [
+    ".json"
+  ],
+  "subMetas": {
+    "19901": {
+      "importer": "sprite-frame",
+      "uuid": "de175d83-a625-4305-bf59-10e6f446b42e@19901",
+      "displayName": "",
+      "id": "19901",
+      "name": "slot_loadingBar_Fx",
+      "userData": {
+        "trimThreshold": 1,
+        "rotated": true,
+        "offsetX": 0,
+        "offsetY": 0,
+        "trimX": 1,
+        "trimY": 1,
+        "width": 38,
+        "height": 50,
+        "rawWidth": 38,
+        "rawHeight": 50,
+        "borderTop": 0,
+        "borderBottom": 0,
+        "borderLeft": 0,
+        "borderRight": 0,
+        "packable": true,
+        "pixelsToUnit": 100,
+        "pivotX": 0.5,
+        "pivotY": 0.5,
+        "meshType": 0,
+        "vertices": {
+          "rawPosition": [],
+          "indexes": [],
+          "uv": [],
+          "nuv": [],
+          "minPos": [],
+          "maxPos": []
+        },
+        "isUuid": true,
+        "imageUuidOrDatabaseUri": "84f62bb3-1226-49c1-bbcd-9ea7a1ff602e@6c48a",
+        "atlasUuid": "de175d83-a625-4305-bf59-10e6f446b42e",
+        "trimType": "auto"
+      },
+      "ver": "1.0.12",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "193b0": {
+      "importer": "sprite-frame",
+      "uuid": "de175d83-a625-4305-bf59-10e6f446b42e@193b0",
+      "displayName": "",
+      "id": "193b0",
+      "name": "slot_loadingBar",
+      "userData": {
+        "trimThreshold": 1,
+        "rotated": true,
+        "offsetX": 0,
+        "offsetY": 0,
+        "trimX": 43,
+        "trimY": 41,
+        "width": 718,
+        "height": 18,
+        "rawWidth": 718,
+        "rawHeight": 18,
+        "borderTop": 0,
+        "borderBottom": 0,
+        "borderLeft": 0,
+        "borderRight": 0,
+        "packable": true,
+        "pixelsToUnit": 100,
+        "pivotX": 0.5,
+        "pivotY": 0.5,
+        "meshType": 0,
+        "vertices": {
+          "rawPosition": [],
+          "indexes": [],
+          "uv": [],
+          "nuv": [],
+          "minPos": [],
+          "maxPos": []
+        },
+        "isUuid": true,
+        "imageUuidOrDatabaseUri": "84f62bb3-1226-49c1-bbcd-9ea7a1ff602e@6c48a",
+        "atlasUuid": "de175d83-a625-4305-bf59-10e6f446b42e",
+        "trimType": "auto"
+      },
+      "ver": "1.0.12",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "b0508": {
+      "importer": "sprite-frame",
+      "uuid": "de175d83-a625-4305-bf59-10e6f446b42e@b0508",
+      "displayName": "",
+      "id": "b0508",
+      "name": "slot_loadingBoard",
+      "userData": {
+        "trimThreshold": 1,
+        "rotated": true,
+        "offsetX": 0,
+        "offsetY": -3,
+        "trimX": 1,
+        "trimY": 41,
+        "width": 740,
+        "height": 40,
+        "rawWidth": 740,
+        "rawHeight": 46,
+        "borderTop": 0,
+        "borderBottom": 0,
+        "borderLeft": 0,
+        "borderRight": 0,
+        "packable": true,
+        "pixelsToUnit": 100,
+        "pivotX": 0.5,
+        "pivotY": 0.5,
+        "meshType": 0,
+        "vertices": {
+          "rawPosition": [],
+          "indexes": [],
+          "uv": [],
+          "nuv": [],
+          "minPos": [],
+          "maxPos": []
+        },
+        "isUuid": true,
+        "imageUuidOrDatabaseUri": "84f62bb3-1226-49c1-bbcd-9ea7a1ff602e@6c48a",
+        "atlasUuid": "de175d83-a625-4305-bf59-10e6f446b42e",
+        "trimType": "auto"
+      },
+      "ver": "1.0.12",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    }
+  },
+  "userData": {
+    "atlasTextureName": "PU_ProgressBarAtlas.png",
+    "format": 2,
+    "uuid": "de175d83-a625-4305-bf59-10e6f446b42e",
+    "textureUuid": "84f62bb3-1226-49c1-bbcd-9ea7a1ff602e@6c48a"
+  }
+}
