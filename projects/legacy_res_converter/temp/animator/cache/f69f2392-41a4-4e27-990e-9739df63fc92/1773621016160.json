@@ -1,0 +1,30 @@
+[
+  {
+    "__type__": "cc.AnimationClip",
+    "_name": "PU_extraSaleFxAR_loop",
+    "_objFlags": 0,
+    "__editorExtras__": {
+      "embeddedPlayerGroups": []
+    },
+    "_native": "",
+    "sample": 60,
+    "speed": 0.333333343,
+    "wrapMode": 2,
+    "enableTrsBlending": false,
+    "_duration": 2.0166666666666666,
+    "_hash": 500763545,
+    "_tracks": [],
+    "_exoticAnimation": null,
+    "_events": [],
+    "_embeddedPlayers": [],
+    "_additiveSettings": {
+      "__id__": 1
+    },
+    "_auxiliaryCurveEntries": []
+  },
+  {
+    "__type__": "cc.AnimationClipAdditiveSettings",
+    "enabled": false,
+    "refClip": null
+  }
+]

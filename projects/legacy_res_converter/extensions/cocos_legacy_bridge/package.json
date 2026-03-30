@@ -1,0 +1,65 @@
+{
+    "$schema": "./@types/schema/package/index.json",
+    "package_version": 2,
+    "name": "cocos_legacy_bridge",
+    "version": "1.0.0",
+    "author": "Cocos Creator",
+    "editor": ">=3.8.8",
+    "scripts": {
+        "preinstall": "node ./scripts/preinstall.js",
+        "build": "npx tsc"
+    },
+    "description": "i18n:cocos_legacy_bridge.description",
+    "main": "./dist/main.js",
+    "devDependencies": {
+        "@cocos/creator-types": "latest",
+        "@types/fs-extra": "^11.0.4",
+        "@types/node": "^18.17.1",
+        "typescript": "^5.8.2"
+    },
+    "panels": {
+        "bridge-panel": {
+            "title": "Cocos Legacy Bridge",
+            "type": "dockable",
+            "main": "dist/panels/bridge/bridge-panel.js",
+            "size": {
+                "min-width": 400,
+                "min-height": 300,
+                "width": 1024,
+                "height": 600
+            }
+        }
+    },
+    "contributions": {
+        "scene": {
+            "script": "./dist/scene.js"
+        },
+        "menu": [
+            {
+               "path": "i18n:menu.panel/Cocos Legacy Bridge",
+                "label": "open_panel",
+                "message": "open-panel"
+            },
+            {
+                "path": "i18n:menu.develop/Cocos Legacy Bridge",
+                "label": "send_to_panel",
+                "message": "send-to-panel"
+            }
+        ],
+        "messages": {
+            "open-panel": {
+                "methods": [
+                    "openPanel"
+                ]
+            },
+            "send-to-panel": {
+                "methods": [
+                    "bridge-panel.hello"
+                ]
+            }
+        }
+    },
+    "dependencies": {
+        "fs-extra": "^11.3.3"
+    }
+}

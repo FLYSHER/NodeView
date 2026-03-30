@@ -1,0 +1,76 @@
+{
+  "version": "1.0.1",
+  "map": {
+    "materials.meta": {
+      "time": 1774828882741.3953
+    },
+    "scene.meta": {
+      "time": 1773898992663.8542
+    },
+    "scripts.meta": {
+      "time": 1773898992667.3423
+    },
+    "scripts/BoneFollower.ts.meta": {
+      "time": 1774320373546.74
+    },
+    "scripts/SkinController.ts.meta": {
+      "time": 1774320373547.8022
+    },
+    "materials": {
+      "time": 1774320373543.2087,
+      "uuid": "e56ce3c8-d323-4ad1-adc9-acd857de8225"
+    },
+    "scene": {
+      "time": 1774320373545.1758,
+      "uuid": "2963659e-b3a1-454c-b91c-1eb4203fa3a4"
+    },
+    "scripts": {
+      "time": 1774320373547.3923,
+      "uuid": "31a0f6a3-a1dd-4a7e-b089-0602c12c0274"
+    },
+    "scripts/BoneFollower.ts": {
+      "time": 1774320373546.211,
+      "uuid": "7c623996-0909-4050-89e7-6c3adf1c4979"
+    },
+    "scripts/SkinController.ts": {
+      "time": 1774320373547.1777,
+      "uuid": "8ad149d2-0f47-4e08-850f-252d80173996"
+    },
+    "materials/Additive.mtl.meta": {
+      "time": 1774320373540.1023
+    },
+    "materials/LinearAdd.mtl.meta": {
+      "time": 1774320373541.5747
+    },
+    "materials/Multiply.mtl.meta": {
+      "time": 1774320373542.4185
+    },
+    "materials/Normal.mtl.meta": {
+      "time": 1774320373543.708
+    },
+    "scene/converter_scene.scene.meta": {
+      "time": 1774320373545.572
+    },
+    "materials/Normal.mtl": {
+      "time": 1774320373543.021,
+      "uuid": "c3349099-16f6-41c0-ace1-04a2210f704d"
+    },
+    "materials/Additive.mtl": {
+      "time": 1774320373539.5642,
+      "uuid": "d70ac601-79a1-4708-98a1-862cd4b6609e"
+    },
+    "materials/Multiply.mtl": {
+      "time": 1774320373541.883,
+      "uuid": "030cb77f-a72c-4b36-ae53-9014e9e8473e"
+    },
+    "materials/LinearAdd.mtl": {
+      "time": 1774320373541.082,
+      "uuid": "edecab09-e4d2-4a75-841e-a6a8bbe02bf9"
+    },
+    "scene/converter_scene.scene": {
+      "time": 1774320373545.0862,
+      "uuid": "698fed48-d023-4dcc-bfe7-570b497d02cf"
+    }
+  },
+  "missing": {}
+}
