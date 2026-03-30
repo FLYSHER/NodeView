@@ -1,132 +1,0 @@
-2026. 3. 30. 09:01:17-log: Cannot access game frame or container.
-2026. 3. 30. 09:01:18-debug: asset-db:require-engine-code (811ms)
-2026. 3. 30. 09:01:18-log: [box2d]:box2d wasm lib loaded.
-2026. 3. 30. 09:01:18-log: meshopt wasm decoder initialized
-2026. 3. 30. 09:01:18-log: [bullet]:bullet wasm lib loaded.
-2026. 3. 30. 09:01:18-log: Cocos Creator v4.0.0
-2026. 3. 30. 09:01:18-log: Using legacy pipeline
-2026. 3. 30. 09:01:18-debug: [Assets Memory track]: asset-db:worker-init: initEngine start:30.42MB, end 122.06MB, increase: 91.64MB
-2026. 3. 30. 09:01:18-log: Forward render pipeline initialized.
-2026. 3. 30. 09:01:22-debug: run package(windows) handler(enable) start
-2026. 3. 30. 09:01:22-debug: run package(wechatprogram) handler(enable) success!
-2026. 3. 30. 09:01:22-debug: run package(xiaomi-quick-game) handler(enable) start
-2026. 3. 30. 09:01:22-debug: run package(im-plugin) handler(enable) start
-2026. 3. 30. 09:01:22-debug: run package(cocos-service) handler(enable) success!
-2026. 3. 30. 09:01:22-debug: run package(cocos-service) handler(enable) start
-2026. 3. 30. 09:01:22-debug: run package(im-plugin) handler(enable) success!
-2026. 3. 30. 09:01:22-debug: run package(xiaomi-quick-game) handler(enable) success!
-2026. 3. 30. 09:01:22-debug: run package(placeholder) handler(enable) success!
-2026. 3. 30. 09:01:22-debug: run package(cocos_legacy_bridge) handler(enable) success!
-2026. 3. 30. 09:01:22-debug: run package(cocos_legacy_bridge) handler(enable) start
-2026. 3. 30. 09:01:22-debug: run package(windows) handler(enable) success!
-2026. 3. 30. 09:01:22-debug: [Assets Memory track]: asset-db:worker-init: initPlugin start:79.02MB, end 242.63MB, increase: 163.62MB
-2026. 3. 30. 09:01:22-debug: Run asset db hook programming:beforePreStart ...
-2026. 3. 30. 09:01:22-debug: [Assets Memory track]: asset-db:worker-init start:30.41MB, end 243.19MB, increase: 212.78MB
-2026. 3. 30. 09:01:22-debug: Run asset db hook programming:beforePreStart success!
-2026. 3. 30. 09:01:22-debug: Run asset db hook engine-extends:beforePreStart ...
-2026. 3. 30. 09:01:22-debug: Run asset db hook engine-extends:beforePreStart success!
-2026. 3. 30. 09:01:22-debug: run package(wechatprogram) handler(enable) start
-2026. 3. 30. 09:01:22-debug: run package(placeholder) handler(enable) start
-2026. 3. 30. 09:01:22-debug: asset-db:worker-init: initPlugin (4133ms)
-2026. 3. 30. 09:01:22-debug: asset-db-hook-engine-extends-beforePreStart (100ms)
-2026. 3. 30. 09:01:22-debug: asset-db:worker-init (5125ms)
-2026. 3. 30. 09:01:22-debug: asset-db-hook-programming-beforePreStart (100ms)
-2026. 3. 30. 09:01:22-debug: Preimport db internal success
-2026. 3. 30. 09:01:22-debug: %cImport%c: /Users/cswq327/cocos_project/legacy_res_converter/assets/scripts/SkinController.tsbackground: #aaff85; color: #000;color: #000;
-2026. 3. 30. 09:01:22-debug: %cImport%c: /Users/cswq327/cocos_project/legacy_res_converter/assets/materialsbackground: #aaff85; color: #000;color: #000;
-2026. 3. 30. 09:01:22-debug: %cImport%c: /Users/cswq327/cocos_project/legacy_res_converter/assets/scripts/BoneFollower.tsbackground: #aaff85; color: #000;color: #000;
-2026. 3. 30. 09:01:22-debug: %cImport%c: /Users/cswq327/cocos_project/legacy_res_converter/assets/scenebackground: #aaff85; color: #000;color: #000;
-2026. 3. 30. 09:01:22-debug: %cImport%c: /Users/cswq327/cocos_project/legacy_res_converter/assets/scriptsbackground: #aaff85; color: #000;color: #000;
-2026. 3. 30. 09:01:22-debug: starting packer-driver...
-2026. 3. 30. 09:01:22-debug: Preimport db assets success
-2026. 3. 30. 09:01:22-debug: Run asset db hook programming:afterPreStart ...
-2026. 3. 30. 09:01:23-debug: initialize scripting environment...
-2026. 3. 30. 09:01:23-debug: [[Executor]] prepare before lock
-2026. 3. 30. 09:01:23-debug: Set detail map pack:///resolution-detail-map.json: {}
-2026. 3. 30. 09:01:23-debug: [[Executor]] prepare after unlock
-2026. 3. 30. 09:01:23-debug: Start up the 'internal' database...
-2026. 3. 30. 09:01:23-debug: [Assets Memory track]: asset-db:worker-init: preStart start:243.20MB, end 266.01MB, increase: 22.80MB
-2026. 3. 30. 09:01:23-debug: Run asset db hook engine-extends:afterPreStart ...
-2026. 3. 30. 09:01:23-debug: Run asset db hook programming:afterPreStart success!
-2026. 3. 30. 09:01:23-debug: Run asset db hook engine-extends:afterPreStart success!
-2026. 3. 30. 09:01:23-debug: asset-db-hook-engine-extends-afterPreStart (192ms)
-2026. 3. 30. 09:01:23-debug: asset-db:worker-effect-data-processing (191ms)
-2026. 3. 30. 09:01:23-debug: asset-db-hook-programming-afterPreStart (640ms)
-2026. 3. 30. 09:01:23-debug: Run asset db hook engine-extends:afterStartDB ...
-2026. 3. 30. 09:01:23-debug: recompile effect.bin success
-2026. 3. 30. 09:01:23-debug: Start up the 'assets' database...
-2026. 3. 30. 09:01:23-debug: Run asset db hook engine-extends:afterStartDB success!
-2026. 3. 30. 09:01:23-debug: asset-db:worker-effect-data-processing (232ms)
-2026. 3. 30. 09:01:23-debug: asset-db-hook-engine-extends-afterStartDB (232ms)
-2026. 3. 30. 09:01:23-debug: %cImport%c: /Users/cswq327/cocos_project/legacy_res_converter/assets/materials/Additive.mtlbackground: #aaff85; color: #000;color: #000;
-2026. 3. 30. 09:01:23-debug: %cImport%c: /Users/cswq327/cocos_project/legacy_res_converter/assets/materials/Multiply.mtlbackground: #aaff85; color: #000;color: #000;
-2026. 3. 30. 09:01:23-debug: %cImport%c: /Users/cswq327/cocos_project/legacy_res_converter/assets/materials/Normal.mtlbackground: #aaff85; color: #000;color: #000;
-2026. 3. 30. 09:01:23-debug: %cImport%c: /Users/cswq327/cocos_project/legacy_res_converter/assets/materials/LinearAdd.mtlbackground: #aaff85; color: #000;color: #000;
-2026. 3. 30. 09:01:23-debug: %cImport%c: /Users/cswq327/cocos_project/legacy_res_converter/assets/scene/converter_scene.scenebackground: #aaff85; color: #000;color: #000;
-2026. 3. 30. 09:01:23-debug: Run asset db hook engine-extends:afterStartDB ...
-2026. 3. 30. 09:01:23-debug: recompile effect.bin success
-2026. 3. 30. 09:01:23-debug: lazy register asset handler json
-2026. 3. 30. 09:01:23-debug: lazy register asset handler spine-data
-2026. 3. 30. 09:01:23-debug: lazy register asset handler dragonbones
-2026. 3. 30. 09:01:23-debug: lazy register asset handler dragonbones-atlas
-2026. 3. 30. 09:01:23-debug: lazy register asset handler terrain
-2026. 3. 30. 09:01:23-debug: lazy register asset handler *
-2026. 3. 30. 09:01:23-debug: lazy register asset handler javascript
-2026. 3. 30. 09:01:23-debug: lazy register asset handler typescript
-2026. 3. 30. 09:01:23-debug: lazy register asset handler prefab
-2026. 3. 30. 09:01:23-debug: lazy register asset handler sprite-frame
-2026. 3. 30. 09:01:23-debug: lazy register asset handler tiled-map
-2026. 3. 30. 09:01:23-debug: lazy register asset handler buffer
-2026. 3. 30. 09:01:23-debug: lazy register asset handler image
-2026. 3. 30. 09:01:23-debug: lazy register asset handler sign-image
-2026. 3. 30. 09:01:23-debug: lazy register asset handler alpha-image
-2026. 3. 30. 09:01:23-debug: [Assets Memory track]: asset-db:worker-init: startup start:266.02MB, end 279.96MB, increase: 13.94MB
-2026. 3. 30. 09:01:23-debug: lazy register asset handler directory
-2026. 3. 30. 09:01:23-debug: lazy register asset handler texture-cube
-2026. 3. 30. 09:01:23-debug: lazy register asset handler render-texture
-2026. 3. 30. 09:01:23-debug: lazy register asset handler scene
-2026. 3. 30. 09:01:23-debug: lazy register asset handler rt-sprite-frame
-2026. 3. 30. 09:01:23-debug: lazy register asset handler erp-texture-cube
-2026. 3. 30. 09:01:23-debug: lazy register asset handler texture-cube-face
-2026. 3. 30. 09:01:23-debug: lazy register asset handler gltf
-2026. 3. 30. 09:01:23-debug: lazy register asset handler gltf-animation
-2026. 3. 30. 09:01:23-debug: lazy register asset handler gltf-mesh
-2026. 3. 30. 09:01:23-debug: lazy register asset handler gltf-skeleton
-2026. 3. 30. 09:01:23-debug: lazy register asset handler gltf-scene
-2026. 3. 30. 09:01:23-debug: lazy register asset handler gltf-material
-2026. 3. 30. 09:01:23-debug: lazy register asset handler physics-material
-2026. 3. 30. 09:01:23-debug: lazy register asset handler material
-2026. 3. 30. 09:01:23-debug: lazy register asset handler effect
-2026. 3. 30. 09:01:23-debug: lazy register asset handler effect-header
-2026. 3. 30. 09:01:23-debug: lazy register asset handler fbx
-2026. 3. 30. 09:01:23-debug: lazy register asset handler gltf-embeded-image
-2026. 3. 30. 09:01:23-debug: lazy register asset handler animation-clip
-2026. 3. 30. 09:01:23-debug: lazy register asset handler animation-graph
-2026. 3. 30. 09:01:23-debug: lazy register asset handler animation-graph-variant
-2026. 3. 30. 09:01:23-debug: lazy register asset handler texture
-2026. 3. 30. 09:01:23-debug: lazy register asset handler ttf-font
-2026. 3. 30. 09:01:23-debug: lazy register asset handler bitmap-font
-2026. 3. 30. 09:01:23-debug: lazy register asset handler particle
-2026. 3. 30. 09:01:23-debug: lazy register asset handler sprite-atlas
-2026. 3. 30. 09:01:23-debug: lazy register asset handler label-atlas
-2026. 3. 30. 09:01:23-debug: lazy register asset handler render-pipeline
-2026. 3. 30. 09:01:23-debug: lazy register asset handler render-flow
-2026. 3. 30. 09:01:23-debug: lazy register asset handler instantiation-material
-2026. 3. 30. 09:01:23-debug: lazy register asset handler audio-clip
-2026. 3. 30. 09:01:23-debug: lazy register asset handler render-stage
-2026. 3. 30. 09:01:23-debug: lazy register asset handler instantiation-mesh
-2026. 3. 30. 09:01:23-debug: lazy register asset handler instantiation-skeleton
-2026. 3. 30. 09:01:23-debug: lazy register asset handler instantiation-animation
-2026. 3. 30. 09:01:23-debug: lazy register asset handler video-clip
-2026. 3. 30. 09:01:23-debug: lazy register asset handler auto-atlas
-2026. 3. 30. 09:01:23-debug: lazy register asset handler text
-2026. 3. 30. 09:01:23-debug: Run asset db hook engine-extends:afterStartDB success!
-2026. 3. 30. 09:01:23-debug: lazy register asset handler animation-mask
-2026. 3. 30. 09:01:23-debug: asset-db-hook-engine-extends-afterStartDB (209ms)
-2026. 3. 30. 09:01:23-debug: init worker message success
-2026. 3. 30. 09:01:23-debug: programming:execute-script (1ms)
-2026. 3. 30. 09:01:23-debug: asset-db:worker-effect-data-processing (209ms)
-2026. 3. 30. 09:01:23-debug: asset-db:start-database (1350ms)
-2026. 3. 30. 09:01:23-debug: asset-db:ready (8953ms)
-2026. 3. 30. 09:01:24-debug: [Build Memory track]: builder:worker-init start:283.85MB, end 305.57MB, increase: 21.73MB
-2026. 3. 30. 09:01:24-debug: builder:worker-init (313ms)
