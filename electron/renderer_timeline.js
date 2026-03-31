@@ -110,6 +110,7 @@ const Renderer_timeline = {
         });
 
         outlineContainer.onwheel = this.outlineMouseWheel.bind(this);
+        cc.log("[tg] test : ", this.timeline_rows);
     },
 
     showActivePositionInformation : function() {
@@ -118,6 +119,7 @@ const Renderer_timeline = {
 
     setAnimationTimeline : function( arFileName, trackName ) {
         const originData      = cc.loader.getRes( arFileName );
+        cc.log("[tg] originData : ", originData);
         const armature_data   = originData['armature_data'][0];
         const boneList        = armature_data['bone_data'];
         const animation_data  = originData['animation_data'][0];
@@ -131,19 +133,25 @@ const Renderer_timeline = {
 
         this.mov_totalFrame = move_data['dr'] - 1;
         this.mov_scale      = move_data['sc'];
-
+        cc.log("[tg] move_data:  ", move_data);
         const mov_bone_data = move_data['mov_bone_data'];
         this.timeline_rows.length = 0;
 
         const msPerFrame = this.animationInternal / this.mov_scale * 1000;
         this.msPerFrame = msPerFrame;
 
+        // frame index ( fi ) 값 기준으로 정렬되어 있는 것인지??
+        // 일반적인 상황에서는 그렇다.
         mov_bone_data.forEach((bone_data) => {
             const frame_data = bone_data['frame_data'];
             this.timeline_rows.push({
                 title : bone_data.name,
                 keyframes : frame_data.map((f_data) => {
-                    return {val: f_data['fi'] * msPerFrame};
+                    return {
+                        val: f_data['fi'] * msPerFrame,
+                        parentBoneName : bone_data.name,
+                        frameData : f_data
+                    };
                 })
             });
         });
@@ -157,6 +165,56 @@ const Renderer_timeline = {
 
         this.timeline.setTime( 0 );
         this.timeline.setZoom( 3 );
+        // 키프레임 눌렀을 떄 2~3번 적용
+        this.timeline.onMouseDown(function (obj) {
+            cc.log("[tg] onMouseDown, obj ", obj);
+        });
+        // 키프레임 드래그 출발
+        this.timeline.onDragStarted(function (obj) {
+            cc.log("[tg] onDragStarted, obj ", obj);
+        });
+        // 키프레임 드래그 중
+        this.timeline.onDrag(function (obj) {
+            cc.log("[tg] onDrag, obj ", obj);
+        });
+        // 키프레임 드래그 종료
+        this.timeline.onDragFinished(function (obj) {
+            cc.log("[tg] onDragFinished, obj ", obj);
+        });
+        // 새로운 키 프레임이 눌렸을 경우.
+        // 상태가 변경된 키프레임 배열 changed : Array, 선택 상태인 키프레임 배열 selected : Array
+        this.timeline.onSelected(function (obj) {
+            cc.log("[tg] onSelected, obj ", obj);
+            const selectedObj = obj.selected[0];
+            const armatureNode = Genie.ToolController.getSelectNode();
+            if (!selectedObj)
+                return;
+            const bone = armatureNode.getBone(selectedObj['parentBoneName']);
+            if (bone) {
+
+                const displayName = bone._boneData.displayDataList[0].displayName;
+                cc.log("[tg] displayDataList = ", bone._boneData.displayDataList);
+                if (displayName) {
+                    // todo test
+                    cc.eventManager.dispatchCustomEvent( 'onSetPreviewSprite', {
+                        name    : displayName,
+                        resType : Genie.ResType.SPRITE
+                    } );
+                }
+            }
+        });
+        // 드래그가 끝날 때 emit
+        this.timeline.onKeyframeChanged(function (obj) {
+            cc.log("[tg] onKeyframeChanged, obj ", obj);
+        });
+        // 더블클릭 시 타임라인을 클릭 위치로 옮겨옴
+        this.timeline.onDoubleClick(function (obj) {
+            cc.log("[tg] onDoubleClick, obj ", obj);
+        });
+        // 타임라인이 변경되었을 때 호출되는 이벤트
+        // this.timeline.onTimeChanged(function (event) {
+        //     cc.log("[tg] onTimeChanged, event : ", event);
+        // });
     },
 
     outlineMouseWheel : function( event ) {
