@@ -1,0 +1,39 @@
+{
+    "$schema": "./@types/schema/package/index.json",
+    "package_version": 2,
+    "name": "sample_importer",
+    "version": "1.0.0",
+    "author": "Cocos Creator",
+    "editor": ">=3.8.8",
+    "scripts": {
+        "preinstall": "node ./scripts/preinstall.js",
+        "build": "tsc",
+        "watch": "tsc -w"
+    },
+    "description": "i18n:sample_importer.description",
+    "main": "./dist/main.js",
+    "devDependencies": {
+        "@cocos/creator-types": "^3.8.8",
+        "@types/node": "^18.17.1",
+        "typescript": "^5.8.2"
+    },
+    "contributions": {
+        "scene": {
+            "script": "./dist/scene.js"
+        },
+        "menu": [
+            {
+                "path": "i18n:sample_importer",
+                "label": "i18n:sample_importer.show_log",
+                "message": "show-log"
+            }
+        ],
+        "messages": {
+            "show-log": {
+                "methods": [
+                    "showLog"
+                ]
+            }
+        }
+    }
+}
