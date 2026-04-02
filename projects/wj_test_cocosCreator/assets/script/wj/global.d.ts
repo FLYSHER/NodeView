@@ -15,7 +15,7 @@ declare let HTTP_METHOD : any;
 declare let IS_SUCCEED : any;
 declare let browser : any;
 declare const CONFIG : any;
-
+declare let Player : any;
 // 1.모든 js 파일는  내용은 declare로 선언한다.
 // declare module '*.js';
 // 사용하는쪽

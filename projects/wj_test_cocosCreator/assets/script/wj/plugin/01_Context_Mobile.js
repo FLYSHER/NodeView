@@ -559,11 +559,12 @@ var _update_timer = legacy_cc.Class.extend( {
 	},
 
 	start : function() {
-		this._scheduler.scheduleUpdateForTarget( this, 0, false );
+		// this._scheduler.scheduleUpdateForTarget( this, 0, false );
+        this._scheduler.scheduleUpdate(this, 0, false, this.update);
 	},
 
 	stop : function() {
-		this._scheduler.unscheduleUpdateForTarget(this);
+		this._scheduler.unscheduleUpdate(this);
 	},
 
 	register : function( obj ) {
@@ -604,7 +605,7 @@ var _update_timer = legacy_cc.Class.extend( {
 
 _update_timer._inst = null;
 
-var RockNTimer = function() {
+window.RockNTimer = function() {
 	if( null === _update_timer._inst ) {
 		_update_timer._inst = new _update_timer();
 		_update_timer._inst.start();

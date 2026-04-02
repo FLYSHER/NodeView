@@ -2,6 +2,11 @@
  * Created by soo on 2017. 2. 27..
  */
 
+cc.isUndefined = function (obj) {
+    return typeof obj === 'undefined';
+};
+
+
 var rnc = rnc || {};
 var SERVER_CONFIG = SERVER_CONFIG || {};
 if (typeof window !== 'undefined') {

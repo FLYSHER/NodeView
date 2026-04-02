@@ -1,4 +1,5 @@
 import { _decorator, AnimationClip, Component, Node, js } from 'cc';
+import * as cc from 'cc';
 const { ccclass, property, executeInEditMode } = _decorator;
 
 @ccclass('Test2')

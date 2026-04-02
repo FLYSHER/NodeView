@@ -598,7 +598,7 @@ export class TestWebSocket extends Component {
                     {
                         //RockN.NET.emit( 'onEntryLobby', res );
 
-                        // new Player( res[ 'player' ]);
+                        new Player( res[ 'player' ]);
 
                         //NET_SW.resetWithLog("NetConnector.entryLobby_GameServer before Resolove");
                         // if(res['loungeBanProducts'] && VipSlotLockLayer) {
@@ -642,14 +642,14 @@ export class TestWebSocket extends Component {
                 //     RNCInSlotMeta.SlotLifecycleHandler.init();
 
                 //     // only mobile native app
-                //     RockN.Player.isNewUserFromBanner = res['newUserEntry'];
+                    RockN.Player.isNewUserFromBanner = res['newUserEntry'];
 
                 //     RNCBanner.Controller.setBannerData(res['bannerInfo'] );
                 //     RNCSlotEntry.Model.init( res );
                 //     setShareState();
 
-                //     RockN.Player.isNewUserForLoadingImage = (0 !== res[ 'isNewUser' ] )
-                //     RockN.UseDefaultLoading = !RockN.Player.inVipMode;
+                    RockN.Player.isNewUserForLoadingImage = (0 !== res[ 'isNewUser' ] )
+                    RockN.UseDefaultLoading = !RockN.Player.inVipMode;
 
                     //New User Exp
                     param.isNewUserExp              = ( res[ 'newUserExp' ]===true);
