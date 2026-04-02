@@ -1,0 +1,15 @@
+{
+  "name": "NewProject",
+  "uuid": "f49fecb6-bb07-464d-bf14-c32220fa29d2",
+  "creator": {
+    "version": "3.8.8"
+  },
+  "devDependencies": {
+    "@cocos/creator-types": "^3.8.7",
+    "electron": "^40.4.0"
+  },
+  "dependencies": {
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  }
+}
