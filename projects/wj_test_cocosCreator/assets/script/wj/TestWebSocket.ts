@@ -1,4 +1,4 @@
-import { _decorator, Component, resources, JsonAsset, Sprite, log } from 'cc';
+import { _decorator, Component, resources, JsonAsset, Sprite, log, director } from 'cc';
 import { ResourceUtil } from './common/ResourceUtil';
 import * as cc from 'cc';
 import { NATIVE, PREVIEW } from 'cc/env'; // 환경 분기용
@@ -133,8 +133,9 @@ export class TestWebSocket extends Component {
         await this.entryLobby_GameServer(NetConnectorParam);
         await this.iAmReady_GameServer(NetConnectorParam);
 
-        await this.loadLoaderResource(NetConnectorParam);
-        await this.testSpriteLoad();
+        await this.goToLoadingScene(NetConnectorParam);
+        // await this.loadLoaderResource(NetConnectorParam);
+        // await this.testSpriteLoad();
     }
     
     async loadProjectJson() {
@@ -735,6 +736,18 @@ export class TestWebSocket extends Component {
 
     }
 
+    async goToLoadingScene(param) {
+        // 1. GameScene을 로드합니다.
+        director.loadScene('02_loadingScene', (err, scene) => {
+            if (err) return console.error(err);
+
+            // 2. 씬이 열리자마자 씬 안에 있는 'GameManager'라는 이름의 노드를 찾습니다.
+            const loadingSceneComp : any = scene.getComponentInChildren('LoadingScene');
+            if (loadingSceneComp) {
+                loadingSceneComp.initStart(param); // 데이터 전달 완료!
+            }
+        });
+    }
     //todo //SceneManager 구성 sceneList;
     //res[ 'destination' ] 에 의해 씬이동 가능. sceneList구조 가져와야 함
     //RockN.Player
