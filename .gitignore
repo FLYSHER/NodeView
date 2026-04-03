@@ -14,6 +14,8 @@ projects/*/bin/               # 스크립트 빌드 시 생성될 수 있는 폴
 projects/*/node_modules/
 tsconfig.tsbuildinfo # TS 증분 빌드 정보
 
+.DS_Store
+**/.DS_Store
 #//////////////////////////
 # VSCode
 #//////////////////////////
