@@ -2,3 +2,5 @@
 export * from './ArmatureBone';
 export * from './ArmatureDisplay';
 export * from './Armature';
+export * from './common/SceneManager';
+export * from './common/ResourceUtil';

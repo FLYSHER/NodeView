@@ -1,4 +1,4 @@
-import { resources, Asset } from 'cc';
+import { resources, assetManager, Asset } from 'cc';
 const { ResPack } = window as any;
 
 export var ResourceUtil = {
@@ -8,7 +8,7 @@ export var ResourceUtil = {
             // 예: "ui/panel.prefab" -> "ui/panel"
             let cleanPath = path.replace(/\.[^/.]+$/, "");
 
-            // 💡 [보너스 꿀팁] 아까 언급했던 이미지 처리 로직 자동화!
+            // [보너스 꿀팁] 아까 언급했던 이미지 처리 로직 자동화!
             // 이미지를 가져올때 spriteFrame타입(2d UI용)으로 가져오라는 의미
             if (path.endsWith('.jpg')) {
                 cleanPath += '/spriteFrame';
@@ -77,6 +77,16 @@ export var ResourceUtil = {
             }
         );
     },
+
+    releaseAll(){
+        //assets/resources/에 있는것들중 로드된것들을 releaseAll 한다., 
+        //resources 는  AssetsManager의 하나의 번들이다.
+        resources.releaseAll();
+    },
+    
+    // releaseUnusedAssets(){
+    //     assetManager.releaseUnusedAssets();
+    // },
 
     get: function (resString: string, type: any = null) {
        resString = this.getCleanResourceName(resString);
