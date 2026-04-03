@@ -1,6 +1,7 @@
 // @ts-ignore
 import { assetManager, SpriteFrame, path, gfx } from 'cc';
 import { basename } from 'path';
+import { readFileSync, writeFileSync } from "fs-extra";
 
 /**
  * 여러 모듈에서 공통으로 사용하는 함수들.
@@ -150,4 +151,115 @@ export function cleanupTempNode(node: any) {
     Editor.Message.send('scene', 'node-destroyed', nodeUuid);
     // @ts-ignore
     Editor.Message.send('scene', 'change-node-hierarchy', nodeUuid);
+}
+
+// 9-sliced capInsets 적용
+export function applyScale9Insets(spriteFrame: any, options: any) {
+    if (!spriteFrame) return;
+
+    const texW = spriteFrame.originalSize.width;
+    const texH = spriteFrame.originalSize.height;
+
+    const capX = options.capInsetsX ?? 0;
+    const capY = options.capInsetsY ?? 0;
+    const capW = options.capInsetsWidth ?? texW;
+    const capH = options.capInsetsHeight ?? texH;
+
+    // 자를 영역(Width/Height)이 없으면 9-Slice의 의미가 없으므로 스킵
+    if (capW === 0 && capH === 0) return;
+
+    // CC 3.x의 SpriteFrame 속성에 직접 마진(Margin) 값을 주입합니다.
+    spriteFrame.insetLeft = capX;
+    spriteFrame.insetTop = capY;
+    spriteFrame.insetRight = Math.max(0, texW - capX - capW);
+    spriteFrame.insetBottom = Math.max(0, texH - capY - capH);
+}
+
+export async function apply9ScaleToMeta(resourceMap: ResourceMap, jsonData: any) {
+    // 🚨 [수정] opt만 저장하지 않고, 파일을 찾을 때 쓸 fileUUID(부모 UUID)도 함께 저장합니다.
+    const patchMap = new Map<string, {opt: any, fileUUID: string}>();
+
+    function traverse(node: any) {
+        const opt = node.options;
+        if (opt) {
+            // 1. 일반 ImageView의 9-Slice
+            if (opt.scale9Enable && opt.fileNameData?.path) {
+                const res = resourceMap.getResData(opt.fileNameData.path);
+                if (res?.frameUUID) {
+                    // 아틀라스에 속해있다면 atlasUUID를, 아니면 본인 UUID를 사용
+                    patchMap.set(res.frameUUID, { opt, fileUUID: res.atlasUUID || res.frameUUID });
+                }
+            }
+            // 2. Panel의 배경 이미지 9-Slice
+            if (opt.backGroundScale9Enable && opt.backGroundImageData?.path) {
+                const res = resourceMap.getResData(opt.backGroundImageData.path);
+                if (res?.frameUUID) {
+                    patchMap.set(res.frameUUID, { opt, fileUUID: res.atlasUUID || res.frameUUID });
+                }
+            }
+        }
+        if (node.children) node.children.forEach(traverse);
+    }
+
+    const rootWidget = jsonData.widgetTree || jsonData.nodeTree || jsonData;
+    traverse(rootWidget);
+
+    for (const [frameUUID, data] of patchMap.entries()) {
+        const { opt, fileUUID } = data;
+
+        // 🚨 [핵심 해결] 가상 에셋(frameUUID)이 아닌, 실제 존재하는 물리적 파일(fileUUID)로 경로를 찾습니다!
+        // @ts-ignore
+        const assetInfo = await Editor.Message.request('asset-db', 'query-asset-info', fileUUID);
+
+        if (!assetInfo || !assetInfo.file) continue;
+
+        const metaPath = assetInfo.file + '.meta';
+        try {
+            const metaStr = readFileSync(metaPath, 'utf8');
+            const metaObj = JSON.parse(metaStr);
+            let subMeta = null;
+
+            if (metaObj.subMetas) {
+                for (const key in metaObj.subMetas) {
+                    if (metaObj.subMetas[key].uuid === frameUUID) {
+                        subMeta = metaObj.subMetas[key];
+                        break;
+                    }
+                }
+            }
+
+            if (subMeta && subMeta.userData) {
+                const userData = subMeta.userData;
+
+                const texW = userData.rawWidth || userData.width || 100;
+                const texH = userData.rawHeight || userData.height || 100;
+
+                const capX = opt.capInsetsX ?? 0;
+                const capY = opt.capInsetsY ?? 0;
+                const capW = opt.capInsetsWidth ?? texW;
+                const capH = opt.capInsetsHeight ?? texH;
+
+                if (capW === 0 && capH === 0) continue;
+
+                const bL = capX;
+                const bT = capY;
+                const bR = Math.max(0, texW - capX - capW);
+                const bB = Math.max(0, texH - capY - capH);
+
+                if (userData.borderLeft !== bL || userData.borderTop !== bT ||
+                    userData.borderRight !== bR || userData.borderBottom !== bB) {
+
+                    userData.borderLeft = bL;
+                    userData.borderTop = bT;
+                    userData.borderRight = bR;
+                    userData.borderBottom = bB;
+
+                    writeFileSync(metaPath, JSON.stringify(metaObj, null, 2));
+                    console.log(`[Meta Patch] 9-Slice 기록 완료: ${subMeta.name} (L:${bL}, T:${bT}, R:${bR}, B:${bB})`);
+                }
+            }
+        } catch (e) {
+            console.error("[apply9ScaleToMeta] Meta patch error:", e);
+        }
+    }
 }

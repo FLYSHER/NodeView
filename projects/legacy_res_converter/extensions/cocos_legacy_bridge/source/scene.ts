@@ -1,5 +1,5 @@
 // @ts-ignore
-import { Node, Layers, director, Animation } from 'cc';
+import {Node, Layers, director, Animation, UITransform} from 'cc';
 declare const cce : any;
 
 import { loadAssetByUUID, cleanupTempNode } from './utils';
@@ -7,8 +7,9 @@ import { buildNodeTree } from './ui-builder';
 import { buildUIAnimations } from './ui-action-builder';
 import { buildArmatureTree, generateAllAnimationClip, buildSkinRenderers } from './armature-builder';
 
+
 import { json } from 'stream/consumers';
-import { createResourceMap } from './utils';
+import { createResourceMap, apply9ScaleToMeta } from './utils';
 
 // 프리팹 생성 - 실제 노드를 씬에 올린 뒤 에디터 명령으로 굽는 방식
 async function _generatePrefabFromSceneNode( args: any ) {
@@ -64,6 +65,19 @@ export const methods = {
             }
 
             const rootWidget = jsonData.widgetTree || jsonData.nodeTree || jsonData;
+
+            const rwOptions = rootWidget.options || {};
+            const designW = rwOptions.width ?? jsonData.designWidth ?? 0;
+            const designH = rwOptions.height ?? jsonData.designHeight ?? 0;
+            const anchorX = rwOptions.anchorPointX ?? 0.5;
+            const anchorY = rwOptions.anchorPointY ?? 0.5;
+
+            const rootTrComp = rootNode.getComponent(UITransform) || rootNode.addComponent(UITransform);
+            rootTrComp.setContentSize(designW, designH);
+            rootTrComp.setAnchorPoint(anchorX, anchorY);
+
+            rootNode.setPosition((anchorX-0.5) * designW, (anchorY-0.5) * designH );
+
             // const children = rootWidget.children || [];
             const children = [...(rootWidget.children || [])]; // sort 를 위해 복사본 만든다.
 
@@ -75,6 +89,8 @@ export const methods = {
             const fontPaths = Array.from(fontPathSet);
             console.log("fontPaths > ", fontPaths );
             const spriteFrameMap = await createResourceMap(atlasPaths, fontPaths);
+
+            await apply9ScaleToMeta(spriteFrameMap, jsonData); // 노드를 만들기 전에 9-sliced 메타파일 저장
 
             // ui action
             // 💡 [추가] 애니메이션(액션 리스트)이 존재하는지 확인합니다.
