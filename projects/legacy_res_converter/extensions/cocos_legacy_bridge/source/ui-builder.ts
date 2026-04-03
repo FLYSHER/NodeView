@@ -173,25 +173,34 @@ async function setupUIPanel(node: Node, options: any, resourceMap: ResourceMap) 
                     applyScale9Insets(sf, options);
                 }
                 else{
-                    // 패널 사이즈보다 스프라이트 크기가 크다면
-                    // 원본비율 유지하면서 패널안에 들어가도록 처리(Aspect Fit)
+                    // 일반 이미지는 원본사이즈로
                     bgSprite.type = Sprite.Type.SIMPLE;
-                    bgSprite.sizeMode = Sprite.SizeMode.CUSTOM;
+                    bgSprite.sizeMode = Sprite.SizeMode.RAW;
+                    // 🚨 [수정] 잘려 나간 투명 여백을 복구하여 중심점이 위로 쏠리는 것을 막습니다!
+                    bgSprite.trim = false;
 
-                    // 원본 텍스처 사이즈
-                    const texW = sf.originalSize.width;
-                    const texH = sf.originalSize.height;
-
-                    // 패널(w, h)에 맞추기 위한 축소 비율 계산
-                    let scale = 1;
-                    if (texW > 0 && texH > 0) {
-                        // 가로/세로 중 더 많이 튀어나온 쪽에 맞춰서 축소 비율을 정합니다.
-                        scale = Math.min(w / texW, h / texH);
-                    }
-
-                    // 계산된 최종 사이즈 적용!
-                    const bgTrComp = bgNode.getComponent(UITransform) || bgNode.addComponent(UITransform);
-                    bgTrComp.setContentSize(texW * scale, texH * scale);
+                    // // 패널 사이즈보다 스프라이트 크기가 크다면
+                    // // 원본비율 유지하면서 패널안에 들어가도록 처리(Aspect Fit)
+                    // bgSprite.type = Sprite.Type.SIMPLE;
+                    // bgSprite.sizeMode = Sprite.SizeMode.CUSTOM;
+                    //
+                    // // 원본 텍스처 사이즈
+                    // const texW = sf.originalSize.width;
+                    // const texH = sf.originalSize.height;
+                    //
+                    // // 패널(w, h)에 맞추기 위한 축소 비율 계산
+                    // let scale = 1;
+                    // if (texW > 0 && texH > 0) {
+                    //     // 가로/세로 중 더 많이 튀어나온 쪽에 맞춰서 축소 비율을 정합니다.
+                    //     scale = Math.min(w / texW, h / texH);
+                    // }
+                    //
+                    // // 계산된 최종 사이즈 적용!
+                    // // const bgTrComp = bgNode.getComponent(UITransform) || bgNode.addComponent(UITransform);
+                    // // bgTrComp.setContentSize(texW * scale, texH * scale);
+                    //
+                    // const bgTrComp = bgNode.getComponent(UITransform) || bgNode.addComponent(UITransform);
+                    // bgTrComp.setContentSize(texW, texH);
                 }
 
                 // 🚨 방어 코드 추가: 에디터에서 배경 이미지가 즉시 보이도록 강제 업데이트!
@@ -292,6 +301,8 @@ async function setupImageView(node: Node, options: any, resourceMap: ResourceMap
     }
     else {
         sprite.sizeMode = Sprite.SizeMode.RAW
+        // 🚨 [수정] 이미지 위치 틀어짐 방지
+        sprite.trim = false;
     }
 
     // 9-scale
@@ -359,7 +370,14 @@ async function setupButton(node:Node, options: any, resourceMap: ResourceMap) {
     //      SPIRTE  : 상태에 따라 스프라이트 프레임 변경
     //      SCALE   : 상태에 따라 zoom scale 
     button.transition = Button.Transition.SPRITE;
-    sprite.sizeMode = Sprite.SizeMode.CUSTOM;
+
+    // ignoreSize가 true면, 억지로 늘리지 말고 잘려나간 픽셀 그대로(RAW) 작게 렌더링합니다!
+    if (options.ignoreSize) {
+        sprite.sizeMode = Sprite.SizeMode.RAW;
+        sprite.trim = false; // 투명 여백을 살려 원본 크기를 유지!
+    } else {
+        sprite.sizeMode = Sprite.SizeMode.CUSTOM;
+    }
 
     
     // Normal
