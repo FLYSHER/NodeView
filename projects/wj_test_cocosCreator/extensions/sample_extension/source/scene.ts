@@ -33,7 +33,8 @@ export const methods = {
             console.log("Test LoadPlist: ", atlasArray.length ); // 여기서 바로 데이터 사용 가능
             // 전역 변수로 태그 맵 저장 (parseWidget 실행 시 채워짐)
             let actionTagMap: Map<number, Node> = new Map();
-            await parseWidget(json['widgetTree'], rootNode , atlasArray, actionTagMap);
+
+            await parseWidget(json['widgetTree'], rootNode , atlasArray, actionTagMap, true);
             // 애니메이션 데이터 생성
             animData = await generateAnimations(json['animation'], rootNode, actionTagMap);
          }
@@ -253,7 +254,7 @@ async function loadBMFont(fileName:string) {
 /**
  * 위젯 데이터를 분석하여 노드를 생성하고 속성을 적용하는 메인 재귀 함수
  */
-async function parseWidget(widgetData: any, parent: Node, atlasArray: any, actionTagMap: Map<number, Node> ) {
+async function parseWidget(widgetData: any, parent: Node, atlasArray: any, actionTagMap: Map<number, Node>, isRoot : boolean ) {
     const classname = widgetData["classname"];
     const options = widgetData["options"];
 
@@ -344,19 +345,54 @@ async function parseWidget(widgetData: any, parent: Node, atlasArray: any, actio
         case 'LabelAtlas':
             break;
         case 'LabelBMFont':
+        case 'Label':
+                const label = newNode.addComponent(cc.Label);
                 if(options['fileNameData'] && options['fileNameData']['path']){
                     const bmFontStr = options['fileNameData']['path'];
                     let bmFont = await loadBMFont(bmFontStr);
-                    const label = newNode.addComponent(cc.Label);
                     label.useSystemFont = false;
                     label.font = bmFont;
-                    label.string = options['text'];
                 }
-            break;
-        case 'Label':
-             const label = newNode.addComponent(cc.Label);
-             label.useSystemFont = true;
-             label.string = options['text'];
+                else {
+                    label.useSystemFont = true;
+                    // --- 일반 Label 로직 ---
+                    label.fontSize = options.fontSize || 20;
+                    // Line Height
+                    if (options.lineHeight !== undefined) {
+                        label.lineHeight = options.lineHeight;
+                    } else {
+                        label.lineHeight = label.fontSize;
+                    }
+                }
+                label.string = options['text'];
+                label.enableWrapText = false;
+
+                // Overflow
+                if (options.ignoreSize === false) {
+                    label.overflow = Label.Overflow.SHRINK;
+                } else {
+                    label.overflow = Label.Overflow.NONE;
+                }
+
+                // --- 정렬(Alignment) 설정 로직 ---
+                // 수평 정렬
+                if (options.hAlignment !== undefined) {
+                    label.horizontalAlign = options.hAlignment;
+                } else {
+                    label.horizontalAlign = Label.HorizontalAlign.CENTER;
+                }
+
+                // 수직 정렬
+                if (options.vAlignment !== undefined) {
+                    label.verticalAlign = options.vAlignment;
+                } else {
+                    label.verticalAlign = Label.VerticalAlign.TOP;
+                }
+
+                // 색상
+                if (options.colorR !== undefined) {
+                    label.color = new cc.Color(options.colorR, options.colorG, options.colorB, options.opacity ?? 255);
+                }
             break;
         case 'ListView':
             break;
@@ -376,6 +412,8 @@ async function parseWidget(widgetData: any, parent: Node, atlasArray: any, actio
             let barSprite : Sprite | null = setupSprite(barNode, options, atlasArray); // 4. 텍스처(이미지) 로드 및 나인패치(9-Slice) 지원
             if(!barSprite) barSprite = barNode.addComponent(Sprite); 
             barSprite.sizeMode = Sprite.SizeMode.CUSTOM;
+
+            const barPos :Vec3= barNode.getPosition();
 
             // 크기 가져오기
             const w = options._calcWidth ?? options.width ?? 0;
@@ -417,7 +455,8 @@ async function parseWidget(widgetData: any, parent: Node, atlasArray: any, actio
 
             // 6. Bar Node 포지션 수정
             // 처음 sprite 세팅할 때 기본 Horizontal로 세팅되면서 x: width / 2 값 들어갈 수 있음.
-            barNode.setPosition(0, 0, 0);
+            barNode.setPosition(barPos);
+            
             break;
         case 'PageView':
             break;
@@ -454,8 +493,16 @@ async function parseWidget(widgetData: any, parent: Node, atlasArray: any, actio
     const children = widgetData['children'];
     if (children && children.length > 0) {
         for( var n = 0; n < children.length; n++){
-          await parseWidget(children[n], newNode, atlasArray, actionTagMap);
+          await parseWidget(children[n], newNode, atlasArray, actionTagMap, false);
         }
+    }
+
+    if(isRoot){
+        let contentSize : Size = trans.contentSize;
+        let pos : Vec3 = newNode.position;
+        pos.x -= contentSize.width * 0.5;
+        pos.y -= contentSize.height * 0.5;
+        newNode.setPosition(pos);
     }
 }
 
@@ -504,6 +551,12 @@ function setupSprite(node: Node, options: any, atlasArray: any) {
                 frame = atlasArray[n].getSpriteFrame(path);
                 if(frame){
                     sprite.spriteFrame = frame;
+                    const offsetX = frame.offset.x; // -88
+                    const offsetY = frame.offset.y; // 37
+                    let pos = node.getPosition();
+                    pos.x += offsetX;
+                    pos.y += offsetY;
+                    node.setPosition(pos);
                     return sprite;
                 }
             }

@@ -1,4 +1,4 @@
-import { _decorator, Component, resources, JsonAsset, Sprite, log } from 'cc';
+import { _decorator, Component, resources, JsonAsset, instantiate,Prefab, Node, Sprite, UITransform,  log } from 'cc';
 import { SceneManager, ResourceUtil } from './Includes';
 import { NATIVE, PREVIEW } from 'cc/env'; // 환경 분기용
 
@@ -25,7 +25,7 @@ export class LoadingScene extends Component {
         // 씬이 시작될 때 매니저에게 데이터를 달라고 요청합니다.
         const settingData = SceneManager.getInstance().getTransitionData();
         log("[CHECK] LoaingScene ", JSON.stringify(settingData))
-        await this.loadLoaderResource(settingData);
+        //await this.loadLoaderResource(settingData);
         await this.testSpriteLoad();
     }
 
@@ -58,7 +58,7 @@ export class LoadingScene extends Component {
     
     async testSpriteLoad() {
         let self : any = this;
-        return await new Promise<void>(function (resolve, reject) {
+        await new Promise<void>(function (resolve, reject) {
             RockN.Util.loadResource(resMobileLoginLoading.LoadingBackground,null,
                 (err, item)=>{
                     if (!err && self._testSprite) {
@@ -69,6 +69,9 @@ export class LoadingScene extends Component {
             );
         });
 
+        let node :Node  = await ResourceUtil.getPrefab("PU_ProgressBarUI_mb");
+        node.parent = this.node;
+        return;
     }
 }
 

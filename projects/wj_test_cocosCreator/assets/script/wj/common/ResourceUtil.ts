@@ -1,4 +1,4 @@
-import { resources, assetManager, Asset } from 'cc';
+import { resources, assetManager, Asset, Prefab, Node, instantiate } from 'cc';
 const { ResPack } = window as any;
 
 export var ResourceUtil = {
@@ -87,12 +87,32 @@ export var ResourceUtil = {
     // releaseUnusedAssets(){
     //     assetManager.releaseUnusedAssets();
     // },
+    // get<T extends Asset>(resString: string, type: any = null): T | null {
+    //     resString = this.getCleanResourceName(resString);
+    //     return resources.get<T>(resString, type);
+    // }
+    get(resString: string, type: any = null){
+        resString = this.getCleanResourceName(resString);
+        return resources.get(resString, type);
+    },
 
-    get: function (resString: string, type: any = null) {
-       resString = this.getCleanResourceName(resString);
-       return  resources.get(resString, type);
+    // async 함수 내부라고 가정
+    async getPrefab(resString: string) {
+        // get이 아니라 비동기로 직접 load를 시도합니다.
+        return new Promise<Node>((resolve, reject) => {
+            resString = this.getCleanResourceName(resString);
+            resources.load(resString, Prefab, (err, loadedPrefab) => {
+                if (err) {
+                    console.error("프리팹 로드 실패! 경로를 확인하세요:", err);
+                    reject(err);
+                    return;
+                }
+                // 이제 완벽하게 로드되었으니 안심하고 복제합니다!
+                let instanceNode : Node = instantiate(loadedPrefab);
+                resolve(instanceNode);
+            });
+        });
     }
-
 };
 
 RockN.Util = RockN.Util || {};
