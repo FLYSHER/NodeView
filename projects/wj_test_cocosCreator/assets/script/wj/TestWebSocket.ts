@@ -1,5 +1,6 @@
 import { _decorator, Component, resources, JsonAsset, Sprite, log, director } from 'cc';
-import { ResourceUtil } from './common/ResourceUtil';
+import { ResourceUtil, SceneManager } from './Includes';
+
 import * as cc from 'cc';
 import { NATIVE, PREVIEW } from 'cc/env'; // 환경 분기용
 
@@ -108,10 +109,6 @@ let NetConnectorParam = {
 
 @ccclass('TestWebSocket')
 export class TestWebSocket extends Component {
-
-    @property({ type: Sprite, tooltip: "Test", visible : true })
-    public _testSprite: Sprite = null; 
-
 
     async start() {
         NetConnectorParam.clear();
@@ -737,15 +734,40 @@ export class TestWebSocket extends Component {
     }
 
     async goToLoadingScene(param) {
-        // 1. GameScene을 로드합니다.
-        director.loadScene('02_loadingScene', (err, scene) => {
-            if (err) return console.error(err);
+        // // 1. GameScene을 로드합니다.
+        // director.loadScene('02_loadingScene', (err, scene) => {
+        //     if (err) return console.error(err);
 
-            // 2. 씬이 열리자마자 씬 안에 있는 'GameManager'라는 이름의 노드를 찾습니다.
-            const loadingSceneComp : any = scene.getComponentInChildren('LoadingScene');
-            if (loadingSceneComp) {
-                loadingSceneComp.initStart(param); // 데이터 전달 완료!
-            }
+        //     // 2. 씬이 열리자마자 씬 안에 있는 'GameManager'라는 이름의 노드를 찾습니다.
+        //     const loadingSceneComp : any = scene.getComponentInChildren('LoadingScene');
+        //     if (loadingSceneComp) {
+        //         loadingSceneComp.initStart(param); // 데이터 전달 완료!
+        //     }
+        // });
+
+        var res = param.iamReadyResponse;
+        (res[ 'destination' ] === 'lobby')    && ( res[ 'destination' ] = 'mobileLobby' );
+        (res[ 'destination' ] === 'vipLobby') && ( res[ 'destination' ] = 'mobileVipLobby' );
+
+        SceneManager.getInstance().changeSceneByName( res[ 'destination' ], function(){
+            
+            cc.log(`[CHECK] ${res[ 'destination' ]} 완료` );
+
+            // //로딩씬 완료후 다음 이동 씬 서버에 기록
+            // RockN.NET.request('connector.entryHandler.setEntryComplete', {
+            //     playerID    : RockN.Player.playerID,
+            //     scene       :  res[ 'destination' ]
+            // });
+
+            // RockN.handle_signal( {
+            //     protocol   : SIG.SIG_SET_SLOT,
+            //     gameInfo   : res[ 'gameInfo' ],
+            //     syncParams : res[ 'syncParams' ],
+            //     gameParams : res[ 'gameParams' ],
+            //     cubeInfo   : res[ 'cubeInfo' ],
+            //     rid        : res[ 'rid' ]
+            // } );
+
         });
     }
     //todo //SceneManager 구성 sceneList;
