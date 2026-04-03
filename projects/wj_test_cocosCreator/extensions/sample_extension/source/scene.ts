@@ -354,15 +354,70 @@ async function parseWidget(widgetData: any, parent: Node, atlasArray: any, actio
                 }
             break;
         case 'Label':
-            //setupLabel(newNode, options);
+             const label = newNode.addComponent(cc.Label);
+             label.useSystemFont = true;
+             label.string = options['text'];
             break;
         case 'ListView':
             break;
         case 'LoadingBar':
             //setupSprite(newNode, options);
-            const bar = newNode.addComponent(cc.ProgressBar);
-            bar.totalLength = width;
-            bar.progress = (options['percent'] || 0) / 100;
+            const progressBar = newNode.addComponent(cc.ProgressBar);
+            progressBar.totalLength = width;
+            progressBar.progress = (options['percent'] || 0) / 100;
+            progressBar.mode = cc.ProgressBar.Mode.FILLED; // filled로 세팅
+
+            // 2. 게이지 역할을 할 자식 노드(Bar) 생성
+            const barNode = new Node("Bar");
+            barNode.layer = newNode.layer;
+            barNode.parent = newNode;
+
+            const barUI = barNode.addComponent(UITransform);
+            let barSprite : Sprite | null = setupSprite(barNode, options, atlasArray); // 4. 텍스처(이미지) 로드 및 나인패치(9-Slice) 지원
+            if(!barSprite) barSprite = barNode.addComponent(Sprite); 
+            barSprite.sizeMode = Sprite.SizeMode.CUSTOM;
+
+            // 크기 가져오기
+            const w = options._calcWidth ?? options.width ?? 0;
+            const h = options._calcHeight ?? options.height ?? 0;
+
+            barUI.setContentSize(w, h);
+            const pAnchorX = options.anchorPointX ?? 0.5;
+            const pAnchorY = options.anchorPointY ?? 0.5;
+            barUI.setAnchorPoint(pAnchorX, pAnchorY);
+
+            // Filled 로 구성.
+            barSprite.type = Sprite.Type.FILLED;
+
+            // todo 일단 임시 처리 방식
+            // 채우기 방식이 Radial 인지 Horizontal 인지 판별하기 위해서 비율이 정사각형에 가까우면 일단 radial로 처리
+            const aspectRatio = w > 0 && h > 0 ? w / h : 5;
+            const isRadial = aspectRatio >= 0.85 && aspectRatio <= 1.15;
+
+            if (isRadial) {
+                // --- 원형(Radial) 로직 ---
+                barSprite.fillType = Sprite.FillType.RADIAL;
+                barSprite.fillCenter = new Vec2(0.5, 0.5); // 정중앙을 기준으로 채움
+
+                // 12시 방향에서 시작. 그러나 기존 파일에서는 보통 rotation -90을 주고 있기 때문에
+                // 따로 처리할 필요가 없다.
+                //barSprite.fillStart = 0.25;
+                progressBar.reverse = false;
+            } else {
+                // --- 가로형(Horizontal) 로직 ---
+                barSprite.fillType = Sprite.FillType.HORIZONTAL;
+            }
+
+
+            // 5. ProgressBar 컴포넌트에 방금 만든 자식(Bar) 연결 및 수치 세팅
+            progressBar.barSprite = barSprite;
+            progressBar.totalLength = 1;
+            // 스튜디오의 percent는 0~100 이고, Creator의 progress는 0~1.0
+            progressBar.progress = (options.percent ?? 0) / 100;
+
+            // 6. Bar Node 포지션 수정
+            // 처음 sprite 세팅할 때 기본 Horizontal로 세팅되면서 x: width / 2 값 들어갈 수 있음.
+            barNode.setPosition(0, 0, 0);
             break;
         case 'PageView':
             break;
@@ -427,8 +482,10 @@ function setupSprite(node: Node, options: any, atlasArray: any) {
 
     // 이미지가 필요한 경우 Sprite 컴포넌트 추가
     // (Panel은 배경색만 있거나 투명할 수도 있어서 체크)
-    if (options['fileNameData'] || options['colorType'] === 1 || isScale9) {
-        const sprite = node.addComponent(Sprite);
+    let fileData = options['fileNameData'] || options['textureData'];
+
+    if (fileData || options['colorType'] === 1 || isScale9) {
+        const sprite = node.getComponent(Sprite)||node.addComponent(Sprite);
         if (isScale9) {
             sprite.type = Sprite.Type.SLICED;
         }
@@ -439,20 +496,20 @@ function setupSprite(node: Node, options: any, atlasArray: any) {
         }
 
         // --- 이미지 로드 로직 ---
-        const fileNameData = options['fileNameData'];
-        if (fileNameData) {
-            let path = fileNameData['path'];           // 예: “button.png”
+        if (fileData) {
+            let path = fileData['path'];           // 예: “button.png”
             path = path.replace('.png', '');
             var frame = null;
             for(var n = 0 ; n < atlasArray.length; n++){
                 frame = atlasArray[n].getSpriteFrame(path);
                 if(frame){
                     sprite.spriteFrame = frame;
-                    return;
+                    return sprite;
                 }
             }
         }
     }
+    return null;
 }
 //#region AnimationTrack
 /**
