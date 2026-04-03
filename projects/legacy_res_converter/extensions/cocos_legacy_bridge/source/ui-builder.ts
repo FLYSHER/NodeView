@@ -1,5 +1,5 @@
 //@ts-ignore
-import { Node, Layers, UITransform, Size, Vec2, Sprite, path, Button, Label, Color, UIOpacity, ProgressBar, PageView, Mask, Layout, HorizontalTextAlignment, VerticalTextAlignment } from 'cc';
+import { Node, Layers, UITransform, Size, Vec2, Sprite, path, Button, Label, Color, UIOpacity, ProgressBar, ScrollView, PageView, Mask, Layout, HorizontalTextAlignment, VerticalTextAlignment } from 'cc';
 import { basename } from 'path';
 import { ResourceMap, loadAssetByUUID, applyScale9Insets } from './utils';
 import { receiveMessageOnPort } from 'worker_threads';
@@ -55,6 +55,10 @@ export async function buildNodeTree(jsonData: any, parentNode: Node, resourceMap
     switch(classname) {
         case "Panel":
             await setupUIPanel( currentNode, options, resourceMap );
+            break;
+        case "ScrollView":
+            targetContainer = setupScrollView(currentNode, options);
+            childPathPrefix = `${nodePath}/view/content`;
             break;
         case "PageView":
             targetContainer = setupPageView(currentNode, options);
@@ -134,7 +138,7 @@ async function setupUIPanel(node: Node, options: any, resourceMap: ResourceMap) 
     // 클리핑 세팅
     if( options.clipAble ) {
         const mask = node.getComponent(Mask) || node.addComponent(Mask);
-        mask.type = Mask.Type.RECT;
+        mask.type = Mask.Type.GRAPHICS_RECT;
     }
 
     const nodeTrComp = node.getComponent(UITransform);
@@ -233,6 +237,67 @@ async function setupUIPanel(node: Node, options: any, resourceMap: ResourceMap) 
 
     // 배경색 및 배경 opacity 세팅은 필요하면 나중에..
     // Layout 정렬 기능 필요하면 나중에..
+}
+
+function setupScrollView(node: Node, options: any){
+    const scrollViewComp = node.addComponent(ScrollView);
+
+    // 바운스(끝에서 튕기는 효과) 설정
+    scrollViewComp.bounceDuration = 0.5;
+    scrollViewComp.elastic = options.bounceEnable ?? true;
+
+    // 스크롤 방향 설정 (Cocos Studio 방향 -> 1: Vertical, 2: Horizontal, 3: Both)
+    const dir = options.direction ?? 1;
+    scrollViewComp.vertical = (dir === 1 || dir === 3);
+    scrollViewComp.horizontal = (dir === 2 || dir === 3);
+
+    const nodeTrComp = node.getComponent(UITransform);
+    const w = nodeTrComp?.width || 200;
+    const h = nodeTrComp?.height || 200;
+    const anchorX = nodeTrComp?.anchorPoint.x ?? 0.5;
+    const anchorY = nodeTrComp?.anchorPoint.y ?? 0.5;
+
+    // 내부 스크롤 영역(Content)의 실제 크기
+    const innerWidth = options.innerWidth ?? w;
+    const innerHeight = options.innerHeight ?? h;
+
+    // --- View 노드 세팅 (마스크 영역) ---
+    const viewNode = new Node("view");
+    viewNode.layer = Layers.Enum.UI_2D;
+    viewNode.parent = node;
+
+    if (options.clipAble !== false) {
+        const mask = viewNode.addComponent(Mask);
+        mask.type = Mask.Type.GRAPHICS_RECT;
+    }
+
+    const viewTrComp = viewNode.getComponent(UITransform) || viewNode.addComponent(UITransform);
+    viewTrComp.setContentSize(w, h);
+    viewTrComp.setAnchorPoint(0, 0);
+    // 부모(ScrollView) 앵커를 역산해서 100% 겹치게 배치
+    viewNode.setPosition(-w * anchorX, -h * anchorY);
+
+    // --- Content 노드 세팅 (실제 자식들이 붙을 도화지) ---
+    const contentNode = new Node("content");
+    contentNode.layer = Layers.Enum.UI_2D;
+    contentNode.parent = viewNode;
+
+    const contentTrComp = contentNode.getComponent(UITransform) || contentNode.addComponent(UITransform);
+    contentTrComp.setContentSize(innerWidth, innerHeight);
+    contentTrComp.setAnchorPoint(0, 0);
+
+    // 💡 [핵심] 세로 스크롤일 경우 Content가 위(Top)에 정렬되도록 Y축 초기 위치를 보정합니다.
+    if (scrollViewComp.vertical) {
+        contentNode.setPosition(0, h - innerHeight);
+    } else {
+        contentNode.setPosition(0, 0);
+    }
+
+    // ScrollView 컴포넌트에 Content 연결
+    scrollViewComp.content = contentNode;
+
+    // 자식 위젯들은 이 contentNode 아래에 생성되어야 하므로 반환합니다.
+    return contentNode;
 }
 
 function setupPageView(node: Node, options: any){
