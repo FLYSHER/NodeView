@@ -504,6 +504,17 @@ async function parseWidget(widgetData: any, parent: Node, atlasArray: any, actio
         pos.y -= contentSize.height * 0.5;
         newNode.setPosition(pos);
     }
+    else{
+        const widgetComp =  newNode.addComponent(cc.Widget);
+        widgetComp.target = parent;
+        widgetComp.isAlignLeft = true;
+        widgetComp.isAlignBottom = true;
+        widgetComp.isAlignTop = false;
+        widgetComp.isAlignRight = false;
+        widgetComp.updateAlignment();
+        // widgetComp.left = 10;
+        // widgetComp.bottom = 10;
+    }
 }
 
 function findSprite(atlasArray: any, spriteFrameName: string) {
@@ -936,7 +947,6 @@ async function generateAnimations(json: any, rootNode: Node, actionTagMap: Map<n
         clip.wrapMode = actionData['loop'] ? cc.AnimationClip.WrapMode.Loop : cc.AnimationClip.WrapMode.Normal;
         let unittime =  actionData['unittime'] ? actionData['unittime']  : (1/60);//UIACtion 한프레임당 시간
         let maxTime : number = 0; // 클립의 전체 길이를 계산하기 위한 변수
-
         const actionNodeList = actionData['actionnodelist'];
         if (actionNodeList) {
             for (const actionNode of actionNodeList) {
@@ -1112,6 +1122,7 @@ async function generateARAnimations(json: any, rootNode: Node,  boneNodesMap: Ma
         const actualFps = baseFps * timeScale; // 60 * 0.333... = 20 //초당 20프레임
         const clip = new cc.AnimationClip();
         clip.name = clipName;
+        //clip.sample = Math.round(baseFps * timeScale);
         clip.wrapMode = mov_data['lp'] ? cc.AnimationClip.WrapMode.Loop : cc.AnimationClip.WrapMode.Normal;
         let maxTime : number =  mov_data['dr'] / actualFps; // 클립의 전체 길이를 계산하기 위한 변수
         let unittime : number =  1/actualFps;  //한프레임당 시간
