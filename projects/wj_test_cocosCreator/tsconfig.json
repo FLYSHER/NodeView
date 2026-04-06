@@ -4,9 +4,12 @@
 
   /* Add your custom configuration here. */
   "compilerOptions": {
+    "moduleResolution": "node16", // "node" 라고 되어있는 것을 "node16"으로 변경!
+    "module": "Node16",          //  이 녀석도 Node16으로 변경!
     "strict": false,
     // ▼▼▼ import map ▼▼▼
     "baseUrl": "./",
+    "ignoreDeprecations": "6.0",    //이 줄을 추가하면 TS 6.0 관련 모든 잔소리(baseUrl, moduleResolution 등)가 한 방에 다 꺼집니다!
     "paths": {
       "foo": ["./assets/lib/foo.ts"]
     },
