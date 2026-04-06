@@ -2,8 +2,8 @@ import { _decorator, Component, Node, UITransform, Vec2, Vec3 } from 'cc';
 const { ccclass, executeInEditMode, requireComponent } = _decorator;
 
 @ccclass('AnchorCompensation')
-@executeInEditMode(true) // 🌟 에디터 화면에서도 실시간으로 동작하게 만듭니다.
-@requireComponent(UITransform) // 🌟 이 컴포넌트는 무조건 UITransform과 짝꿍이어야 합니다.
+@executeInEditMode(true) 
+@requireComponent(UITransform)
 export class AnchorCompensation extends Component {
 
     private _uiTransform: UITransform | null = null;
@@ -12,16 +12,15 @@ export class AnchorCompensation extends Component {
     onLoad() {
         this._uiTransform = this.getComponent(UITransform);
         if (this._uiTransform) {
-            // 최초 실행 시 현재 앵커 위치를 기억해 둡니다.
+            // 최초 실행 시 현재 앵커
             this._lastAnchor.set(this._uiTransform.anchorPoint.x, this._uiTransform.anchorPoint.y);
-            
-            // 앵커가 변할 때마다 엔진이 발생시키는 이벤트를 듣습니다.
+            // 앵커가 변할 때 이벤트등록
             this.node.on(Node.EventType.ANCHOR_CHANGED, this._onAnchorChanged, this);
         }
     }
 
     onDestroy() {
-        // 컴포넌트가 파괴될 때 이벤트 리스너도 깔끔하게 지워줍니다. (메모리 누수 방지)
+        // 컴포넌트가 파괴될 때 이벤트 리스너 제거
         this.node.off(Node.EventType.ANCHOR_CHANGED, this._onAnchorChanged, this);
     }
 
@@ -41,11 +40,11 @@ export class AnchorCompensation extends Component {
             const child = children[i];
             const pos = child.position;
             
-            // 자식의 원래 위치에서 부모가 이동한 만큼을 빼서 시각적 위치를 유지!
+            // 자식의 원래 위치에서 부모가 이동한 만큼을 빼서 시각적 위치로 조절
             child.setPosition(new Vec3(pos.x - deltaX, pos.y - deltaY, pos.z));
         }
 
-        // 3. 현재 앵커를 다시 '마지막 앵커'로 갱신하여 다음 변화를 준비합니다.
+        // 3. 현재 앵커갱신
         this._lastAnchor.set(currentAnchor.x, currentAnchor.y);
     }
 }
