@@ -309,10 +309,10 @@
       "__id__": 8
     },
     "asset": {
-      "__uuid__": "5c975946-7733-46ae-9e3c-f374f550f948",
+      "__uuid__": "2fb68f85-9460-41de-aa3b-e6b53b0fec9f",
       "__expectedType__": "cc.Prefab"
     },
-    "fileId": "c5dPDjhx5AfKtnZVweCXFD",
+    "fileId": "4ebiriLz5JA41F+DcbwKJs",
     "instance": {
       "__id__": 10
     },
@@ -321,7 +321,7 @@
   },
   {
     "__type__": "cc.PrefabInstance",
-    "fileId": "dfHO2hZZZHFpP/qa67ikGS",
+    "fileId": "71On7tvS1H4b68Bcb2MJ5+",
     "prefabRootNode": null,
     "mountedChildren": [],
     "mountedComponents": [],
@@ -357,7 +357,7 @@
   {
     "__type__": "cc.TargetInfo",
     "localID": [
-      "c5dPDjhx5AfKtnZVweCXFD"
+      "4ebiriLz5JA41F+DcbwKJs"
     ]
   },
   {
@@ -412,19 +412,16 @@
       "__id__": 17
     },
     "propertyPath": [
-      "_lpos"
+      "_target"
     ],
     "value": {
-      "__type__": "cc.Vec3",
-      "x": 568.0540039192109,
-      "y": 48.323999837760006,
-      "z": 0
+      "__id__": 8
     }
   },
   {
     "__type__": "cc.TargetInfo",
     "localID": [
-      "c3K8JuebREK74j2011u6Zx"
+      "f8YVCKrk1Bs6rgIGnx+Kso"
     ]
   },
   {
@@ -542,13 +539,13 @@
   {
     "__type__": "cc.TargetInfo",
     "localID": [
-      "09NIU3RaBLwZU8AOOknCg4"
+      "77m8pZVYVMGZtjmRI90aVY"
     ]
   },
   {
     "__type__": "cc.TargetInfo",
     "localID": [
-      "fbqOJgFABLf4Ga6k42q9Pn"
+      "f5oEt4hnpN0IC9gzmI37rH"
     ]
   },
   {
@@ -572,13 +569,13 @@
   {
     "__type__": "cc.TargetInfo",
     "localID": [
-      "915DIt/BNAT4qlhc9yAq2r"
+      "1cL5ccwV9FWIQt3BGrGWDB"
     ]
   },
   {
     "__type__": "cc.TargetInfo",
     "localID": [
-      "fbqOJgFABLf4Ga6k42q9Pn"
+      "f5oEt4hnpN0IC9gzmI37rH"
     ]
   },
   {
@@ -602,13 +599,13 @@
   {
     "__type__": "cc.TargetInfo",
     "localID": [
-      "acVA1m5LxM25bGpM+9qIOV"
+      "373aTOd2xHGpFpHbwEADlr"
     ]
   },
   {
     "__type__": "cc.TargetInfo",
     "localID": [
-      "fbqOJgFABLf4Ga6k42q9Pn"
+      "f5oEt4hnpN0IC9gzmI37rH"
     ]
   },
   {
@@ -632,13 +629,13 @@
   {
     "__type__": "cc.TargetInfo",
     "localID": [
-      "e4y30XjqJNz4jbcBF0Q34t"
+      "2b+YkoMS5C+oV8KQGm3jDh"
     ]
   },
   {
     "__type__": "cc.TargetInfo",
     "localID": [
-      "fbqOJgFABLf4Ga6k42q9Pn"
+      "f5oEt4hnpN0IC9gzmI37rH"
     ]
   },
   {

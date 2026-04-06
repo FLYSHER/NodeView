@@ -497,24 +497,29 @@ async function parseWidget(widgetData: any, parent: Node, atlasArray: any, actio
         }
     }
 
+    // if(isRoot){
+    //     let contentSize : Size = trans.contentSize;
+    //     let pos : Vec3 = newNode.position;
+    //     pos.x -= contentSize.width * 0.5;
+    //     pos.y -= contentSize.height * 0.5;
+    //     newNode.setPosition(pos);
+    // }
+
+    const widgetComp =  newNode.addComponent(cc.Widget);
+    widgetComp.target = parent;
+    widgetComp.isAlignLeft = true;
+    widgetComp.isAlignBottom = true;
+    widgetComp.isAlignTop = false;
+    widgetComp.isAlignRight = false;
+    widgetComp.updateAlignment();
+    // widgetComp.left = 10;
+    // widgetComp.bottom = 10;
     if(isRoot){
-        let contentSize : Size = trans.contentSize;
-        let pos : Vec3 = newNode.position;
-        pos.x -= contentSize.width * 0.5;
-        pos.y -= contentSize.height * 0.5;
-        newNode.setPosition(pos);
-    }
-    else{
-        const widgetComp =  newNode.addComponent(cc.Widget);
-        widgetComp.target = parent;
-        widgetComp.isAlignLeft = true;
-        widgetComp.isAlignBottom = true;
-        widgetComp.isAlignTop = false;
-        widgetComp.isAlignRight = false;
+        trans.setAnchorPoint(0.5, 0.5);
         widgetComp.updateAlignment();
-        // widgetComp.left = 10;
-        // widgetComp.bottom = 10;
-    }
+        await new Promise(resolve => setTimeout(resolve, 100));
+        newNode.setPosition(Vec3.ZERO);
+     }
 }
 
 function findSprite(atlasArray: any, spriteFrameName: string) {
