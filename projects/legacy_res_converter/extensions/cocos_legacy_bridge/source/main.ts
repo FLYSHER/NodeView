@@ -10,10 +10,12 @@ const TARGET_ROOT_PATH = join(PROJECT_PATH, 'assets', 'legacy');
 const TARGET_IMAGE_PATH = join(TARGET_ROOT_PATH, 'images');
 const TARGET_PREFAB_PATH = join(TARGET_ROOT_PATH, 'prefabs');
 const TARGET_JSON_PATH = join(TARGET_ROOT_PATH, 'export_jsons');
+const TARGET_ANIM_PATH = join(TARGET_ROOT_PATH, 'animations');
 
 const TARGET_IMAGE_URL = 'db://assets/legacy/images';
 const TARGET_PREFAB_URL = 'db://assets/legacy/prefabs';
 const TARGET_JSON_URL = 'db://assets/legacy/export_jsons';
+const TARGET_ANIM_URL = 'db://assets/legacy/animations';
 
 // ----------------------------------------------------------------
 // [공통 헬퍼 함수] JSON 데이터를 분석하여 의존성(plist, png)을 복사하고 DB를 갱신
@@ -135,10 +137,14 @@ async function processArmature(assetInfo: any, jsonData: any, assetRootDir: stri
     // 1. 공통 텍스처 의존성 복사
     await copyDependencies(assetInfo, jsonData, assetRootDir );
 
+    ensureDirSync(TARGET_PREFAB_PATH);
+    ensureDirSync(TARGET_ANIM_PATH);
+
     // 2. 프리팹 생성 명령 씬으로 전달    
-    const dest_url = assetInfo.url;
-    const prefab_url = `${dirname(dest_url)}/${basename(assetInfo.file).replace('.ExportJson', '.prefab')}`;
-    
+    // const dest_url = assetInfo.url;
+    // const prefab_url = `${dirname(dest_url)}/${basename(assetInfo.file).replace('.ExportJson', '.prefab')}`;
+    const prefab_url = `${TARGET_PREFAB_URL}/${basename(assetInfo.file).replace('.ExportJson', '.prefab')}`;
+
     // scene.ts의 createArmaturePrefab 호출
     await Editor.Message.request('scene', 'execute-scene-script', {
         name: 'cocos_legacy_bridge', // package.json에 등록된 extension 이름으로 맞춰주세요
@@ -146,7 +152,9 @@ async function processArmature(assetInfo: any, jsonData: any, assetRootDir: stri
         args: [{
             name: basename(assetInfo.file, '.ExportJson'),
             destUrl: prefab_url,
-            jsonData: jsonData
+            jsonData: jsonData,
+            imageDestUrl: TARGET_IMAGE_URL,
+            animDestUrl: TARGET_ANIM_URL,
         }]
     });
 }
@@ -170,7 +178,8 @@ async function processUI(assetInfo: any, jsonData: any, assetRootDir: string) {
             name: basename(assetInfo.file, '.ExportJson'),
             destUrl: prefab_url,
             jsonData: jsonData,
-            imageDestUrl: TARGET_IMAGE_URL
+            imageDestUrl: TARGET_IMAGE_URL,
+            animDestUrl: TARGET_ANIM_URL,
         }]
     });
 }

@@ -138,7 +138,7 @@ export const methods = {
 
     // Animation 프리팹 생성  
     async createArmaturePrefab(args: any ) {
-        const { name, destUrl, jsonData, imageDestUrl } = args;
+        const { name, destUrl, jsonData, imageDestUrl, animDestUrl } = args;
         let rootNode: Node | null = null;
 
         console.log("[scene] createArmaturePrefab 시작 : ", name);
@@ -157,7 +157,14 @@ export const methods = {
             const animComp = rootNode.addComponent( Animation ); // 에니메이션 컴포넌트 추가
 
             // exportJson 
-            const destDir = destUrl.substring(0, destUrl.lastIndexOf('/'));
+            const destDir = `${animDestUrl}/${name}`;
+            // 엔진 API를 통해 폴더가 없으면 에디터 상에 폴더를 생성해줍니다.
+            // @ts-ignore
+            if (!await Editor.Message.request('asset-db', 'query-asset-info', destDir)) {
+                // @ts-ignore
+                await Editor.Message.request('asset-db', 'create-asset', destDir, null);
+            }
+
             const armatureData = jsonData.armature_data && jsonData.armature_data[0];
             const animationData = jsonData.animation_data && jsonData.animation_data[0];
             const atlasPaths = jsonData.config_file_path || [];
@@ -179,7 +186,7 @@ export const methods = {
             const prefabUrl = `db://assets/${name}.prefab`;
             await _generatePrefabFromSceneNode({
                 nodeUUID : rootNode.uuid,
-                targetUrl: prefabUrl
+                targetUrl: destUrl
             });
         } catch (err) {
             console.error("Armature 생성 실패 : ", err);
