@@ -1,18 +1,31 @@
-import { readJsonSync, copySync, existsSync, readFileSync, writeFileSync } from 'fs-extra';
+import {readJsonSync, copySync, existsSync, readFileSync, writeFileSync, ensureDir, ensureDirSync} from 'fs-extra';
 import { join, dirname, basename } from 'path';
 // @ts-ignore
 import packageJSON from '../package.json';
 
+
+const PROJECT_PATH = Editor.Project.path;
+const TARGET_ROOT_PATH = join(PROJECT_PATH, 'assets', 'legacy');
+
+const TARGET_IMAGE_PATH = join(TARGET_ROOT_PATH, 'images');
+const TARGET_PREFAB_PATH = join(TARGET_ROOT_PATH, 'prefabs');
+const TARGET_JSON_PATH = join(TARGET_ROOT_PATH, 'export_jsons');
+
+const TARGET_IMAGE_URL = 'db://assets/legacy/images';
+const TARGET_PREFAB_URL = 'db://assets/legacy/prefabs';
+const TARGET_JSON_URL = 'db://assets/legacy/export_jsons';
+
 // ----------------------------------------------------------------
 // [공통 헬퍼 함수] JSON 데이터를 분석하여 의존성(plist, png)을 복사하고 DB를 갱신
 // ----------------------------------------------------------------
+//
 async function copyDependencies(assetInfo: any, jsonData: any, legacyRootDir: string ) {
 
-    // UI 파일이면 textures, Armature 파일이면 config_file_path를 가져온다.
-    // 둘 다 없으면 빈 배열([])을 반환합니다.
+    // exportJson 에서 사용하는 spriteAtlas 파일명 배열
+    // UI 파일이면 textures, Armature 파일이면 config_file_path 를 가져온다.
     const textures: string[] = jsonData.textures || jsonData.config_file_path || [];
 
-    // font set 복사
+    // exportJson 에서 사용하는 font 는 위젯을 하나씩 전수조사 해서 사용하는 font 배열 세팅
     const fontSet = new Set<string>();
     const rootWidget = jsonData.widgetTree || jsonData.nodeTree || jsonData;
     collectBMFonts(rootWidget, fontSet);
@@ -21,14 +34,22 @@ async function copyDependencies(assetInfo: any, jsonData: any, legacyRootDir: st
     jsonData.fonts = fontPaths; // 나중에 jsonData 에서 쓸수 있게 하자.
 
     if (textures.length === 0 && fontPaths.length === 0) {
-        console.log("복사할 리소스가 없음");
+        console.log("exportJson 에서 사용하는 아틀라스나 font 가 없음.");
         return;
     }
 
-    const dest_dir_url = dirname(assetInfo.url);    // 에셋 DB 경로 (예: db://assets/...)
-    const dest_dir_path = dirname(assetInfo.file);  // 실제 파일 시스템 경로 (복사용) 
+    // PU_extraSaleUI.ExportJson 를 asset 에 등록 후  assetInfo 예제
+    // assetInfo
+    //     name: 'PU_extraSaleUI.ExportJson',
+    //     source: 'db://assets/PU_extraSaleUI.ExportJson',
+    //     path: 'db://assets/PU_extraSaleUI',
+    //     url: 'db://assets/PU_extraSaleUI.ExportJson',
+    //     file: '/Users/myID/myCompany/cocos_res_converter/projects/legacy_res_converter/assets/PU_extraSaleUI.ExportJson',
+    //     uuid: 'f2ae49f7-662b-4818-a947-xxxxxxxx6853cb',
 
     let needRefresh = false;
+
+    ensureDirSync(TARGET_IMAGE_PATH); // target path 가 없으면 생성
 
     const originResSearchPath = [
         legacyRootDir,
@@ -58,11 +79,11 @@ async function copyDependencies(assetInfo: any, jsonData: any, legacyRootDir: st
         const origin_png_path = origin_plist_path.replace('.plist', '.png');
 
         if (validPlist) {
-            copySync(validPlist, join(dest_dir_path, basename(validPlist)));
+            copySync(validPlist, join(TARGET_IMAGE_PATH, basename(validPlist)));
             needRefresh = true;
         }
         if (validPng) {
-            copySync(validPng, join(dest_dir_path, basename(validPng)));
+            copySync(validPng, join(TARGET_IMAGE_PATH, basename(validPng)));
             needRefresh = true;
         }
     }
@@ -75,7 +96,7 @@ async function copyDependencies(assetInfo: any, jsonData: any, legacyRootDir: st
 
         if (validFnt) {
             // size 가 음수로 나올 경우, 양수로 바꿔줘서 생성한다.(원본 수정 )
-            const destFnt = join(dest_dir_path, basename(validFnt));
+            const destFnt = join(TARGET_IMAGE_PATH, basename(validFnt));
             let fntContent = readFileSync(validFnt, 'utf-8');
 
             if (fntContent.includes('size=-')) {
@@ -90,7 +111,7 @@ async function copyDependencies(assetInfo: any, jsonData: any, legacyRootDir: st
         }
 
         if (validPng) {
-            copySync(validPng, join(dest_dir_path, basename(validPng)));
+            copySync(validPng, join(TARGET_IMAGE_PATH, basename(validPng)));
             needRefresh = true;
         }
     }
@@ -98,7 +119,7 @@ async function copyDependencies(assetInfo: any, jsonData: any, legacyRootDir: st
     // 파일 복사가 일어났다면 Asset DB 리프레시
     if (needRefresh) {
         console.log("[Main]에셋 DB 텍스처 리프레시 요청 중...");
-        await Editor.Message.request('asset-db', 'refresh-asset', dest_dir_url);
+        await Editor.Message.request('asset-db', 'refresh-asset', TARGET_IMAGE_URL);
         // 리프레시 후 안전하게 파일이 인식될 때까지 잠시 대기
         await new Promise(resolve => setTimeout(resolve, 500));
         console.log("[Main]텍스처 동기화 완료!");
@@ -134,24 +155,22 @@ async function processArmature(assetInfo: any, jsonData: any, assetRootDir: stri
 // [내부 헬퍼 함수] 기존 cocos studio UI 전용 처리 로직
 // ----------------------------------------------------------------
 async function processUI(assetInfo: any, jsonData: any, assetRootDir: string) {
-    console.log("[Main] => processUI 로직 시작...");
-
     // 1. 공통 텍스처 의존성 복사
     await copyDependencies(assetInfo, jsonData, assetRootDir);
-    
+
     // 2. 프리팹 생성 명령 씬으로 전달
-    // assets-db 리프레시 ( dependancy 파일 찾고 asset 패널에서 사용할 수 있도록 ) 
-    const dest_url = assetInfo.url; // 'db://assets/a.ExportJson',
-    const prefab_url = `${dirname(dest_url)}/${basename(assetInfo.file).replace('.ExportJson', '.prefab')}`;
+    ensureDirSync(TARGET_PREFAB_PATH);
+    const prefab_url = `${TARGET_PREFAB_URL}/${basename(assetInfo.file).replace('.ExportJson', '.prefab')}`;
     
     // scene.ts의 createPrefabFromExportJson 호출
     await Editor.Message.request('scene', 'execute-scene-script', {
-        name: 'cocos_legacy_bridge', // extension 이름. package.json의 name 과 맞아야 함.
+        name: packageJSON.name, // 'cocos_legacy_bridge', // extension 이름. package.json의 name 과 맞아야 함.
         method: 'createCCStudioUIPrefab',
         args: [{
             name: basename(assetInfo.file, '.ExportJson'),
             destUrl: prefab_url,
-            jsonData: jsonData
+            jsonData: jsonData,
+            imageDestUrl: TARGET_IMAGE_URL
         }]
     });
 }
@@ -187,10 +206,11 @@ export const methods: { [key: string]: (...any: any) => any } = {
         //  Editor.Panel.open(packageJSON.name);
     },
 
-    // Legacy UI파일이 asset 패널에 drag-drop 된 후 호출
+    // Legacy UI,AR 파일이 asset 패널에 drag-drop 된 후 호출.
+    // asset 에 로드된 exportJson 파일이 로드 된 후 uuid 받음.
     // exportJson 파일 분석 후 scene 으로 넘김
     async handleExportJson( uuid: string ) {
-        let legacyAssetRootDir = await Editor.Profile.getProject('cocos_legacy_bridge', 'legacyAssetRoot');
+        let legacyAssetRootDir = await Editor.Profile.getProject(packageJSON.name, 'legacyAssetRoot');
 
         const isPathInvalid = !legacyAssetRootDir || !existsSync(legacyAssetRootDir);
 
@@ -239,6 +259,18 @@ export const methods: { [key: string]: (...any: any) => any } = {
             } else {
                 console.log(`[Main] 🖼️ UI 파일 감지 : ${assetInfo.name}`);
                 await processUI(assetInfo, jsonData, legacyAssetRootDir); // 외부 함수 직접 호출
+            }
+
+            // 마지막으로 exportJson 파일을 옮긴다.
+            ensureDirSync(TARGET_JSON_PATH);
+            const export_json_src_url = assetInfo.url;
+            const destUrl = `${TARGET_JSON_URL}/${basename(assetInfo.file)}`;
+
+            // 만약 이미 올바른 폴더(export_jsons)에 떨군 게 아니라면 이동시킵니다.
+            if (export_json_src_url !== destUrl) {
+                console.log(`[Main] 🚚 작업 완료! 원본 ExportJson 파일을 아카이브로 이동: ${destUrl}`);
+                // @ts-ignore
+                await Editor.Message.request('asset-db', 'move-asset', export_json_src_url, destUrl);
             }
         }
         catch( err ) {

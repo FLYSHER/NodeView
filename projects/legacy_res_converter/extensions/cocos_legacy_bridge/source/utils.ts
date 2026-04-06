@@ -39,7 +39,7 @@ export class ResourceMap extends Map<string, {frameUUID?: string, atlasUUID?: st
     getResData(rawPath: string ) {
         if (!rawPath) return null;
         
-        // C++의 basename 처럼 이름만 추출 // fnt. png 모두 대응하도록
+
         const name = path.basename(rawPath).replace(/\.(png|fnt)$/, '');
         const data = this.get(name);
         
@@ -69,12 +69,13 @@ export class ResourceMap extends Map<string, {frameUUID?: string, atlasUUID?: st
 
 // plist 배열을 넘기면 base 이름으로 관련 spriteFrame name - uuid 맵 생성
 // atlas 도 에디터에 세팅하기 위해 uuid 넣자..
-export async function createResourceMap(atlasPathList: string[], fontPathList: string[] = []): Promise<ResourceMap> {
+export async function createResourceMap(atlasPathList: string[], fontPathList: string[] = [], imageDestUrl: string): Promise<ResourceMap> {
     const resourceMap = new ResourceMap();
     
    for (const atlasPath of atlasPathList) {
         const fileName = path.basename(atlasPath);
-        const atlasUrl = `db://assets/${fileName}`;
+        const atlasUrl = `${imageDestUrl}/${fileName}`;
+        // const atlasUrl = `db://assets/${fileName}`;
         
         // @ts-ignore
         // atlas uuid 도 넘긴다.
@@ -103,7 +104,8 @@ export async function createResourceMap(atlasPathList: string[], fontPathList: s
 
     // 
     for(const fontPath of fontPathList){
-        const fontUrl = `db://assets/${path.basename(fontPath)}`;
+        // const fontUrl = `db://assets/${path.basename(fontPath)}`;
+        const fontUrl = `${imageDestUrl}/${basename(fontPath)}`;
         
         // @ts-ignore
         const fontInfo: any = await Editor.Message.request('asset-db', 'query-asset-info', fontUrl);
@@ -153,19 +155,22 @@ export function cleanupTempNode(node: any) {
     Editor.Message.send('scene', 'change-node-hierarchy', nodeUuid);
 }
 
-// 9-sliced capInsets 적용
+// 9-sliced capInsets 를 새 엔진 버전의 속성으로 세팅
+// legacy : 늘어나는 영역 세팅 ( x,y,w,h 로 rect 세팅 )
+// 3.8.x : 늘어나지 않아야 할 영역 ( top, bottom, left, right )
 export function applyScale9Insets(spriteFrame: any, options: any) {
     if (!spriteFrame) return;
 
     const texW = spriteFrame.originalSize.width;
     const texH = spriteFrame.originalSize.height;
 
+    // legacy : 기존  늘어나는 rect 속성
     const capX = options.capInsetsX ?? 0;
     const capY = options.capInsetsY ?? 0;
     const capW = options.capInsetsWidth ?? texW;
     const capH = options.capInsetsHeight ?? texH;
 
-    // 자를 영역(Width/Height)이 없으면 9-Slice의 의미가 없으므로 스킵
+    // 자를 영역(Width/Height)이 없으면 9-Slice 의 의미가 없으므로 스킵
     if (capW === 0 && capH === 0) return;
 
     // CC 3.x의 SpriteFrame 속성에 직접 마진(Margin) 값을 주입합니다.

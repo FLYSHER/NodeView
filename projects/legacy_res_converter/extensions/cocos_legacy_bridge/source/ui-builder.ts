@@ -68,7 +68,7 @@ export async function buildNodeTree(jsonData: any, parentNode: Node, resourceMap
             targetContainer = setupListView(currentNode, options);
             childPathPrefix = `${nodePath}/view/content`;
             break;
-        case "ImageView":
+        case "ImageView": // className === "Sprite" 문의 필요.
             await setupImageView( currentNode, options, resourceMap );
             break;
         case "Button":
@@ -319,7 +319,6 @@ function setupPageView(node: Node, options: any){
     pageViewComp.bounceDuration = 0.5;
     pageViewComp.direction = PageView.Direction.HORIZONTAL;
     pageViewComp.sizeMode = PageView.SizeMode.UNIFIED;
-
     const nodeTrComp = node.getComponent(UITransform);
     const w = nodeTrComp?.width || 200;
     const h = nodeTrComp?.height || 200;
@@ -428,28 +427,30 @@ function setupListView(node: Node, options: any){
 }
 
 /**
- *  options 
- *      fileNameData 
- *          path : "A.png"
- *          plistFile : ""
- *          resourceType : number 
+ * 전략 : 단순히 Node 에 Sprite 컴포넌트 추가
+ *
  */
 async function setupImageView(node: Node, options: any, resourceMap: ResourceMap){
-    // 스프라이트 컴포넌트 추가
-    const sprite = node.addComponent(Sprite);
 
-    // ignoreSize 값에 따라 sizeMode 세팅
-    // Sprite.SizeMode
-    //      RAW : 리소스 크기에 맞춰 세팅
-    //      TRIMMED : 이미지 투명부분 제외
-    //      CUSTOM  : 직접 설정
+    const sprite = node.getComponent(Sprite) || node.addComponent(Sprite); // 스프라이트 컴포넌트 추가
+
+    // Sprite Component
+    //      sizeMode : Node 의 contentSize 를 어떻게 할 것인가?
+    //          ㄴ RAW :
+    //          ㄴ CUSTOM :
+    //          ㄴ TRIMMED :
+    //      type     : 어떻게 보여줄 것인가?
+    //          ㄴ SIMPLE :
+    //          ㄴ SLICED :
+    //          ㄴ TILED  :
+    //          ㄴ FILLED :
+
     if( options.ignoreSize === false ) {
         sprite.sizeMode = Sprite.SizeMode.CUSTOM;
     }
     else {
         sprite.sizeMode = Sprite.SizeMode.RAW
-        // 🚨 [수정] 이미지 위치 틀어짐 방지
-        sprite.trim = false;
+        sprite.trim = false; // 투명여백까지 포함한 사이즈를 기준으로 중심점을 잡아서, 포팅 시 같은 의도대로 진행
     }
 
     // 9-scale
@@ -459,9 +460,13 @@ async function setupImageView(node: Node, options: any, resourceMap: ResourceMap
         sprite.type = Sprite.Type.SIMPLE;
     }
 
-   if (options.fileNameData?.path) {
+    // fileNameData {
+    //      path : "PU_AAA_01.png"
+    //      plistFile : "",
+    //      resourceType : 1
+    // }
+    if (options.fileNameData?.path) {
         const resData = resourceMap.getResData( options.fileNameData.path );
-        // console.log( "resData : ", options.fileNameData.path, resData );
 
         // @ts-ignore
         const loc_spriteFrame = await loadAssetByUUID( resData?.frameUUID );
@@ -506,15 +511,15 @@ async function setupImageView(node: Node, options: any, resourceMap: ResourceMap
 async function setupButton(node:Node, options: any, resourceMap: ResourceMap) {
 
     // 버튼은 기본적으로 이미지를 보여주기 위해 Sprite가 필요합니다.
-    const sprite = node.addComponent(Sprite);
-    const button = node.addComponent(Button);
+    const sprite = node.getComponent(Sprite) || node.addComponent(Sprite);
+    const button = node.getComponent(Button) || node.addComponent(Button);
     
     button.target = node;   // target 노드를 자기 자신으로 지정해야 SpriteFrame 교체가 정상적으로 일어납니다.
 
     // Button.Transition ( 버튼 클릭 시 효과 타입)
     //      NONE    : 버튼 이벤트만.. 시각적 변환 없음
     //      COLOR   : 상태에 따라 색상 설정 
-    //      SPIRTE  : 상태에 따라 스프라이트 프레임 변경
+    //      SPRITE  : 상태에 따라 스프라이트 프레임 변경
     //      SCALE   : 상태에 따라 zoom scale 
     button.transition = Button.Transition.SPRITE;
 

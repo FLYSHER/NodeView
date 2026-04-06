@@ -38,7 +38,7 @@ export const methods = {
 
     // UI 프리팹 생성
     async createCCStudioUIPrefab(args: any) {
-        const { name, destUrl, jsonData } = args;
+        const { name, destUrl, jsonData, imageDestUrl } = args;
         let rootNode = null;
 
         console.log("createPrefabFromExportJson : ", name, destUrl );
@@ -88,7 +88,7 @@ export const methods = {
             collectBMFontPaths(rootWidget, fontPathSet);
             const fontPaths = Array.from(fontPathSet);
             console.log("fontPaths > ", fontPaths );
-            const spriteFrameMap = await createResourceMap(atlasPaths, fontPaths);
+            const spriteFrameMap = await createResourceMap(atlasPaths, fontPaths, imageDestUrl );
 
             await apply9ScaleToMeta(spriteFrameMap, jsonData); // 노드를 만들기 전에 9-sliced 메타파일 저장
 
@@ -116,11 +116,11 @@ export const methods = {
                 await buildUIAnimations(rootNode, jsonData, uiActionNodeMap!);
             }
 
-            const prefabUrl = `db://assets/${name}.prefab`;
+            // const prefabUrl = `db://assets/${name}.prefab`;
         
             await _generatePrefabFromSceneNode({
                 nodeUUID : rootNode.uuid,
-                targetUrl: prefabUrl  
+                targetUrl: destUrl
             });
 
             // 0.5초 정도 대기 후 UUID 확인
@@ -138,7 +138,7 @@ export const methods = {
 
     // Animation 프리팹 생성  
     async createArmaturePrefab(args: any ) {
-        const { name, destUrl, jsonData } = args;
+        const { name, destUrl, jsonData, imageDestUrl } = args;
         let rootNode: Node | null = null;
 
         console.log("[scene] createArmaturePrefab 시작 : ", name);
@@ -162,7 +162,7 @@ export const methods = {
             const animationData = jsonData.animation_data && jsonData.animation_data[0];
             const atlasPaths = jsonData.config_file_path || [];
             
-            const resourceMap = await createResourceMap( atlasPaths );
+            const resourceMap = await createResourceMap( atlasPaths, [], imageDestUrl );
           
             // 노드 hierarchy 구성, 리소스경로 맵 구성
             const { nodePathMap, nodeDict } = await buildArmatureTree(armatureData, rootNode);
