@@ -1,5 +1,5 @@
 //@ts-ignore
-import { Node, Layers, UITransform, Size, Vec2, Sprite, path, Button, Label, Color, UIOpacity, ProgressBar, ScrollView, PageView, Mask, Layout, HorizontalTextAlignment, VerticalTextAlignment } from 'cc';
+import { Node, Layers, UITransform, Size, Vec2, Sprite, path, Button, Label, Color, UIOpacity, ProgressBar, ScrollView, PageView, Mask, Layout, EditBox, Widget, HorizontalTextAlignment, VerticalTextAlignment, Toggle, Slider } from 'cc';
 import { basename } from 'path';
 import { ResourceMap, loadAssetByUUID, applyScale9Insets } from './utils';
 import { receiveMessageOnPort } from 'worker_threads';
@@ -64,6 +64,10 @@ export async function buildNodeTree(jsonData: any, parentNode: Node, resourceMap
             targetContainer = setupPageView(currentNode, options);
             childPathPrefix = `${nodePath}/view/content`;
             break;
+        case "ListView":
+            targetContainer = setupListView(currentNode, options);
+            childPathPrefix = `${nodePath}/view/content`;
+            break;
         case "ImageView":
             await setupImageView( currentNode, options, resourceMap );
             break;
@@ -79,6 +83,15 @@ export async function buildNodeTree(jsonData: any, parentNode: Node, resourceMap
             break;
         case "LoadingBar":
             await setupLoadingBar(currentNode, options, resourceMap);
+            break;
+        case "TextField":
+            setupTextField(currentNode, options);
+            break;
+        case "CheckBox":
+            await setupCheckBox(currentNode, options, resourceMap);
+            break;
+        case "Slider":
+            await setupSlider(currentNode, options, resourceMap);
             break;
     }
 
@@ -345,6 +358,75 @@ function setupPageView(node: Node, options: any){
     return containerNode;
 }
 
+function setupListView(node: Node, options: any){
+    // 1. ScrollView 기본 세팅 (앞서 만든 setupScrollView와 유사)
+    const scrollViewComp = node.addComponent(ScrollView);
+
+    scrollViewComp.bounceDuration = 0.5;
+    scrollViewComp.elastic = options.bounceEnable ?? true;
+
+    // 방향 (1: Vertical, 2: Horizontal)
+    const dir = options.direction ?? 1;
+    const isVertical = (dir === 1 || dir === 3);
+    scrollViewComp.vertical = isVertical;
+    scrollViewComp.horizontal = !isVertical;
+
+    const nodeTrComp = node.getComponent(UITransform);
+    const w = nodeTrComp?.width || 200;
+    const h = nodeTrComp?.height || 200;
+    const anchorX = nodeTrComp?.anchorPoint.x ?? 0.5;
+    const anchorY = nodeTrComp?.anchorPoint.y ?? 0.5;
+
+    // 2. View 노드 세팅 (마스크 영역)
+    const viewNode = new Node("view");
+    viewNode.layer = Layers.Enum.UI_2D;
+    viewNode.parent = node;
+
+    if (options.clipAble !== false) {
+        const mask = viewNode.addComponent(Mask);
+        mask.type = Mask.Type.GRAPHICS_RECT; // 최신 엔진 권장 속성
+    }
+
+    const viewTrComp = viewNode.getComponent(UITransform) || viewNode.addComponent(UITransform);
+    viewTrComp.setContentSize(w, h);
+    viewTrComp.setAnchorPoint(0, 0);
+    viewNode.setPosition(-w * anchorX, -h * anchorY);
+
+    // 3. Content 노드 세팅 (자식들이 쌓일 도화지)
+    const contentNode = new Node("content");
+    contentNode.layer = Layers.Enum.UI_2D;
+    contentNode.parent = viewNode;
+
+    const contentTrComp = contentNode.getComponent(UITransform) || contentNode.addComponent(UITransform);
+
+    // 💡 [핵심] Layout 컴포넌트가 자식들을 추가할 때 도화지 크기를 알아서 늘리도록 설정
+    const layoutComp = contentNode.addComponent(Layout);
+    layoutComp.resizeMode = Layout.ResizeMode.CONTAINER;
+
+    // 방향에 따른 정렬 및 간격(itemMargin) 세팅
+    if (isVertical) {
+        layoutComp.type = Layout.Type.VERTICAL;
+        layoutComp.spacingY = options.itemMargin ?? 0; // 아이템 간 간격
+
+        // 세로 리스트는 위에서 아래로 쌓이므로, Content의 기준점을 좌상단(0, 1)으로 잡고 맨 위(h)로 올립니다.
+        contentTrComp.setAnchorPoint(0, 1);
+        contentNode.setPosition(0, h);
+    } else {
+        layoutComp.type = Layout.Type.HORIZONTAL;
+        layoutComp.spacingX = options.itemMargin ?? 0; // 아이템 간 간격
+
+        // 가로 리스트는 좌에서 우로 쌓이므로, Content의 기준점을 좌상단(0, 1)으로 잡습니다.
+        contentTrComp.setAnchorPoint(0, 1);
+        contentNode.setPosition(0, h);
+    }
+
+    // ScrollView에 Content 연결
+    scrollViewComp.content = contentNode;
+
+    // 자식 위젯들은 이 contentNode 아래에 생성되어야 하므로 반환
+    return contentNode;
+}
+
 /**
  *  options 
  *      fileNameData 
@@ -576,4 +658,128 @@ async function setupLoadingBar(node:Node, options: any, resourceMap: ResourceMap
     progressBar.mode = ProgressBar.Mode.FILLED;
     progressBar.totalLength = 1;
     progressBar.progress = (options.percent ?? 0) / 100;
+}
+
+function setupTextField(node: Node, options: any) {
+    const editBox = node.addComponent(EditBox);
+
+    const bgSprite = node.getComponent(Sprite) || node.addComponent(Sprite) ; // 터치용 ( 투명 스프라이트 )
+    bgSprite.sizeMode = Sprite.SizeMode.CUSTOM;
+
+    //
+    const textNode = new Node("TEXT_LABEL");
+    textNode.layer = Layers.Enum.UI_2D;
+    textNode.parent = node;
+
+    const txtLabelComp = textNode.addComponent(Label);
+    txtLabelComp.horizontalAlign = HorizontalTextAlignment.LEFT;
+    txtLabelComp.verticalAlign = VerticalTextAlignment.CENTER;
+    txtLabelComp.fontSize = options.fontSize || 20;
+    txtLabelComp.color = new Color( options.colorR ?? 255, options.colorG ?? 255, options.colorB ?? 255);
+
+    // placeholder
+    const phNode = new Node("PLACEHOLDER_LABEL");
+    phNode.layer = Layers.Enum.UI_2D;
+    phNode.parent = node;
+
+    const phLabelComp = phNode.addComponent(Label);
+    phLabelComp.horizontalAlign = HorizontalTextAlignment.LEFT;
+    phLabelComp.verticalAlign = VerticalTextAlignment.CENTER;
+    phLabelComp.fontSize = options.fontSize || 20;
+    phLabelComp.color = Color.GRAY; // gray 로...
+
+    // 부모 크기에 꽉 차도록 설정
+    [textNode, phNode].forEach( _node =>{
+        const widgetComp = _node.addComponent(Widget);
+        widgetComp.isAlignTop = widgetComp.isAbsoluteBottom = widgetComp.isAlignLeft = widgetComp.isAlignRight = true;
+        widgetComp.top = widgetComp.bottom = widgetComp.left = widgetComp.right = 0;
+    });
+
+
+    editBox.textLabel = txtLabelComp;
+    editBox.placeholderLabel = phLabelComp;
+    editBox.placeholder = options.placeHolder || "";
+    editBox.string = options.text || "";
+
+    // 비밀번호 모드 처리
+    if (options.passwordEnable) {
+        editBox.inputFlag = EditBox.InputFlag.PASSWORD;
+    }
+
+    // 글자 수 제한 처리
+    if (options.maxLengthEnable && options.maxLength) {
+        editBox.maxLength = options.maxLength;
+    }
+}
+
+async function setupCheckBox(node: Node, options: any, resourceMap: ResourceMap) {
+    const toggle = node.addComponent(Toggle);
+    const bgSprite = node.addComponent(Sprite);
+    bgSprite.sizeMode = Sprite.SizeMode.RAW;
+    bgSprite.trim = false;
+
+    // 배경 이미지 (체크 안 되었을 때)
+    if (options.backGroundBoxData?.path) {
+        const resData = resourceMap.getResData(options.backGroundBoxData.path);
+        // @ts-ignore
+        const sf = await loadAssetByUUID(resData?.frameUUID);
+        bgSprite.spriteFrame = sf;
+    }
+
+    // V표시 (체크 마크) 노드 생성
+    const checkNode = new Node("checkmark");
+    checkNode.layer = Layers.Enum.UI_2D;
+    checkNode.parent = node;
+    const checkSprite = checkNode.addComponent(Sprite);
+    checkSprite.sizeMode = Sprite.SizeMode.RAW;
+    checkSprite.trim = false;
+
+    // V표시 이미지 세팅
+    if (options.frontCrossData?.path) {
+        const resData = resourceMap.getResData(options.frontCrossData.path);
+        // @ts-ignore
+        const sf = await loadAssetByUUID(resData?.frameUUID);
+        checkSprite.spriteFrame = sf;
+    }
+
+    // Toggle 컴포넌트에 연결
+    toggle.checkMark = checkSprite;
+    toggle.isChecked = options.selectedState ?? true; // 초기 체크 상태
+    toggle.interactable = options.displaystate ?? true;
+}
+
+async function setupSlider(node: Node, options: any, resourceMap: ResourceMap) {
+    const slider = node.addComponent(Slider);
+    const bgSprite = node.addComponent(Sprite);
+    bgSprite.sizeMode = Sprite.SizeMode.RAW;
+    bgSprite.trim = false;
+
+    // 슬라이더 배경 바 이미지
+    if (options.barFileNameData?.path) {
+        const resData = resourceMap.getResData(options.barFileNameData.path);
+        // @ts-ignore
+        const sf = await loadAssetByUUID(resData?.frameUUID);
+        bgSprite.spriteFrame = sf;
+    }
+
+    // 슬라이더 손잡이(Ball) 노드 생성
+    const handleNode = new Node("Handle");
+    handleNode.layer = Layers.Enum.UI_2D;
+    handleNode.parent = node;
+    const handleSprite = handleNode.addComponent(Sprite);
+    handleSprite.sizeMode = Sprite.SizeMode.RAW;
+    handleSprite.trim = false;
+
+    // 슬라이더 손잡이 이미지 세팅
+    if (options.ballNormalData?.path) {
+        const resData = resourceMap.getResData(options.ballNormalData.path);
+        // @ts-ignore
+        const sf = await loadAssetByUUID(resData?.frameUUID);
+        handleSprite.spriteFrame = sf;
+    }
+
+    // Slider 컴포넌트에 연결
+    slider.handle = handleSprite;
+    slider.progress = (options.percent ?? 0) / 100; // Cocos Studio는 0~100, Creator는 0~1
+    slider.direction = Slider.Direction.Horizontal; // 대부분 가로형으로 사용됨
 }
