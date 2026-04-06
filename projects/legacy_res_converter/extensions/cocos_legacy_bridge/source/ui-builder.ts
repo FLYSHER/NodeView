@@ -654,10 +654,11 @@ async function setupLoadingBar(node:Node, options: any, resourceMap: ResourceMap
     //      HORIZONTAL = 0,
     //      VERTICAL = 1,
     //      FILLED = 2
-    progressBar.barSprite = barSprite;
     progressBar.mode = ProgressBar.Mode.FILLED;
     progressBar.totalLength = 1;
     progressBar.progress = (options.percent ?? 0) / 100;
+
+    progressBar.barSprite = barSprite;
 }
 
 function setupTextField(node: Node, options: any) {
