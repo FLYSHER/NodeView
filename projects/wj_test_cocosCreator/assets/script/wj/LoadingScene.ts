@@ -25,8 +25,9 @@ export class LoadingScene extends Component {
         // 씬이 시작될 때 매니저에게 데이터를 달라고 요청합니다.
         const settingData = SceneManager.getInstance().getTransitionData();
         log("[CHECK] LoaingScene ", JSON.stringify(settingData))
-        //await this.loadLoaderResource(settingData);
-        await this.testSpriteLoad();
+        await this.loadLoaderResource(settingData);
+        this.testSpriteLoad2();
+        //await this.testSpriteLoad();
     }
 
     //로딩씬의 리소스 로드
@@ -55,7 +56,24 @@ export class LoadingScene extends Component {
             );
         });
     };
-    
+
+    testSpriteLoad2() {
+        // 1. 먼저 ResourceUtil에서 '설계도(Prefab)'를 가져옵니다. (as Node 절대 금지!)
+        // 유틸 함수를 <Prefab> 제네릭으로 잘 만들어두셨으니 타입 추론이 깔끔하게 됩니다.
+        let prefab = ResourceUtil.get("PU_ProgressBarUI_mb", Prefab);
+        // 방어 코드: 캐시에 프리팹이 잘 있는지 확인
+        if (prefab) {
+            // 2. 🌟 설계도를 바탕으로 진짜 '노드(Node)'를 찍어냅니다!
+            // instantiate의 결과물은 무조건 Node 타입입니다.
+            let node: Node = instantiate(prefab);
+            
+            // 3. 이제 완벽한 물리적 노드니까 parent에 당당하게 붙일 수 있습니다.
+            node.parent = this.node;
+        } else {
+            console.error("프리팹 캐시가 없습니다! load를 먼저 했는지 확인하세요.");
+        }
+    };
+
     async testSpriteLoad() {
         let self : any = this;
         await new Promise<void>(function (resolve, reject) {
