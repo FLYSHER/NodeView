@@ -1,6 +1,9 @@
 {
     "extends": "./base.tsconfig.json",
     "compilerOptions": {
+        "moduleResolution": "node16", // 🌟 "node" 라고 되어있는 것을 "node16"으로 변경!
+        "module": "Node16",          // 🌟 이 녀석도 Node16으로 변경!
+        
         "outDir": "./dist",
         "rootDir": "./source",
         "types": ["node","electron", "@cocos/creator-types/engine", "@cocos/creator-types/editor"]
