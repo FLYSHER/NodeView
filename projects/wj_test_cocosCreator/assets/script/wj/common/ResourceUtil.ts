@@ -3,7 +3,12 @@ const { ResPack } = window as any;
 
 export var ResourceUtil = {
 
-    cacheItems : {},
+    // [키: 타입이름] -> [키: 에셋경로] -> 실제 에셋 객체
+    caches: {} as { [typeName: string]: { [path: string]: any } },
+    // cachePrefabs: {},
+    // cachePlists: {},
+    // cachePngs: {},
+    // cacheFonts: {},
     // getCleanResourceName(path: string) {
     //         // 정규식을 사용해 마지막 '.' 이후의 문자열(확장자)을 날려버립니다.
     //         // 예: "ui/panel.prefab" -> "ui/panel"
@@ -83,20 +88,13 @@ export var ResourceUtil = {
     //     );
     // },
 
-    _loadItem : function(path, loadResItem){
-        if(loadResItem.isValid) {
-            loadResItem.addRef();
-            this.cacheItems[path] = loadResItem;
-        }
-    },
-
     async loadAssetsGroup<T extends Asset>(paths: string[], type: any, onProgress: (finished: number, total: number, item: any) => void): Promise<T[]> {
         return new Promise((resolve, reject) => {
             if (paths.length === 0) {
                 resolve([]); // 부를 게 없으면 빈 배열 리턴
                 return;
             }
-
+            let cache = caches[type.name]  || (caches[type.name]={});
             resources.load(
                 paths, 
                 type, 
@@ -111,7 +109,10 @@ export var ResourceUtil = {
                     }
                     for (let i = 0; i < items.length; i++) {
                         // items[i].addRef(); 
-                        this._loadItem(paths[i], items[i]);
+                        if(!cache[paths[i]] && items[i].isValid){
+                            items[i].addRef();
+                            cache[paths[i]] = items[i];
+                        }
                     }
                     resolve(items as T[]);
                 }
@@ -151,6 +152,11 @@ export var ResourceUtil = {
             return;
         }
         
+        let cachePrefabs = caches[Prefab.name]     || (caches[Prefab.name]={});
+        let cachePlists = caches[SpriteAtlas.name] || (caches[SpriteAtlas.name]={});
+        let cachePngs = caches[SpriteFrame.name]   || (caches[SpriteFrame.name]={});
+        let cacheFonts = caches[BitmapFont.name]   || (caches[BitmapFont.name]={});
+        
         const prefabs: string[] = [];
         const plists: string[] = [];
         const pngs: string[] = [];
@@ -158,9 +164,18 @@ export var ResourceUtil = {
 
         // Set을 사용하면 나중에 중복 검사할 때 속도가 엄청 빠릅니다.
         const plistBasePaths = new Set<string>();
+        let basePath = "";
+        const loadedAssets = [];
+        
         for (let path of arrAssetsToLoad) {
             if (path.endsWith('.plist')) {
-                plistBasePaths.add(path.replace('.plist', ''));
+                basePath = path.replace('.plist', '');
+                if(!cachePlists[basePath]){
+                    plistBasePaths.add(basePath);
+                }
+                else{
+                    loadedAssets.push(cachePlists[basePath]);
+                }
             }
         }
 
@@ -169,23 +184,45 @@ export var ResourceUtil = {
             let path = arrAssetsToLoad[i];
 
             if (path.endsWith('.ExportJson')) {
-                prefabs.push(path.replace('.ExportJson', ''));
+                basePath = path.replace('.ExportJson', '');
+                if(!cachePrefabs[basePath]){
+                    prefabs.push(basePath);
+                }
+                else{
+                    loadedAssets.push(cachePrefabs[basePath]);
+                }
 
-            } else if (path.endsWith('.plist')) {
-                plists.push(path.replace('.plist', ''));
-
-            } else if (path.endsWith('.png')) {
+            }else if (path.endsWith('.jpg')){
+                basePath = path.replace('.jpg', '') + '/spriteFrame';
+                if(!cachePngs[basePath]){
+                    pngs.push(basePath);
+                }
+                else{
+                    loadedAssets.push(cachePngs[basePath]);
+                }
+            }else if (path.endsWith('.png')) {
                 // 확장자를 뗀 기본 경로 추출
-                let basePath = path.replace('.png', '');
-                
+                basePath = path.replace('.png', '');
                 if (plistBasePaths.has(basePath)) {
                     console.log(`[중복 필터링] ${path} 는 plist 세트이므로 단독 로드에서 제외.`);
                 } else {
-                    pngs.push(basePath + '/spriteFrame');
+                    basePath = basePath + '/spriteFrame';
+                    if(!this.cachePngs[basePath]){
+                        pngs.push(basePath);
+                    }
+                    else{
+                        loadedAssets.push(cachePngs[basePath]);
+                    }
                 }
 
             } else if (path.endsWith('.fnt')) {
-                fonts.push(path.replace('.fnt', ''));
+                basePath = path.replace('.fnt', '');
+                if(!cacheFonts[basePath]){
+                    fonts.push(basePath);
+                }
+                else{
+                    loadedAssets.push(cacheFonts[basePath]);
+                }
             }
         }
 
@@ -229,10 +266,16 @@ export var ResourceUtil = {
             ]);
 
             // 🌟 성공: 받아온 4개의 결과물 배열을 하나로 합칩니다.
-            let allItems = [...loadedPrefabs, ...loadedPlists, ...loadedPngs, ...loadedFonts];
-
-            if (onComplete) {
-                onComplete(null, allItems);
+            let allItems = [...loadedAssets, ...loadedPrefabs, ...loadedPlists, ...loadedPngs, ...loadedFonts];
+            if(isSingleItem){
+                if (onComplete) {
+                    onComplete(null, allItems[0]);
+                }
+            }
+            else{
+                if (onComplete) {
+                    onComplete(null, allItems);
+                }
             }
 
         } catch (error) {
@@ -281,9 +324,12 @@ export var ResourceUtil = {
         // resString = this.getCleanResourceName(resString);
         
         // 엔진 내부 함수에 전달할 때는 any로 우회하고, 최종 반환값만 T로 맞춰줍니다.
-        let assetItem =  this.cacheItems[resString]; //resources.get(resString, type as any);
-
-        return assetItem as T;
+        let cache = caches[type.name];
+        if(cache){
+            let assetItem =  cache[resString]; //resources.get(resString, type as any);
+            return assetItem as T;
+        }
+        return null;
     },
 
     // async 함수 내부라고 가정
