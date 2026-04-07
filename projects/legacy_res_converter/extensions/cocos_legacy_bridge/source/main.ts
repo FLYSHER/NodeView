@@ -44,10 +44,20 @@ async function checkLegacyRootConfig() {
     }
 }
 
-// ----------------------------------------------------------------
-// [공통 헬퍼 함수] JSON 데이터를 분석하여 의존성(plist, png)을 복사하고 DB를 갱신
-// ----------------------------------------------------------------
-//
+function collectBMFonts(node: any, fontSet: Set<string>){
+    if (!node) return;
+
+    // LabelBMFont 타입이고 폰트 경로 정보가 있는 경우
+    if (node.classname === "LabelBMFont" && node.options?.fileNameData?.path) {
+        fontSet.add(node.options.fileNameData.path);
+    }
+
+    if (node.children) {
+        node.children.forEach((child: any) => collectBMFonts(child, fontSet));
+    }
+}
+
+// exportJson 에서 사용하는 plist, png 파일 asset-db 에 추가 ( 복사 )
 async function copyDependencies(assetInfo: any, jsonData: any, legacyRootDir: string ) {
 
     // exportJson 에서 사용하는 spriteAtlas 파일명 배열
@@ -144,21 +154,14 @@ async function copyDependencies(assetInfo: any, jsonData: any, legacyRootDir: st
     }
 }
 
-// ----------------------------------------------------------------
-// [내부 헬퍼 함수] 🦾 Armature (애니메이션) 전용 처리 로직
-// ----------------------------------------------------------------
+// Legacy AR Build
 async function processArmature(assetInfo: any, jsonData: any, assetRootDir: string) {
-    console.log("=> processArmature 로직 시작...");
 
-    // 1. 공통 텍스처 의존성 복사
     await copyDependencies(assetInfo, jsonData, assetRootDir );
 
     ensureDirSync(TARGET_PREFAB_PATH);
     ensureDirSync(TARGET_ANIM_PATH);
 
-    // 2. 프리팹 생성 명령 씬으로 전달
-    // const dest_url = assetInfo.url;
-    // const prefab_url = `${dirname(dest_url)}/${basename(assetInfo.file).replace('.ExportJson', '.prefab')}`;
     const prefab_url = `${TARGET_PREFAB_URL}/${basename(assetInfo.file).replace('.ExportJson', '.prefab')}`;
 
     // scene.ts의 createArmaturePrefab 호출
@@ -175,12 +178,9 @@ async function processArmature(assetInfo: any, jsonData: any, assetRootDir: stri
     });
 }
 
-// ----------------------------------------------------------------
-// [내부 헬퍼 함수] 기존 cocos studio UI 전용 처리 로직
-// ----------------------------------------------------------------
+// Legacy UI Build
 async function processUI(assetInfo: any, jsonData: any, assetRootDir: string) {
 
-    // 해당 UI 에서 사용하는 리소스 ( plist/png, fnt/png ) asset-db 에 추가
     await copyDependencies(assetInfo, jsonData, assetRootDir);
 
     ensureDirSync(TARGET_PREFAB_PATH);
@@ -200,19 +200,6 @@ async function processUI(assetInfo: any, jsonData: any, assetRootDir: string) {
             animDestUrl: TARGET_ANIM_URL,
         }]
     });
-}
-
-function collectBMFonts(node: any, fontSet: Set<string>){
-    if (!node) return;
-
-    // LabelBMFont 타입이고 폰트 경로 정보가 있는 경우
-    if (node.classname === "LabelBMFont" && node.options?.fileNameData?.path) {
-        fontSet.add(node.options.fileNameData.path);
-    }
-
-    if (node.children) {
-        node.children.forEach((child: any) => collectBMFonts(child, fontSet));
-    }
 }
 
 // 에셋 패널에 파일이 추가되었을 때 호출.

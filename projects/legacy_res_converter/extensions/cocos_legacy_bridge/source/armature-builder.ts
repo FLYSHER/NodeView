@@ -487,56 +487,90 @@ function setBoneKeyFrameData( animClip: any, boneData: any, setupPoseData: any, 
     }
 }
 
+function createBoneNode(name: string): Node {
+    const boneNode = new Node(name);
+    boneNode.layer = Layers.Enum.UI_2D;
+
+    // 본 크기는 0,0 으로 ..
+    const uiTrans = boneNode.addComponent(UITransform);
+    uiTrans.setContentSize(0, 0);
+    uiTrans.setAnchorPoint(0, 0);
+
+    return boneNode;
+}
+
+function setupBoneTransform(boneNode: Node, boneData: any, nodeDict: Record<string, Node>, defaultParent: Node ) {
+    // 부모 본 세팅 ( 데이터에 없으면 boneRoot 에 붙힘 )
+    const parent = (boneData.parent && nodeDict[boneData.parent]) ? nodeDict[boneData.parent] : defaultParent;
+    boneNode.setParent( parent );
+
+    // pos
+    boneNode.setPosition(boneData.x ?? 0, boneData.y ?? 0, 0);
+
+    // scale
+    boneNode.setScale(boneData.cX ?? 1, boneData.cY ?? 1, 1);
+
+    // rotation
+    // legacy 의 radian 을 degree 로 변환
+    // kx 값으로 회전하며 -로 보정.
+    const setupRotRad = boneData.kX ? -boneData.kX : 0;
+    boneNode.setRotationFromEuler(0, 0, setupRotRad * RAD_TO_DEG);
+
+}
+
 // armature 정보로 기존 bone-tree 구조를 node-tree 구조로 변경
 // rootNode 에 자식본노드들 붙혀 node-tree 만들고
-// 본노드 패스맵과, 본노드맵 정보 리턴
+// 본-계층구조경로 맵과, 본-노드 맵 정보 리턴
 export async function buildArmatureTree(armatureData: any, rootNode: Node): Promise<{ nodePathMap: Record<string, string>, nodeDict: Record<string, Node> }> {
     const nodePathMap: Record<string, string> = {}; // 본 노드들 패스 맵 
     const nodeDict: Record<string, Node> = {};      // 본 노드 맵
 
-    if (!armatureData || !armatureData.bone_data ) return { nodePathMap, nodeDict };
+    // nodePathMap : 노드 부모 경로 맵
+    // ex )
+    //      '30': 'BoneRoot/ctrl_main/main/ctrl_30/30',
+    //      '50': 'BoneRoot/ctrl_main/main/ctrl_50/50',
+    //      RenderRoot: 'RenderRoot',
 
-    // 스킨 담아둘 노드 Root 생성
-    const renderRoot = new Node('RenderRoot');
-    renderRoot.layer = Layers.Enum.UI_2D;
-    renderRoot.parent = rootNode;
-    nodeDict['__RenderRoot__'] = renderRoot;
+    // nodeDict : 본 이름과 실제 본 노드 레퍼런스 맵
+    //      '30' : 본 노드 ref
 
-    // 본 루트 노드
+    if (!armatureData || !armatureData.bone_data ) {
+        return { nodePathMap, nodeDict };
+    }
+
+    // AR Root Node
+    //  ㄴ BoneRoot
+    //      ㄴ ... 본 계층 구조
+    //  ㄴ RenderRoot
+    //      ㄴ skinNode .. 계층구조 아닌 RenderRoot를 부모로 든 자식들 모음
+
+    // 본 루트 노드 생성
     const boneRoot = new Node('BoneRoot');
     boneRoot.layer = Layers.Enum.UI_2D;
     boneRoot.parent = rootNode;
     nodeDict['__BoneRoot__'] = boneRoot; // 딕셔너리에도 등록
 
+    // 스킨 루트 노드 생성
+    const renderRoot = new Node('RenderRoot');
+    renderRoot.layer = Layers.Enum.UI_2D;
+    renderRoot.parent = rootNode;
+    nodeDict['__RenderRoot__'] = renderRoot;
+
     const boneDataList: any[] = armatureData.bone_data;
 
-    // 1. bone hierarch 정보 기반으로 노드 생성 후 dic 에 넣음.
-    for (const bone of boneDataList) {
-        const boneNode = new Node(bone.name);
-        boneNode.layer = Layers.Enum.UI_2D;
-
-        const uiTrans = boneNode.addComponent(UITransform);
-        uiTrans.contentSize = size(0, 0);
-        uiTrans.setAnchorPoint(0, 0);
-
-        nodeDict[bone.name] = boneNode;
+    // 본 노드 생성 & 본 이름 - 노드 맵에 세팅
+    for (const boneData of boneDataList) {
+        const boneNode = createBoneNode(boneData.name);
+        nodeDict[boneData.name] = boneNode;
     }
 
-    // 2. 계층구조 생성 후 기본 transform 설정
-    for (const bone of boneDataList) {
-        const boneNode = nodeDict[bone.name];
-        const targetParent = (bone.parent && nodeDict[bone.parent]) ? nodeDict[bone.parent] : boneRoot;
-
-        boneNode.setParent(targetParent);
-
-        boneNode.setPosition(bone.x ?? 0 , bone.y ?? 0, 0);
-        boneNode.setScale(bone.cX ?? 1, bone.cY ?? 1, 1);
-
-        const setupRotRad = bone.kX ? -bone.kX : 0;
-        boneNode.setRotationFromEuler(0, 0, setupRotRad * RAD_TO_DEG);
+    // Bone 트리구조 빌드 및 본 RTS(위치-크기-회전) 속성 세팅
+    for (const boneData of boneDataList) {
+        const boneNode = nodeDict[boneData.name];
+        setupBoneTransform(boneNode, boneData, nodeDict, boneRoot);
     }
 
-    // 3. 본노드 패스 저장 ( ex.. root/hand/finger )
+    // 3. 본 - 계층구조 경로 맵 저장 ( ex.. root/hand/finger )
     // clip 재사용과 layered animation 등이 가능. 
     function _recordPaths(node: Node, currentPath: string) {
         for (const child of node.children) {
@@ -553,13 +587,13 @@ export async function buildArmatureTree(armatureData: any, rootNode: Node): Prom
 // skin 세팅이 되어있는 본 처리
 // 기존 스킨 데이터 있는 본 자식으로 각각 transform 만 관리, renderer 만 관리하는 노드 2개 생성
 // skinBone, skinNode ( skinNode 는 renderer root node 에 붙힘. order 관리를 위해 )
-export async function buildSkinRenderers(armatureData: any, nodeDict: Record<string, Node>, destDir: string, jsonData: any, resourceMap: ResourceMap ) {
+export async function buildAllSkinNode(armatureData: any, nodeDict: Record<string, Node>, destDir: string, jsonData: any, resourceMap: ResourceMap ) {
     if (!armatureData || !armatureData.bone_data) return;
 
     // 스킨에서 사용할 공유(shared) 메터리얼 skinController static 변수 에 세팅
     const allMats = await loadAllMaterials();
     const skinController = js.getClassByName('SkinController') as any;
-    skinController.setSharedMaterials(allMats);
+    skinController.setSharedMaterials(allMats); // SkinController 클래스에 setSharedMaterials Static 함수 있음.
 
     // [ sort 하지 않고 setSiblingIndex 하지 않는 이유. ]
     // 원본 order 값이 50, 100 처럼 듬성듬성인 상태, 음수도 있음.

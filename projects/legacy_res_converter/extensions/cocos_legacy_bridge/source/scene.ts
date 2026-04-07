@@ -5,7 +5,7 @@ declare const cce : any;
 import { ResourceMap, cleanupTempNode } from './utils';
 import { buildNodeTree } from './ui-builder';
 import { buildUIAnimations } from './ui-action-builder';
-import { buildArmatureTree, generateAllAnimationClip, buildSkinRenderers } from './armature-builder';
+import { buildArmatureTree, generateAllAnimationClip, buildAllSkinNode } from './armature-builder';
 
 
 import { json } from 'stream/consumers';
@@ -53,6 +53,33 @@ function createUIRootNode(name: string, jsonData: any, parent: Node): Node {
     rootNode.setPosition((anchorX - 0.5) * designW, (anchorY - 0.5) * designH);
 
     return rootNode;
+}
+
+// AR Root Node 생성 (Animation Component 추가)
+function createARRootNode(name: string, parent: Node): Node {
+    const rootNode = new Node(name);
+    rootNode.layer = Layers.Enum.UI_2D;
+    rootNode.parent = parent;
+
+    const animComp = rootNode.addComponent(Animation);
+    return rootNode;
+}
+
+// 에디터 asset-db 에 특정 폴더가 존재하는지 확인하고 없으면 생성
+// baseDir : ex) db://assets/legacy/animation
+// subDir : ex) pu_extraSaleAR.. exportJson 이름과 같은 폴더
+async function ensureFolder(baseDir: string, subDir: string): Promise<string> {
+    const fullPath = `${baseDir}/${subDir}`;
+
+    // @ts-ignore
+    const exists = await Editor.Message.request('asset-db', 'query-asset-info', fullPath);
+
+    if (!exists) {
+        // @ts-ignore
+        await Editor.Message.request('asset-db', 'create-asset', fullPath, null);
+    }
+
+    return fullPath;
 }
 
 // 하위 노드들 모두 검사하여 사용되는 리소스의 매핑 정보 생성
@@ -137,14 +164,8 @@ export const methods = {
 
             // UIAction 정보가 있다면 animation clip 생성
             if(hasAnimation && uiActionNodeMap) {
-                const destDir = `${animDestUrl}/${name}`;
-
-                // 폴더가 없으면 생성 (에셋 DB 등록)
-                // @ts-ignore
-                if (!await Editor.Message.request('asset-db', 'query-asset-info', destDir)) {
-                    // @ts-ignore
-                    await Editor.Message.request('asset-db', 'create-asset', destDir, null);
-                }
+                // 타겟 폴더 없으면 생성
+                const destDir = await ensureFolder(animDestUrl, name);
 
                 // ui-action-builder.ts의 함수 호출
                 await buildUIAnimations(rootNode, jsonData, uiActionNodeMap, destDir);
@@ -169,58 +190,47 @@ export const methods = {
         }
     },
 
-    // Animation 프리팹 생성  
+    // AR 프리팹 생성
     async createArmaturePrefab(args: any ) {
         const { name, destUrl, jsonData, imageDestUrl, animDestUrl } = args;
+
+        // console.log("[scene] createArmaturePrefab 시작 : ", name);
+
         let rootNode: Node | null = null;
-
-        console.log("[scene] createArmaturePrefab 시작 : ", name);
-
         try {
             const scene = director.getScene();
             const canvas = scene?.getChildByName('Canvas');
 
-            if (!canvas) throw new Error("Canvas 를 찾을 수 없음!");
-
-            // step 1. 루트 노드 생성 및 Animation 컴포넌트 부착
-            rootNode = new Node(name);
-            rootNode.layer = Layers.Enum.UI_2D;
-            rootNode.parent = canvas;
-
-            const animComp = rootNode.addComponent( Animation ); // 에니메이션 컴포넌트 추가
-
-            const destDir = `${animDestUrl}/${name}`;
-
-            // destDir 해당 폴더 없으면 생성.
-            // @ts-ignore
-            if (!await Editor.Message.request('asset-db', 'query-asset-info', destDir)) {
-                // @ts-ignore
-                await Editor.Message.request('asset-db', 'create-asset', destDir, null);
+            if (!canvas) {
+                throw new Error("Canvas 를 찾을 수 없음!");
             }
 
-            const armatureData = jsonData.armature_data && jsonData.armature_data[0];
-            const animationData = jsonData.animation_data && jsonData.animation_data[0];
-            const atlasPaths = jsonData.config_file_path || [];
-            
-            const resourceMap = await createResourceMap( atlasPaths, [], imageDestUrl );
-          
-            // 노드 hierarchy 구성, 리소스경로 맵 구성
-            const { nodePathMap, nodeDict } = await buildArmatureTree(armatureData, rootNode);
-            console.log("🎯 Armature 뼈대 구축 완료!");
-            
-            // 각각의 노드 ( 기존 Bone 개념 ) 에 skin 데이터 세팅
-            await buildSkinRenderers(armatureData, nodeDict, destDir, jsonData, resourceMap );
-            console.log("👗 Armature 스킨 부착 완료!");
+            // step 1. AR RootNode 생성
+            rootNode = createARRootNode(name, canvas);
 
-            //에니메이션 클립 포팅, 프리팹 생성 
+            // step 2. resource map 생성 ( ar 에서 사용하는 모든 spriteFrame map)
+            const atlasPaths = jsonData.config_file_path || [];
+            const resourceMap = await createResourceMap( atlasPaths, [], imageDestUrl );
+
+            // step 3. bone tree 구조 생성
+            const armatureData = jsonData.armature_data && jsonData.armature_data[0];
+            const { nodePathMap, nodeDict } = await buildArmatureTree(armatureData, rootNode);
+
+            // step 4. skin node 생성 ( 본과 다른 root 에 같은 계층으로 생성 )
+            const destDir = await ensureFolder(animDestUrl, name);
+            await buildAllSkinNode(armatureData, nodeDict, destDir, jsonData, resourceMap );
+
+            // step 5. 에니메이션 클립 생성
+            const animationData = jsonData.animation_data && jsonData.animation_data[0];
+            const animComp = rootNode.getComponent( Animation );
             await generateAllAnimationClip(armatureData,animationData, nodePathMap, animComp, name, destDir);
 
-            // 4. 프리팹 굽기
-            const prefabUrl = `db://assets/${name}.prefab`;
+            // step 6. 프리팹 생성
             await generatePrefabFromSceneNode({
                 nodeUUID : rootNode.uuid,
                 targetUrl: destUrl
             });
+
         } catch (err) {
             console.error("Armature 생성 실패 : ", err);
         } finally {
