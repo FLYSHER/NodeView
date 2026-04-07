@@ -1,4 +1,4 @@
-import { _decorator, Component, resources, JsonAsset, instantiate,Prefab, Node, Sprite, UITransform,  log } from 'cc';
+import { _decorator, Component, resources, JsonAsset, instantiate,Prefab, Node, Sprite, UITransform,  log, Primitive } from 'cc';
 import { SceneManager, ResourceUtil } from './Includes';
 import { NATIVE, PREVIEW } from 'cc/env'; // 환경 분기용
 
@@ -26,8 +26,9 @@ export class LoadingScene extends Component {
         const settingData = SceneManager.getInstance().getTransitionData();
         log("[CHECK] LoaingScene ", JSON.stringify(settingData))
         await this.loadLoaderResource(settingData);
-        this.testSpriteLoad2();
+        await this.testSpriteLoad2();
         //await this.testSpriteLoad();
+        //await this.changeEmptyScene();
     }
 
     //로딩씬의 리소스 로드
@@ -37,7 +38,9 @@ export class LoadingScene extends Component {
             log(">>>>>>>>>>>>>>> NetConnector.loadLoaderResource");
 
             var resLoaderToLoad = null;
-            var res = param.iamReadyResponse;
+            if(param){
+                var res = param.iamReadyResponse;
+            }
             // if (res) // && SceneManager.getInstance().isSceneForNewUser() )
             // {
             //     resLoaderToLoad = g_resNewUserSlotLoader_lite;
@@ -57,7 +60,19 @@ export class LoadingScene extends Component {
         });
     };
 
-    testSpriteLoad2() {
+    async testSpriteLoad2() {
+        let self : any = this;
+        await new Promise<void>(function (resolve, reject) {
+            RockN.Util.loadResource(resMobileLoginLoading.LoadingBackground,null,
+                (err, item)=>{
+                    if (!err && self._testSprite) {
+                        self._testSprite.spriteFrame = item;
+                    }
+                    resolve();
+                }
+            );
+        });
+
         // 1. 먼저 ResourceUtil에서 '설계도(Prefab)'를 가져옵니다. (as Node 절대 금지!)
         // 유틸 함수를 <Prefab> 제네릭으로 잘 만들어두셨으니 타입 추론이 깔끔하게 됩니다.
         let prefab = ResourceUtil.get("PU_ProgressBarUI_mb", Prefab);
@@ -90,6 +105,11 @@ export class LoadingScene extends Component {
         let node :Node  = await ResourceUtil.getPrefab("PU_ProgressBarUI_mb");
         node.parent = this.node;
         return;
+    };
+
+    async changeEmptyScene(){
+        await new Promise(resolve => setTimeout(resolve, 500));
+        SceneManager.getInstance().changeToDynamicScene();
     }
 }
 

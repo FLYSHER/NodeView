@@ -174,7 +174,10 @@ export var ResourceUtil = {
             } else if (path.endsWith('.plist')) {
                 plists.push(path.replace('.plist', ''));
 
-            } else if (path.endsWith('.png')) {
+            }else if (path.endsWith('.jpg')){
+                let basePath = path.replace('.jpg', '');
+                pngs.push(basePath + '/spriteFrame');
+            }else if (path.endsWith('.png')) {
                 // 확장자를 뗀 기본 경로 추출
                 let basePath = path.replace('.png', '');
                 
@@ -230,9 +233,15 @@ export var ResourceUtil = {
 
             // 🌟 성공: 받아온 4개의 결과물 배열을 하나로 합칩니다.
             let allItems = [...loadedPrefabs, ...loadedPlists, ...loadedPngs, ...loadedFonts];
-
-            if (onComplete) {
-                onComplete(null, allItems);
+            if(isSingleItem){
+                if (onComplete) {
+                    onComplete(null, allItems[0]);
+                }
+            }
+            else{
+                if (onComplete) {
+                    onComplete(null, allItems);
+                }
             }
 
         } catch (error) {

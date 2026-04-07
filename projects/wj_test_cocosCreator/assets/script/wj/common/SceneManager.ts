@@ -1,5 +1,5 @@
 import { director, log, assert, warn } from 'cc';
-
+import * as cc from 'cc';
 const { sceneList, SCENE_TYPE } = window as any;
 
 export class SceneManager{
@@ -207,6 +207,38 @@ export class SceneManager{
         //     });
         // });
 	}
+
+    public changeToDynamicScene() {
+        // 1. 순수 코드로 빈 씬(Scene) 객체 생성
+        let myNewScene = new cc.Scene("MyCodeScene");
+
+        // 2. UI를 그리기 위한 필수 뼈대: Canvas 노드 생성
+        let canvasNode = new cc.Node("Canvas");
+        let canvasComp = canvasNode.addComponent(cc.Canvas);
+        
+        // 3. 화면을 비출 필수 뼈대: Camera 노드 생성
+        let cameraNode = new cc.Node("Camera");
+        let cameraComp = cameraNode.addComponent(cc.Camera);
+        // UI를 찍을 카메라 설정 (2D 환경 세팅)
+        cameraComp.projection = cc.Camera.ProjectionType.ORTHO; 
+        cameraNode.parent = canvasNode; // 카메라는 캔버스 자식으로
+
+        // 4. 테스트용 글자(Label) 노드 하나 만들어보기
+        let textNode = new cc.Node("HelloText");
+        textNode.addComponent(cc.UITransform);
+        let labelComp = textNode.addComponent(cc.Label);
+        labelComp.string = "코드로 만든 씬입니다!";
+        labelComp.color = cc.Color.WHITE;
+        textNode.parent = canvasNode;
+
+        // 5. 조립한 Canvas를 씬에 부착
+        myNewScene.addChild(canvasNode);
+
+        // 🌟 6. 대망의 씬 전환! (기존 씬은 메모리에서 내려가고 새 씬이 올라옵니다)
+        director.runScene(myNewScene);
+        
+        console.log("코드로 생성한 씬으로 전환 완료!");
+    }
 }
 
 

@@ -8,7 +8,7 @@
   ],
   "subMetas": {},
   "userData": {
-    "loadPluginInEditor": true,
+    "loadPluginInEditor": false,
     "loadPluginInWeb": true,
     "loadPluginInNative": true,
     "loadPluginInMiniGame": true,
