@@ -1,5 +1,6 @@
-import {readJsonSync, copySync, existsSync, readFileSync, writeFileSync, ensureDir, ensureDirSync} from 'fs-extra';
-import { join, dirname, basename } from 'path';
+import {readJsonSync, copySync, existsSync, readFileSync, writeFileSync, ensureDirSync} from 'fs-extra';
+import { join, basename } from 'path';
+
 // @ts-ignore
 import packageJSON from '../package.json';
 
@@ -16,6 +17,32 @@ const TARGET_IMAGE_URL = 'db://assets/legacy/images';
 const TARGET_PREFAB_URL = 'db://assets/legacy/prefabs';
 const TARGET_JSON_URL = 'db://assets/legacy/export_jsons';
 const TARGET_ANIM_URL = 'db://assets/legacy/animations';
+
+// config 에 legacy asset root 폴더 경로 체크 및 세팅
+async function checkLegacyRootConfig() {
+
+    const legacyAssetRootDir = await Editor.Profile.getProject(packageJSON.name, 'legacyAssetRoot');
+    const isPathInvalid = !legacyAssetRootDir || !existsSync(legacyAssetRootDir);
+
+    if (isPathInvalid) {
+        const reason = !legacyAssetRootDir ? "설정된 원본 리소스 경로가 없습니다." : "설정된 원본 경로가 올바르지 않습니다.";
+        console.warn(`[${packageJSON.name}] ${reason}`);
+
+        // 2. 강제 경고창 (Editor.Dialog.warn)
+        // 버튼을 하나만 배치하여 사용자가 설정을 인지하고 패널로 이동하게 만듭니다.
+        // @ts-ignore
+        await Editor.Dialog.warn(`${reason}\n패널에서 Legacy Root 경로를 다시 설정해주세요!`, {
+            buttons: ['설정 패널 열기'],
+            default: 0,
+            cancel: 0
+        });
+
+        // 3. 설정 패널 오픈
+        Editor.Panel.open(`${packageJSON.name}.bridge-panel`);
+    } else {
+        console.log(`[${packageJSON.name}] 원본 경로 활성화됨: ${legacyAssetRootDir}`);
+    }
+}
 
 // ----------------------------------------------------------------
 // [공통 헬퍼 함수] JSON 데이터를 분석하여 의존성(plist, png)을 복사하고 DB를 갱신
@@ -40,22 +67,13 @@ async function copyDependencies(assetInfo: any, jsonData: any, legacyRootDir: st
         return;
     }
 
-    // PU_extraSaleUI.ExportJson 를 asset 에 등록 후  assetInfo 예제
-    // assetInfo
-    //     name: 'PU_extraSaleUI.ExportJson',
-    //     source: 'db://assets/PU_extraSaleUI.ExportJson',
-    //     path: 'db://assets/PU_extraSaleUI',
-    //     url: 'db://assets/PU_extraSaleUI.ExportJson',
-    //     file: '/Users/myID/myCompany/cocos_res_converter/projects/legacy_res_converter/assets/PU_extraSaleUI.ExportJson',
-    //     uuid: 'f2ae49f7-662b-4818-a947-xxxxxxxx6853cb',
-
     let needRefresh = false;
 
     ensureDirSync(TARGET_IMAGE_PATH); // target path 가 없으면 생성
 
     const originResSearchPath = [
         legacyRootDir,
-        join(legacyRootDir,'binary')
+        join(legacyRootDir, 'binary')
     ];
 
     const findValidPath = (relPath: string): string | null => {
@@ -68,6 +86,7 @@ async function copyDependencies(assetInfo: any, jsonData: any, legacyRootDir: st
         return null;
     };
 
+    console.log("[Main]  = 관련 아틀라스 복사 = ");
     for (const fileName of textures) {
         // 혹시 확장자가 명시 안 된 경우를 대비한 방어 코드
         const isPlist = fileName.toLowerCase().endsWith('.plist');
@@ -76,9 +95,6 @@ async function copyDependencies(assetInfo: any, jsonData: any, legacyRootDir: st
 
         const validPlist = findValidPath(originName);
         const validPng = findValidPath(originPngName);
-
-        const origin_plist_path = join(legacyRootDir, originName);
-        const origin_png_path = origin_plist_path.replace('.plist', '.png');
 
         if (validPlist) {
             copySync(validPlist, join(TARGET_IMAGE_PATH, basename(validPlist)));
@@ -133,14 +149,14 @@ async function copyDependencies(assetInfo: any, jsonData: any, legacyRootDir: st
 // ----------------------------------------------------------------
 async function processArmature(assetInfo: any, jsonData: any, assetRootDir: string) {
     console.log("=> processArmature 로직 시작...");
-    
+
     // 1. 공통 텍스처 의존성 복사
     await copyDependencies(assetInfo, jsonData, assetRootDir );
 
     ensureDirSync(TARGET_PREFAB_PATH);
     ensureDirSync(TARGET_ANIM_PATH);
 
-    // 2. 프리팹 생성 명령 씬으로 전달    
+    // 2. 프리팹 생성 명령 씬으로 전달
     // const dest_url = assetInfo.url;
     // const prefab_url = `${dirname(dest_url)}/${basename(assetInfo.file).replace('.ExportJson', '.prefab')}`;
     const prefab_url = `${TARGET_PREFAB_URL}/${basename(assetInfo.file).replace('.ExportJson', '.prefab')}`;
@@ -163,15 +179,15 @@ async function processArmature(assetInfo: any, jsonData: any, assetRootDir: stri
 // [내부 헬퍼 함수] 기존 cocos studio UI 전용 처리 로직
 // ----------------------------------------------------------------
 async function processUI(assetInfo: any, jsonData: any, assetRootDir: string) {
-    // 1. 공통 텍스처 의존성 복사
+
+    // 해당 UI 에서 사용하는 리소스 ( plist/png, fnt/png ) asset-db 에 추가
     await copyDependencies(assetInfo, jsonData, assetRootDir);
 
-    // 2. 프리팹 생성 명령 씬으로 전달
     ensureDirSync(TARGET_PREFAB_PATH);
     ensureDirSync(TARGET_ANIM_PATH);
 
     const prefab_url = `${TARGET_PREFAB_URL}/${basename(assetInfo.file).replace('.ExportJson', '.prefab')}`;
-    
+
     // scene.ts의 createPrefabFromExportJson 호출
     await Editor.Message.request('scene', 'execute-scene-script', {
         name: packageJSON.name, // 'cocos_legacy_bridge', // extension 이름. package.json의 name 과 맞아야 함.
@@ -188,7 +204,7 @@ async function processUI(assetInfo: any, jsonData: any, assetRootDir: string) {
 
 function collectBMFonts(node: any, fontSet: Set<string>){
     if (!node) return;
-    
+
     // LabelBMFont 타입이고 폰트 경로 정보가 있는 경우
     if (node.classname === "LabelBMFont" && node.options?.fileNameData?.path) {
         fontSet.add(node.options.fileNameData.path);
@@ -202,84 +218,57 @@ function collectBMFonts(node: any, fontSet: Set<string>){
 // 에셋 패널에 파일이 추가되었을 때 호출.
 const onAssetAdd = ( uuid: string, info: any )=>{
     if (info.name.endsWith('.ExportJson')) {
-        console.log("[Main][Event] ### asset-db:asset-add ###");
-        console.log("   >>> uuid, name : ", uuid, info.name );
-        
+        console.log("[Main] asset-db 에 exportJson 파일 추가 : ", info.name, uuid );
+
         methods.handleExportJson( uuid );
     }
 }
 
 export const methods: { [key: string]: (...any: any) => any } = {
-    // Lagacy 에셋 루트 폴더 설정 
+
+    // legacy asset root folder 세팅을 위한 패널 오픈
     openPanel() {
         console.log('[cocos_legacy_bridge] openPanelMethod 가 실행되었습니다.', packageJSON.name);
         Editor.Panel.open('cocos_legacy_bridge.bridge-panel');
-        //  Editor.Panel.open(packageJSON.name);
     },
 
-    // Legacy UI,AR 파일이 asset 패널에 drag-drop 된 후 호출.
-    // asset 에 로드된 exportJson 파일이 로드 된 후 uuid 받음.
-    // exportJson 파일 분석 후 scene 으로 넘김
+    // asset 에 추가된 exportJson 파일 분석 후
+    // UI, AR 포팅 프로세스 실행.
     async handleExportJson( uuid: string ) {
+
+        // step 1. load 할때, legacy asset root 폴더 경로 체크하지만, 혹시 몰라 다시 체크
         let legacyAssetRootDir = await Editor.Profile.getProject(packageJSON.name, 'legacyAssetRoot');
 
-        const isPathInvalid = !legacyAssetRootDir || !existsSync(legacyAssetRootDir);
-
-        if (isPathInvalid) {
-            const reason = !legacyAssetRootDir ? "설정된 경로가 없습니다." : "설정된 경로가 올바르지 않습니다.";
-
-            // @ts-ignore
-            await Editor.Dialog.warn(`${reason}\n패널에서 Legacy Root 경로를 다시 설정해주세요!`, {
-                buttons: ['설정 패널 열기'],
-                default: 0,
-                cancel: 0
-            });
-
-            // 패널을 열어 사용자가 수정하게 유도
-            // @ts-ignore
-            Editor.Panel.open('cocos_legacy_bridge.bridge-panel');
-
-            // // @ts-ignore
-            // Editor.Dialog.warn('패널에서 Legacy Root 경로를 먼저 설정해주세요!', {
-            //     buttons: ['확인'], // 버튼 배열을 직접 지정하여 하나만 나오게 함
-            //     default: 0,       // 엔터 키 입력 시 실행될 버튼 인덱스
-            //     cancel: 0         // ESC 키 입력 시 실행될 버튼 인덱스
-            // });
-            // // @ts-ignore
-            // Editor.Panel.open('cocos_legacy_bridge.bridge-panel'); // 패널 자동 열기
+        if (!legacyAssetRootDir || !existsSync(legacyAssetRootDir)) {
+            await checkLegacyRootConfig();
             return;
         }
 
-        console.log('[Main] 사용 중인 원본 경로:', legacyAssetRootDir);
-
-        // step 1. uuid 로 에셋디비에서 exportJson 에셋 정보 요청 
-        const assetInfo = await Editor.Message.request('asset-db', 'query-asset-info', uuid ); 
+        // step 2. 로드된 exportJson 에셋에 대한 assetInfo 요청
+        const assetInfo = await Editor.Message.request('asset-db', 'query-asset-info', uuid );
 
         if (!assetInfo || !assetInfo.file.toLowerCase().endsWith('.exportjson')) {
-            console.warn("해당 uuid 로 assetInfo 를 가져올 수 없음 : ", uuid );
+            console.warn("해당 uuid 로 해당 exportJson 에 대한 assetInfo 를 가져올 수 없음 : ", uuid );
             return;
         }
 
         try {
-            const jsonData = readJsonSync( assetInfo.file ); 
+            const jsonData = readJsonSync( assetInfo.file );
             const isArmature = !!(jsonData.armature_data || jsonData.animation_data);
 
+            // step 3. AR / UI 인지 판단 후 해당 프로세스 실행
             if (isArmature) {
-                console.log(`[Main] 🦾 Armature 파일 감지 : ${assetInfo.name}`);
                 await processArmature(assetInfo, jsonData, legacyAssetRootDir); // 외부 함수 직접 호출
             } else {
-                console.log(`[Main] 🖼️ UI 파일 감지 : ${assetInfo.name}`);
                 await processUI(assetInfo, jsonData, legacyAssetRootDir); // 외부 함수 직접 호출
             }
 
-            // 마지막으로 exportJson 파일을 옮긴다.
+            // step 4. export json 파일을 TARGET_JSON_PATH 에 없다면 그곳으로 이동.
             ensureDirSync(TARGET_JSON_PATH);
             const export_json_src_url = assetInfo.url;
             const destUrl = `${TARGET_JSON_URL}/${basename(assetInfo.file)}`;
 
-            // 만약 이미 올바른 폴더(export_jsons)에 떨군 게 아니라면 이동시킵니다.
             if (export_json_src_url !== destUrl) {
-                console.log(`[Main] 🚚 작업 완료! 원본 ExportJson 파일을 아카이브로 이동: ${destUrl}`);
                 // @ts-ignore
                 await Editor.Message.request('asset-db', 'move-asset', export_json_src_url, destUrl);
             }
@@ -287,7 +276,7 @@ export const methods: { [key: string]: (...any: any) => any } = {
         catch( err ) {
             console.error( "error : ", err );
         }
-        
+
     },
 
     showLog() {
@@ -300,18 +289,19 @@ export const methods: { [key: string]: (...any: any) => any } = {
 };
 
 export function load() {
-    // 에셋패널에 파일 drag-drop 후 에셋에 등록이 잘 되면 호출
     // @ts-ignore
+    Editor.Message.addBroadcastListener('asset-db:asset-add', onAssetAdd ); // asset-db 에 파일이 추가될 경우, 리스너 등록
 
-     // @ts-ignore
-    Editor.Message.addBroadcastListener('asset-db:asset-add', onAssetAdd );
+    // legacy asset root 폴더 경로 체크
+    setTimeout(checkLegacyRootConfig, 1000);
 
-    console.log("extension Load! ver_5 ");
+    console.log(`[${packageJSON.name}] Extension Loaded!`);
 }
 
 export function unload() {
+
     // @ts-ignore
     Editor.Message.removeBroadcastListener('asset-db:asset-add', onAssetAdd);
-    
-    console.log("extension Unload! ver_5 ");
+
+    console.log(`[${packageJSON.name}] Extension Unloaded!`);
 }

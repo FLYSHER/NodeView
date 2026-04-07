@@ -143,16 +143,17 @@ export async function loadAssetByUUID(uuid: string): Promise<any> {
 export function cleanupTempNode(node: any) {
     if (!node) return;
 
-    const nodeUuid = node.uuid;
+    const nodeUUID = node.uuid;
+
     // @ts-ignore
-    Editor.Selection.unselect('node', nodeUuid);
+    Editor.Selection.unselect('node', nodeUUID);
     node._prefab = null;
     node.parent = null;
     node.destroy();
     // @ts-ignore
-    Editor.Message.send('scene', 'node-destroyed', nodeUuid);
+    Editor.Message.send('scene', 'node-destroyed', nodeUUID);
     // @ts-ignore
-    Editor.Message.send('scene', 'change-node-hierarchy', nodeUuid);
+    Editor.Message.send('scene', 'change-node-hierarchy', nodeUUID);
 }
 
 // 9-sliced capInsets 를 새 엔진 버전의 속성으로 세팅

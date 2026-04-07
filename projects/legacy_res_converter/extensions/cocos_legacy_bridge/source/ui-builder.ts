@@ -74,8 +74,8 @@ export async function buildNodeTree(jsonData: any, parentNode: Node, resourceMap
         case "Button":
             await setupButton(currentNode, options, resourceMap );
             break;
-        case "Text": // 시스템 폰트
-        case "Label": // 🚨 신버전 Cocos Studio 대응 (여기로 걸려들어옵니다!)
+        case "Text":
+        case "Label": // 3.8.x 버전부터는 같은 위젯에 속성으로 BMFont / system font 나눈다.
             await setupLabel(currentNode, options, resourceMap, false);
             break;  
         case "LabelBMFont": // BM 폰트
@@ -468,13 +468,13 @@ async function setupImageView(node: Node, options: any, resourceMap: ResourceMap
     if (options.fileNameData?.path) {
         const resData = resourceMap.getResData( options.fileNameData.path );
 
+        // 스프라이트 프레임 세팅
         // @ts-ignore
         const loc_spriteFrame = await loadAssetByUUID( resData?.frameUUID );
         sprite.spriteFrame = loc_spriteFrame;
-        // console.log( "loc_spriteFrame : ", loc_spriteFrame );
 
         if(loc_spriteFrame) {
-            // 에디터에 아틀라스 명시적으로 세팅
+            // 스프라이트 아틀라스 세팅
             // @ts-ignore
             const loc_atlas = await loadAssetByUUID( resData?.atlasUUID );
             if(loc_atlas) {
