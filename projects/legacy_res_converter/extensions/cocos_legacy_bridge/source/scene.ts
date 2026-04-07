@@ -38,7 +38,7 @@ export const methods = {
 
     // UI 프리팹 생성
     async createCCStudioUIPrefab(args: any) {
-        const { name, destUrl, jsonData, imageDestUrl } = args;
+        const { name, destUrl, jsonData, imageDestUrl, animDestUrl } = args;
         let rootNode = null;
 
         console.log("createPrefabFromExportJson : ", name, destUrl );
@@ -93,10 +93,7 @@ export const methods = {
             await apply9ScaleToMeta(spriteFrameMap, jsonData); // 노드를 만들기 전에 9-sliced 메타파일 저장
 
             // ui action
-            // 💡 [추가] 애니메이션(액션 리스트)이 존재하는지 확인합니다.
             const hasAnimation = jsonData.animation && jsonData.animation.actionlist && jsonData.animation.actionlist.length > 0;
-
-            // 💡 [추가] 애니메이션이 있을 때만 Map을 생성하고, 없으면 undefined!
             const uiActionNodeMap = hasAnimation ? new Map<number, string>() : undefined;
 
             // 루트 위젯 order
@@ -112,8 +109,16 @@ export const methods = {
             }
 
             if (hasAnimation) {
+                const destDir = `${animDestUrl}/${name}`;
+
+                // @ts-ignore
+                if (!await Editor.Message.request('asset-db', 'query-asset-info', destDir)) {
+                    // @ts-ignore
+                    await Editor.Message.request('asset-db', 'create-asset', destDir, null);
+                }
+
                 // console.log("🎯 애니메이션 감지됨! ActionTag Map 구축 완료 (크기):", uiActionNodeMap?.size);
-                await buildUIAnimations(rootNode, jsonData, uiActionNodeMap!);
+                await buildUIAnimations(rootNode, jsonData, uiActionNodeMap!, destDir);
             }
 
             // const prefabUrl = `db://assets/${name}.prefab`;

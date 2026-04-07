@@ -138,7 +138,7 @@ async function generateUIActionClip( rootNode: Node, action:any, uiActionNodeMap
     return clip;
 }
 
-export async function buildUIAnimations(rootNode: Node, jsonData: any, uiActionNodeMap: Map<number, string>) {
+export async function buildUIAnimations(rootNode: Node, jsonData: any, uiActionNodeMap: Map<number, string>, destDir: string) {
     const animData = jsonData.animation;
     if (!animData || !animData.actionlist || animData.actionlist.length === 0) return;
 
@@ -147,13 +147,15 @@ export async function buildUIAnimations(rootNode: Node, jsonData: any, uiActionN
 
     // 클립 개수대로 animation clip 생성
     for (const action of animData.actionlist) {
+
         const clip = await generateUIActionClip( rootNode, action, uiActionNodeMap );
 
         // asset 에 저장
         // @ts-ignore
         const serialized = cce.Utils.serialize(clip);
         // @ts-ignore
-        const clipUrl = `db://assets/${rootNode.name}_${clip.name}.anim`;
+        // const clipUrl = `db://assets/${rootNode.name}_${clip.name}.anim`;
+        const clipUrl = `${destDir}/${rootNode.name}_${clip.name}.anim`;
 
         const dataStr = typeof serialized === 'string' ? serialized : JSON.stringify(serialized, null, 2);
         //@ts-ignore

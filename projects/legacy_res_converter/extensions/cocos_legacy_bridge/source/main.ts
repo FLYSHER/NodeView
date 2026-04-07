@@ -168,6 +168,8 @@ async function processUI(assetInfo: any, jsonData: any, assetRootDir: string) {
 
     // 2. 프리팹 생성 명령 씬으로 전달
     ensureDirSync(TARGET_PREFAB_PATH);
+    ensureDirSync(TARGET_ANIM_PATH);
+
     const prefab_url = `${TARGET_PREFAB_URL}/${basename(assetInfo.file).replace('.ExportJson', '.prefab')}`;
     
     // scene.ts의 createPrefabFromExportJson 호출
