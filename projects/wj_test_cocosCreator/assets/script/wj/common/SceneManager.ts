@@ -35,8 +35,8 @@ export class SceneManager{
         }
 
         // 실제 씬 이동 처리
-        director.loadScene(sceneName, (err) => {
-            cb && cb();
+        director.loadScene(sceneName, (err, scene) => {
+            cb && cb(err, scene);
             if (err) {
                 console.error(`[SceneManager] 씬 이동 실패! (${sceneName})`, err);
             } else {
@@ -110,9 +110,29 @@ export class SceneManager{
 
         let _param = param? param : {}; 
         _param.loadingSceneInfo = sceneList[ currIdx ];
-        _param.completeCallback = cb;
+        _param.completeCallback = (err, scene) => {
+                           //1. 새로운 노드 생성
+                const newNode = new cc.Node('LobbyComponet');
+
+                // 2. 특정 컴포넌트 추가 (미리 임포트한 클래스 이름 사용)
+                //const myComponent = newNode.addComponent();
+                // 3. 로드된 현재 씬의 최상위에 노드 추가
+                // loadScene의 두 번째 인자인 'scene' 객체를 사용하거나, director.getScene()을 사용합니다.
+                const sceneNode = scene || director.getScene();    
+                const canvasNode = scene.getComponentInChildren(cc.Canvas).node;
+                canvasNode.addChild(newNode);
+
+
+                let textNode = new cc.Node("HelloText");
+                textNode.addComponent(cc.UITransform);
+                let labelComp = textNode.addComponent(cc.Label);
+                labelComp.string = "[AAAA]";
+                labelComp.color = cc.Color.WHITE;
+                textNode.parent = canvasNode;            
+        };
 
         this.changeScene('02_loadingScene', _param);
+        
         /**
          * release global nodes
          */

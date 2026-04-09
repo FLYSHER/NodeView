@@ -1,4 +1,5 @@
-import { _decorator, Component, resources, JsonAsset, instantiate,Prefab, Node, Sprite, UITransform,  log, Primitive } from 'cc';
+import { _decorator, Component, resources, JsonAsset, instantiate, Prefab, Node, Sprite, UITransform, log, Primitive, director, Label } from 'cc';
+import * as cc from 'cc';
 import { SceneManager, ResourceUtil } from './Includes';
 import { NATIVE, PREVIEW } from 'cc/env'; // 환경 분기용
 
@@ -27,6 +28,7 @@ export class LoadingScene extends Component {
         log("[CHECK] LoaingScene ", JSON.stringify(settingData))
         await this.loadLoaderResource(settingData);
         await this.testSpriteLoad2();
+        await this.changeScene(settingData);
         //await this.testSpriteLoad();
         //await this.changeEmptyScene();
     }
@@ -105,6 +107,37 @@ export class LoadingScene extends Component {
         let node :Node  = await ResourceUtil.getPrefab("PU_ProgressBarUI_mb");
         node.parent = this.node;
         return;
+    };
+
+    async changeScene(settingData){
+        SceneManager.getInstance().changeScene("03_emptyScene", null, (err,scene) => {
+            if (err) {
+                
+            }
+            else {
+                // // 1. 새로운 노드 생성
+                // const newNode = new Node('LobbyComponet');
+
+                // // 2. 특정 컴포넌트 추가 (미리 임포트한 클래스 이름 사용)
+                // //const myComponent = newNode.addComponent();
+                // // 3. 로드된 현재 씬의 최상위에 노드 추가
+                // // loadScene의 두 번째 인자인 'scene' 객체를 사용하거나, director.getScene()을 사용합니다.
+                // const sceneNode = scene || director.getScene();    
+                // const canvasNode = scene.getComponentInChildren(cc.Canvas).node;
+                // canvasNode.addChild(newNode);
+
+
+                // let textNode = new Node("HelloText");
+                // textNode.addComponent(UITransform);
+                // let labelComp = textNode.addComponent(Label);
+                // labelComp.string = "";
+                // labelComp.color = cc.Color.WHITE;
+                // textNode.parent = canvasNode;
+
+                settingData.completeCallback(err, scene);
+
+            }
+        });
     };
 
     async changeEmptyScene(){
