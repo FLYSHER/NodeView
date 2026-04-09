@@ -247,7 +247,11 @@ function extractTrackChannels(frames: any[], setupPose: any) {
             data.y.push((f.y ?? 0) + (setupPose.y ?? 0));
             data.sx.push((f.cX ?? 1) * (setupPose.cX ?? 1));
             data.sy.push((f.cY ?? 1) * (setupPose.cY ?? 1));
-            data.rotV.push(-((f.kX ?? 0) + (setupPose.kX ?? 0)));
+
+            // Degree 로 변환
+            // data.rotV.push(-((f.kX ?? 0) + (setupPose.kX ?? 0)));
+            const totalRotationRad = (f.kX ?? 0) + (setupPose.kX ?? 0);
+            data.rotV.push(-(totalRotationRad * RAD_TO_DEG));
 
             const color = f.color || {};
             data.cR.push(color.r ?? 255);
@@ -360,25 +364,7 @@ function addBlendModeTrack(animClip: any, targetPath: string, frames: any[]) {
     animClip.addTrack(blendTrack);
 }
 
-function createSkinBone(bone: any, boneNode: Node) {
-    // skin bone 생성
-    const skinBone = new Node(`${bone.name}_skinBone`);
-    skinBone.addComponent(UITransform).setContentSize(0,0);
-    skinBone.setParent(boneNode);
-
-    // 첫번재 display data 가져와 해당 transform 을 skinBone 에 세팅
-    const firstDisplay = bone.display_data[0];
-    if (firstDisplay.skin_data && firstDisplay.skin_data.length > 0) {
-        const skinData = firstDisplay.skin_data[0];
-        skinBone.setPosition(skinData.x ?? 0, skinData.y ?? 0, 0);
-        skinBone.setScale(skinData.cX ?? 1, skinData.cY ?? 1, 1);
-        skinBone.setRotationFromEuler(0, 0, -(skinData.kX ?? 0) * RAD_TO_DEG);
-    }
-
-    return skinBone;
-}
-
-function createSkinNode(bone: any, renderRoot: Node, skinBone: Node, frames: SpriteFrame[], anchorX_JSON: number, anchorY_JSON: number) {
+function createSkinNode(bone: any, renderRoot: Node, targetBone: Node, frames: SpriteFrame[], anchorX_JSON: number, anchorY_JSON: number) {
     const skinNode = new Node(`${bone.name}_skinNode`);
     skinNode.layer = Layers.Enum.UI_2D;
     skinNode.setParent(renderRoot);
@@ -399,7 +385,7 @@ function createSkinNode(bone: any, renderRoot: Node, skinBone: Node, frames: Spr
     uiTrans.setAnchorPoint(anchorX, anchorY);
 
     // BoneFollower 컴포넌트 속성 세팅
-    follower.targetBone = skinBone;
+    follower.targetBone = targetBone;
 
     // SkinController 컴포넌트 속성 세팅
     skinCtrl.frames = frames;
@@ -459,6 +445,7 @@ function getSkinTrackData( boneData: any, setupPoseData: any) {
     return null;
 }
 
+// Bone 하나에 대한 animation Track 세팅
 function setBoneKeyFrameData( animClip: any, boneData: any, setupPoseData: any, nodePathMap: Record<string, string> ) {
     const boneName = boneData.name;
     const bonePath = nodePathMap[boneName]; // ex) pelvis/spine/boneName
@@ -574,12 +561,19 @@ export async function buildArmatureTree(armatureData: any, rootNode: Node): Prom
     // clip 재사용과 layered animation 등이 가능. 
     function _recordPaths(node: Node, currentPath: string) {
         for (const child of node.children) {
+
+            if(child.name === 'RenderRoot') {
+                continue; // renderRoot 쪽은 nodePathMap 에서 제외
+            }
+
             const childPath = currentPath ? `${currentPath}/${child.name}` : child.name;
             nodePathMap[child.name] = childPath; 
             _recordPaths(child, childPath);      
         }
     }
-    _recordPaths(rootNode, "");
+
+    nodePathMap['BoneRoot'] = 'BoneRoot';
+    _recordPaths(boneRoot, "BoneRoot");
 
     return { nodePathMap, nodeDict };
 }
@@ -605,11 +599,11 @@ export async function buildAllSkinNode(armatureData: any, nodeDict: Record<strin
     // render root 노드 생성
     const renderRoot = nodeDict['__RenderRoot__'];
 
-    for (const bone of sortedBoneData) {
-        const boneNode = nodeDict[bone.name];
+    for (const boneData of sortedBoneData) {
+        const boneNode = nodeDict[boneData.name];
         if (!boneNode) continue;
 
-        const displayDataList = bone.display_data || []; // 본에 할당된 display_data. 없으면 해당 key 가 없다.
+        const displayDataList = boneData.display_data || []; // 본에 할당된 display_data. 없으면 해당 key 가 없다.
         if (displayDataList.length === 0) continue; // 스킨 데이터가 없으면 다음으로..
 
         const frames: SpriteFrame[] = [];   // 본에 할당된 스프라이트 프레임들
@@ -634,13 +628,10 @@ export async function buildAllSkinNode(armatureData: any, nodeDict: Record<strin
 
         if (frames.length === 0) continue; // sprite frame 없는 bone 은 넘어간다.
 
-        // 스킨 본 생성
-        const skinBone = createSkinBone(bone, boneNode);
-
         // 스킨 노드 생성
         const anchorX_JSON = (firstResData && firstResData.pX !== undefined) ? firstResData.pX : 0.5;
         const anchorY_JSON = (firstResData && firstResData.pY !== undefined) ? firstResData.pY : 0.5;
-        createSkinNode(bone, renderRoot, skinBone, frames, anchorX_JSON, anchorY_JSON);
+        createSkinNode(boneData, renderRoot, boneNode, frames, anchorX_JSON, anchorY_JSON);
     }
 }
 
