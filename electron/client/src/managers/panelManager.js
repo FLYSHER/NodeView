@@ -130,12 +130,38 @@ var PanelManager = (function() {
                 e.preventDefault();
                 const assetsPanel = document.getElementById('assets-panel-drop-zone');
                 if (!assetsPanel) return;
+
                 const rect = assetsPanel.getBoundingClientRect();
                 assetsPanel.classList.remove('drag-over-active');
+
                 if (e.clientX >= rect.left && e.clientX <= rect.right &&
                     e.clientY >= rect.top && e.clientY <= rect.bottom) {
-                    if (typeof Loader !== 'undefined' && Loader.onDropHandler) {
-                        Loader.onDropHandler(e);
+
+                    const isElectron = !!(window && window.process && window.process.type);
+
+                    if (isElectron) {
+                        const fs = require('fs');
+                        const { ipcRenderer } = require('electron');
+                        const files = e.dataTransfer.files;
+                        const arrFilePaths = [];
+
+                        for (let i = 0; i < files.length; i++) {
+                            if (fs.statSync(files[i].path).isDirectory()) {
+                                alert("폴더 드래그는 지원하지 않습니다. 파일만 넣어주세요.");
+                                return;
+                            }
+                            arrFilePaths.push(files[i].path);
+                        }
+
+                        if (arrFilePaths.length > 0) {
+                            console.log("Electron Mode: Sending IPC");
+                            ipcRenderer.send('fileDropEvent', arrFilePaths);
+                        }
+                    } else {
+                        if (typeof Loader !== 'undefined' && Loader.onDropHandler) {
+                            console.log("Web Mode: Calling onDropHandler");
+                            Loader.onDropHandler(e);
+                        }
                     }
                 }
             }, false);
