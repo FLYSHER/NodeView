@@ -2,13 +2,21 @@
 const {app, BrowserWindow, Menu, dialog} = require('electron')
 const path = require('path')
 const loadManager = require('./LoadManager')
+const windowStateKeeper = require('electron-window-state');
 
 
 function createWindow () {
+  let mainWindowState = windowStateKeeper({
+    defaultWidth: 800,
+    defaultHeight: 600
+  });
+
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
+    x: mainWindowState.x,
+    y: mainWindowState.y,
+    width: mainWindowState.width,
+    height: mainWindowState.height,
     webPreferences: {
       webSecurity: false,
       preload: path.join(__dirname, 'preload.js'),
@@ -16,6 +24,8 @@ function createWindow () {
       contextIsolation: false
     }
   })
+
+  mainWindowState.manage(mainWindow);
 
   console.log("electron created window");
   // and load the index.html of the app.
@@ -50,6 +60,29 @@ const template = [
       {
         label: 'Exit',
         role: 'close'
+      }
+    ]
+  },
+  {
+    label: 'Debug',
+    submenu: [
+      {
+        label: 'Toggle Developer Tools',
+        accelerator: 'F12',
+        click (item, focusedWindow) {
+          if (focusedWindow) {
+            focusedWindow.webContents.toggleDevTools()
+          }
+        }
+      },
+      {
+        label: 'Reload',
+        accelerator: 'F5',
+        click (item, focusedWindow) {
+          if (focusedWindow) {
+            focusedWindow.webContents.reload()
+          }
+        }
       }
     ]
   },
