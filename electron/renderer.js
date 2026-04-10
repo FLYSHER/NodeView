@@ -7,6 +7,7 @@
 
 
 const { ipcRenderer } = require('electron');
+const fs = require('fs');
 
 class FileEntry {
 
@@ -34,19 +35,31 @@ var ElectronRenderer = {
             "drop",
             function (evt) {
                 evt.stopPropagation();
-                evt.preventDefault();   // stops the browser from redirecting off to the image.
+                evt.preventDefault();
 
-                console.log("renderer drop");
-
+                var files = evt.dataTransfer.files;
                 var arrFilePaths = [];
-                for (var i=0;i < evt.dataTransfer.files.length; i++)
-                {
-                    arrFilePaths.push(evt.dataTransfer.files[i].path);
+
+                for (var i = 0; i < files.length; i++) {
+                    // [추가] 폴더인지 검사
+                    try {
+                        if (fs.statSync(files[i].path).isDirectory()) {
+                            alert("프로그램 버전은 폴더 드래그를 지원하지 않습니다. 파일만 선택해서 넣어주세요.");
+                            return; // 로직 중단
+                        }
+                    } catch (e) {
+                        console.error("파일 상태 확인 중 오류:", e);
+                        continue;
+                    }
+
+                    arrFilePaths.push(files[i].path);
                 }
 
-                ipcRenderer.send('fileDropEvent', arrFilePaths);
-
-                // Loader.readFile( evt.dataTransfer.files );
+                // 폴더가 없을 때만 메인 프로세스로 전송
+                if (arrFilePaths.length > 0) {
+                    console.log("renderer drop - files only");
+                    ipcRenderer.send('fileDropEvent', arrFilePaths);
+                }
             }, false);
 
 
