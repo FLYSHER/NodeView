@@ -152,7 +152,21 @@
                 <input type="checkbox" id="visible" name="visible" checked>
             </div>
 
+            <div id="label-option" class="section-header" style="display: none;">Label</div>
+            <div id="label-content-group" class="input-group" style="display: none;">
+                <label class="styleLabel">Text:</label>
+                <textarea id="labelText" class="positionInput" style="width: 100%; height: 60px; resize: vertical;"></textarea>
+            </div>
+
             <div class="section-header">Transform</div>
+            <div class="input-group">
+                <label class="styleLabel draggable-label" data-target="anchorX">Anchor X:</label>
+                <input type="number" id="anchorX" name="anchorX" step="0.1" class="positionInput text-right">
+            </div>
+            <div class="input-group">
+                <label class="styleLabel draggable-label" data-target="anchorY">Anchor Y:</label>
+                <input type="number" id="anchorY" name="anchorY" step="0.1" class="positionInput text-right">
+            </div>
             <div class="input-group">
                 <label class="styleLabel draggable-label" data-target="posX">Position X:</label>
                 <input type="number" id="posX" name="posX" class="positionInput text-right">

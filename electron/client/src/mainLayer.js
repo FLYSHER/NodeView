@@ -61,8 +61,6 @@ var MainLayer = cc.Layer.extend({
         this.addChild(label, 0, this.DESC_TAG);
 
         this._nodeList = {};
-        this._nodeOrder = [];
-        this._movementCtrl = new UiPositionCtrl();
         this._itemList = new UIItemList(this);
         this._treeView = new UIScrollTreeViewCtrl(this);
         this._treeView.setup();

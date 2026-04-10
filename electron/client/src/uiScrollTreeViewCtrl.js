@@ -348,12 +348,7 @@ class UIScrollTreeViewCtrl {
                     const treeString = this.getOriginalTreeString(originalJson.widgetTree, this._mainLayer.assetLibrary);
                     if (typeof copyStringToClipboard === 'function') {
                         copyStringToClipboard(treeString);
-                        console.log("선택된 에셋의 원본 위젯 구조를 복사했습니다.");
-                    } else {
-                        console.warn("copyStringToClipboard 함수가 정의되지 않았습니다.");
                     }
-                } else {
-                    console.warn("선택된 에셋의 원본 정보를 찾을 수 없습니다.");
                 }
             } else {
                 if (Object.keys(this._treeWidgetObj).length > 0) {
@@ -365,11 +360,7 @@ class UIScrollTreeViewCtrl {
                     this._treeString += "};";
                     if (typeof copyStringToClipboard === 'function') {
                         copyStringToClipboard(this._treeString);
-                    } else {
-                        console.warn("copyStringToClipboard 함수가 정의되지 않았습니다.");
                     }
-                } else {
-                    console.warn("복사할 트리 데이터가 없습니다. 먼저 트리를 로드하거나 선택해주세요.");
                 }
             }
         }.bind(this));
@@ -382,11 +373,7 @@ class UIScrollTreeViewCtrl {
                 if (selectedNode.data && selectedNode.data.nodeId) {
                     const cocosNodeIdToDelete = selectedNode.data.nodeId;
                     this._mainLayer._deletionManager.deleteSceneNode(cocosNodeIdToDelete);
-                } else {
-                    console.warn("삭제할 수 있는 노드가 선택되지 않았습니다.");
                 }
-            } else {
-                console.warn("계층구조 패널에서 삭제할 노드를 선택해주세요.");
             }
         }.bind(this));
 
@@ -408,6 +395,23 @@ class UIScrollTreeViewCtrl {
                     const isDebugEnabled = targetSpine.getDebugSlotsEnabled ? targetSpine.getDebugSlotsEnabled() : false;
                     targetSpine.setDebugSlotsEnabled(!isDebugEnabled);
                     sender.target.innerText = !isDebugEnabled ? "Hide Slot" : "Show Slot";
+                }
+            });
+        }.bind(this));
+
+        document.getElementById('labelText').addEventListener('input', function (e) {
+            this._selectNode.forEach(item => {
+                let target = item;
+                if (item instanceof DraggableNode) {
+                    target = item.ui || item.armature || item.spine || item.image || item;
+                }
+
+                if (target && typeof target.setString === 'function') {
+                    target.setString(e.target.value);
+
+                    if (typeof Gizmo_DrawTouchLayerByRect === 'function') {
+                        Gizmo_DrawTouchLayerByRect(item.getBoundingBoxToWorld());
+                    }
                 }
             });
         }.bind(this));
@@ -472,6 +476,30 @@ class UIScrollTreeViewCtrl {
             });
         }.bind(this));
 
+        document.getElementById('anchorX').addEventListener('input', function (e) {
+            this._selectNode.forEach(item => {
+                const val = parseFloat(e.target.value);
+                if (!isNaN(val) && item) {
+                    item.setAnchorPoint(cc.p(val, item.getAnchorPoint().y));
+                    if (this._mainLayer && item.__instanceId) {
+                        this._mainLayer.updateMenuWithNodeId(item.__instanceId);
+                    }
+                }
+            });
+        }.bind(this));
+
+        document.getElementById('anchorY').addEventListener('input', function (e) {
+            this._selectNode.forEach(item => {
+                const val = parseFloat(e.target.value);
+                if (!isNaN(val) && item) {
+                    item.setAnchorPoint(cc.p(item.getAnchorPoint().x, val));
+                    if (this._mainLayer && item.__instanceId) {
+                        this._mainLayer.updateMenuWithNodeId(item.__instanceId);
+                    }
+                }
+            });
+        }.bind(this));
+
         document.getElementById('opacity').addEventListener('input', function (e) {
             const val = parseInt(e.target.value, 10);
             document.getElementById('opacityValue').textContent = val;
@@ -521,7 +549,7 @@ class UIScrollTreeViewCtrl {
             startValue = parseFloat(activeInputEl.value);
             if (activeInputEl.id.includes('scale')) {
                 sensitivity = 0.01;
-            } else if (activeInputEl.id === 'rotation') {
+            } else if (activeInputEl.id === 'rotation' || activeInputEl.id.includes('anchor')) {
                 sensitivity = 0.1;
             } else {
                 sensitivity = 0.2;
@@ -533,14 +561,11 @@ class UIScrollTreeViewCtrl {
             if (!isDraggingLabel || !activeInputEl) return;
             e.preventDefault();
             const deltaX = e.clientX - startMouseX;
-            let newValue;
-            newValue = startValue + deltaX * sensitivity;
+            let newValue = startValue + deltaX * sensitivity;
             const step = parseFloat(activeInputEl.step) || 1;
             newValue = Math.round(newValue / step) * step;
             activeInputEl.value = newValue.toFixed(activeInputEl.step ? activeInputEl.step.split('.')[1]?.length || 0 : 2);
-            activeInputEl.dispatchEvent(new Event('input', {
-                bubbles: true
-            }));
+            activeInputEl.dispatchEvent(new Event('input', { bubbles: true }));
         };
         const handleLabelMouseup = () => {
             if (isDraggingLabel) {
@@ -556,114 +581,138 @@ class UIScrollTreeViewCtrl {
         document.addEventListener('touchend', handleLabelMouseup);
         const draggableLabels = document.querySelectorAll('.draggable-label');
         draggableLabels.forEach(label => {
-            label.removeEventListener('mousedown', handleLabelMousedown);
-            label.removeEventListener('touchstart', handleLabelMousedown);
             label.addEventListener('mousedown', handleLabelMousedown);
             label.addEventListener('touchstart', handleLabelMousedown);
         });
     }
 
     setNode(node) {
+        // 1. 모든 필드 초기화 및 UI 숨김 처리 함수
         const resetAndDisableAllFields = () => {
             $('#actionTree').empty();
             $('#spine-option').css('display', 'none');
+
+            // 라벨 관련 UI를 기본적으로 숨김
+            $('#label-option, #label-content-group').css('display', 'none');
+
             document.getElementById('nodeName').value = '';
             document.getElementById('nodeName').disabled = true;
-            const fields = ['posX', 'posY', 'scaleX', 'scaleY', 'rotation', 'opacity'];
+
+            // 라벨 텍스트 필드를 포함한 모든 필드 초기화
+            const fields = ['posX', 'posY', 'scaleX', 'scaleY', 'rotation', 'opacity', 'anchorX', 'anchorY', 'labelText'];
             fields.forEach(id => {
                 const el = document.getElementById(id);
-                el.value = '';
-                el.disabled = true;
+                if (el) {
+                    el.value = '';
+                    el.disabled = true;
+                }
             });
+
             document.getElementById('opacityValue').textContent = '0';
             document.getElementById('visible').checked = false;
             document.getElementById('visible').disabled = true;
             document.getElementById('zOrderValue').textContent = 'N/A';
+
             if (typeof Gizmo_ClearDraw === 'function') {
                 Gizmo_ClearDraw();
             }
         };
+
+        // 2. 노드 선택 여부와 상관없이 일단 UI 상태를 초기화
+        resetAndDisableAllFields();
+
+        // 3. 선택된 노드가 없으면 여기서 중단
         if (!node) {
             this._selectNode = [];
             this._masterNode = null;
-            resetAndDisableAllFields();
             return;
         }
+
+        // 4. 노드 정보 설정 시작
         this._selectNode = [node];
         document.getElementById('nodeName').value = node.getName() || "Unnamed Node";
         document.getElementById('nodeName').disabled = false;
         document.getElementById('zOrderValue').textContent = node.getLocalZOrder ? node.getLocalZOrder() : '0';
-        const fieldsToEnable = ['posX', 'posY', 'scaleX', 'scaleY', 'rotation', 'opacity', 'visible'];
-        fieldsToEnable.forEach(id => document.getElementById(id).disabled = false);
+
+        const fieldsToEnable = ['posX', 'posY', 'scaleX', 'scaleY', 'rotation', 'opacity', 'visible', 'anchorX', 'anchorY'];
+        fieldsToEnable.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.disabled = false;
+        });
+
         document.getElementById('posX').value = node.getPosition().x.toFixed(2);
         document.getElementById('posY').value = node.getPosition().y.toFixed(2);
         document.getElementById('scaleX').value = node.getScaleX ? node.getScaleX().toFixed(2) : '1.00';
         document.getElementById('scaleY').value = node.getScaleY ? node.getScaleY().toFixed(2) : '1.00';
         document.getElementById('rotation').value = node.getRotation ? node.getRotation().toFixed(2) : '0.00';
+
+        const currentAnchor = node.getAnchorPoint ? node.getAnchorPoint() : cc.p(0.5, 0.5);
+        document.getElementById('anchorX').value = currentAnchor.x.toFixed(2);
+        document.getElementById('anchorY').value = currentAnchor.y.toFixed(2);
+
         const currentOpacity = node.getOpacity ? node.getOpacity() : 255;
         document.getElementById('opacity').value = currentOpacity;
         document.getElementById('opacityValue').textContent = currentOpacity;
         document.getElementById('visible').checked = node.isVisible ? node.isVisible() : true;
+
+        // 5. 텍스트 노드 여부 판단 및 UI 노출
+        let textTarget = node;
+        if (node instanceof DraggableNode) {
+            textTarget = node.ui || node;
+        }
+
+        // setString/getString이 있는 노드일 때만 라벨 수정창을 보여줌
+        if (textTarget && typeof textTarget.getString === 'function') {
+            $('#label-option, #label-content-group').css('display', 'block');
+            const textInput = document.getElementById('labelText');
+            if (textInput) {
+                textInput.disabled = false;
+                textInput.value = textTarget.getString();
+            }
+        }
+
+        // 6. 기즈모 및 애니메이션 리스트 업데이트
         if (typeof Gizmo_DrawTouchLayerByRect === 'function') {
             var worldBoundingBox = node.getBoundingBoxToWorld();
             if (worldBoundingBox.width < 5) worldBoundingBox.width = 10;
             if (worldBoundingBox.height < 5) worldBoundingBox.height = 10;
             Gizmo_DrawTouchLayerByRect(worldBoundingBox);
         }
-        $('#actionTree').empty();
-        $('#spine-option').css('display', 'none');
+
         if (node instanceof DraggableNode) {
             const draggableNodeInstance = node;
             let unifiedAnimationList = [];
             let contentNodeForAnimation = draggableNodeInstance.ui || draggableNodeInstance.armature || draggableNodeInstance.spine || draggableNodeInstance.image;
+
             if (contentNodeForAnimation) {
                 switch (draggableNodeInstance.assetType) {
                     case 'armature':
                         if (contentNodeForAnimation.getAnimation && contentNodeForAnimation.getAnimation()._animationData && contentNodeForAnimation.getAnimation()._animationData.movementNames) {
-                            contentNodeForAnimation.getAnimation()._animationData.movementNames.forEach(name => unifiedAnimationList.push({
-                                name: name,
-                                type: 'armature'
-                            }));
+                            contentNodeForAnimation.getAnimation()._animationData.movementNames.forEach(name => unifiedAnimationList.push({ name: name, type: 'armature' }));
                         }
                         break;
                     case 'spine':
                         if (contentNodeForAnimation.getState && contentNodeForAnimation.getState().data && contentNodeForAnimation.getState().data.skeletonData && contentNodeForAnimation.getState().data.skeletonData.animations) {
-                            contentNodeForAnimation.getState().data.skeletonData.animations.forEach(anim => unifiedAnimationList.push({
-                                name: anim.name,
-                                type: 'spine'
-                            }));
+                            contentNodeForAnimation.getState().data.skeletonData.animations.forEach(anim => unifiedAnimationList.push({ name: anim.name, type: 'spine' }));
                         }
                         break;
                     case 'ui':
                     case 'cocosstudio':
                         if (draggableNodeInstance.cocosAction && draggableNodeInstance.cocosAction._animationInfos) {
                             for (let key in draggableNodeInstance.cocosAction._animationInfos) {
-                                unifiedAnimationList.push({
-                                    name: key,
-                                    type: 'action'
-                                });
+                                unifiedAnimationList.push({ name: key, type: 'action' });
                             }
                         } else if (draggableNodeInstance.actionUrl) {
                             const rawActionList = ccs.actionManager.getActionList(draggableNodeInstance.actionUrl);
                             if (rawActionList) {
-                                rawActionList.forEach(action => unifiedAnimationList.push({
-                                    name: action.getName(),
-                                    type: 'action'
-                                }));
-                            } else if (cc.loader.cache[draggableNodeInstance.actionUrl] && cc.loader.cache[draggableNodeInstance.actionUrl].animation && cc.loader.cache[draggableNodeInstance.actionUrl].animation.actionlist) {
-                                cc.loader.cache[draggableNodeInstance.actionUrl].animation.actionlist.forEach(action => {
-                                    unifiedAnimationList.push({
-                                        name: action.name,
-                                        type: 'action'
-                                    });
-                                });
+                                rawActionList.forEach(action => unifiedAnimationList.push({ name: action.getName(), type: 'action' }));
                             }
                         }
                         break;
                 }
             }
+
             const $actionContainer = $('#actionTree');
-            $actionContainer.empty();
             const self = this;
             unifiedAnimationList.forEach(item => {
                 let iconText = '';
@@ -672,11 +721,12 @@ class UIScrollTreeViewCtrl {
                 if (item.type === 'spine') iconText = 'SP';
                 if (item.type === 'action') iconText = 'UI';
                 const $item = $(`
-        <div class="custom-tree-item" data-anim-name="${item.name}" data-anim-type="${item.type}">
-            <span class="track-type-icon ${typeClass}">${iconText}</span>
-            ${item.name}
-        </div>
-        `);
+                <div class="custom-tree-item" data-anim-name="${item.name}" data-anim-type="${item.type}">
+                    <span class="track-type-icon ${typeClass}">${iconText}</span>
+                    ${item.name}
+                </div>
+            `);
+
                 $item.draggable({
                     appendTo: "body",
                     distance: 10,
@@ -685,22 +735,16 @@ class UIScrollTreeViewCtrl {
                         const $helper = $(`<div class="custom-drag-helper">${assetName}</div>`);
                         $helper.data('animName', assetName);
                         $helper.data('animType', $(this).data('anim-type'));
-                        $(this).draggable("option", "cursorAt", {
-                            left: 1,
-                            top: 1
-                        });
+                        $(this).draggable("option", "cursorAt", { left: 1, top: 1 });
                         return $helper;
                     },
                     revert: 'invalid',
                     revertDuration: 200,
                     zIndex: 9999,
-                    start: function (event, ui) {
-                        $('#resize-overlay').show();
-                    },
-                    stop: function (event, ui) {
-                        $('#resize-overlay').hide();
-                    }
+                    start: function (event, ui) { $('#resize-overlay').show(); },
+                    stop: function (event, ui) { $('#resize-overlay').hide(); }
                 });
+
                 $item.on('click', function () {
                     $actionContainer.find('.custom-tree-item').removeClass('selected');
                     $(this).addClass('selected');
@@ -708,12 +752,8 @@ class UIScrollTreeViewCtrl {
                     const animType = $(this).data('anim-type');
                     const draggableNode = self._selectNode[0];
                     if (!draggableNode) return;
-                    if (draggableNode.spine) {
-                        draggableNode.spine.clearTrack(0);
-                    }
-                    if (draggableNode.armature) {
-                        draggableNode.armature.getAnimation().stop();
-                    }
+                    if (draggableNode.spine) draggableNode.spine.clearTrack(0);
+                    if (draggableNode.armature) draggableNode.armature.getAnimation().stop();
                     if (draggableNode.ui) {
                         draggableNode.ui.getChildren().forEach(child => child.stopAllActions());
                         draggableNode.ui.stopAllActions();
@@ -732,77 +772,10 @@ class UIScrollTreeViewCtrl {
                 });
                 $actionContainer.append($item);
             });
+
             if (draggableNodeInstance.assetType === 'spine') {
                 $('#spine-option').css('display', 'block');
             }
-        }
-    }
-
-    selectNode(nodeObj) {
-        this._selectNode.length = 0;
-        this._selectNode = [nodeObj];
-        if (nodeObj.isVisible())
-            $('#toggleVisible').html('Hide');
-        else
-            $('#toggleVisible').html('Show');
-        $('#localPos').html("(" + nodeObj.getPosition().x.toFixed(2) + " , " + nodeObj.getPosition().y.toFixed(2) + ")");
-        $("input[name=lPosX]").val(nodeObj.getPosition().x.toFixed(2));
-        $("input[name=lPosY]").val(nodeObj.getPosition().y.toFixed(2));
-        $('#LocalSize').html("(" + nodeObj.getContentSize().width.toFixed(2) + " , " + nodeObj.getContentSize().height.toFixed(2) + ")");
-        $("input[name=opacity]").val(opa);
-        $('#opacityValue').html(opa);
-        $('#anchorValue').html("(" + ancX + " , " + ancY + ")");
-        $('#zOrderValue').html(zOrder);
-        var rectNode = cc.director.getRunningScene().getChildByTag(gizmoNodTag);
-        if (!rectNode) {
-            rectNode = new cc.DrawNode();
-            rectNode.setTag(gizmoNodTag);
-            cc.director.getRunningScene().addChild(rectNode, 999999, gizmoNodTag);
-        } else {
-            rectNode.clear();
-        }
-    }
-
-    selectNodeMulti(nodeArr) {
-        this._selectNode.length = 0;
-        this._selectNode = nodeArr;
-        var posX = this._selectNode[0].getPosition().x.toFixed(2);
-        var posY = this._selectNode[0].getPosition().y.toFixed(2);
-        var sizeW = this._selectNode[0].getContentSize().width;
-        var sizeH = this._selectNode[0].getContentSize().height;
-        var opa = this._selectNode[0].getOpacity();
-        var ancX = this._selectNode[0].getAnchorPoint().x;
-        var ancY = this._selectNode[0].getAnchorPoint().Y;
-        var zOrder = this._selectNode[0].getLocalZOrder();
-        this._selectNode.forEach(item => {
-            posX = posX === item.getPosition().x.toFixed(2) ? posX : "-";
-            posY = posY === item.getPosition().y.toFixed(2) ? posY : "-";
-            sizeW = sizeW === item.getContentSize().width ? sizeW : "-";
-            sizeH = sizeH === item.getContentSize().height ? sizeH : "-";
-            opa = opa === item.getOpacity() ? opa : "-";
-            ancX = ancX === item.getAnchorPoint().x ? ancX : "-";
-            ancY = ancY === item.getAnchorPoint().Y ? ancY : "-";
-            zOrder = zOrder === item.getLocalZOrder() ? zOrder : "-";
-        });
-        if (this._selectNode[0].isVisible())
-            $('#toggleVisible').html('Hide');
-        else
-            $('#toggleVisible').html('Show');
-        $('#localPos').html("(" + posX + " , " + posY + ")");
-        $("input[name=lPosX]").val(posX);
-        $("input[name=lPosY]").val(posY);
-        $('#LocalSize').html("(" + sizeW + " , " + sizeH + ")");
-        $("input[name=opacity]").val(opa);
-        $('#opacityValue').html(opa);
-        $('#anchorValue').html("(" + ancX + " , " + ancY + ")");
-        $('#zOrderValue').html(zOrder);
-        var rectNode = cc.director.getRunningScene().getChildByTag(gizmoNodTag);
-        if (!rectNode) {
-            rectNode = new cc.DrawNode();
-            rectNode.setTag(gizmoNodTag);
-            cc.director.getRunningScene().addChild(rectNode, 999999, gizmoNodTag);
-        } else {
-            rectNode.clear();
         }
     }
 
