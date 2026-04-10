@@ -116,17 +116,17 @@ var LoadManager  = {
             fileFinder.addSearchPath("binary/image");
             fileFinder.addSearchPath("../image");
 
+            let ext = path.extname(files[i]).toLowerCase();
 
-            if (path.extname(files[i]).toLowerCase()===".exportjson")
+            if (ext === ".exportjson")
             {
                 let rawdata = fs.readFileSync(files[i], "utf8");
                 let jsonObj = JSON.parse(rawdata);
+
                 if (jsonObj['config_file_path'] != null)
                 {
                     jsonObj['config_file_path'].forEach(function(item){
-
-                        if (fileFinder.pushFile(item))
-                        {
+                        if (fileFinder.pushFile(item)) {
                             if (item.endsWith(".plist")) {
                                 fileFinder.pushFile(item.replace(".plist", ".png"))
                             }
@@ -137,20 +137,14 @@ var LoadManager  = {
                 if (jsonObj['textures'] != null)
                 {
                     jsonObj['textures'].forEach(function(item){
-
-                        console.log("textures items = " +item);
-                        if (fileFinder.pushFile(item))
-                        {
+                        if (fileFinder.pushFile(item)) {
                             if (item.endsWith(".plist")) {
                                 fileFinder.pushFile(item.replace(".plist", ".png"))
                             }
                         }
-
                     });
                 }
 
-
-                //fnt 파일
                 let arrFntFiles = [];
                 this.parseWidgetTreeRecursively(jsonObj["widgetTree"], arrFntFiles);
                 arrFntFiles = this.getUniqueValuesArray(arrFntFiles);
@@ -158,6 +152,23 @@ var LoadManager  = {
                 arrFntFiles.forEach(function(item){
                     fileFinder.pushFile(item);
                 });
+
+                filesImport = filesImport.concat(fileFinder.getFileList());
+            }
+            else if (ext === ".json")
+            {
+                let rawdata = fs.readFileSync(files[i], "utf8");
+                try {
+                    let jsonObj = JSON.parse(rawdata);
+                    if (jsonObj['skeleton'] && jsonObj['skeleton']['spine']) {
+                        let baseName = path.basename(files[i], '.json');
+
+                        fileFinder.pushFile(baseName + ".atlas");
+                        fileFinder.pushFile(baseName + ".png");
+                    }
+                } catch (e) {
+                    console.error("JSON Parsing error:", e);
+                }
 
                 filesImport = filesImport.concat(fileFinder.getFileList());
             }
@@ -189,44 +200,42 @@ var LoadManager  = {
         let promises = [];
         let dependentsFiles = [];
         filesImport.forEach(function(item){
-            let fileInfo = {
-                filePath : item,
-                content : null,
-            };
-            console.log("filesImport = " + item);
+            let fileInfo = { filePath : item, content : null };
             dependentsFiles.push(fileInfo);
             let extName = path.extname(item).toLowerCase();
-            if (extName == ".png")
-            {
+            if (extName == ".png") {
                 let promise = new Promise(function (resolve, reject) {
-
-                    console.log("dataurl : " + item);
                     imageDataURI.encodeFromFile(item)
                         .then(res => {
                             fileInfo.content = res;
                             resolve();
-                        })
-
+                        }).catch(err => { console.error(err); resolve(); });
                 });
                 promises.push(promise);
-            }
-            else if (extName===".exportjson" || extName===".plist" || extName===".fnt" || extName===".json" || extName===".atlas"){
+            } else if (extName===".exportjson" || extName===".plist" || extName===".fnt" || extName===".json" || extName===".atlas"){
                 fileInfo.content = fs.readFileSync(item, "utf8");
             }
-
         });
 
 
 
         let targetFiles = [];
         files.forEach(function(item){
-            let fileInfo = {
-                filePath : item,
-                content : null,
-            };
+            let fileInfo = { filePath : item, content : null };
             targetFiles.push(fileInfo);
             let extName = path.extname(item).toLowerCase();
-            if (extName===".exportjson" || extName===".plist" || extName===".fnt" || extName===".json" || extName===".atlas"){
+
+            if (extName == ".png") {
+                let promise = new Promise(function (resolve, reject) {
+                    imageDataURI.encodeFromFile(item)
+                        .then(res => {
+                            fileInfo.content = res;
+                            resolve();
+                        }).catch(err => { console.error(err); resolve(); });
+                });
+                promises.push(promise);
+            }
+            else if (extName===".exportjson" || extName===".plist" || extName===".fnt" || extName===".json" || extName===".atlas"){
                 fileInfo.content = fs.readFileSync(item, "utf8");
             }
         });
@@ -237,14 +246,13 @@ var LoadManager  = {
         let mainWindow = this._mainWindow;
         Promise.all(promises).then(
             function (){
-
                 console.log("Promise.all complete");
                 mainWindow.webContents.send('fileDropEventReply', {
                     targetFiles : targetFiles,
-                    dependentFiles:dependentsFiles});
+                    dependentFiles: dependentsFiles
+                });
             }
-        )
-
+        );
     },
 
     init : function (mainWindow){
