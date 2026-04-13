@@ -256,14 +256,37 @@ var LoadManager  = {
     },
 
     init : function (mainWindow){
-
         this._mainWindow = mainWindow;
         console.log("LoadManager inited");
-        // onInputValue 이벤트 수신
+
         ipcMain.on('fileDropEvent', (evt, payload) => {
             LoadManager.loadFiles(payload);
+        });
 
-        })
+        ipcMain.on('requestFileData', (evt, filePath) => {
+            console.log("[디버그 - 2단계] 렌더러로부터 파일 데이터 요청 받음: " + filePath);
+            let extName = path.extname(filePath).toLowerCase();
+
+            if (extName === ".png") {
+                imageDataURI.encodeFromFile(filePath)
+                    .then(res => {
+                        console.log("[디버그 - 2단계] 이미지 인코딩 및 전송 완료: " + filePath);
+                        evt.reply('requestFileDataReply', { filePath: filePath, content: res });
+                    }).catch(err => {
+                    console.error("[디버그 - 2단계] 이미지 읽기 에러:", err);
+                    evt.reply('requestFileDataReply', { filePath: filePath, content: null });
+                });
+            } else {
+                try {
+                    let content = fs.readFileSync(filePath, "utf8");
+                    console.log("[디버그 - 2단계] 텍스트 파일 읽기 및 전송 완료: " + filePath);
+                    evt.reply('requestFileDataReply', { filePath: filePath, content: content });
+                } catch(err) {
+                    console.error("[디버그 - 2단계] 텍스트 파일 읽기 에러:", err);
+                    evt.reply('requestFileDataReply', { filePath: filePath, content: null });
+                }
+            }
+        });
     }
 
 }

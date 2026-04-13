@@ -141,20 +141,62 @@ var PanelManager = (function() {
 
                     if (isElectron) {
                         const fs = require('fs');
+                        const path = require('path');
                         const { ipcRenderer } = require('electron');
                         const files = e.dataTransfer.files;
                         const arrFilePaths = [];
 
-                        for (let i = 0; i < files.length; i++) {
-                            if (fs.statSync(files[i].path).isDirectory()) {
-                                alert("폴더 드래그는 지원하지 않습니다. 파일만 넣어주세요.");
-                                return;
+                        // 캔버스와 동일한 FileEntry 구조체 정의
+                        class FileEntry {
+                            constructor(fileInfo) {
+                                this.fullPath = fileInfo.filePath;
+                                this.isFile = true;
+                                this.isDirectory = false;
+                                this.name = this.fullPath.split(/[\\\/]/).pop();
+                                this.content = fileInfo.content;
                             }
-                            arrFilePaths.push(files[i].path);
+                            file(filecb) {
+                                filecb(this);
+                            }
+                        }
+
+                        // 캔버스와 동일한 폴더 순회 및 ResourceMapData 갱신 로직
+                        function walkDir(dir) {
+                            var list = fs.readdirSync(dir);
+                            list.forEach(function(file) {
+                                var fullPath = path.join(dir, file);
+                                var stat = fs.statSync(fullPath);
+                                if (stat && stat.isDirectory()) {
+                                    walkDir(fullPath);
+                                } else {
+                                    var fileInfo = { filePath: fullPath, content: null };
+                                    var fileEntry = new FileEntry(fileInfo);
+
+                                    if (typeof ResourceMapData !== 'undefined') {
+                                        if (!ResourceMapData[fileEntry.name]) {
+                                            ResourceMapData[fileEntry.name] = fileEntry;
+                                        } else {
+                                            ResourceMapData[fileEntry.name].fullPath = fullPath;
+                                        }
+                                    }
+                                }
+                            });
+                        }
+
+                        for (let i = 0; i < files.length; i++) {
+                            try {
+                                if (fs.statSync(files[i].path).isDirectory()) {
+                                    walkDir(files[i].path);
+                                } else {
+                                    arrFilePaths.push(files[i].path);
+                                }
+                            } catch (error) {
+                                console.error(error);
+                                continue;
+                            }
                         }
 
                         if (arrFilePaths.length > 0) {
-                            console.log("Electron Mode: Sending IPC");
                             ipcRenderer.send('fileDropEvent', arrFilePaths);
                         }
                     } else {
