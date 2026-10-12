@@ -37,7 +37,7 @@ body {
     cursor: default;
     color: var(--font-primary);
     background-color: var(--bg-primary);
-    font-family: 'Roboto', Helvetica, Verdana, Arial, sans-serif;
+    font-family: var(--font-ui);
     overflow: hidden;
     /* 상단 툴바 / 패널 영역 / 하단 상태바 */
     display: flex;
@@ -145,7 +145,7 @@ canvas {
     border: 1px solid var(--border-color);
     border-radius: 4px;
     color: var(--font-primary);
-    font-family: Consolas, 'Courier New', monospace;
+    font-family: var(--font-mono);
     font-size: 0.8rem;
 }
 #bg-color-picker {
@@ -1128,7 +1128,7 @@ ul.tabs li.current {
     border: 1px solid var(--border-color);
     border-radius: 4px;
     color: var(--font-primary);
-    font-family: Consolas, 'Courier New', monospace;
+    font-family: var(--font-mono);
     padding: 5px 8px;
 }
 .uiw-checks {
@@ -1163,7 +1163,7 @@ ul.tabs li.current {
     background-color: var(--bg-primary);
     border: 1px solid var(--border-color);
     border-radius: 6px;
-    font-family: Consolas, 'Courier New', monospace;
+    font-family: var(--font-mono);
     font-size: 0.8rem;
     line-height: 1.5;
     color: var(--font-primary);
@@ -1345,7 +1345,7 @@ ul.tabs li.current {
     padding: 0 3px;
     border: 1px solid currentColor;
     border-radius: 3px;
-    font-family: Consolas, 'Courier New', monospace;
+    font-family: var(--font-mono);
     font-size: 0.65rem;
     font-weight: bold;
     text-align: center;
@@ -1391,7 +1391,7 @@ ul.tabs li.current {
 .dep-path {
     margin-top: 3px;
     color: var(--font-secondary);
-    font-family: Consolas, 'Courier New', monospace;
+    font-family: var(--font-mono);
     font-size: 0.75rem;
     word-break: break-all;
 }
@@ -1412,7 +1412,7 @@ ul.tabs li.current {
     border-radius: 6px;
 }
 .dep-stat-value {
-    font-family: Consolas, 'Courier New', monospace;
+    font-family: var(--font-mono);
     font-size: 1rem;
     font-weight: 600;
 }
@@ -1512,7 +1512,7 @@ ul.tabs li.current {
     font-size: 0.75rem;
 }
 .dep-alert-paths {
-    font-family: Consolas, 'Courier New', monospace;
+    font-family: var(--font-mono);
     font-size: 0.75rem;
     line-height: 1.6;
     word-break: break-all;
@@ -1601,7 +1601,7 @@ ul.tabs li.current {
 .rv-zoom-label {
     min-width: 44px;
     text-align: center;
-    font-family: Consolas, 'Courier New', monospace;
+    font-family: var(--font-mono);
 }
 .rv-body {
     flex: 1;
@@ -1640,7 +1640,7 @@ ul.tabs li.current {
     gap: 8px;
     padding: 4px 10px;
     cursor: pointer;
-    font-family: Consolas, 'Courier New', monospace;
+    font-family: var(--font-mono);
     font-size: 0.75rem;
 }
 .rv-item:hover {
@@ -1685,7 +1685,7 @@ ul.tabs li.current {
     padding: 3px 8px;
     border-radius: 4px;
     background-color: rgba(0, 0, 0, 0.65);
-    font-family: Consolas, 'Courier New', monospace;
+    font-family: var(--font-mono);
     font-size: 0.75rem;
     pointer-events: none;
 }
@@ -1732,7 +1732,7 @@ ul.tabs li.current {
     color: var(--font-secondary);
 }
 .rv-v {
-    font-family: Consolas, 'Courier New', monospace;
+    font-family: var(--font-mono);
     word-break: break-all;
 }
 .rv-missing {
@@ -1763,7 +1763,7 @@ ul.tabs li.current {
     align-items: center;
     gap: 8px;
     padding: 3px 10px;
-    font-family: Consolas, 'Courier New', monospace;
+    font-family: var(--font-mono);
     font-size: 0.75rem;
     word-break: break-all;
 }
@@ -1826,7 +1826,7 @@ ul.tabs li.current {
 .insp-chip-class {
     border-color: #3c6fb8;
     color: #8fc1ff;
-    font-family: Consolas, 'Courier New', monospace;
+    font-family: var(--font-mono);
 }
 #inspector-body {
     padding: 0;
@@ -1903,7 +1903,7 @@ ul.tabs li.current {
     border: 1px solid var(--border-color);
     border-radius: 3px;
     color: var(--font-primary);
-    font-family: Consolas, 'Courier New', monospace;
+    font-family: var(--font-mono);
     font-size: 0.8rem;
 }
 .insp-input:focus {
@@ -1979,7 +1979,7 @@ input.insp-input[type="number"] {
 .insp-frame-text,
 .insp-ro {
     color: var(--font-secondary);
-    font-family: Consolas, 'Courier New', monospace;
+    font-family: var(--font-mono);
     font-size: 0.78rem;
     word-break: break-all;
 }
@@ -2077,7 +2077,7 @@ input.insp-input[type="number"] {
     font-size: 0.78rem;
 }
 .insp-tex-name {
-    font-family: Consolas, 'Courier New', monospace;
+    font-family: var(--font-mono);
     word-break: break-all;
 }
 .insp-tex-label {
@@ -2149,7 +2149,7 @@ button.sb-item:hover {
     color: #ff8a8a;
 }
 .sb-fps {
-    font-family: Consolas, 'Courier New', monospace;
+    font-family: var(--font-mono);
 }
 
 /* --- Console 패널 --- */
@@ -2203,7 +2203,7 @@ button.sb-item:hover {
 .con-list {
     flex: 1;
     overflow: auto;
-    font-family: Consolas, 'Courier New', monospace;
+    font-family: var(--font-mono);
     font-size: 0.75rem;
 }
 .con-row {
@@ -2249,7 +2249,7 @@ button.sb-item:hover {
     padding: 20px;
     color: var(--font-secondary);
     text-align: center;
-    font-family: 'Roboto', Helvetica, Arial, sans-serif;
+    font-family: var(--font-ui);
 }
 
 /* --- Assets 행 오른쪽 끝: 상태 배지 + 삭제(X) 버튼 (Hierarchy 의 삭제 아이콘과 같은 모양) --- */
@@ -2443,7 +2443,7 @@ button.sb-item:hover {
     background: none;
     border: 1px solid currentColor;
     border-radius: 3px;
-    font-family: Consolas, 'Courier New', monospace;
+    font-family: var(--font-mono);
     font-size: 0.62rem;
     line-height: 14px;
 }
@@ -2493,7 +2493,7 @@ button.sb-item:hover {
 }
 .asset-meta {
     color: var(--font-secondary);
-    font-family: Consolas, 'Courier New', monospace;
+    font-family: var(--font-mono);
     font-size: 0.7rem;
     white-space: nowrap;
 }
@@ -2563,7 +2563,7 @@ button.sb-item:hover {
     background: none;
     border: 1px solid currentColor;
     border-radius: 3px;
-    font-family: Consolas, 'Courier New', monospace;
+    font-family: var(--font-mono);
     font-size: 0.62rem;
     line-height: 14px;
 }
@@ -2579,7 +2579,7 @@ button.sb-item:hover {
 #widgetTree .z-order-label {
     margin: 0;
     color: #8b9098;
-    font-family: Consolas, 'Courier New', monospace;
+    font-family: var(--font-mono);
     font-size: 0.7rem;
     font-weight: normal;
 }
@@ -2644,7 +2644,7 @@ button.sb-item:hover {
 }
 .hier-footer-hint {
     color: var(--font-secondary);
-    font-family: Consolas, 'Courier New', monospace;
+    font-family: var(--font-mono);
     font-size: 0.7rem;
 }
 
@@ -2743,7 +2743,7 @@ button.sb-item:hover {
     background: none;
     border: 1px solid currentColor;
     border-radius: 3px;
-    font-family: Consolas, 'Courier New', monospace;
+    font-family: var(--font-mono);
     font-size: 0.62rem;
     line-height: 14px;
 }
@@ -2761,7 +2761,7 @@ button.sb-item:hover {
 #actionTree .anim-dur {
     flex: none;
     color: var(--font-secondary);
-    font-family: Consolas, 'Courier New', monospace;
+    font-family: var(--font-mono);
     font-size: 0.7rem;
 }
 #actionTree .anim-item.selected .anim-dur {
@@ -2821,7 +2821,7 @@ button.sb-item:hover {
 }
 .seq-time {
     margin-left: 4px;
-    font-family: Consolas, 'Courier New', monospace;
+    font-family: var(--font-mono);
     font-size: 0.8rem;
 }
 .seq-time-total {
@@ -2844,7 +2844,7 @@ button.sb-item:hover {
     background-color: #1b1b1b;
 }
 .ruler-marker {
-    font-family: Consolas, 'Courier New', monospace;
+    font-family: var(--font-mono);
     font-size: 10px;
     line-height: 22px;
 }
@@ -2869,7 +2869,7 @@ button.sb-item:hover {
     background: none;
     border: 1px solid currentColor;
     border-radius: 3px;
-    font-family: Consolas, 'Courier New', monospace;
+    font-family: var(--font-mono);
     font-size: 0.62rem;
     line-height: 14px;
 }
@@ -2899,7 +2899,7 @@ button.sb-item:hover {
 }
 .timeline-clip .clip-duration {
     color: rgba(255, 255, 255, 0.65);
-    font-family: Consolas, 'Courier New', monospace;
+    font-family: var(--font-mono);
     font-size: 0.7rem;
 }
 .timeline-clip.selected {
@@ -3012,11 +3012,174 @@ button.sb-item:hover {
     border-radius: 4px;
     background-color: rgba(0, 0, 0, 0.6);
     color: #7fd3e0;
-    font-family: Consolas, 'Courier New', monospace;
+    font-family: var(--font-mono);
     font-size: 0.7rem;
     line-height: 1.5;
     pointer-events: none;
 }
 .gv-stats:empty {
     display: none !important;
+}
+
+/* =====================================================================
+   테마: 시안 팔레트와 글꼴 (IBM Plex Sans KR / JetBrains Mono, fonts/fonts.css 로컬 번들)
+   기존 변수 이름은 그대로 두고 값만 바꾼다
+   ===================================================================== */
+:root {
+    --font-ui: 'IBM Plex Sans KR', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+    --font-mono: 'JetBrains Mono', Consolas, 'Courier New', monospace;
+
+    --bg-app: #141518;        /* 앱 바탕, 탭 줄 */
+    --bg-input: #141518;      /* 입력칸 */
+    --bg-primary: #1d1f23;    /* 패널 본문 */
+    --bg-secondary: #26292e;  /* 패널 툴바, 헤더 */
+    --bg-tertiary: #2c2f35;   /* 호버, 눌린 버튼 */
+    --bg-tab: #191a1d;        /* 비활성 탭 */
+    --line-dark: #0d0e10;     /* 패널 사이 구분선 */
+    --font-primary: #e6e7ea;
+    --font-secondary: #a3a7ae;
+    --font-muted: #8b9098;
+    --border-color: #34373d;
+    --accent-color: #4c8dff;
+    --accent-strong: #2a5bb8;
+    --dropdown-bg: #1d1f23;
+    --dropdown-hover-bg: #2c2f35;
+    --scrollbar-thumb: #3a3d43;
+    --scrollbar-track: var(--bg-primary);
+}
+body {
+    background-color: var(--bg-app);
+}
+input,
+select,
+textarea,
+button {
+    font-family: inherit;
+}
+.inspector-name-input:focus,
+.positionInput:focus {
+    box-shadow: 0 0 0 2px rgba(76, 141, 255, 0.35);
+}
+
+/* --- Golden Layout (dark theme 덮어쓰기) --- */
+body .lm_goldenlayout {
+    background: var(--line-dark);
+}
+body .lm_content {
+    background: var(--bg-primary);
+    border: none;
+}
+body .lm_splitter {
+    background: var(--line-dark);
+    opacity: 1;
+}
+body .lm_splitter:hover,
+body .lm_splitter.lm_dragging {
+    background: var(--accent-color);
+}
+body .lm_header {
+    background: var(--bg-app);
+    border-bottom: 1px solid var(--line-dark);
+    box-sizing: content-box;
+}
+body .lm_header .lm_tab {
+    font-family: var(--font-ui);
+    font-size: 12px;
+    color: var(--font-secondary);
+    background: var(--bg-tab);
+    box-shadow: none;
+    border-radius: 4px 4px 0 0;
+    border-top: 2px solid transparent;
+    margin-right: 2px;
+    padding-bottom: 4px;
+}
+body .lm_header .lm_tab:hover {
+    color: var(--font-primary);
+}
+body .lm_header .lm_tab.lm_active {
+    color: var(--font-primary);
+    background: var(--bg-primary);
+    border-top-color: var(--accent-color);
+    font-weight: 500;
+    box-shadow: none;
+}
+body .lm_header .lm_tab .lm_close_tab,
+body .lm_controls > li {
+    opacity: 0.45;
+}
+body .lm_header .lm_tab .lm_close_tab:hover,
+body .lm_controls > li:hover {
+    opacity: 1;
+}
+body .lm_dragProxy .lm_content,
+body .lm_stack.lm_docking .lm_items {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+}
+body .lm_dropTargetIndicator {
+    outline: 1px dashed var(--accent-color);
+    box-shadow: inset 0 0 30px rgba(76, 141, 255, 0.25);
+}
+body .lm_dropTargetIndicator .lm_inner {
+    background: var(--accent-color);
+    opacity: 0.12;
+}
+
+/* --- 스크롤바 --- */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+::-webkit-scrollbar-track {
+    background: var(--scrollbar-track);
+}
+::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb);
+    border: 2px solid var(--scrollbar-track);
+    border-radius: 6px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #4a4e55;
+}
+::-webkit-scrollbar-corner {
+    background: var(--scrollbar-track);
+}
+
+/* --- Inspector: 헤더 버튼, 한 줄 체크박스 묶음 --- */
+.insp-head-btn {
+    flex-shrink: 0;
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    color: #c9ccd2;
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.insp-head-btn:hover:not(:disabled) {
+    background: var(--bg-tertiary);
+    color: var(--font-primary);
+}
+.insp-head-btn:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+.inspector-top-area {
+    gap: 6px;
+}
+.insp-flags {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 14px;
+}
+.insp-flags .insp-check {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--font-secondary);
+    cursor: pointer;
+}
+.insp-flags .insp-check:hover {
+    color: var(--font-primary);
 }

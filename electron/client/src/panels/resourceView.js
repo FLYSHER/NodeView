@@ -642,7 +642,7 @@ var ResourceView = (function () {
         if (!this.showBounds && this.selected == null) return;
         var self = this;
         var zoom = this.zoom;
-        ctx.font = '11px Consolas, monospace';
+        ctx.font = '11px "JetBrains Mono", Consolas, monospace';
         this.model.items.forEach(function (it, i) {
             var isSel = i === self.selected;
             if (!self.showBounds && !isSel) return;

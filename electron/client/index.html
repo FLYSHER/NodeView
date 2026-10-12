@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <link href="fonts/fonts.css" rel="stylesheet" type="text/css">
     <link href="style.css" rel="stylesheet" type="text/css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -151,6 +152,8 @@
         <div class="inspector-top-area">
             <input type="checkbox" id="inspector-visible" aria-label="Visible" disabled>
             <input type="text" id="nodeName" name="nodeName" class="positionInput inspector-name-input" aria-label="노드 이름" disabled>
+            <button type="button" id="inspectorCopyBtn" class="insp-head-btn" title="현재 속성 값을 텍스트로 복사" disabled>값 복사</button>
+            <button type="button" id="inspectorResetBtn" class="insp-head-btn" title="이 노드를 처음 선택했을 때의 값으로 되돌리기" disabled>원래대로</button>
         </div>
         <div id="inspector-header-extra" class="inspector-chips"></div>
         <div id="inspector-body" class="panel-content-inner"></div>

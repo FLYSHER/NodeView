@@ -100,8 +100,9 @@ var Inspector = (function () {
     }
 
     // ---- 속성 정의 표 ------------------------------------------------------
-    // type: xy | number | text | textarea | bool | color | range | select | ro
+    // type: xy | number | text | textarea | bool | flags | color | range | select | ro
     // get(n) / set(n, v) : xy 는 {x, y} 를 주고받는다
+    // flags : 한 줄에 체크박스 여러 개. flags[] 각각이 applies / get / set 을 가진다
 
     var SECTIONS = [
         {
@@ -148,20 +149,26 @@ var Inspector = (function () {
                 { key: 'zOrder', label: 'Z-Order', type: 'number', step: 1, refreshHierarchy: true,
                     get: function (n) { return n.getLocalZOrder(); },
                     set: function (n, v) { n.setLocalZOrder(Math.round(v)); } },
-                { key: 'flipX', label: 'Flip X', type: 'bool',
-                    applies: function (n) { return has(n, 'isFlippedX') && has(n, 'setFlippedX'); },
-                    get: function (n) { return n.isFlippedX(); },
-                    set: function (n, v) { n.setFlippedX(v); } },
-                { key: 'flipY', label: 'Flip Y', type: 'bool',
-                    applies: function (n) { return has(n, 'isFlippedY') && has(n, 'setFlippedY'); },
-                    get: function (n) { return n.isFlippedY(); },
-                    set: function (n, v) { n.setFlippedY(v); } },
-                { key: 'cascadeOpacity', label: 'Cascade Opacity', type: 'bool',
-                    get: function (n) { return n.isCascadeOpacityEnabled(); },
-                    set: function (n, v) { n.setCascadeOpacityEnabled(v); } },
-                { key: 'cascadeColor', label: 'Cascade Color', type: 'bool',
-                    get: function (n) { return n.isCascadeColorEnabled(); },
-                    set: function (n, v) { n.setCascadeColorEnabled(v); } }
+                { key: 'flip', label: 'Flip', type: 'flags',
+                    flags: [
+                        { key: 'x', label: 'X',
+                            applies: function (n) { return has(n, 'isFlippedX') && has(n, 'setFlippedX'); },
+                            get: function (n) { return n.isFlippedX(); },
+                            set: function (n, v) { n.setFlippedX(v); } },
+                        { key: 'y', label: 'Y',
+                            applies: function (n) { return has(n, 'isFlippedY') && has(n, 'setFlippedY'); },
+                            get: function (n) { return n.isFlippedY(); },
+                            set: function (n, v) { n.setFlippedY(v); } }
+                    ] },
+                { key: 'cascade', label: 'Cascade', type: 'flags',
+                    flags: [
+                        { key: 'opacity', label: 'Opacity',
+                            get: function (n) { return n.isCascadeOpacityEnabled(); },
+                            set: function (n, v) { n.setCascadeOpacityEnabled(v); } },
+                        { key: 'color', label: 'Color',
+                            get: function (n) { return n.isCascadeColorEnabled(); },
+                            set: function (n, v) { n.setCascadeColorEnabled(v); } }
+                    ] }
             ]
         },
         {
@@ -483,15 +490,29 @@ var Inspector = (function () {
 
     function propApplies(prop, target) {
         try {
+            if (prop.type === 'flags') return applicableFlags(prop, target).length > 0;
             return !prop.applies || prop.applies(target);
         } catch (e) {
             return false;
         }
     }
 
+    function applicableFlags(prop, target) {
+        return prop.flags.filter(function (f) {
+            try { return !f.applies || f.applies(target); } catch (e) { return false; }
+        });
+    }
+
+    function findFlag(prop, flagKey) {
+        for (var i = 0; i < prop.flags.length; i++) {
+            if (prop.flags[i].key === flagKey) return prop.flags[i];
+        }
+        return null;
+    }
+
     function renderProp(section, prop, target) {
         var key = section.id + '.' + prop.key;
-        var ro = prop.type === 'ro' || !prop.set || (prop.readOnly && prop.readOnly(target));
+        var ro = prop.type === 'ro' || (!prop.set && prop.type !== 'flags') || (prop.readOnly && prop.readOnly(target));
         var scrub = (prop.type === 'number' || prop.type === 'xy') && !ro;
         var label = '<span class="insp-label' + (scrub ? ' insp-scrub' : '') + '" data-key="' + key + '" title="' + (scrub ? '좌우로 드래그해서 값 조절' : '') + '">' + esc(prop.label) + '</span>';
         var field = '';
@@ -516,6 +537,12 @@ var Inspector = (function () {
                 break;
             case 'bool':
                 field = '<label class="insp-check"><input type="checkbox" class="insp-input" data-key="' + key + '"' + (ro ? ' disabled' : '') + '></label>';
+                break;
+            case 'flags':
+                field = '<div class="insp-flags">' + applicableFlags(prop, target).map(function (f) {
+                    return '<label class="insp-check"><input type="checkbox" class="insp-input" data-key="' + key + '" data-flag="' + f.key + '">' +
+                        '<span>' + esc(f.label) + '</span></label>';
+                }).join('') + '</div>';
                 break;
             case 'color':
                 field = '<div class="insp-color"><input type="color" class="insp-input" data-key="' + key + '"' + (ro ? ' disabled' : '') + '><span class="insp-color-hex" data-hex-for="' + key + '"></span></div>';
@@ -557,12 +584,15 @@ var Inspector = (function () {
             $body.html('<div class="insp-empty">Hierarchy 나 Game View 에서 노드를 선택하세요.</div>');
             $('#nodeName').val('').prop('disabled', true);
             $('#inspector-visible').prop('checked', false).prop('disabled', true);
+            $('#inspectorCopyBtn, #inspectorResetBtn').prop('disabled', true);
             return;
         }
 
         var n = _node;
         $('#nodeName').val(n.getName() || 'Unnamed Node').prop('disabled', false);
         $('#inspector-visible').prop('disabled', false);
+        $('#inspectorCopyBtn, #inspectorResetBtn').prop('disabled', false);
+        if (!_originals.has(n)) _originals.set(n, takeSnapshot(n));
 
         var chips = '<span class="insp-chip insp-chip-class">' + esc(className(n)) + '</span>' +
             '<span class="insp-chip">Tag ' + esc(n.getTag()) + '</span>' +
@@ -628,6 +658,12 @@ var Inspector = (function () {
                         break;
                     case 'bool':
                         $inputs.prop('checked', !!v);
+                        break;
+                    case 'flags':
+                        $inputs.each(function () {
+                            var f = findFlag(prop, $(this).data('flag'));
+                            try { this.checked = !!(f && f.get(entry.target)); } catch (e) { this.checked = false; }
+                        });
                         break;
                     case 'color':
                         $inputs.each(function () { if (this !== active || force) this.value = v || '#ffffff'; });
@@ -700,9 +736,22 @@ var Inspector = (function () {
     function applyInput(el) {
         var key = $(el).data('key');
         var found = findProp(key);
-        if (!found || !found.prop.set) return;
+        if (!found) return;
         var prop = found.prop, target = found.target;
         var value;
+
+        if (prop.type === 'flags') {
+            var flag = findFlag(prop, $(el).data('flag'));
+            if (!flag) return;
+            try {
+                flag.set(target, el.checked);
+            } catch (e) {
+                console.error('[Inspector] 값 적용 실패:', key + '.' + flag.key, e);
+            }
+            afterChange(prop);
+            return;
+        }
+        if (!prop.set) return;
 
         switch (prop.type) {
             case 'xy':
@@ -801,6 +850,9 @@ var Inspector = (function () {
             $icon.closest('.jstree-anchor').toggleClass('node-hidden', !this.checked);
         });
 
+        $doc.on('click', '#inspectorCopyBtn', copyValues);
+        $doc.on('click', '#inspectorResetBtn', restoreOriginal);
+
         bindScrub();
     }
 
@@ -818,6 +870,129 @@ var Inspector = (function () {
         n.setName(name);
         if (mainLayer) mainLayer.refreshHierarchyView();
         refresh(false);
+    }
+
+    // ---- 원래대로 / 값 복사 ----------------------------------------------
+    // 노드를 처음 Inspector 에 띄울 때 편집 가능한 값을 저장해 두고, "원래대로" 로 되돌린다
+
+    var _originals = new WeakMap();
+
+    function collectSections(n) {
+        var list = [];
+        SECTIONS.forEach(function (section) {
+            var target = section.target ? section.target(n) : n;
+            if (!target || !section.applies(n)) return;
+            list.push({ section: section, target: target, props: section.props.filter(function (p) { return propApplies(p, target); }) });
+        });
+        return list;
+    }
+
+    function isRestorable(prop, target) {
+        if (prop.live || prop.type === 'ro' || prop.type === 'frame' || prop.type === 'progress' || prop.type === 'resource') return false;
+        if (prop.readOnly && prop.readOnly(target)) return false;
+        return prop.type === 'flags' || !!prop.set;
+    }
+
+    function readValue(prop, target) {
+        if (prop.type === 'flags') {
+            var flags = {};
+            applicableFlags(prop, target).forEach(function (f) { flags[f.key] = !!f.get(target); });
+            return flags;
+        }
+        var v = prop.get(target);
+        return (v && typeof v === 'object' && 'x' in v) ? { x: v.x, y: v.y } : v;
+    }
+
+    function takeSnapshot(n) {
+        var entries = [];
+        collectSections(n).forEach(function (entry) {
+            entry.props.forEach(function (prop) {
+                if (!isRestorable(prop, entry.target)) return;
+                try {
+                    entries.push({ prop: prop, target: entry.target, value: readValue(prop, entry.target) });
+                } catch (e) { /* 읽을 수 없는 값은 건너뛴다 */ }
+            });
+        });
+        return { visible: n.isVisible(), entries: entries };
+    }
+
+    function restoreOriginal() {
+        if (!_node) return;
+        var snap = _originals.get(_node);
+        if (!snap) return;
+        var failed = 0;
+        snap.entries.forEach(function (e) {
+            try {
+                if (e.prop.type === 'flags') {
+                    applicableFlags(e.prop, e.target).forEach(function (f) {
+                        if (f.key in e.value) f.set(e.target, e.value[f.key]);
+                    });
+                } else {
+                    e.prop.set(e.target, e.value);
+                }
+            } catch (err) {
+                failed++;
+                console.error('[Inspector] 원래대로 실패:', e.prop.key, err);
+            }
+        });
+        if (_node.isVisible() !== snap.visible) $('#inspector-visible').prop('checked', snap.visible).trigger('change');
+        if (window.MainLayerInstance) window.MainLayerInstance.refreshHierarchyView();
+        afterChange(null);
+        refresh(true);
+        UIWidgetsCopyPopover.showToast(failed ? '일부 값을 되돌리지 못했습니다' : '처음 선택했을 때 값으로 되돌렸습니다',
+            (_node.getName() || 'Unnamed') + ' · ' + snap.entries.length + '개 속성', !!failed);
+    }
+
+    function formatValue(prop, v, target) {
+        if (v == null) return '—';
+        switch (prop.type) {
+            case 'xy':
+                var axes = prop.axes || ['X', 'Y'];
+                return axes[0] + ' ' + fmt(v.x, prop.step || 1) + ', ' + axes[1] + ' ' + fmt(v.y, prop.step || 1);
+            case 'number':
+                return fmt(v, prop.step || 1);
+            case 'flags':
+                return applicableFlags(prop, target).map(function (f) { return f.label + ' ' + (v[f.key] ? 'on' : 'off'); }).join(', ');
+            case 'bool':
+                return v ? 'on' : 'off';
+            case 'color':
+                return String(v).toUpperCase();
+            case 'select':
+                var opts = [];
+                try { opts = prop.options(target) || []; } catch (e) { opts = []; }
+                for (var i = 0; i < opts.length; i++) {
+                    if (String(opts[i][0]) === String(v)) return opts[i][1];
+                }
+                return String(v);
+            case 'progress':
+            case 'resource':
+                return v.text || v.label || '—';
+            case 'frame':
+                return v.cur + ' / ' + Math.max(0, v.total - 1);
+            default:
+                return String(v).replace(/\r?\n/g, '\\n');
+        }
+    }
+
+    function valuesText(n) {
+        var lines = [(n.getName() || 'Unnamed') + ' (' + className(n) + ')' + (nodePath(n) ? ' · ' + nodePath(n) : '')];
+        collectSections(n).forEach(function (entry) {
+            if (entry.props.length === 0) return;
+            lines.push('', '[' + entry.section.title + ']');
+            entry.props.forEach(function (prop) {
+                var v;
+                try { v = readValue(prop, entry.target); } catch (e) { v = null; }
+                lines.push(prop.label + ': ' + formatValue(prop, v, entry.target));
+            });
+        });
+        return lines.join('\n');
+    }
+
+    function copyValues() {
+        if (!_node) return;
+        var text = valuesText(_node);
+        if (typeof copyStringToClipboard === 'function') copyStringToClipboard(text);
+        UIWidgetsCopyPopover.showToast('속성 값 복사됨', (_node.getName() || 'Unnamed') + ' · ' + text.split('\n').length + '줄');
     }
 
     // 라벨을 좌우로 드래그해서 숫자 조절 (Unity 방식)
