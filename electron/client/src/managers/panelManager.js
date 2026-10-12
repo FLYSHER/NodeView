@@ -126,7 +126,10 @@ var PanelManager = (function() {
             container.getElement().append($('#original-content-templates').find('#fileContainer').children());
         });
         myLayout.registerComponent('widgetTree', function(container, componentState) { container.getElement().append($('#original-content-templates').find('#widgetContainer').children()); });
-        myLayout.registerComponent('properties', function(container, componentState) { container.getElement().append($('#original-content-templates').find('#nodeInfoContainer').children()); });
+        myLayout.registerComponent('properties', function(container, componentState) {
+            // 헤더(이름/클래스)는 고정하고 Inspector 본문만 스크롤
+            container.getElement().addClass('properties-panel').append($('#original-content-templates').find('#nodeInfoContainer').children());
+        });
         myLayout.registerComponent('uiAnimation', function(container, componentState) { container.getElement().append($('#original-content-templates').find('#uiAnimationContainer').children()); });
         myLayout.registerComponent('sequencer', function(container, componentState) { container.getElement().append($('#original-content-templates').find('#sequencerContainer').children()); });
         myLayout.registerComponent('resourceView', function(container, componentState) {
@@ -316,16 +319,18 @@ var PanelManager = (function() {
         },
 
         // 리소스 파일을 Game View 옆 탭으로 연다 (이미 열려 있으면 그 탭을 앞으로)
-        openResource: function (fileName, kind) {
+        openResource: function (fileName, kind, selectName) {
             if (!_layout || !ResourceView.canOpen(kind)) return;
             const existing = _layout.root.getItemsByFilter(i => i.isComponent && i.componentName === 'resourceView' &&
                 i.config.componentState && i.config.componentState.fileName === fileName)[0];
             if (existing) {
                 existing.parent.setActiveContentItem(existing);
+                const viewer = ResourceView.getViewer(fileName);
+                if (viewer && selectName) setTimeout(function () { viewer.selectByName(selectName); }, 0);
                 return;
             }
             const title = ResourceView.KIND_LABEL[kind] + ' · ' + $('<div>').text(fileName).html();
-            const config = { type: 'component', componentName: 'resourceView', title: title, componentState: { fileName: fileName, kind: kind } };
+            const config = { type: 'component', componentName: 'resourceView', title: title, componentState: { fileName: fileName, kind: kind, select: selectName || null } };
             const gameView = _layout.root.getItemsByFilter(i => i.isComponent && i.componentName === 'gameView')[0];
             if (gameView && gameView.parent && gameView.parent.isStack) {
                 gameView.parent.addChild(config);

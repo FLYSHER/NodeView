@@ -38,6 +38,7 @@
         "src/armatureDebugDraw.js",
         "src/resources/resourceRegistry.js",
         "src/panels/dependenciesPanel.js",
-        "src/panels/resourceView.js"
+        "src/panels/resourceView.js",
+        "src/panels/inspector.js"
     ]
 }

@@ -1798,3 +1798,309 @@ ul.tabs li.current {
     padding: 5px 8px;
     font-size: 0.8rem;
 }
+
+/* --- Inspector (Properties) --- */
+#inspector-visible {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    accent-color: var(--accent-color);
+}
+.inspector-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 6px 12px;
+    border-bottom: 1px solid var(--border-color);
+    background-color: var(--bg-secondary);
+}
+.inspector-chips:empty {
+    display: none;
+}
+.insp-chip {
+    max-width: 100%;
+    padding: 1px 6px;
+    border: 1px solid var(--border-color);
+    border-radius: 3px;
+    color: var(--font-secondary);
+    font-size: 0.72rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.insp-chip-class {
+    border-color: #3c6fb8;
+    color: #8fc1ff;
+    font-family: Consolas, 'Courier New', monospace;
+}
+#inspector-body {
+    padding: 0;
+}
+.insp-empty {
+    padding: 24px 12px;
+    color: var(--font-secondary);
+    text-align: center;
+    font-size: 0.85rem;
+}
+.insp-section {
+    border-bottom: 1px solid var(--border-color);
+}
+.insp-section-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    padding: 6px 10px;
+    background-color: var(--bg-tertiary);
+    border: 0;
+    color: var(--font-primary);
+    font: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+}
+.insp-caret {
+    width: 10px;
+    color: var(--font-secondary);
+    font-size: 0.7rem;
+}
+.insp-section-body {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 8px 10px 10px;
+}
+.insp-section.collapsed .insp-section-body {
+    display: none;
+}
+.insp-row {
+    display: grid;
+    grid-template-columns: 96px minmax(0, 1fr);
+    align-items: center;
+    gap: 8px;
+    min-height: 24px;
+    font-size: 0.8rem;
+}
+.insp-row-wide {
+    grid-template-columns: 1fr;
+    gap: 4px;
+}
+.insp-label {
+    color: var(--font-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.insp-scrub {
+    cursor: ew-resize;
+    user-select: none;
+}
+.insp-scrub:hover {
+    color: var(--font-primary);
+}
+.insp-input {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: 3px 6px;
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 3px;
+    color: var(--font-primary);
+    font-family: Consolas, 'Courier New', monospace;
+    font-size: 0.8rem;
+}
+.insp-input:focus {
+    border-color: var(--accent-color);
+    outline: none;
+}
+.insp-input:disabled {
+    color: var(--font-secondary);
+    opacity: 0.8;
+}
+.insp-text,
+.insp-select,
+.insp-textarea {
+    font-family: inherit;
+}
+.insp-textarea {
+    resize: vertical;
+    min-height: 44px;
+}
+.insp-xy {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+}
+.insp-axis {
+    display: flex;
+    align-items: stretch;
+    min-width: 0;
+}
+.insp-axis-name {
+    display: flex;
+    align-items: center;
+    padding: 0 5px;
+    border: 1px solid var(--border-color);
+    border-right: 0;
+    border-radius: 3px 0 0 3px;
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+.insp-axis-name.axis-x { color: #ff8a8a; background-color: #2a1c1c; }
+.insp-axis-name.axis-y { color: #7fe0a6; background-color: #1a2a20; }
+.insp-axis .insp-input {
+    border-radius: 0 3px 3px 0;
+    text-align: right;
+}
+input.insp-input[type="number"] {
+    text-align: right;
+}
+.insp-check input {
+    width: 15px;
+    height: 15px;
+    margin: 0;
+    accent-color: var(--accent-color);
+}
+.insp-color,
+.insp-range,
+.insp-progress,
+.insp-frame {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+.insp-color input[type="color"] {
+    width: 34px;
+    height: 22px;
+    padding: 1px;
+    cursor: pointer;
+}
+.insp-color-hex,
+.insp-range-value,
+.insp-progress-text,
+.insp-frame-text,
+.insp-ro {
+    color: var(--font-secondary);
+    font-family: Consolas, 'Courier New', monospace;
+    font-size: 0.78rem;
+    word-break: break-all;
+}
+.insp-ro {
+    color: var(--font-primary);
+}
+.insp-range input[type="range"],
+.insp-frame-range {
+    flex: 1;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    accent-color: var(--accent-color);
+}
+.insp-range-value {
+    width: 30px;
+    text-align: right;
+}
+.insp-progress-bar {
+    flex: 1;
+    height: 6px;
+    border-radius: 3px;
+    background-color: var(--bg-primary);
+    overflow: hidden;
+}
+.insp-progress-fill {
+    width: 0;
+    height: 100%;
+    background-color: #ff9f43;
+}
+.insp-mini {
+    flex-shrink: 0;
+    width: 24px;
+    height: 22px;
+    padding: 0;
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 3px;
+    color: var(--font-primary);
+    font-size: 0.65rem;
+    cursor: pointer;
+}
+.insp-mini:hover {
+    border-color: var(--accent-color);
+}
+.insp-frame-text {
+    flex-shrink: 0;
+    min-width: 52px;
+    text-align: right;
+}
+.insp-link {
+    background: none;
+    border: 0;
+    padding: 0;
+    color: #8fb8ff;
+    font: inherit;
+    font-size: 0.78rem;
+    cursor: pointer;
+    text-align: left;
+}
+.insp-link:hover {
+    color: #c2d8ff;
+}
+.insp-ro .insp-link {
+    margin-left: 8px;
+}
+.insp-subtle {
+    color: var(--font-secondary);
+    font-size: 0.75rem;
+}
+.insp-tex-card {
+    display: flex;
+    gap: 10px;
+    padding: 6px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    background-color: var(--bg-primary);
+}
+.insp-tex-thumb {
+    flex-shrink: 0;
+    width: 56px;
+    height: 56px;
+    border-radius: 3px;
+    background-color: #3a3d42;
+    background-image: linear-gradient(45deg, #2c2f33 25%, transparent 25%), linear-gradient(-45deg, #2c2f33 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #2c2f33 75%), linear-gradient(-45deg, transparent 75%, #2c2f33 75%);
+    background-size: 10px 10px;
+    background-position: 0 0, 0 5px, 5px -5px, -5px 0;
+}
+.insp-tex-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    font-size: 0.78rem;
+}
+.insp-tex-name {
+    font-family: Consolas, 'Courier New', monospace;
+    word-break: break-all;
+}
+.insp-tex-label {
+    margin-right: 6px;
+    padding: 0 4px;
+    border: 1px solid var(--border-color);
+    border-radius: 3px;
+    color: var(--font-secondary);
+    font-family: inherit;
+    font-size: 0.7rem;
+}
+.lm_content.properties-panel {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+.properties-panel .inspector-top-area,
+.properties-panel .inspector-chips {
+    flex-shrink: 0;
+}

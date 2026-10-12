@@ -243,7 +243,7 @@ class UIScrollTreeViewCtrl {
                 cocosNode.setVisible(newVisibility);
                 $icon.toggleClass('fa-eye', newVisibility).toggleClass('fa-eye-slash', !newVisibility);
                 if (self._selectNode.length > 0 && self._selectNode[0].__instanceId === nodeId) {
-                    $('#visible').prop('checked', newVisibility);
+                    Inspector.refresh();
                 }
             }
         });
@@ -317,20 +317,6 @@ class UIScrollTreeViewCtrl {
         return { entries: entries, sourceLabel: 'Hierarchy 전체' };
     }
 
-    _updateDebugButtons(node) {
-        if (!(node instanceof DraggableNode)) return;
-        let bonesOn = false;
-        let slotsOn = false;
-        if (node.spine) {
-            bonesOn = node.spine.getDebugBonesEnabled();
-            slotsOn = node.spine.getDebugSlotsEnabled();
-        } else if (node.armature) {
-            bonesOn = ArmatureDebugDraw.isEnabled(node.armature);
-        }
-        $('#debugBone').text(bonesOn ? 'Hide Bone' : 'Show Bone').toggleClass('active', bonesOn);
-        $('#debugSlot').text(slotsOn ? 'Hide Slot' : 'Show Slot').toggleClass('active', slotsOn);
-    }
-
     setup() {
         $('#toggleVisible').click(function () {
             this._selectNode.forEach(item => {
@@ -374,303 +360,31 @@ class UIScrollTreeViewCtrl {
             }
         }.bind(this));
 
-        $('#debugBone').click(function () {
-            const node = this._selectNode[0];
-            if (!(node instanceof DraggableNode)) return;
-            if (node.spine) {
-                node.spine.setDebugBonesEnabled(!node.spine.getDebugBonesEnabled());
-            } else if (node.armature) {
-                ArmatureDebugDraw.setEnabled(node.armature, !ArmatureDebugDraw.isEnabled(node.armature));
-            }
-            this._updateDebugButtons(node);
-        }.bind(this));
-
-        $('#debugSlot').click(function () {
-            const node = this._selectNode[0];
-            if (!(node instanceof DraggableNode) || !node.spine) return;
-            node.spine.setDebugSlotsEnabled(!node.spine.getDebugSlotsEnabled());
-            this._updateDebugButtons(node);
-        }.bind(this));
-
-        document.getElementById('labelText').addEventListener('input', function (e) {
-            this._selectNode.forEach(item => {
-                let target = item;
-                if (item instanceof DraggableNode) {
-                    target = item.ui || item.armature || item.spine || item.image || item;
-                }
-
-                if (target && typeof target.setString === 'function') {
-                    target.setString(e.target.value);
-
-                    if (typeof Gizmo_DrawTouchLayerByRect === 'function') {
-                        Gizmo_DrawTouchLayerByRect(item.getBoundingBoxToWorld());
-                    }
-                }
-            });
-        }.bind(this));
-
-        document.getElementById('posX').addEventListener('input', function (e) {
-            this._selectNode.forEach(item => {
-                const val = parseFloat(e.target.value);
-                if (!isNaN(val) && item) {
-                    item.setPositionX(val);
-                    if (this._mainLayer && item.__instanceId) {
-                        this._mainLayer.updateMenuWithNodeId(item.__instanceId);
-                    }
-                }
-            });
-        }.bind(this));
-
-        document.getElementById('posY').addEventListener('input', function (e) {
-            this._selectNode.forEach(item => {
-                const val = parseFloat(e.target.value);
-                if (!isNaN(val) && item) {
-                    item.setPositionY(val);
-                    if (this._mainLayer && item.__instanceId) {
-                        this._mainLayer.updateMenuWithNodeId(item.__instanceId);
-                    }
-                }
-            });
-        }.bind(this));
-
-        document.getElementById('scaleX').addEventListener('input', function (e) {
-            this._selectNode.forEach(item => {
-                const val = parseFloat(e.target.value);
-                if (!isNaN(val) && item) {
-                    item.setScaleX(val);
-                    if (this._mainLayer && item.__instanceId) {
-                        this._mainLayer.updateMenuWithNodeId(item.__instanceId);
-                    }
-                }
-            });
-        }.bind(this));
-
-        document.getElementById('scaleY').addEventListener('input', function (e) {
-            this._selectNode.forEach(item => {
-                const val = parseFloat(e.target.value);
-                if (!isNaN(val) && item) {
-                    item.setScaleY(val);
-                    if (this._mainLayer && item.__instanceId) {
-                        this._mainLayer.updateMenuWithNodeId(item.__instanceId);
-                    }
-                }
-            });
-        }.bind(this));
-
-        document.getElementById('rotation').addEventListener('input', function (e) {
-            this._selectNode.forEach(item => {
-                const val = parseFloat(e.target.value);
-                if (!isNaN(val) && item) {
-                    item.setRotation(val);
-                    if (this._mainLayer && item.__instanceId) {
-                        this._mainLayer.updateMenuWithNodeId(item.__instanceId);
-                    }
-                }
-            });
-        }.bind(this));
-
-        document.getElementById('anchorX').addEventListener('input', function (e) {
-            this._selectNode.forEach(item => {
-                const val = parseFloat(e.target.value);
-                if (!isNaN(val) && item) {
-                    item.setAnchorPoint(cc.p(val, item.getAnchorPoint().y));
-                    if (this._mainLayer && item.__instanceId) {
-                        this._mainLayer.updateMenuWithNodeId(item.__instanceId);
-                    }
-                }
-            });
-        }.bind(this));
-
-        document.getElementById('anchorY').addEventListener('input', function (e) {
-            this._selectNode.forEach(item => {
-                const val = parseFloat(e.target.value);
-                if (!isNaN(val) && item) {
-                    item.setAnchorPoint(cc.p(item.getAnchorPoint().x, val));
-                    if (this._mainLayer && item.__instanceId) {
-                        this._mainLayer.updateMenuWithNodeId(item.__instanceId);
-                    }
-                }
-            });
-        }.bind(this));
-
-        document.getElementById('opacity').addEventListener('input', function (e) {
-            const val = parseInt(e.target.value, 10);
-            document.getElementById('opacityValue').textContent = val;
-            this._selectNode.forEach(item => {
-                if (item) {
-                    item.setOpacity(val);
-                    if (this._mainLayer && item.__instanceId) {
-                        this._mainLayer.updateMenuWithNodeId(item.__instanceId);
-                    }
-                }
-            });
-        }.bind(this));
-
-        document.getElementById('visible').addEventListener('change', function (e) {
-            const isChecked = e.target.checked;
-            this._selectNode.forEach(item => {
-                if (item) {
-                    item.setVisible(isChecked);
-                    const $jstreeNode = $('#' + item.__instanceId);
-                    if ($jstreeNode.length) {
-                        $jstreeNode.children('.jstree-anchor').find('.visibility-toggle').toggleClass('fa-eye', isChecked).toggleClass('fa-eye-slash', !isChecked);
-                    }
-                    if (this._mainLayer && item.__instanceId) {
-                        this._mainLayer.updateMenuWithNodeId(item.__instanceId);
-                    }
-                }
-            });
-        }.bind(this));
-
-        let isDraggingLabel = false;
-        let startMouseX = 0;
-        let startValue = 0;
-        let activeInputEl = null;
-        let sensitivity = 0.1;
-        const handleLabelMousedown = (e) => {
-            if (!this._selectNode[0] || e.button !== 0) return;
-            const targetLabel = e.currentTarget;
-            const targetInputId = targetLabel.dataset.target;
-            activeInputEl = document.getElementById(targetInputId);
-            if (!activeInputEl || activeInputEl.disabled) {
-                activeInputEl = null;
-                return;
-            }
-            e.preventDefault();
-            isDraggingLabel = true;
-            startMouseX = e.clientX;
-            startValue = parseFloat(activeInputEl.value);
-            if (activeInputEl.id.includes('scale')) {
-                sensitivity = 0.01;
-            } else if (activeInputEl.id === 'rotation' || activeInputEl.id.includes('anchor')) {
-                sensitivity = 0.1;
-            } else {
-                sensitivity = 0.2;
-            }
-            document.body.style.cursor = 'ew-resize';
-            $('#resize-overlay').show();
-        };
-        const handleLabelMousemove = (e) => {
-            if (!isDraggingLabel || !activeInputEl) return;
-            e.preventDefault();
-            const deltaX = e.clientX - startMouseX;
-            let newValue = startValue + deltaX * sensitivity;
-            const step = parseFloat(activeInputEl.step) || 1;
-            newValue = Math.round(newValue / step) * step;
-            activeInputEl.value = newValue.toFixed(activeInputEl.step ? activeInputEl.step.split('.')[1]?.length || 0 : 2);
-            activeInputEl.dispatchEvent(new Event('input', { bubbles: true }));
-        };
-        const handleLabelMouseup = () => {
-            if (isDraggingLabel) {
-                isDraggingLabel = false;
-                activeInputEl = null;
-                document.body.style.cursor = 'default';
-                $('#resize-overlay').hide();
-            }
-        };
-        document.addEventListener('mousemove', handleLabelMousemove);
-        document.addEventListener('mouseup', handleLabelMouseup);
-        document.addEventListener('touchmove', handleLabelMousemove);
-        document.addEventListener('touchend', handleLabelMouseup);
-        const draggableLabels = document.querySelectorAll('.draggable-label');
-        draggableLabels.forEach(label => {
-            label.addEventListener('mousedown', handleLabelMousedown);
-            label.addEventListener('touchstart', handleLabelMousedown);
-        });
+        Inspector.init();
     }
 
     setNode(node) {
-        // 1. 모든 필드 초기화 및 UI 숨김 처리 함수
-        const resetAndDisableAllFields = () => {
-            $('#actionTree').empty();
-            $('#debug-option').css('display', 'none');
-
-            // 라벨 관련 UI를 기본적으로 숨김
-            $('#label-option, #label-content-group').css('display', 'none');
-
-            document.getElementById('nodeName').value = '';
-            document.getElementById('nodeName').disabled = true;
-
-            // 라벨 텍스트 필드를 포함한 모든 필드 초기화
-            const fields = ['posX', 'posY', 'scaleX', 'scaleY', 'rotation', 'opacity', 'anchorX', 'anchorY', 'labelText'];
-            fields.forEach(id => {
-                const el = document.getElementById(id);
-                if (el) {
-                    el.value = '';
-                    el.disabled = true;
-                }
-            });
-
-            document.getElementById('opacityValue').textContent = '0';
-            document.getElementById('visible').checked = false;
-            document.getElementById('visible').disabled = true;
-            document.getElementById('zOrderValue').textContent = 'N/A';
-
-            if (typeof Gizmo_ClearDraw === 'function') {
-                Gizmo_ClearDraw();
-            }
-        };
-
-        // 2. 노드 선택 여부와 상관없이 일단 UI 상태를 초기화
-        resetAndDisableAllFields();
-
-        // 3. 선택된 노드가 없으면 여기서 중단
-        if (!node) {
-            this._selectNode = [];
-            this._masterNode = null;
+        // 같은 노드면(드래그로 위치가 바뀐 경우 등) 값만 갱신
+        if (node && this._selectNode[0] === node) {
+            Inspector.setNode(node);
+            this._drawGizmo(node);
             return;
         }
 
-        // 4. 노드 정보 설정 시작
-        this._selectNode = [node];
-        document.getElementById('nodeName').value = node.getName() || "Unnamed Node";
-        document.getElementById('nodeName').disabled = false;
-        document.getElementById('zOrderValue').textContent = node.getLocalZOrder ? node.getLocalZOrder() : '0';
+        $('#actionTree').empty();
+        Inspector.setNode(node);
 
-        const fieldsToEnable = ['posX', 'posY', 'scaleX', 'scaleY', 'rotation', 'opacity', 'visible', 'anchorX', 'anchorY'];
-        fieldsToEnable.forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.disabled = false;
-        });
-
-        document.getElementById('posX').value = node.getPosition().x.toFixed(2);
-        document.getElementById('posY').value = node.getPosition().y.toFixed(2);
-        document.getElementById('scaleX').value = node.getScaleX ? node.getScaleX().toFixed(2) : '1.00';
-        document.getElementById('scaleY').value = node.getScaleY ? node.getScaleY().toFixed(2) : '1.00';
-        document.getElementById('rotation').value = node.getRotation ? node.getRotation().toFixed(2) : '0.00';
-
-        const currentAnchor = node.getAnchorPoint ? node.getAnchorPoint() : cc.p(0.5, 0.5);
-        document.getElementById('anchorX').value = currentAnchor.x.toFixed(2);
-        document.getElementById('anchorY').value = currentAnchor.y.toFixed(2);
-
-        const currentOpacity = node.getOpacity ? node.getOpacity() : 255;
-        document.getElementById('opacity').value = currentOpacity;
-        document.getElementById('opacityValue').textContent = currentOpacity;
-        document.getElementById('visible').checked = node.isVisible ? node.isVisible() : true;
-
-        // 5. 텍스트 노드 여부 판단 및 UI 노출
-        let textTarget = node;
-        if (node instanceof DraggableNode) {
-            textTarget = node.ui || node;
-        }
-
-        // setString/getString이 있는 노드일 때만 라벨 수정창을 보여줌
-        if (textTarget && typeof textTarget.getString === 'function') {
-            $('#label-option, #label-content-group').css('display', 'block');
-            const textInput = document.getElementById('labelText');
-            if (textInput) {
-                textInput.disabled = false;
-                textInput.value = textTarget.getString();
+        if (!node) {
+            this._selectNode = [];
+            this._masterNode = null;
+            if (typeof Gizmo_ClearDraw === 'function') {
+                Gizmo_ClearDraw();
             }
+            return;
         }
 
-        // 6. 기즈모 및 애니메이션 리스트 업데이트
-        if (typeof Gizmo_DrawTouchLayerByRect === 'function') {
-            var worldBoundingBox = node.getBoundingBoxToWorld();
-            if (worldBoundingBox.width < 5) worldBoundingBox.width = 10;
-            if (worldBoundingBox.height < 5) worldBoundingBox.height = 10;
-            Gizmo_DrawTouchLayerByRect(worldBoundingBox);
-        }
+        this._selectNode = [node];
+        this._drawGizmo(node);
 
         if (node instanceof DraggableNode) {
             const draggableNodeInstance = node;
@@ -766,11 +480,15 @@ class UIScrollTreeViewCtrl {
                 $actionContainer.append($item);
             });
 
-            if (draggableNodeInstance.assetType === 'spine' || draggableNodeInstance.assetType === 'armature') {
-                $('#debug-option').css('display', 'flex');
-                $('#debugSlot').toggle(draggableNodeInstance.assetType === 'spine');
-                this._updateDebugButtons(draggableNodeInstance);
-            }
+        }
+    }
+
+    _drawGizmo(node) {
+        if (typeof Gizmo_DrawTouchLayerByRect === 'function') {
+            var worldBoundingBox = node.getBoundingBoxToWorld();
+            if (worldBoundingBox.width < 5) worldBoundingBox.width = 10;
+            if (worldBoundingBox.height < 5) worldBoundingBox.height = 10;
+            Gizmo_DrawTouchLayerByRect(worldBoundingBox);
         }
     }
 

@@ -8,6 +8,7 @@ var ResourceView = (function () {
 
     var KIND_LABEL = { png: 'PNG', plist: 'PLIST', atlas: 'ATLAS', fnt: 'FNT' };
     var MIN_ZOOM = 0.05;
+    var _viewers = {};   // fileName -> Viewer (열려 있는 탭)
     var MAX_ZOOM = 32;
 
     function esc(text) {
@@ -186,10 +187,15 @@ var ResourceView = (function () {
         this._userMoved = false;
         this._pixelCanvas = null;
 
+        var self = this;
         this._build();
         this.reload();
+        _viewers[this.fileName] = this;
+        if (state.select) {
+            var selectName = state.select;
+            setTimeout(function () { self.selectByName(selectName); }, 50);
+        }
 
-        var self = this;
         this._registryListener = cc.eventManager.addCustomListener(ResourceRegistry.EVENT_CHANGED, function () {
             // 텍스처가 나중에 로드됐을 수 있으므로 모델을 다시 만든다
             if (!self.model || !self.model.texture || self.model.missingReason) self.reload();
@@ -315,7 +321,20 @@ var ResourceView = (function () {
         canvas.addEventListener('mouseleave', function () { self.$el.find('.rv-readout').text(''); });
     };
 
+    Viewer.prototype.selectByName = function (name) {
+        if (!this.viewW) this._resizeCanvas();
+        for (var i = 0; i < this.model.items.length; i++) {
+            if (this.model.items[i].name === name) {
+                this.select(i, !!this.viewW);
+                if (this.viewW) this._userMoved = true;
+                return true;
+            }
+        }
+        return false;
+    };
+
     Viewer.prototype.destroy = function () {
+        if (_viewers[this.fileName] === this) delete _viewers[this.fileName];
         window.removeEventListener('mousemove', this._onMove);
         window.removeEventListener('mouseup', this._onUp);
         if (this._registryListener) cc.eventManager.removeListener(this._registryListener);
@@ -692,6 +711,7 @@ var ResourceView = (function () {
 
     return {
         Viewer: Viewer,
+        getViewer: function (fileName) { return _viewers[fileName] || null; },
         KIND_LABEL: KIND_LABEL,
         buildModel: buildModel,
         // 이 확장자를 Resource View 로 열 수 있는지

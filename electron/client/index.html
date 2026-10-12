@@ -124,10 +124,6 @@
             <div id="ui-option">
             </div>
 
-            <div id="debug-option" class="button-group">
-                <button type="button" id="debugBone" class="styleButton" style="width: 45%;">Show Bone</button>
-                <button type="button" id="debugSlot" class="styleButton" style="width: 45%;">Show Slot</button>
-            </div>
         </div>
     </div>
 
@@ -141,59 +137,11 @@
 
     <div id="nodeInfoContainer" class="nodeInfoContainer">
         <div class="inspector-top-area">
-            <i class="fas fa-cube inspector-name-icon"></i> <input type="text" id="nodeName" name="nodeName" class="positionInput inspector-name-input"> </div>
-
-        <div class="panel-content-inner">
-            <div class="section-header">Renderer</div>
-            <div class="input-group">
-                <label class="styleLabel" for="zOrderValue">Z-Order:</label> <span id="zOrderValue" class="value-label">0</span>
-            </div>
-            <div class="input-group">
-                <label class="styleLabel" for="opacity">Opacity:</label>
-                <input type="range" id="opacity" name="opacity" min="0" max="255" value="255">
-                <span id="opacityValue" class="value-label">255</span>
-            </div>
-            <div class="checkbox-group">
-                <label class="styleLabel" for="visible">Visible:</label>
-                <input type="checkbox" id="visible" name="visible" checked>
-            </div>
-
-            <div id="label-option" class="section-header" style="display: none;">Label</div>
-            <div id="label-content-group" class="input-group" style="display: none;">
-                <label class="styleLabel">Text:</label>
-                <textarea id="labelText" class="positionInput" style="width: 100%; height: 60px; resize: vertical;"></textarea>
-            </div>
-
-            <div class="section-header">Transform</div>
-            <div class="input-group">
-                <label class="styleLabel draggable-label" data-target="anchorX">Anchor X:</label>
-                <input type="number" id="anchorX" name="anchorX" step="0.1" class="positionInput text-right">
-            </div>
-            <div class="input-group">
-                <label class="styleLabel draggable-label" data-target="anchorY">Anchor Y:</label>
-                <input type="number" id="anchorY" name="anchorY" step="0.1" class="positionInput text-right">
-            </div>
-            <div class="input-group">
-                <label class="styleLabel draggable-label" data-target="posX">Position X:</label>
-                <input type="number" id="posX" name="posX" class="positionInput text-right">
-            </div>
-            <div class="input-group">
-                <label class="styleLabel draggable-label" data-target="posY">Position Y:</label>
-                <input type="number" id="posY" name="posY" class="positionInput text-right">
-            </div>
-            <div class="input-group">
-                <label class="styleLabel draggable-label" data-target="scaleX">Scale X:</label>
-                <input type="number" id="scaleX" name="scaleX" step="0.01" class="positionInput text-right">
-            </div>
-            <div class="input-group">
-                <label class="styleLabel draggable-label" data-target="scaleY">Scale Y:</label>
-                <input type="number" id="scaleY" name="scaleY" step="0.01" class="positionInput text-right">
-            </div>
-            <div class="input-group">
-                <label class="styleLabel draggable-label" data-target="rotation">Rotation:</label>
-                <input type="number" id="rotation" name="rotation" step="0.1" class="positionInput text-right">
-            </div>
+            <input type="checkbox" id="inspector-visible" aria-label="Visible" disabled>
+            <input type="text" id="nodeName" name="nodeName" class="positionInput inspector-name-input" aria-label="노드 이름" disabled>
         </div>
+        <div id="inspector-header-extra" class="inspector-chips"></div>
+        <div id="inspector-body" class="panel-content-inner"></div>
     </div>
 
     <div id="sequencerContainer" class="widgetContainer">
