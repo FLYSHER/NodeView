@@ -141,8 +141,8 @@ var PanelManager = (function() {
             ConsolePanel.mount(container);
         });
         myLayout.registerComponent('dependencies', function(container, componentState) {
-            container.getElement().append('<div id="dependencies-panel" class="dependencies-panel"></div>');
-            DependenciesPanel.mount();
+            const panel = $('<div id="dependencies-panel" class="dependencies-panel"></div>').appendTo(container.getElement());
+            DependenciesPanel.mount(panel[0]);
         });
     }
 

@@ -7,9 +7,10 @@ var DependenciesPanel = (function () {
     var _assetKey = null;
     var _selectedFile = null;
     var _missingOnly = false;
+    var _rootEl = null;     // mount 시 받은 패널 요소 (GoldenLayout 이 문서에 붙이기 전이라 ID 로는 찾을 수 없음)
 
     function $root() {
-        return $('#dependencies-panel');
+        return $(_rootEl || '#dependencies-panel');
     }
 
     function esc(text) {
@@ -83,8 +84,8 @@ var DependenciesPanel = (function () {
                 html += '<div class="dep-row dep-item status-' + d.status + sel + '" data-file-name="' + esc(d.fileName) + '" title="' + esc(d.fullPath || d.ref) + '">' +
                     '<span class="dep-file"><span class="res-kind kind-' + esc(d.kind) + '">' + esc(d.kind.toUpperCase()) + '</span><span class="dep-file-name">' + esc(d.fileName) + '</span></span>' +
                     '<span>' + esc(d.info || (d.regions != null ? d.regions + ' regions' : '—')) + '</span>' +
-                    '<span>' + formatBytes(d.bytes) + '</span>' +
-                    '<span>' + (d.usage == null ? '—' : d.usage) + '</span>' +
+                    '<span data-label="크기">' + formatBytes(d.bytes) + '</span>' +
+                    '<span data-label="사용">' + (d.usage == null ? '—' : d.usage) + '</span>' +
                     '<span class="dep-status">' + statusLabel(d.status) + '</span>' +
                     '</div>';
             });
@@ -187,32 +188,45 @@ var DependenciesPanel = (function () {
         if (dep && dep.status === 'ok') PanelManager.openResource(dep.fileName, dep.kind);
     }
 
-    function bindEvents() {
-        var $el = $root();
-        $el.on('click', '.dep-item', function () {
+    function bindEvents(rootEl) {
+        // 패널 요소에 직접(네이티브로) 위임 등록: 패널을 다른 위치로 옮겨도 유지된다
+        var on = function (type, selector, handler) {
+            rootEl.addEventListener(type, function (e) {
+                var target = e.target.closest ? e.target.closest(selector) : null;
+                if (target && rootEl.contains(target)) handler.call(target, e);
+            });
+        };
+
+        // 좁은 패널(오른쪽 열 등)에서는 표를 2줄 카드 형태로 바꾼다
+        if (window.ResizeObserver) {
+            new ResizeObserver(function () {
+                rootEl.classList.toggle('dep-narrow', rootEl.clientWidth < 520);
+            }).observe(rootEl);
+        }
+        on('click', '.dep-item', function () {
             _selectedFile = $(this).data('file-name') + '';
             render();
         });
-        $el.on('dblclick', '.dep-item', function () {
+        on('dblclick', '.dep-item', function () {
             openSelected($(this).data('file-name') + '');
         });
-        $el.on('click', '.dep-open-view', function () {
+        on('click', '.dep-open-view', function () {
             openSelected(_selectedFile);
         });
-        $el.on('change', '.dep-missing-only', function () {
+        on('change', '.dep-missing-only', function () {
             _missingOnly = this.checked;
             render();
         });
-        $el.on('click', '.dep-pick-file', function () {
+        on('click', '.dep-pick-file', function () {
             pickFile($(this).data('file-name') + '');
         });
-        $el.on('click', '.dep-copy-list', function () {
+        on('click', '.dep-copy-list', function () {
             var data = _assetKey ? ResourceRegistry.collect(_assetKey) : null;
             if (!data) return;
             copyStringToClipboard(listText(data));
             UIWidgetsCopyPopover.showToast('리소스 목록 복사됨', data.deps.length + '개 파일');
         });
-        $el.on('click', '.dep-reveal', function () {
+        on('click', '.dep-reveal', function () {
             var data = _assetKey ? ResourceRegistry.collect(_assetKey) : null;
             if (!data) return;
             var selected = data.deps.filter(function (d) { return d.fileName === _selectedFile && d.fullPath; })[0];
@@ -227,8 +241,9 @@ var DependenciesPanel = (function () {
 
     return {
         // GoldenLayout 컴포넌트가 만들어질 때 호출
-        mount: function () {
-            bindEvents();
+        mount: function (rootEl) {
+            _rootEl = rootEl;
+            bindEvents(rootEl);
             render();
         },
         showAsset: function (assetKey, fileName) {

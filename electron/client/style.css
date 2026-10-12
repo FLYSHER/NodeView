@@ -2297,3 +2297,47 @@ button.sb-item:hover {
     color: #D32F2F;
 }
 
+/* --- Dependencies: 좁은 패널 (오른쪽 열 배치 등) --- */
+.dep-footer {
+    flex-wrap: wrap;
+}
+.dep-footer .styleButton {
+    white-space: nowrap;
+}
+.dep-narrow .dep-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.dep-narrow .dep-head {
+    display: none;
+}
+/* 1줄: 파일명 + 상태 / 2줄: 정보 · 크기 · 사용 */
+.dep-narrow .dep-row {
+    grid-template-columns: auto auto minmax(0, 1fr) auto;
+    row-gap: 2px;
+    column-gap: 12px;
+}
+.dep-narrow .dep-item > :nth-child(1) { grid-column: 1 / 4; grid-row: 1; }
+.dep-narrow .dep-item > :nth-child(5) { grid-column: 4; grid-row: 1; text-align: right; }
+.dep-narrow .dep-item > :nth-child(2) { grid-column: 1; grid-row: 2; }
+.dep-narrow .dep-item > :nth-child(3) { grid-column: 2; grid-row: 2; }
+.dep-narrow .dep-item > :nth-child(4) { grid-column: 3; grid-row: 2; }
+.dep-narrow .dep-item > :nth-child(2),
+.dep-narrow .dep-item > :nth-child(3),
+.dep-narrow .dep-item > :nth-child(4) {
+    color: var(--font-secondary);
+    font-size: 0.72rem;
+    white-space: nowrap;
+}
+.dep-narrow .dep-item.selected > :nth-child(2),
+.dep-narrow .dep-item.selected > :nth-child(3),
+.dep-narrow .dep-item.selected > :nth-child(4) {
+    color: #dce8ff;
+}
+.dep-narrow .dep-item [data-label]::before {
+    content: attr(data-label) " ";
+    opacity: 0.8;
+}
+.dep-narrow .dep-item > :nth-child(2) {
+    padding-left: 44px;   /* 종류 배지 폭만큼 들여서 파일명 아래에 맞춘다 */
+}
+
