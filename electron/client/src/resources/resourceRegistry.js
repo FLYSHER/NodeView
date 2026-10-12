@@ -382,8 +382,129 @@ var ResourceRegistry = (function () {
         };
     }
 
+    // ---- Resource View 용 상세 정보 --------------------------------------
+
+    /**
+     * Spine .atlas 전체 파싱 (3.x 형식 + 4.x 의 bounds/offsets 일부)
+     * @returns {Array<{name, size, format, filter, regions: Array}>}
+     */
+    function parseAtlas(atlasText) {
+        var pages = [];
+        var page = null;
+        var region = null;
+        var expectPage = true;
+        var nums = function (v) { return String(v).split(',').map(function (n) { return parseFloat(n); }); };
+
+        String(atlasText).split(/\r?\n/).forEach(function (line) {
+            if (line.trim() === '') { expectPage = true; region = null; return; }
+            if (expectPage) {
+                page = { name: line.trim(), size: null, format: '', filter: '', regions: [] };
+                pages.push(page);
+                expectPage = false;
+                return;
+            }
+            var colon = line.indexOf(':');
+            var isProp = colon >= 0;
+            if (!isProp) {
+                region = { name: line.trim(), x: 0, y: 0, w: 0, h: 0, rotate: 0, origW: 0, origH: 0, offX: 0, offY: 0, index: -1, page: page.name };
+                page.regions.push(region);
+                return;
+            }
+            var key = line.substring(0, colon).trim();
+            var value = line.substring(colon + 1).trim();
+            // 들여쓴 속성 = 리전 속성, 아니면 페이지 속성
+            var target = /^\s/.test(line) && region ? region : null;
+            if (!target) {
+                // 페이지 속성
+                if (key === 'size') { var s = nums(value); page.size = { w: s[0], h: s[1] }; }
+                else if (key === 'format') page.format = value;
+                else if (key === 'filter') page.filter = value;
+                return;
+            }
+            var v;
+            switch (key) {
+                case 'rotate': target.rotate = value === 'true' ? 90 : (value === 'false' ? 0 : parseFloat(value) || 0); break;
+                case 'xy': v = nums(value); target.x = v[0]; target.y = v[1]; break;
+                case 'size': v = nums(value); target.w = v[0]; target.h = v[1]; break;
+                case 'bounds': v = nums(value); target.x = v[0]; target.y = v[1]; target.w = v[2]; target.h = v[3]; break;
+                case 'orig': v = nums(value); target.origW = v[0]; target.origH = v[1]; break;
+                case 'offset': v = nums(value); target.offX = v[0]; target.offY = v[1]; break;
+                case 'offsets': v = nums(value); target.offX = v[0]; target.offY = v[1]; target.origW = v[2]; target.origH = v[3]; break;
+                case 'index': target.index = parseInt(value, 10); break;
+            }
+        });
+        pages.forEach(function (p) {
+            p.regions.forEach(function (r) {
+                if (!r.origW) { r.origW = r.w; r.origH = r.h; }
+            });
+        });
+        return pages;
+    }
+
+    /**
+     * plist 프레임을 사용하는 곳 (로드된 모든 UI / Armature 기준)
+     * @returns {Object} frameName -> [{ assetKey, assetName, node }]
+     */
+    function getFrameUsage(plistFileName) {
+        var conf = Loader.plistFiles[stem(plistFileName)];
+        var usage = {};
+        if (!conf || !conf.frames) return usage;
+        var add = function (frame, item) { (usage[frame] = usage[frame] || []).push(item); };
+
+        getSources().forEach(function (src) {
+            if (src.type === 'ui') {
+                var dic = cc.loader.cache[src.url];
+                if (!dic || !dic.widgetTree) return;
+                collectWidgetRefs(dic.widgetTree).forEach(function (ref) {
+                    if (ref.resourceType === 1 && conf.frames[ref.path]) {
+                        add(ref.path, { assetKey: src.key, assetName: src.name, node: ref.node });
+                    }
+                });
+            } else if (src.type === 'armature') {
+                var arm = Loader.armatureData[src.file];
+                (arm && arm.texture_data || []).forEach(function (t) {
+                    var frame = conf.frames[t.name + '.png'] ? t.name + '.png' : (conf.frames[t.name] ? t.name : null);
+                    if (frame) add(frame, { assetKey: src.key, assetName: src.name, node: null, label: '디스플레이 ' + t.name });
+                });
+            }
+        });
+        return usage;
+    }
+
+    /**
+     * Spine 리전을 사용하는 슬롯/어태치먼트
+     * @returns {Object} regionName -> ['slot → attachment (skin)']
+     */
+    function getSpineRegionUsage(spineName) {
+        var usage = {};
+        var json;
+        try { json = JSON.parse(Loader.spineData[spineName]); } catch (e) { return usage; }
+        if (!json || !json.skins) return usage;
+
+        var NON_REGION = ['boundingbox', 'clipping', 'path', 'point'];
+        var visitSkin = function (skinName, slots) {
+            for (var slot in slots) {
+                for (var attName in slots[slot]) {
+                    var att = slots[slot][attName] || {};
+                    if (NON_REGION.indexOf(att.type) >= 0) continue;
+                    var regionName = att.path || att.name || attName;
+                    (usage[regionName] = usage[regionName] || []).push(slot + ' → ' + attName + ' (' + skinName + ')');
+                }
+            }
+        };
+        if (Array.isArray(json.skins)) {
+            json.skins.forEach(function (skin) { visitSkin(skin.name, skin.attachments || {}); });   // 3.8+
+        } else {
+            for (var skinName in json.skins) visitSkin(skinName, json.skins[skinName]);           // 3.7 이하
+        }
+        return usage;
+    }
+
     return {
         EVENT_CHANGED: EVENT_CHANGED,
+        parseAtlas: parseAtlas,
+        getFrameUsage: getFrameUsage,
+        getSpineRegionUsage: getSpineRegionUsage,
         registerSource: registerSource,
         removeSource: removeSource,
         getSource: getSource,

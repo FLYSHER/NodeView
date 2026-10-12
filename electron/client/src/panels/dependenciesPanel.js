@@ -127,6 +127,8 @@ var DependenciesPanel = (function () {
         html += '<div class="dep-footer">' +
             (isElectron() ? '<button type="button" class="styleButton dep-reveal">탐색기에서 열기</button>' : '') +
             '<button type="button" class="styleButton dep-copy-list">목록 복사</button>' +
+            (selected && selected.status === 'ok' && ResourceView.canOpen(selected.kind)
+                ? '<button type="button" class="styleButton dep-open-view">Resource View 로 열기</button>' : '') +
             '</div>';
 
         $el.html(html);
@@ -179,11 +181,23 @@ var DependenciesPanel = (function () {
         $input.trigger('click');
     }
 
+    function openSelected(fileName) {
+        var data = _assetKey ? ResourceRegistry.collect(_assetKey) : null;
+        var dep = data && data.deps.filter(function (d) { return d.fileName === fileName; })[0];
+        if (dep && dep.status === 'ok') PanelManager.openResource(dep.fileName, dep.kind);
+    }
+
     function bindEvents() {
         var $el = $root();
         $el.on('click', '.dep-item', function () {
             _selectedFile = $(this).data('file-name') + '';
             render();
+        });
+        $el.on('dblclick', '.dep-item', function () {
+            openSelected($(this).data('file-name') + '');
+        });
+        $el.on('click', '.dep-open-view', function () {
+            openSelected(_selectedFile);
         });
         $el.on('change', '.dep-missing-only', function () {
             _missingOnly = this.checked;

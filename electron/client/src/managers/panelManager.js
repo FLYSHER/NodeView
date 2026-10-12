@@ -51,6 +51,21 @@ var PanelManager = (function() {
         });
     }
 
+    // 저장된 레이아웃에서 특정 컴포넌트를 제거 (Resource View 탭은 리소스가 다시 로드되지 않으므로 복원하지 않는다)
+    function _stripComponents(config, componentName) {
+        if (!config) return config;
+        const strip = function (item) {
+            if (!item.content) return;
+            item.content = item.content.filter(child => !(child.type === 'component' && child.componentName === componentName));
+            if (typeof item.activeItemIndex === 'number' && item.activeItemIndex >= item.content.length) {
+                item.activeItemIndex = Math.max(0, item.content.length - 1);
+            }
+            item.content.forEach(strip);
+        };
+        strip(config);
+        return config;
+    }
+
     function _addComponent(myLayout, name) {
         const componentConfig = { type: 'component', componentName: name, title: componentRegistry[name].title };
         // Sequencer 가 있는 스택 → 아무 스택 → 루트 순서로 넣는다
@@ -114,6 +129,9 @@ var PanelManager = (function() {
         myLayout.registerComponent('properties', function(container, componentState) { container.getElement().append($('#original-content-templates').find('#nodeInfoContainer').children()); });
         myLayout.registerComponent('uiAnimation', function(container, componentState) { container.getElement().append($('#original-content-templates').find('#uiAnimationContainer').children()); });
         myLayout.registerComponent('sequencer', function(container, componentState) { container.getElement().append($('#original-content-templates').find('#sequencerContainer').children()); });
+        myLayout.registerComponent('resourceView', function(container, componentState) {
+            new ResourceView.Viewer(container, componentState || {});
+        });
         myLayout.registerComponent('dependencies', function(container, componentState) {
             container.getElement().append('<div id="dependencies-panel" class="dependencies-panel"></div>');
             DependenciesPanel.mount();
@@ -124,7 +142,7 @@ var PanelManager = (function() {
         initialize: function () {
             const layoutArea = $('#panels-container-area');
             layoutArea.empty();
-            const finalLayoutConfig = LayoutManager.load() || defaultLayoutConfig;
+            const finalLayoutConfig = _stripComponents(LayoutManager.load(), 'resourceView') || defaultLayoutConfig;
             const myLayout = new GoldenLayout(finalLayoutConfig, layoutArea);
 
             _registerComponents(myLayout);
@@ -295,6 +313,26 @@ var PanelManager = (function() {
                 if (myLayout) myLayout.updateSize();
             }, 150);
             $(window).on('resize', debouncedResize);
+        },
+
+        // 리소스 파일을 Game View 옆 탭으로 연다 (이미 열려 있으면 그 탭을 앞으로)
+        openResource: function (fileName, kind) {
+            if (!_layout || !ResourceView.canOpen(kind)) return;
+            const existing = _layout.root.getItemsByFilter(i => i.isComponent && i.componentName === 'resourceView' &&
+                i.config.componentState && i.config.componentState.fileName === fileName)[0];
+            if (existing) {
+                existing.parent.setActiveContentItem(existing);
+                return;
+            }
+            const title = ResourceView.KIND_LABEL[kind] + ' · ' + $('<div>').text(fileName).html();
+            const config = { type: 'component', componentName: 'resourceView', title: title, componentState: { fileName: fileName, kind: kind } };
+            const gameView = _layout.root.getItemsByFilter(i => i.isComponent && i.componentName === 'gameView')[0];
+            if (gameView && gameView.parent && gameView.parent.isStack) {
+                gameView.parent.addChild(config);
+            } else {
+                const stack = _layout.root.getItemsByFilter(i => i.isStack)[0];
+                (stack || _layout.root.contentItems[0]).addChild(config);
+            }
         },
 
         // 패널을 앞으로 가져온다 (닫혀 있으면 다시 연다)

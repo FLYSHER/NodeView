@@ -165,7 +165,7 @@ var UIItemList = cc.Node.extend({
                     : dep.status === 'pending' ? '대기'
                     : (dep.info || '');
                 const $row = $(`
-<div class="asset-dep-row status-${dep.status}" data-file-name="${this._escape(dep.fileName)}" title="${this._escape(dep.fullPath || dep.ref)}">
+<div class="asset-dep-row status-${dep.status}" data-file-name="${this._escape(dep.fileName)}" title="${this._escape((dep.fullPath || dep.ref) + (dep.status === 'ok' ? ' — 더블클릭: Resource View 로 열기' : ''))}">
     <span class="res-kind kind-${dep.kind}">${this._escape(dep.kind.toUpperCase())}</span>
     <span class="asset-dep-name">${this._escape(dep.fileName)}</span>
     <span class="asset-dep-meta">${this._escape(meta)}</span>
@@ -173,6 +173,11 @@ var UIItemList = cc.Node.extend({
                 $row.on('click', (e) => {
                     e.stopPropagation();
                     this._select(assetKey, dep.fileName);
+                });
+                // 더블클릭 → Resource View 탭으로 열기
+                $row.on('dblclick', (e) => {
+                    e.stopPropagation();
+                    if (dep.status === 'ok') PanelManager.openResource(dep.fileName, dep.kind);
                 });
                 $deps.append($row);
             });
