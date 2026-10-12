@@ -90,10 +90,20 @@ var UIItemList = cc.Node.extend({
     <span class="track-type-icon ${badge.cls}">${badge.text}</span>
     <span class="asset-name">${this._escape(assetInfo.name)}</span>
     <span class="asset-type">(${assetInfo.type.toUpperCase()})</span>
-    ${statusHtml}
+    <span class="asset-row-end">
+        ${statusHtml}
+        <button type="button" class="asset-delete-btn" title="에셋 삭제" aria-label="${this._escape(assetInfo.name)} 삭제"><i class="fa fa-times" aria-hidden="true"></i></button>
+    </span>
 </div>`);
         $item.attr('data-asset-name', assetInfo.name).attr('data-asset-type', assetInfo.type);
         $wrap.append($item);
+
+        // X 버튼: Hierarchy 와 같은 방식으로 바로 삭제 (씬에 배치된 인스턴스도 함께 삭제됨)
+        $item.find('.asset-delete-btn').on('mousedown dblclick', (e) => e.stopPropagation());
+        $item.find('.asset-delete-btn').on('click', (e) => {
+            e.stopPropagation();
+            this._mainLayer.deleteAsset(assetInfo.name, assetInfo.type);
+        });
 
         $item.find('.asset-caret').on('click', (e) => {
             e.stopPropagation();

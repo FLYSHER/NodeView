@@ -48,8 +48,23 @@ class DeletionManager {
             this._mainLayer.refreshAssetsPanel();
             console.log(`[DELETE_MGR] -> Assets 패널 UI 새로고침 완료.`);
 
+        } else if (ResourceRegistry.getSource(assetKey)) {
+            // 텍스처 누락 등으로 로드가 끝나지 않은 에셋: 목록과 캐시에서만 제거
+            Loader.clearAssetCache(assetName, assetType);
+            ResourceRegistry.removeSource(assetKey);
+            this._mainLayer.refreshAssetsPanel();
         } else {
             console.warn(`[DELETE_MGR] 경고: 에셋 라이브러리에서 '${assetName}' (타입: ${assetType}) 에셋을 찾을 수 없습니다.`);
+        }
+
+        // 삭제한 에셋이 선택/펼침 상태였다면 정리
+        const itemList = this._mainLayer._itemList;
+        if (itemList) {
+            delete itemList._expandedKeys[assetKey];
+            if (itemList._selectedKey === assetKey) {
+                itemList._selectedKey = null;
+                if (typeof DependenciesPanel !== 'undefined') DependenciesPanel.showAsset(null);
+            }
         }
     }
 

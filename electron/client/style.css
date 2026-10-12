@@ -2269,3 +2269,31 @@ button.sb-item:hover {
     font-family: 'Roboto', Helvetica, Arial, sans-serif;
 }
 
+/* --- Assets 행 오른쪽 끝: 상태 배지 + 삭제(X) 버튼 (Hierarchy 의 삭제 아이콘과 같은 모양) --- */
+.asset-row-end {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+    margin-left: auto;
+    padding-left: 6px;
+}
+.asset-row-end .asset-badge {
+    margin-left: 0;
+}
+.asset-delete-btn {
+    padding: 2px 4px;
+    background: none;
+    border: 0;
+    border-radius: 3px;
+    color: #E57373;
+    font-size: 0.85rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.asset-row:hover .asset-delete-btn {
+    background-color: #ffcdd2;
+    color: #D32F2F;
+}
+
