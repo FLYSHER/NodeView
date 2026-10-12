@@ -42,6 +42,7 @@ class DeletionManager {
             }
 
             delete this._mainLayer.assetLibrary[assetKey];
+            ResourceRegistry.removeSource(assetKey);
             console.log(`[DELETE_MGR] -> 에셋 정의 '${assetName}' 라이브러리에서 삭제 완료.`);
 
             this._mainLayer.refreshAssetsPanel();

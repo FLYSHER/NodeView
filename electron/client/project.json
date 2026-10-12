@@ -35,6 +35,8 @@
         "src/managers/deletionManager.js",
         "src/uiWidgetsCopy.js",
         "src/uiWidgetsCopyPopover.js",
-        "src/armatureDebugDraw.js"
+        "src/armatureDebugDraw.js",
+        "src/resources/resourceRegistry.js",
+        "src/panels/dependenciesPanel.js"
     ]
 }

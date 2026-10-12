@@ -1236,3 +1236,301 @@ ul.tabs li.current {
     font-size: 0.75rem;
     word-break: break-all;
 }
+
+/* --- Assets 패널: 에셋 + 의존 리소스 트리 --- */
+.asset-row {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    white-space: nowrap;
+}
+.asset-caret {
+    width: 14px;
+    flex-shrink: 0;
+    color: var(--font-secondary);
+    font-size: 0.7rem;
+    cursor: pointer;
+}
+.asset-caret.empty {
+    cursor: default;
+}
+.asset-name {
+    flex: 0 1 auto;
+    min-width: 30px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+/* 좁을 때는 (TYPE) 표시가 먼저 줄어든다 */
+.asset-type {
+    flex: 0 100 auto;
+    min-width: 0;
+    margin-left: 4px;
+    overflow: hidden;
+    color: var(--font-secondary);
+    font-size: 0.8em;
+}
+.asset-badge {
+    flex-shrink: 0;
+}
+.asset-badge {
+    margin-left: auto;
+    padding: 0 6px;
+    border-radius: 8px;
+    font-size: 0.7rem;
+    font-weight: normal;
+}
+.asset-badge.missing {
+    color: #ffb3b3;
+    border: 1px solid #8a3a3a;
+}
+.asset-badge.pending {
+    color: var(--font-secondary);
+    border: 1px solid var(--border-color);
+}
+.asset-row-pending {
+    padding: 6px 8px;
+    margin-bottom: 4px;
+    border-radius: 4px;
+    border: 1px dashed var(--border-color);
+    color: var(--font-secondary);
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+.asset-row-pending.selected {
+    border-color: var(--accent-color);
+    color: var(--font-primary);
+}
+.asset-deps {
+    margin: -2px 0 6px 14px;
+    padding-left: 8px;
+    border-left: 1px solid var(--border-color);
+}
+.asset-dep-group {
+    padding: 4px 4px 2px;
+    color: var(--font-secondary);
+    font-size: 0.7rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+.asset-dep-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 6px;
+    border-radius: 3px;
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+.asset-dep-row:hover {
+    background-color: var(--bg-tertiary);
+}
+.asset-dep-name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.asset-dep-meta {
+    color: var(--font-secondary);
+    font-size: 0.75rem;
+    white-space: nowrap;
+}
+.asset-dep-row.status-missing .asset-dep-name,
+.asset-dep-row.status-missing .asset-dep-meta {
+    color: #ff8a8a;
+}
+.asset-dep-row.status-pending .asset-dep-meta {
+    color: #ffc078;
+}
+
+/* 리소스 종류 배지 */
+.res-kind {
+    flex-shrink: 0;
+    min-width: 38px;
+    padding: 0 3px;
+    border: 1px solid currentColor;
+    border-radius: 3px;
+    font-family: Consolas, 'Courier New', monospace;
+    font-size: 0.65rem;
+    font-weight: bold;
+    text-align: center;
+    color: var(--font-secondary);
+}
+.res-kind.kind-plist { color: #e8c547; }
+.res-kind.kind-png { color: #c38bff; }
+.res-kind.kind-fnt { color: #7fd3e0; }
+.res-kind.kind-atlas { color: #ff9f43; }
+.res-kind.kind-frame { color: #ff8a8a; }
+
+/* --- Dependencies 패널 --- */
+.dependencies-panel {
+    height: 100%;
+    overflow: auto;
+    padding: 10px 12px;
+    box-sizing: border-box;
+    color: var(--font-primary);
+    font-size: 0.85rem;
+}
+.dep-empty {
+    padding: 24px 8px;
+    color: var(--font-secondary);
+    text-align: center;
+}
+.dep-header {
+    margin-bottom: 10px;
+}
+.dep-title {
+    font-size: 1rem;
+    font-weight: 600;
+}
+.dep-type {
+    display: inline-block;
+    margin-right: 8px;
+    padding: 0 5px;
+    border: 1px solid var(--accent-color);
+    border-radius: 3px;
+    color: #8fc1ff;
+    font-size: 0.7rem;
+    vertical-align: middle;
+}
+.dep-path {
+    margin-top: 3px;
+    color: var(--font-secondary);
+    font-family: Consolas, 'Courier New', monospace;
+    font-size: 0.75rem;
+    word-break: break-all;
+}
+.dep-subtle {
+    color: var(--font-secondary);
+    font-weight: normal;
+}
+.dep-stats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+    margin-bottom: 10px;
+}
+.dep-stat {
+    padding: 6px 10px;
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+}
+.dep-stat-value {
+    font-family: Consolas, 'Courier New', monospace;
+    font-size: 1rem;
+    font-weight: 600;
+}
+.dep-stat-label {
+    color: var(--font-secondary);
+    font-size: 0.75rem;
+}
+.dep-stat.ok .dep-stat-value { color: #4cd08a; }
+.dep-stat.missing .dep-stat-value { color: #ff8a8a; }
+.dep-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 6px;
+    font-size: 0.8rem;
+}
+.dep-toolbar label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+}
+.dep-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 110px 80px 50px 50px;
+    gap: 8px;
+    align-items: center;
+    padding: 4px 8px;
+}
+.dep-head {
+    color: var(--font-secondary);
+    font-size: 0.75rem;
+    border-bottom: 1px solid var(--border-color);
+}
+.dep-group {
+    padding: 8px 8px 2px;
+    color: var(--font-secondary);
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+.dep-item {
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+}
+.dep-item:hover {
+    background-color: var(--bg-tertiary);
+}
+.dep-item.selected {
+    background-color: var(--accent-color);
+    color: white;
+}
+.dep-file {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+}
+.dep-file-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.dep-status {
+    font-weight: 600;
+    color: #4cd08a;
+}
+.dep-item.status-missing .dep-file-name,
+.dep-item.status-missing .dep-status { color: #ff8a8a; }
+.dep-item.status-pending .dep-status { color: #ffc078; }
+.dep-item.selected .dep-status,
+.dep-item.selected .dep-file-name { color: white; }
+.dep-alert,
+.dep-usage {
+    margin-top: 10px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+.dep-alert {
+    background-color: #241617;
+    border: 1px solid #6b2a2a;
+}
+.dep-usage {
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-color);
+}
+.dep-alert-title {
+    color: #ff8a8a;
+    font-weight: 600;
+}
+.dep-alert-label {
+    color: var(--font-secondary);
+    font-size: 0.75rem;
+}
+.dep-alert-paths {
+    font-family: Consolas, 'Courier New', monospace;
+    font-size: 0.75rem;
+    line-height: 1.6;
+    word-break: break-all;
+}
+.dep-alert-actions .styleButton,
+.dep-footer .styleButton {
+    padding: 4px 12px;
+    font-size: 0.8rem;
+}
+.dep-footer {
+    display: flex;
+    gap: 6px;
+    margin-top: 12px;
+}
+

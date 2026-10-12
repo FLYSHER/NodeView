@@ -26,6 +26,14 @@ Loader.cocosStudioURL = {};
 
 var ResourceMapData = {};
 
+// cc.path.basename 은 폴더 구분자가 없는 경로("a.png")에 null 을 돌려주므로 대신 사용
+Loader._baseName = function (filePath, extname) {
+    var name = String(filePath).split(/[\\/]/).pop();
+    if (extname && name.toLowerCase().endsWith(extname.toLowerCase()))
+        return name.substring(0, name.length - extname.length);
+    return name;
+};
+
 Loader.init = function() {
     var canvas = cc._canvas;
 
@@ -243,6 +251,7 @@ Loader._processFileData = function( url, fileContents, ext, cb, addToAssetPanel)
             this.atlasFiles[ fileName ] = fileContents;
             this.atlasList.push( fileName );
             console.log(`[Loader] Cached .atlas: ${url}`); // 디버그 로그 추가
+            this.checkFiles( fileName, 'atlas' );
             break;
         case ".png":
             cc.loader.loadImg(
@@ -266,12 +275,14 @@ Loader._processFileData = function( url, fileContents, ext, cb, addToAssetPanel)
                     self.checkFiles( fileName, 'png' );
                     // addToAssetPanel이 true일 때만 'loadImage' 이벤트를 디스패치합니다.
                     if (addToAssetPanel) {
+                        ResourceRegistry.registerSource({ key: fileName + '_image', name: fileName, type: 'image', file: url });
                         console.log(`[Loader] Dispatched 'loadImage' for: ${fileName}`);
                         cc.eventManager.dispatchCustomEvent('loadImage', fileName);
                     } else {
                         // Spine/UI/Armature의 연관 PNG는 이 경로를 타서 Assets에 추가되지 않아야 합니다.
                         console.log(`[Loader] Not adding ${fileName}.png to Assets (addToAssetPanel is false).`);
                     }
+                    ResourceRegistry.notifyChanged();
                     cb && cb(); // 콜백 호출
                 }
             );
@@ -284,6 +295,7 @@ Loader._processFileData = function( url, fileContents, ext, cb, addToAssetPanel)
                 cc.loader.cache[ url ] = fileContents; // JSON 내용 캐시
                 this.spineData[ fileName ] = fileContents;
                 this.spineList.push( fileName );
+                ResourceRegistry.registerSource({ key: fileName + '_spine', name: fileName, type: 'spine', file: url });
                 this.readSpineResoueces( fileName ); // Spine 관련 리소스 읽기
                 // this.uiTextures[ fileName ] = fileName + ".atlas"; // uiTextures는 Spine에서 사용되지 않으므로 삭제 또는 주석 처리
                 this.checkFiles( fileName, 'spine' );
@@ -293,6 +305,7 @@ Loader._processFileData = function( url, fileContents, ext, cb, addToAssetPanel)
                 // CocosStudio JSON (프로젝트 파일)
                 this.cocosStudioURL [ fileName ] = url;
                 cc.loader.cache[url] = dic;
+                ResourceRegistry.registerSource({ key: fileName + '_cocosstudio', name: fileName, type: 'cocosstudio', file: url, url: url });
                 if(dic["Content"] && dic["Content"]["Content"] && dic["Content"]["Content"]["UsedResources"]){
                     var fntList = [];
                     var plistList = [];
@@ -327,6 +340,7 @@ Loader._processFileData = function( url, fileContents, ext, cb, addToAssetPanel)
                 // UI Project File
                 cc.loader.cache[url] = dic;
                 this.uiURL[ fileName ] = url;
+                ResourceRegistry.registerSource({ key: fileName + '_ui', name: fileName, type: 'ui', file: url, url: url });
 
                 var loadFntFinishCallback = function(){
                     // readResoueces는 다시 addToAssetPanel=false로 호출되므로 문제가 없습니다.
@@ -366,7 +380,9 @@ Loader._processFileData = function( url, fileContents, ext, cb, addToAssetPanel)
                     self.armatureIDs[ fileName ] = [];
                 }
                 for(i = 0; i < armatureDataArr.length; ++i ) {
-                    self.armatureIDs[ fileName ].push( armatureDataArr[ i ][ ccs.CONST_A_NAME ] );
+                    var armatureId = armatureDataArr[ i ][ ccs.CONST_A_NAME ];
+                    self.armatureIDs[ fileName ].push( armatureId );
+                    ResourceRegistry.registerSource({ key: armatureId + '_armature', name: armatureId, type: 'armature', file: fileName });
                 }
 
                 var dataInfo = new ccs.DataInfo();
@@ -378,6 +394,7 @@ Loader._processFileData = function( url, fileContents, ext, cb, addToAssetPanel)
             }
             break;
     }
+    ResourceRegistry.notifyChanged();
     // PNG는 비동기이므로 이미 위에서 return 되었고, 다른 타입은 cb를 여기서 호출합니다.
     if (ext !== ".png") {
         cb && cb();
@@ -433,7 +450,7 @@ Loader.readSpineResoueces = function ( fileName ) {
         var cachedResource = cc.loader.cache[url];
 
         if (!cachedResource) {
-            var itemFileName = cc.path.basename(url);
+            var itemFileName = Loader._baseName(url);
             var item = ResourceMapData[itemFileName];
 
             if (!!item === false) {
@@ -582,6 +599,17 @@ Loader.checkFiles = function ( fileName, type ) {
             }
             break;
     }
+
+    // Spine 은 json / atlas / png 가 어떤 순서로 도착해도 마지막 파일이 들어온 시점에 완료 처리
+    if( type === 'png' || type === 'atlas' ) {
+        for( i = 0; i < this.spineList.length; i++ ) {
+            var spineName = this.spineList[ i ];
+            if( this.loadedFileNames.indexOf( spineName ) < 0 && this._checkSpineFile( spineName ) ) {
+                this.loadedFileNames.push( spineName );
+                cc.eventManager.dispatchCustomEvent( 'loadSpine', spineName );
+            }
+        }
+    }
 };
 
 Loader._checkAllArmatureFrames = function() {
@@ -607,7 +635,7 @@ Loader._checkArmatureFrames = function( fileName ) {
     var config = this.armatureFrames[ fileName ];
     var loaded = true;
     for( var i = 0; i < config.length; i++ ) {
-        var path = cc.path.basename( config[ i ], '.plist' );
+        var path = Loader._baseName( config[ i ], '.plist' );
         if( this.plistList.indexOf( path ) < 0 || this.textureList.indexOf( path ) < 0 ) {
             loaded = false;
             break;
@@ -639,7 +667,7 @@ Loader._checkUIFile = function( fileName ) {
     var textures = this.uiTextures[ fileName ];
     var loaded = true;
     for( var i = 0; i < textures.length; i++ ) {
-        var path = cc.path.basename( textures[ i ], '.plist' );
+        var path = Loader._baseName( textures[ i ], '.plist' );
         if( this.plistList.indexOf( path ) < 0 || this.textureList.indexOf( path ) < 0 ) {
             loaded = false;
             break;

@@ -48,6 +48,7 @@ var MainLayer = cc.Layer.extend({
         this._loadImageListener = cc.eventManager.addCustomListener('loadImage', function (event) { self.onLoadImage(event.getUserData()); });
 
         this._canvasResizeListener = cc.eventManager.addCustomListener('canvas-resize', this.updateLayout.bind(this));
+        this._registryListener = cc.eventManager.addCustomListener(ResourceRegistry.EVENT_CHANGED, function () { self.refreshAssetsPanel(); });
 
         this._nodePositionChangedListener = cc.eventManager.addCustomListener('node_position_changed', function (event) {
             const eventData = event.getUserData();
@@ -173,13 +174,9 @@ var MainLayer = cc.Layer.extend({
     // *** 수정 끝 ***
 
     refreshAssetsPanel: function () {
-        const $container = $('#fileNameTree');
-        $container.empty();
-
-        for (const key in this.assetLibrary) {
-            if (this.assetLibrary.hasOwnProperty(key)) {
-                this._itemList.addAsset(this.assetLibrary[key]);
-            }
+        this._itemList.render(this.assetLibrary);
+        if (typeof DependenciesPanel !== 'undefined') {
+            DependenciesPanel.refresh();
         }
     },
 
@@ -393,6 +390,7 @@ var MainLayer = cc.Layer.extend({
 
         if (node && contentNode) {
             node.setName(instanceName);
+            node.assetKey = assetKey;
             let maxZOrder = -1;
             this.getChildren().forEach(child => {
                 if (child instanceof DraggableNode) {
@@ -637,6 +635,7 @@ var MainLayer = cc.Layer.extend({
         cc.eventManager.removeListener(this._loadCocosStudioListener);
         cc.eventManager.removeListener(this._loadSpineListener);
         cc.eventManager.removeListener(this._loadImageListener);
+        cc.eventManager.removeListener(this._registryListener);
         if (this._backgroundColorListener) {
             cc.eventManager.removeListener(this._backgroundColorListener);
         }

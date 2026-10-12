@@ -86,6 +86,11 @@ var ElectronRenderer = {
         ipcRenderer.on('fileDropEventReply', async (evt, payload) => {
             const allFiles = [];
 
+            // 메인 프로세스가 찾지 못한 의존 파일 (Dependencies 패널에 탐색 경로와 함께 표시)
+            if (typeof ResourceRegistry !== 'undefined') {
+                ResourceRegistry.setMissingInfo(payload.missingFiles);
+            }
+
             payload.dependentFiles.forEach(f => {
                 allFiles.push({ info: f, isTarget: false });
             });
@@ -161,21 +166,6 @@ var ElectronRenderer = {
                     item.file(function(file) {
                         Loader.readFile(file, null, false);
                     });
-                }
-            }
-        };
-
-        const originalCheckFiles = Loader.checkFiles.bind(Loader);
-        Loader.checkFiles = function(fileName, type) {
-            originalCheckFiles(fileName, type);
-
-            if (type === 'png' || type === 'atlas' || type === 'spine') {
-                for (let i = 0; i < Loader.spineList.length; i++) {
-                    let spineName = Loader.spineList[i];
-                    if (Loader.loadedFileNames.indexOf(spineName) < 0 && Loader._checkSpineFile(spineName)) {
-                        Loader.loadedFileNames.push(spineName);
-                        cc.eventManager.dispatchCustomEvent('loadSpine', spineName);
-                    }
                 }
             }
         };

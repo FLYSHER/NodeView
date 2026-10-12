@@ -7,6 +7,7 @@ var PanelManager = (function() {
         gameView:   { title: "Game View",   component: 'gameView' },
         uiAnimation:{ title: "Animations",  component: 'uiAnimation' },
         sequencer:  { title: "Sequencer",   component: 'sequencer' },
+        dependencies: { title: "Dependencies", component: 'dependencies' },
     };
 
     const defaultLayoutConfig = {
@@ -22,7 +23,8 @@ var PanelManager = (function() {
                         { type: 'component', componentName: 'gameView', title: 'Game View', height: 75 },
                         { type: 'stack', height: 25, minHeight: 250, content: [
                                 { type: 'component', componentName: 'uiAnimation', title: 'Animations' },
-                                { type: 'component', componentName: 'sequencer', title: 'Sequencer' }
+                                { type: 'component', componentName: 'sequencer', title: 'Sequencer' },
+                                { type: 'component', componentName: 'dependencies', title: 'Dependencies' }
                             ]}
                     ]}
             ]
@@ -30,6 +32,37 @@ var PanelManager = (function() {
     };
 
     let manualResolution = null;
+    let _layout = null;
+
+    // 새로 추가된 패널을 예전에 저장된 레이아웃에도 한 번만 넣어준다
+    function _addNewPanelsToSavedLayout(myLayout) {
+        const newPanels = ['dependencies'];
+        newPanels.forEach(function (name) {
+            const flagKey = 'layoutPanelAdded.' + name;
+            if (localStorage.getItem(flagKey)) return;
+            localStorage.setItem(flagKey, '1');
+            if (myLayout.root.getItemsByFilter(item => item.isComponent && item.componentName === name).length > 0) return;
+            // 추가된 탭이 기존에 보던 탭을 가리지 않도록 원래 활성 탭을 되돌린다
+            const stack = myLayout.root.getItemsByFilter(item => item.isStack)
+                .filter(st => st.contentItems.some(ci => ci.componentName === 'sequencer'))[0];
+            const prevActive = stack ? stack.getActiveContentItem() : null;
+            _addComponent(myLayout, name);
+            if (stack && prevActive) stack.setActiveContentItem(prevActive);
+        });
+    }
+
+    function _addComponent(myLayout, name) {
+        const componentConfig = { type: 'component', componentName: name, title: componentRegistry[name].title };
+        // Sequencer 가 있는 스택 → 아무 스택 → 루트 순서로 넣는다
+        const sequencer = myLayout.root.getItemsByFilter(item => item.isComponent && item.componentName === 'sequencer')[0];
+        const stack = (sequencer && sequencer.parent && sequencer.parent.isStack) ? sequencer.parent
+            : myLayout.root.getItemsByFilter(item => item.isStack)[0];
+        if (stack) {
+            stack.addChild(componentConfig);
+        } else {
+            myLayout.root.contentItems[0].addChild(componentConfig);
+        }
+    }
 
     function _registerComponents(myLayout) {
         myLayout.registerComponent('gameView', function(container, componentState){
@@ -81,6 +114,10 @@ var PanelManager = (function() {
         myLayout.registerComponent('properties', function(container, componentState) { container.getElement().append($('#original-content-templates').find('#nodeInfoContainer').children()); });
         myLayout.registerComponent('uiAnimation', function(container, componentState) { container.getElement().append($('#original-content-templates').find('#uiAnimationContainer').children()); });
         myLayout.registerComponent('sequencer', function(container, componentState) { container.getElement().append($('#original-content-templates').find('#sequencerContainer').children()); });
+        myLayout.registerComponent('dependencies', function(container, componentState) {
+            container.getElement().append('<div id="dependencies-panel" class="dependencies-panel"></div>');
+            DependenciesPanel.mount();
+        });
     }
 
     return {
@@ -92,6 +129,8 @@ var PanelManager = (function() {
 
             _registerComponents(myLayout);
             myLayout.init();
+            _layout = myLayout;
+            _addNewPanelsToSavedLayout(myLayout);
 
             const DEFAULT_BG_COLOR = '#323232';
             const savedColor = localStorage.getItem('backgroundColor') || DEFAULT_BG_COLOR;
@@ -256,6 +295,19 @@ var PanelManager = (function() {
                 if (myLayout) myLayout.updateSize();
             }, 150);
             $(window).on('resize', debouncedResize);
+        },
+
+        // 패널을 앞으로 가져온다 (닫혀 있으면 다시 연다)
+        showComponent: function (name) {
+            if (!_layout || !componentRegistry[name]) return;
+            let item = _layout.root.getItemsByFilter(i => i.isComponent && i.componentName === name)[0];
+            if (!item) {
+                _addComponent(_layout, name);
+                item = _layout.root.getItemsByFilter(i => i.isComponent && i.componentName === name)[0];
+            }
+            if (item && item.parent && item.parent.isStack) {
+                item.parent.setActiveContentItem(item);
+            }
         }
     };
 })();

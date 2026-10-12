@@ -11,22 +11,29 @@ class FileFinder {
         this._arrSearchPath = [];
 
         this._arrFiles = [];
+        this._arrMissing = [];
     }
 
     addSearchPath(searchPath){
         this._arrSearchPath.push(path.join(this._baseFolder, searchPath));
     }
 
-    findFile(filePath) {
-
-
-        if (fileUtil.exists(filePath))
-            return filePath;
-
+    // 찾아볼 경로 후보: 원래 경로 → 검색 폴더들
+    getCandidates(filePath) {
+        let candidates = [filePath];
         for(let j=0; j <  this._arrSearchPath.length; j++){
-            let tempPath = path.join( this._arrSearchPath[j], path.basename(filePath));
-            if (fileUtil.exists(tempPath))
-                return tempPath;
+            let candidate = path.join( this._arrSearchPath[j], path.basename(filePath));
+            if (candidates.indexOf(candidate) < 0)
+                candidates.push(candidate);
+        }
+        return candidates;
+    }
+
+    findFile(filePath) {
+        let candidates = this.getCandidates(filePath);
+        for(let j=0; j < candidates.length; j++){
+            if (fileUtil.exists(candidates[j]))
+                return candidates[j];
         }
         return null;
     }
@@ -39,10 +46,12 @@ class FileFinder {
         if (foundPath)
         {
             this._pushFoundFile(foundPath);
-            return true;
+            return foundPath;
         }
 
-        return false;
+        // 렌더러의 Dependencies 패널에서 어디를 찾아봤는지 보여주기 위해 기록
+        this._arrMissing.push({ file: relativePath, searched: this.getCandidates(absolutePath) });
+        return null;
     }
 
     _pushFoundFile(foundPath){
@@ -52,6 +61,10 @@ class FileFinder {
 
     getFileList(){
         return this._arrFiles;
+    }
+
+    getMissingList(){
+        return this._arrMissing;
     }
 
 }
@@ -104,9 +117,33 @@ var LoadManager  = {
     },
 
 
+    // Spine .atlas 텍스트에서 페이지 이미지 이름 목록을 읽는다 (빈 줄 다음 첫 줄 = 페이지)
+    parseAtlasPages : function(atlasText)
+    {
+        let pages = [];
+        let expectPage = true;
+        atlasText.split(/\r?\n/).forEach(function(line){
+            if (line.trim() === "") {
+                expectPage = true;
+            } else if (expectPage) {
+                pages.push(line.trim());
+                expectPage = false;
+            }
+        });
+        return pages;
+    },
+
+    _tagMissing : function(fileFinder, requestedBy)
+    {
+        return fileFinder.getMissingList().map(function(m){
+            return { file: m.file, searched: m.searched, requestedBy: path.basename(requestedBy) };
+        });
+    },
+
     loadFiles : function (files)
     {
         let filesImport = [];
+        let missingFiles = [];
         for(let i=0; i < files.length; i++)
         {
             let baseFolder = path.dirname(files[i]);
@@ -159,6 +196,7 @@ var LoadManager  = {
                 });
 
                 filesImport = filesImport.concat(fileFinder.getFileList());
+                missingFiles = missingFiles.concat(this._tagMissing(fileFinder, files[i]));
             }
             else if (ext === ".json")
             {
@@ -167,14 +205,19 @@ var LoadManager  = {
                     if (jsonObj['skeleton'] && jsonObj['skeleton']['spine']) {
                         let baseName = path.basename(files[i], '.json');
 
-                        fileFinder.pushFile(baseName + ".atlas");
-                        fileFinder.pushFile(baseName + ".png");
+                        let atlasPath = fileFinder.pushFile(baseName + ".atlas");
+                        let pages = atlasPath ? LoadManager.parseAtlasPages(fs.readFileSync(atlasPath, "utf8")) : [];
+                        if (pages.length === 0) pages = [baseName + ".png"];
+                        pages.forEach(function(page){
+                            fileFinder.pushFile(page);
+                        });
                     }
                 } catch (e) {
                     console.error("JSON Parsing error:", e);
                 }
 
                 filesImport = filesImport.concat(fileFinder.getFileList());
+                missingFiles = missingFiles.concat(this._tagMissing(fileFinder, files[i]));
             }
         }
 
@@ -253,7 +296,8 @@ var LoadManager  = {
                 console.log("Promise.all complete");
                 mainWindow.webContents.send('fileDropEventReply', {
                     targetFiles : targetFiles,
-                    dependentFiles: dependentsFiles
+                    dependentFiles: dependentsFiles,
+                    missingFiles: missingFiles
                 });
             }
         );
