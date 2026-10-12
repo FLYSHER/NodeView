@@ -100,7 +100,18 @@ class UIScrollTreeViewCtrl {
             "plugins": ["search", "dnd", "state"],
             "search": {
                 "case_sensitive": false,
-                "show_only_matches": true
+                "show_only_matches": true,
+                // 이름으로 검색, "t:Text" 처럼 쓰면 노드 종류로 필터
+                "search_callback": function (str, node) {
+                    const q = String(str).trim().toLowerCase();
+                    if (!q) return false;
+                    if (q.indexOf('t:') === 0) {
+                        const type = q.slice(2).trim();
+                        return !!type && !!(node.data && node.data.cls) && node.data.cls.toLowerCase().indexOf(type) >= 0;
+                    }
+                    const name = $('<div>').html(node.text).find('.node-name').text().toLowerCase();
+                    return name.indexOf(q) >= 0;
+                }
             },
             "state": {
                 "key": "widgetTreeOpenState",
@@ -165,11 +176,12 @@ class UIScrollTreeViewCtrl {
             });
         });
 
-        $(document).ready(function () {
-            $(".searchNode").keyup(function () {
-                var searchString = $(this).val();
-                $('#widgetTree').jstree('search', searchString);
-            });
+        $(document).on('input', '#searchNode', function () {
+            const tree = $('#widgetTree').jstree(true);
+            if (!tree) return;
+            const q = this.value.trim();
+            if (q) tree.search(q);
+            else tree.clear_search();
         });
 
         $('#widgetTree').on("changed.jstree", function (e, data) {
@@ -242,6 +254,7 @@ class UIScrollTreeViewCtrl {
                 const newVisibility = !cocosNode.isVisible();
                 cocosNode.setVisible(newVisibility);
                 $icon.toggleClass('fa-eye', newVisibility).toggleClass('fa-eye-slash', !newVisibility);
+                $icon.closest('.jstree-anchor').toggleClass('node-hidden', !newVisibility);
                 if (self._selectNode.length > 0 && self._selectNode[0].__instanceId === nodeId) {
                     Inspector.refresh();
                 }

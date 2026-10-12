@@ -124,10 +124,14 @@ var PanelManager = (function() {
         });
 
         myLayout.registerComponent('fileList', function(container, componentState) {
-            container.getElement().attr('id', 'assets-panel-drop-zone');
+            // 상단 검색·필터는 고정하고 목록만 스크롤
+            container.getElement().attr('id', 'assets-panel-drop-zone').addClass('assets-panel');
             container.getElement().append($('#original-content-templates').find('#fileContainer').children());
         });
-        myLayout.registerComponent('widgetTree', function(container, componentState) { container.getElement().append($('#original-content-templates').find('#widgetContainer').children()); });
+        myLayout.registerComponent('widgetTree', function(container, componentState) {
+            // 상단 검색과 하단 uiWidgets 복사는 고정하고 트리만 스크롤
+            container.getElement().addClass('hierarchy-panel').append($('#original-content-templates').find('#widgetContainer').children());
+        });
         myLayout.registerComponent('properties', function(container, componentState) {
             // 헤더(이름/클래스)는 고정하고 Inspector 본문만 스크롤
             container.getElement().addClass('properties-panel').append($('#original-content-templates').find('#nodeInfoContainer').children());

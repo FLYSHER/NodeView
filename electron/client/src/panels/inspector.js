@@ -798,6 +798,7 @@ var Inspector = (function () {
             _node.setVisible(this.checked);
             var $icon = $('#' + _node.__instanceId).children('.jstree-anchor').find('.visibility-toggle');
             $icon.toggleClass('fa-eye', this.checked).toggleClass('fa-eye-slash', !this.checked);
+            $icon.closest('.jstree-anchor').toggleClass('node-hidden', !this.checked);
         });
 
         bindScrub();

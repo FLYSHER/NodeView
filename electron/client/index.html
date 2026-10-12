@@ -105,6 +105,13 @@
     </div>'
 
     <div id="fileContainer" class="fileContainer">
+        <div class="panel-toolbar assets-toolbar">
+            <label class="panel-search">
+                <i class="fas fa-search" aria-hidden="true"></i>
+                <input type="text" id="assetSearch" placeholder="에셋·리소스 검색" aria-label="에셋·리소스 검색" spellcheck="false">
+            </label>
+            <div id="assetFilters" class="filter-chips" role="group" aria-label="에셋 종류 필터"></div>
+        </div>
         <div id="tab-1" class="tab-fileContent current">
             <div class = "smallWidget">
                 <div id="fileNameTree"></div>
@@ -113,21 +120,25 @@
     </div>
 
     <div id="widgetContainer" class="widgetContainer">
-        <ul class="tabs">
-            <input type="text" id = "searchNode" class = "searchNode" placeholder="Search" size="12" style="width: 100px;visibility:hidden">
-        </ul>
+        <div class="panel-toolbar hier-toolbar">
+            <label class="panel-search">
+                <i class="fas fa-search" aria-hidden="true"></i>
+                <input type="text" id="searchNode" class="searchNode" placeholder="노드 이름 검색 (t:Text 로 종류 필터)" aria-label="노드 검색" spellcheck="false">
+            </label>
+            <button type="button" id="openAll" class="icon-btn" title="모두 펼치기" aria-label="모두 펼치기"><i class="fas fa-angle-double-down" aria-hidden="true"></i></button>
+            <button type="button" id="closeAll" class="icon-btn" title="모두 접기" aria-label="모두 접기"><i class="fas fa-angle-double-up" aria-hidden="true"></i></button>
+        </div>
         <div id="tab-1" class="tab-widgetContent current">
             <div class = "treeWidget">
                 <div id="widgetTree"></div>
                 <div id="animationTree"></div>
             </div>
-            <div class="button-group">
-                <button type="button" id="openAll" class="styleButton" title="모든 노드 트리 열기" style="width: 22%;">Open</button>
-                <button type="button" id="closeAll" class="styleButton" title="모든 노드 트리 닫기" style="width: 22%;">Close</button>
-                <div class="split-button">
-                    <button type="button" id="copyBtn" class="styleButton" title="uiWidgets 코드 복사 (Ctrl+Shift+C)">uiWidgets 복사</button>
-                    <button type="button" id="copyOptionsBtn" class="styleButton" title="복사 옵션과 미리보기" aria-label="복사 옵션과 미리보기">▾</button>
+            <div class="hier-footer">
+                <div class="uiw-split">
+                    <button type="button" id="copyBtn" title="uiWidgets 코드 복사 (Ctrl+Shift+C)"><i class="far fa-copy" aria-hidden="true"></i> uiWidgets 복사</button>
+                    <button type="button" id="copyOptionsBtn" title="복사 옵션과 미리보기" aria-label="복사 옵션과 미리보기">▾</button>
                 </div>
+                <span class="hier-footer-hint">Ctrl+Shift+C</span>
             </div>
 
             <div id="ui-option">

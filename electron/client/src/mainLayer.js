@@ -420,82 +420,62 @@ var MainLayer = cc.Layer.extend({
         }
     },
 
-    _buildChildrenRecursive: function (parentNode) {
-        let childrenData = [];
-        const children = parentNode.getChildren();
-        const sortedChildren = children.slice().sort((a, b) => {
-            return a.getLocalZOrder() - b.getLocalZOrder();
-        });
-
-        if (sortedChildren && sortedChildren.length > 0) {
-            for (const child of sortedChildren) {
-                let textContent = child.getName() || "Unnamed Node";
-                let includeGrandchildren = true;
-                let zOrderText = child.getLocalZOrder();
-                const isVisible = child.isVisible();
-                const visibilityIcon = `<i class="fa ${isVisible ? 'fa-eye' : 'fa-eye-slash'} visibility-toggle" data-node-id="${child.__instanceId}"></i>`;
-                const deleteIcon = `<i class="fa fa-times delete-node-icon" data-node-id="${child.__instanceId}"></i>`;
-
-                // --- ▼▼▼ 핵심 수정 로직 ▼▼▼ ---
-                let typeClass = "";
-                // 자식 노드가 DraggableNode인지 먼저 확인합니다.
-                if (child instanceof DraggableNode) {
-                    // DraggableNode라면 assetType에 맞는 고유 클래스를 부여합니다.
-                    typeClass = `type-${child.assetType}`;
-                } else {
-                    // DraggableNode가 아니라면 일반 자식 클래스를 부여합니다.
-                    typeClass = "type-child";
-                }
-                // --- ▲▲▲ 핵심 수정 로직 ▲▲▲ ---
-
-                let childNodeData = {
-                    id: child.__instanceId,
-                    text: `${visibilityIcon} <span class="z-order-label">[${zOrderText}]</span> ${textContent} ${deleteIcon}`,
-                    children: includeGrandchildren ? this._buildChildrenRecursive(child) : [],
-                    data: {
-                        nodeId: child.__instanceId,
-                        zOrder: child.getLocalZOrder()
-                    },
-                    state: { opened: false },
-                    a_attr: { "class": typeClass } // 수정된 typeClass를 여기서 적용합니다.
-                };
-                childrenData.push(childNodeData);
-            }
+    // Hierarchy 오른쪽에 회색으로 보여줄 노드 종류 이름
+    _nodeClassLabel: function (node) {
+        if (node instanceof DraggableNode) {
+            return { ui: 'UI 루트', cocosstudio: 'UI 루트', spine: 'Spine', armature: 'Armature', image: 'Image' }[node.assetType] || 'Instance';
         }
-        return childrenData;
+        const checks = [
+            ['Button', ccui.Button], ['CheckBox', ccui.CheckBox], ['ImageView', ccui.ImageView], ['TextBMFont', ccui.TextBMFont],
+            ['TextAtlas', ccui.TextAtlas], ['TextField', ccui.TextField], ['Text', ccui.Text], ['LoadingBar', ccui.LoadingBar],
+            ['Slider', ccui.Slider], ['ListView', ccui.ListView], ['PageView', ccui.PageView], ['ScrollView', ccui.ScrollView],
+            ['Layout', ccui.Layout], ['Widget', ccui.Widget], ['Spine', sp.SkeletonAnimation], ['Armature', ccs.Armature],
+            ['LabelBMFont', cc.LabelBMFont], ['Label', cc.LabelTTF], ['Sprite', cc.Sprite]
+        ];
+        for (let i = 0; i < checks.length; i++) {
+            if (typeof checks[i][1] === 'function' && node instanceof checks[i][1]) return checks[i][0];
+        }
+        return 'Node';
+    },
+
+    // jstree 노드 데이터 (눈 아이콘 · [Z] · 이름 · 종류 · 삭제 X)
+    _hierarchyNodeData: function (node, typeClass, children) {
+        const id = node.__instanceId;
+        const name = $('<div>').text(node.getName() || 'Unnamed Node').html();
+        const cls = this._nodeClassLabel(node);
+        const isVisible = node.isVisible();
+        return {
+            id: id,
+            text: `<i class="fa ${isVisible ? 'fa-eye' : 'fa-eye-slash'} visibility-toggle" data-node-id="${id}"></i>` +
+                `<span class="z-order-label">[${node.getLocalZOrder()}]</span>` +
+                `<span class="node-name">${name}</span>` +
+                `<span class="node-class">${cls}</span>` +
+                `<i class="fa fa-times delete-node-icon" data-node-id="${id}" title="삭제"></i>`,
+            children: children,
+            data: {
+                nodeId: id,
+                zOrder: node.getLocalZOrder(),
+                cls: cls
+            },
+            state: { opened: false },
+            a_attr: { "class": typeClass + (isVisible ? '' : ' node-hidden') }
+        };
+    },
+
+    _buildChildrenRecursive: function (parentNode) {
+        const sortedChildren = parentNode.getChildren().slice().sort((a, b) => a.getLocalZOrder() - b.getLocalZOrder());
+        return sortedChildren.map(child => {
+            const typeClass = child instanceof DraggableNode ? `type-${child.assetType}` : 'type-child';
+            return this._hierarchyNodeData(child, typeClass, this._buildChildrenRecursive(child));
+        });
     },
 
     refreshHierarchyView: function () {
-        let unifiedTreeData = [];
-        const self = this;
-
         const topLevelNodes = this.getChildren().filter(node => node instanceof DraggableNode);
+        topLevelNodes.sort((a, b) => a.getLocalZOrder() - b.getLocalZOrder());
 
-        topLevelNodes.sort((a, b) => {
-            return a.getLocalZOrder() - b.getLocalZOrder();
-        });
-
-        topLevelNodes.forEach(draggableNode => {
-            let zOrderText = draggableNode.getLocalZOrder();
-            let nodeName = draggableNode.getName() || "Unnamed DraggableNode";
-            let typeClass = `type-${draggableNode.assetType}`;
-            const isVisible = draggableNode.isVisible();
-            const visibilityIcon = `<i class="fa ${isVisible ? 'fa-eye' : 'fa-eye-slash'} visibility-toggle" data-node-id="${draggableNode.__instanceId}"></i>`;
-            const deleteIcon = `<i class="fa fa-times delete-node-icon" data-node-id="${draggableNode.__instanceId}"></i>`;
-
-            let draggableNodeData = {
-                id: draggableNode.__instanceId,
-                text: `${visibilityIcon} <span class="z-order-label">[${zOrderText}]</span> ${nodeName} ${deleteIcon}`,
-                children: this._buildChildrenRecursive(draggableNode),
-                data: {
-                    nodeId: draggableNode.__instanceId,
-                    zOrder: draggableNode.getLocalZOrder()
-                },
-                state: { opened: false },
-                a_attr: { "class": typeClass }
-            };
-            unifiedTreeData.push(draggableNodeData);
-        });
+        const unifiedTreeData = topLevelNodes.map(draggableNode =>
+            this._hierarchyNodeData(draggableNode, `type-${draggableNode.assetType}`, this._buildChildrenRecursive(draggableNode)));
 
         this._treeView.updateTreeView(unifiedTreeData);
     },

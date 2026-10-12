@@ -17,8 +17,28 @@ var UIItemList = cc.Node.extend({
         this._mainLayer = mainLayer;
         this._expandedKeys = {};
         this._selectedKey = null;
+        this._filter = 'all';      // all | ui | spine | armature | image | missing
+        this._query = '';
 
         $('#fileNameTree').addClass('custom-tree-container');
+
+        // 검색 / 종류 필터 (요소는 아직 템플릿 안에 있지만 패널로 옮겨져도 그대로 유지된다)
+        const searchEl = document.getElementById('assetSearch');
+        if (searchEl) {
+            searchEl.addEventListener('input', () => {
+                this._query = searchEl.value.trim().toLowerCase();
+                this._mainLayer.refreshAssetsPanel();
+            });
+        }
+        const filtersEl = document.getElementById('assetFilters');
+        if (filtersEl) {
+            filtersEl.addEventListener('click', (e) => {
+                const chip = e.target.closest('[data-filter]');
+                if (!chip) return;
+                this._filter = chip.getAttribute('data-filter');
+                this._mainLayer.refreshAssetsPanel();
+            });
+        }
 
         this.itemCallbacks = {};
         return true;
@@ -61,18 +81,84 @@ var UIItemList = cc.Node.extend({
             }
         });
 
-        entries.forEach(entry => $container.append(this._buildAssetRow(entry)));
+        entries.forEach(entry => {
+            entry.data = ResourceRegistry.collect(entry.key);
+            entry.missingCount = entry.data ? entry.data.stats.missing + entry.data.missingFrames.length : 0;
+        });
+        this._renderFilters(entries);
+
+        // 종류 필터
+        const typeOf = (t) => (t === 'cocosstudio' ? 'ui' : t);
+        let visible = entries.filter(entry => {
+            if (this._filter === 'all') return true;
+            if (this._filter === 'missing') return entry.missingCount > 0 || !entry.loaded;
+            return typeOf(entry.info.type) === this._filter;
+        });
+
+        // 검색: 에셋 이름이 맞으면 그대로, 리소스 파일명만 맞으면 펼쳐서 맞는 리소스만 보여준다
+        const q = this._query;
+        if (q) {
+            visible = visible.filter(entry => {
+                if (String(entry.info.name).toLowerCase().indexOf(q) >= 0) return true;
+                const matched = entry.data ? entry.data.deps.some(d => d.fileName.toLowerCase().indexOf(q) >= 0) : false;
+                if (matched) entry.depQuery = q;
+                return matched;
+            });
+        }
+
+        if (entries.length === 0) {
+            $container.append('<div class="assets-empty">ExportJson · Spine json · png 파일이나 리소스 폴더를<br>이 패널로 끌어다 놓으세요.</div>');
+        } else if (visible.length === 0) {
+            $container.append('<div class="assets-empty">조건에 맞는 에셋이 없습니다.</div>');
+        }
+        visible.forEach(entry => $container.append(this._buildAssetRow(entry)));
         $container.scrollTop(scrollTop);
+    },
+
+    _renderFilters: function (entries) {
+        const el = document.getElementById('assetFilters');
+        if (!el) return;
+        const count = { all: entries.length, ui: 0, spine: 0, armature: 0, image: 0, missing: 0 };
+        entries.forEach(e => {
+            const t = e.info.type === 'cocosstudio' ? 'ui' : e.info.type;
+            if (count.hasOwnProperty(t)) count[t]++;
+            if (e.missingCount > 0 || !e.loaded) count.missing++;
+        });
+        // 누락이 하나도 없으면 '누락' 칩은 숨긴다 (선택돼 있었다면 전체로)
+        if (count.missing === 0 && this._filter === 'missing') this._filter = 'all';
+        const chips = [['all', '전체'], ['ui', 'UI'], ['spine', 'Spine'], ['armature', 'Armature'], ['image', 'Image']];
+        if (count.missing > 0) chips.push(['missing', '누락 ' + count.missing]);
+        el.innerHTML = chips.map(([key, label]) =>
+            `<button type="button" class="filter-chip${this._filter === key ? ' active' : ''}${key === 'missing' ? ' chip-missing' : ''}" data-filter="${key}" aria-pressed="${this._filter === key}">${label}</button>`
+        ).join('');
+    },
+
+    // 에셋 행 오른쪽에 회색으로 보여줄 정보
+    _assetMeta: function (info) {
+        switch (info.type) {
+            case 'ui': return 'ExportJson';
+            case 'cocosstudio': return 'CocosStudio';
+            case 'armature': return 'Armature';
+            case 'spine':
+                try {
+                    const version = JSON.parse(Loader.spineData[info.name]).skeleton.spine;
+                    return 'Spine ' + String(version).split('.').slice(0, 2).join('.');
+                } catch (e) { return 'Spine'; }
+            case 'image':
+                const tex = Loader.textures[info.name];
+                return tex ? tex.getPixelsWide() + '×' + tex.getPixelsHigh() : 'PNG';
+        }
+        return '';
     },
 
     _buildAssetRow: function (entry) {
         const self = this;
         const assetInfo = entry.info;
         const badge = this._typeBadge(assetInfo.type);
-        const data = ResourceRegistry.collect(entry.key);
-        const missingCount = data ? data.stats.missing + data.missingFrames.length : 0;
+        const data = entry.data;
+        const missingCount = entry.missingCount;
         const expandable = !!(data && data.deps.length > 0);
-        const expanded = expandable && !!this._expandedKeys[entry.key];
+        const expanded = expandable && (!!this._expandedKeys[entry.key] || !!entry.depQuery);
 
         const $wrap = $('<div class="asset-entry"></div>');
 
@@ -89,8 +175,8 @@ var UIItemList = cc.Node.extend({
     <span class="asset-caret${expandable ? '' : ' empty'}" aria-hidden="true">${expandable ? (expanded ? '▾' : '▸') : ''}</span>
     <span class="track-type-icon ${badge.cls}">${badge.text}</span>
     <span class="asset-name">${this._escape(assetInfo.name)}</span>
-    <span class="asset-type">(${assetInfo.type.toUpperCase()})</span>
     <span class="asset-row-end">
+        <span class="asset-meta">${this._escape(this._assetMeta(assetInfo))}</span>
         ${statusHtml}
         <button type="button" class="asset-delete-btn" title="에셋 삭제" aria-label="${this._escape(assetInfo.name)} 삭제"><i class="fa fa-times" aria-hidden="true"></i></button>
     </span>
@@ -162,16 +248,18 @@ var UIItemList = cc.Node.extend({
         }
 
         if (expanded) {
-            $wrap.append(this._buildDepRows(entry.key, data));
+            $wrap.append(this._buildDepRows(entry.key, data, entry.depQuery));
         }
         return $wrap;
     },
 
-    _buildDepRows: function (assetKey, data) {
+    _buildDepRows: function (assetKey, data, depQuery) {
         const $deps = $('<div class="asset-deps"></div>');
         data.groups.forEach(group => {
+            const items = depQuery ? group.items.filter(d => d.fileName.toLowerCase().indexOf(depQuery) >= 0) : group.items;
+            if (items.length === 0) return;
             $deps.append(`<div class="asset-dep-group">${this._escape(group.title)}</div>`);
-            group.items.forEach(dep => {
+            items.forEach(dep => {
                 const meta = dep.status === 'missing' ? '누락'
                     : dep.status === 'pending' ? '대기'
                     : (dep.info || '');

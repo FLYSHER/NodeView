@@ -1028,23 +1028,6 @@ ul.tabs li.current {
     color: white;
 }
 
-/* --- uiWidgets 복사 스플릿 버튼 --- */
-.split-button {
-    display: inline-flex;
-}
-.split-button .styleButton {
-    white-space: nowrap;
-}
-.split-button .styleButton:first-child {
-    border-radius: 999px 0 0 999px;
-    padding-right: 12px;
-}
-.split-button .styleButton:last-child {
-    border-radius: 0 999px 999px 0;
-    border-left: 0;
-    padding: 8px 10px;
-}
-
 .context-menu li.context-menu-separator {
     height: 1px !important;
     padding: 0 !important;
@@ -2341,3 +2324,326 @@ button.sb-item:hover {
     padding-left: 44px;   /* 종류 배지 폭만큼 들여서 파일명 아래에 맞춘다 */
 }
 
+/* =====================================================================
+   Assets / Hierarchy: 시안 스타일 (얇고 평평한 행, 상단 검색·필터 고정)
+   ===================================================================== */
+.lm_content.assets-panel,
+.lm_content.hierarchy-panel {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden !important;
+}
+.assets-panel .tab-fileContent,
+.hierarchy-panel .tab-widgetContent {
+    flex: 1;
+    min-height: 0;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+.assets-panel .smallWidget,
+.hierarchy-panel .treeWidget {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    padding: 4px 0;
+}
+
+/* 패널 상단 툴바 (검색 + 버튼/필터) */
+.panel-toolbar {
+    flex: none;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 8px;
+    border-bottom: 1px solid var(--border-color);
+}
+.panel-search {
+    flex: 1 1 140px;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--font-secondary);
+    font-size: 0.75rem;
+}
+.panel-search:focus-within {
+    border-color: var(--accent-color);
+}
+.panel-search input {
+    flex: 1;
+    min-width: 0;
+    background: none;
+    border: 0;
+    outline: none;
+    color: var(--font-primary);
+    font: inherit;
+    font-size: 0.8rem;
+}
+.filter-chips {
+    flex-basis: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+.filter-chip {
+    padding: 1px 9px;
+    background: none;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    color: var(--font-primary);
+    font: inherit;
+    font-size: 0.72rem;
+    cursor: pointer;
+}
+.filter-chip:hover {
+    border-color: var(--accent-color);
+}
+.filter-chip.active {
+    background-color: #2a5bb8;
+    border-color: #2a5bb8;
+    color: #fff;
+}
+.filter-chip.chip-missing {
+    color: #ff8a8a;
+    border-color: #6b2a2a;
+}
+.filter-chip.chip-missing.active {
+    background-color: #6b2a2a;
+    color: #fff;
+}
+.icon-btn {
+    flex: none;
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    background: none;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    color: var(--font-secondary);
+    cursor: pointer;
+}
+.icon-btn:hover {
+    background-color: var(--bg-tertiary);
+    color: var(--font-primary);
+}
+
+/* 종류 배지: 테두리형 (Assets / Hierarchy 공통 색) */
+#fileNameTree .track-type-icon {
+    width: auto;
+    min-width: 24px;
+    margin: 0;
+    padding: 0 4px;
+    background: none;
+    border: 1px solid currentColor;
+    border-radius: 3px;
+    font-family: Consolas, 'Courier New', monospace;
+    font-size: 0.62rem;
+    line-height: 14px;
+}
+#fileNameTree .track-type-icon.type-action { color: #5aa2ff; background: none; }
+#fileNameTree .track-type-icon.type-spine { color: #ff9f6b; background: none; }
+#fileNameTree .track-type-icon.type-armature { color: #c38bff; background: none; }
+#fileNameTree .track-type-icon.type-image { color: #4cd08a; background: none; }
+
+/* Assets 행 */
+#fileNameTree.custom-tree-container {
+    padding: 0;
+    overflow: visible;
+}
+#fileNameTree .asset-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 26px;
+    margin: 0;
+    padding: 0 6px 0 4px;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    color: var(--font-primary);
+    font-size: 0.82rem;
+    font-weight: normal;
+}
+#fileNameTree .asset-row:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+}
+#fileNameTree .asset-row.selected {
+    background-color: #2a5bb8;
+    color: #fff;
+    font-weight: normal;
+}
+#fileNameTree .asset-row.selected .track-type-icon {
+    color: #fff;
+}
+#fileNameTree .asset-row-pending .asset-name {
+    color: var(--font-secondary);
+}
+#fileNameTree .asset-row-pending.selected .asset-name {
+    color: #fff;
+}
+.asset-caret {
+    width: 12px;
+}
+.asset-meta {
+    color: var(--font-secondary);
+    font-family: Consolas, 'Courier New', monospace;
+    font-size: 0.7rem;
+    white-space: nowrap;
+}
+#fileNameTree .asset-row.selected .asset-meta {
+    color: #dce8ff;
+}
+#fileNameTree .asset-deps {
+    margin: 0 0 4px 18px;
+}
+#fileNameTree .asset-dep-row {
+    height: 22px;
+    padding: 0 6px;
+    border-radius: 0;
+}
+.assets-empty {
+    padding: 24px 12px;
+    color: var(--font-secondary);
+    font-size: 0.8rem;
+    line-height: 1.6;
+    text-align: center;
+}
+
+/* Hierarchy 행 */
+#widgetTree .jstree-node {
+    margin-bottom: 0;
+}
+#widgetTree .jstree-children {
+    margin-top: 0;
+    padding-left: 14px;
+}
+#widgetTree .jstree-anchor {
+    gap: 6px;
+    height: 24px;
+    padding: 0 6px;
+    border-radius: 0;
+    background: none;
+    font-size: 0.82rem;
+    line-height: 24px;
+}
+#widgetTree .jstree-anchor:hover {
+    background-color: rgba(255, 255, 255, 0.06) !important;
+    color: var(--font-primary) !important;
+}
+#widgetTree .jstree-clicked,
+#widgetTree .jstree-clicked:hover {
+    background-color: #2a5bb8 !important;
+    color: #fff !important;
+    font-weight: normal;
+}
+#widgetTree .visibility-toggle {
+    position: static;
+    transform: none;
+    order: -1;
+    width: 14px;
+    color: var(--font-secondary);
+    font-size: 0.75rem;
+    cursor: pointer;
+}
+#widgetTree .jstree-anchor.type-armature::before,
+#widgetTree .jstree-anchor.type-ui::before,
+#widgetTree .jstree-anchor.type-spine::before,
+#widgetTree .jstree-anchor.type-image::before {
+    width: auto;
+    min-width: 18px;
+    margin: 0;
+    padding: 0 4px;
+    background: none;
+    border: 1px solid currentColor;
+    border-radius: 3px;
+    font-family: Consolas, 'Courier New', monospace;
+    font-size: 0.62rem;
+    line-height: 14px;
+}
+#widgetTree .jstree-anchor.type-ui::before { color: #5aa2ff; background: none; }
+#widgetTree .jstree-anchor.type-spine::before { color: #ff9f6b; background: none; }
+#widgetTree .jstree-anchor.type-armature::before { color: #c38bff; background: none; }
+#widgetTree .jstree-anchor.type-image::before { color: #4cd08a; background: none; }
+#widgetTree .jstree-clicked::before { color: #fff !important; }
+/* 자식 노드는 오른쪽에 종류 이름이 나오므로 점 표시는 쓰지 않는다 */
+#widgetTree .jstree-anchor.type-child::before {
+    display: none;
+}
+#widgetTree .z-order-label {
+    margin: 0;
+    color: #8b9098;
+    font-family: Consolas, 'Courier New', monospace;
+    font-size: 0.7rem;
+    font-weight: normal;
+}
+#widgetTree .node-name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+#widgetTree .node-class {
+    flex-shrink: 0;
+    margin-left: auto;
+    padding-left: 8px;
+    color: #8b9098;
+    font-size: 0.7rem;
+}
+#widgetTree .delete-node-icon {
+    flex-shrink: 0;
+    margin-left: 4px;
+}
+#widgetTree .jstree-clicked .z-order-label,
+#widgetTree .jstree-clicked .node-class,
+#widgetTree .jstree-clicked .visibility-toggle {
+    color: #dce8ff;
+}
+#widgetTree .node-hidden .node-name,
+#widgetTree .node-hidden .node-class {
+    opacity: 0.5;
+}
+
+/* Hierarchy 하단: uiWidgets 복사 (각진 파란 스플릿 버튼) */
+.hier-footer {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    border-top: 1px solid var(--border-color);
+    background-color: #1a1a1a;
+}
+.uiw-split {
+    display: inline-flex;
+    border-radius: 4px;
+    overflow: hidden;
+}
+.uiw-split button {
+    padding: 5px 10px;
+    background-color: #2a5bb8;
+    border: 0;
+    color: #fff;
+    font: inherit;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    cursor: pointer;
+}
+.uiw-split button:hover {
+    background-color: #3367c4;
+}
+.uiw-split button + button {
+    padding: 5px 8px;
+    background-color: #23498f;
+    border-left: 1px solid #1a3a75;
+}
+.hier-footer-hint {
+    color: var(--font-secondary);
+    font-family: Consolas, 'Courier New', monospace;
+    font-size: 0.7rem;
+}
