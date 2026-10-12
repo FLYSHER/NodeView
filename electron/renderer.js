@@ -27,58 +27,61 @@ class FileEntry {
 
 var ElectronRenderer = {
 
-    init : function() {
+    /**
+     * 파일/폴더 드롭 처리 (Game View 캔버스, Assets 패널 공용)
+     * - 폴더: 하위 파일 경로를 ResourceMapData 에 등록만 해 둔다 (실제 읽기는 필요할 때)
+     * - 파일: 메인 프로세스로 보내 의존 파일과 함께 로드한다
+     */
+    handleDrop : function(evt) {
         const path = require('path');
+        var files = evt.dataTransfer.files;
+        var arrFilePaths = [];
+
+        function walkDir(dir) {
+            var list = fs.readdirSync(dir);
+            list.forEach(function(file) {
+                var fullPath = path.join(dir, file);
+                var stat = fs.statSync(fullPath);
+                if (stat && stat.isDirectory()) {
+                    walkDir(fullPath);
+                } else {
+                    var fileEntry = new FileEntry({ filePath: fullPath, content: null });
+
+                    if (!ResourceMapData[fileEntry.name]) {
+                        ResourceMapData[fileEntry.name] = fileEntry;
+                    } else {
+                        ResourceMapData[fileEntry.name].fullPath = fullPath;
+                    }
+                }
+            });
+        }
+
+        for (var i = 0; i < files.length; i++) {
+            try {
+                if (fs.statSync(files[i].path).isDirectory()) {
+                    walkDir(files[i].path);
+                } else {
+                    arrFilePaths.push(files[i].path);
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        if (arrFilePaths.length > 0) {
+            ipcRenderer.send('fileDropEvent', arrFilePaths);
+        }
+    },
+
+    init : function() {
         var canvas = cc._canvas;
 
         canvas.removeEventListener("drop", Loader.onDropHandler);
-        canvas.addEventListener(
-            "drop",
-            function (evt) {
-                evt.stopPropagation();
-                evt.preventDefault();
-
-                var files = evt.dataTransfer.files;
-                var arrFilePaths = [];
-
-                function walkDir(dir) {
-                    var list = fs.readdirSync(dir);
-                    list.forEach(function(file) {
-                        var fullPath = path.join(dir, file);
-                        var stat = fs.statSync(fullPath);
-                        if (stat && stat.isDirectory()) {
-                            walkDir(fullPath);
-                        } else {
-                            var fileInfo = { filePath: fullPath, content: null };
-                            var fileEntry = new FileEntry(fileInfo);
-
-                            if (!ResourceMapData[fileEntry.name]) {
-                                ResourceMapData[fileEntry.name] = fileEntry;
-                            } else {
-                                ResourceMapData[fileEntry.name].fullPath = fullPath;
-                            }
-                        }
-                    });
-                }
-
-                for (var i = 0; i < files.length; i++) {
-                    try {
-                        if (fs.statSync(files[i].path).isDirectory()) {
-                            walkDir(files[i].path);
-                            console.log("[디버그 - 4단계] 폴더 경로 갱신 완료");
-                        } else {
-                            arrFilePaths.push(files[i].path);
-                        }
-                    } catch (e) {
-                        console.error(e);
-                        continue;
-                    }
-                }
-
-                if (arrFilePaths.length > 0) {
-                    ipcRenderer.send('fileDropEvent', arrFilePaths);
-                }
-            }, false);
+        canvas.addEventListener("drop", function (evt) {
+            evt.stopPropagation();
+            evt.preventDefault();
+            ElectronRenderer.handleDrop(evt);
+        }, false);
 
         ipcRenderer.on('fileDropEventReply', async (evt, payload) => {
             const allFiles = [];
@@ -112,18 +115,24 @@ var ElectronRenderer = {
             for (const item of allFiles) {
                 let file = new FileEntry(item.info);
 
-                await new Promise((resolve) => {
-                    if (ResourceMapData[file.name]) {
-                        ResourceMapData[file.name].isProcessed = false;
-                    }
-                    file.isProcessed = false;
+                try {
+                    await new Promise((resolve) => {
+                        if (ResourceMapData[file.name]) {
+                            ResourceMapData[file.name].isProcessed = false;
+                        }
+                        file.isProcessed = false;
 
-                    ResourceMapData[file.name] = file;
+                        ResourceMapData[file.name] = file;
 
-                    Loader.readFile(file, () => {
-                        resolve();
-                    }, item.isTarget);
-                });
+                        Loader.readFile(file, () => {
+                            resolve();
+                        }, item.isTarget);
+                    });
+                } catch (err) {
+                    // 깨진 파일 하나 때문에 나머지 파일 로딩이 중단되지 않도록 한다
+                    console.error("[로딩 실패] 파일 처리 중 오류:", file.name, err);
+                    if (typeof printLog === 'function') printLog("파일 처리 실패 : " + file.name);
+                }
             }
         });
 
@@ -189,7 +198,7 @@ var ElectronRenderer = {
 
         let ext = cc.path.extname(url).toLowerCase();
 
-        const processData = (fileContents) => {
+        const processDataUnsafe = (fileContents) => {
             // 데이터를 엔진으로 넘기기 직전에 '처리 완료' 꼬리표를 붙입니다.
             fileEntry.isProcessed = true;
             if (ResourceMapData[url]) {
@@ -220,6 +229,17 @@ var ElectronRenderer = {
             if (ext === ".json" || ext === ".exportjson") {
                 g_fileName = url;
                 g_fileContext = fileContents;
+            }
+        };
+
+        // 파싱 오류가 나도 cb 를 호출해 순차 로딩(await)이 멈추지 않게 한다
+        const processData = (fileContents) => {
+            try {
+                processDataUnsafe(fileContents);
+            } catch (err) {
+                console.error(`[로딩 실패] 파일 처리 중 오류 (${url})`, err);
+                if (typeof printLog === 'function') printLog("파일 처리 실패 : " + url);
+                cb && cb();
             }
         };
 

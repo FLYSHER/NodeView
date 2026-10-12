@@ -96,8 +96,7 @@ var LoadManager  = {
                 }
             }
 
-            obj["children"].forEach(function(e){
-
+            (obj["children"] || []).forEach(function(e){
                 LoadManager.parseWidgetTreeRecursively(e, arrDependant);
             });
 
@@ -120,8 +119,14 @@ var LoadManager  = {
 
             if (ext === ".exportjson")
             {
-                let rawdata = fs.readFileSync(files[i], "utf8");
-                let jsonObj = JSON.parse(rawdata);
+                let jsonObj;
+                try {
+                    jsonObj = JSON.parse(fs.readFileSync(files[i], "utf8"));
+                } catch (e) {
+                    // 깨진 파일 하나 때문에 함께 드롭한 다른 파일까지 실패하지 않도록 건너뛴다
+                    console.error("ExportJson 읽기/파싱 실패:", files[i], e);
+                    continue;
+                }
 
                 if (jsonObj['config_file_path'] != null)
                 {
@@ -157,9 +162,8 @@ var LoadManager  = {
             }
             else if (ext === ".json")
             {
-                let rawdata = fs.readFileSync(files[i], "utf8");
                 try {
-                    let jsonObj = JSON.parse(rawdata);
+                    let jsonObj = JSON.parse(fs.readFileSync(files[i], "utf8"));
                     if (jsonObj['skeleton'] && jsonObj['skeleton']['spine']) {
                         let baseName = path.basename(files[i], '.json');
 

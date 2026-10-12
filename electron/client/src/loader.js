@@ -195,7 +195,15 @@ Loader.readFile = function( file , cb, addToAssetPanel = false) { // addToAssetP
 
             // _processFileData 호출 시 addToAssetPanel 인자를 명시적으로 전달
             // 이를 통해 _processFileData 내부에서 PNG가 Assets 패널에 추가될지 여부를 정확히 제어할 수 있습니다.
-            self._processFileData(url, fileContents, ext, cb, addToAssetPanel);
+            try {
+                self._processFileData(url, fileContents, ext, cb, addToAssetPanel);
+            } catch (err) {
+                // 깨진 파일이 있어도 순차 로딩 체인이 멈추지 않도록 콜백은 반드시 호출
+                console.error("[Loader] 파일 처리 실패:", url, err);
+                printLog( "파일 처리 실패 : " + url );
+                cb && cb();
+                return;
+            }
 
             if ( ext === ".json" ){
                 // g_fileName과 g_fileContext는 DownloadCurrent.js에서 사용될 수 있습니다.
@@ -330,46 +338,21 @@ Loader._processFileData = function( url, fileContents, ext, cb, addToAssetPanel)
                 // FNT 리소스 로딩 (UI 프로젝트 내 BMFont)
                 var fntList = [];
                 function findChild( obj ){
-                    var children = obj['children'];
+                    var children = obj['children'] || [];
                     for( var i = 0; i< children.length ; i++ ){
-                        if(children[i]["classname"] ===  "LabelBMFont"){
-                            fntList.push( children[i]['options']['fileNameData']['path'] );
+                        var child = children[i];
+                        if( child["classname"] === "LabelBMFont" ){
+                            var fileData = child['options'] && child['options']['fileNameData'];
+                            if( fileData && fileData['path'] && fntList.indexOf( fileData['path'] ) < 0 ){
+                                fntList.push( fileData['path'] );
+                            }
                         }
-                        if( children[i]["children"].length > 0 ){
-                            findChild( children[i] );
-                        }
+                        findChild( child );
                     }
                 }
                 findChild(dic['widgetTree'] );
 
-                var loadCount = 0;
-                function loadFnt( fntFile ){
-                    var fntFileName = fntFile.split('/');
-                    var item =  ResourceMapData[ fntFileName[ fntFileName.length - 1 ]];
-                    item.file(function( file ) {
-                        // readFile 호출 시 addToAssetPanel=false로 전달 (FNT 파일의 경우)
-                        Loader.readFile( file , function(){
-                            var newConf = cc.loader.getRes(fntFile);
-                            var pngName = newConf.atlasName.split('/');
-                            var pngItem = ResourceMapData[ pngName[ pngName.length - 1 ]];
-                            pngItem.file( function( pngfile ) {
-                                // readFile 호출 시 addToAssetPanel=false로 전달 (FNT에 연결된 PNG)
-                                Loader.readFile( pngfile , function(){
-                                    loadCount++;
-                                    if( loadCount < fntList.length)
-                                        loadFnt( fntList[loadCount]);
-                                    else
-                                        loadFntFinishCallback();
-                                });
-                            });
-                        });
-                    });
-                }
-
-                if( loadCount < fntList.length)
-                    loadFnt( fntList[loadCount]);
-                else
-                    loadFntFinishCallback();
+                this.loadFnt( fntList, loadFntFinishCallback );
 
             } else if( dic[ ccs.CONST_ARMATURE_DATA ] ) {
                 // Armature Project File
@@ -475,29 +458,49 @@ Loader.loadFnt = function ( fntFileList , endCallback) {
         return;
     }
 
-    var count = fntFileList.length;
-    for(var n = 0; n < fntFileList.length; n++) {
-        var fntFile = fntFileList[n];
-        var fntFileName = fntFile.split('/');
-        var item = ResourceMapData[fntFileName[fntFileName.length - 1]];
+    var remaining = fntFileList.length;
+    var done = function () {
+        remaining--;
+        if (remaining <= 0)
+            endCallback && endCallback();
+    };
+    var baseName = function (filePath) {
+        return filePath.split(/[\\/]/).pop();
+    };
+
+    // forEach 로 각 fnt 파일을 독립된 스코프에서 처리 (비동기 콜백이 마지막 fnt 만 참조하던 문제 수정)
+    fntFileList.forEach(function (fntFile) {
+        var fntName = baseName(fntFile);
+        var item = ResourceMapData[fntName];
+        if (!item) {
+            printLog( "No resource file : " + fntName );
+            done();
+            return;
+        }
         item.file(function (file) {
             // FNT 파일 로드 시 addToAssetPanel=false
             Loader.readFile(file, function () {
-                var newConf = cc.loader.getRes(fntFile);
-                var pngName = newConf.atlasName.split('/');
-                var pngItem = ResourceMapData[pngName[pngName.length - 1]];
+                var conf = cc.loader.getRes(fntFile) || cc.loader.getRes("image/" + fntName);
+                if (!conf || !conf.atlasName) {
+                    printLog( "Invalid fnt file : " + fntName );
+                    done();
+                    return;
+                }
+                var pngName = baseName(conf.atlasName);
+                var pngItem = ResourceMapData[pngName];
+                if (!pngItem) {
+                    printLog( "No resource file : " + pngName );
+                    done();
+                    return;
+                }
                 pngItem.file(function (pngfile) {
                     // FNT에 연결된 PNG 로드 시 addToAssetPanel=false
-                    Loader.readFile(pngfile, function () {
-                        count--
-                        if (count <= 0)
-                            endCallback && endCallback();
-                    });
+                    Loader.readFile(pngfile, done);
                 });
             });
         });
-    }
-}
+    });
+};
 
 Loader.removeData = function ( fileName ){
     //console.log('Loader.removeData', fileName );

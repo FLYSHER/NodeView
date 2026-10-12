@@ -32,6 +32,9 @@
         "src/managers/panelManager.js",
         "src/managers/gameViewManager.js",
         "src/managers/contextMenuManager.js",
-        "src/managers/deletionManager.js"
+        "src/managers/deletionManager.js",
+        "src/uiWidgetsCopy.js",
+        "src/uiWidgetsCopyPopover.js",
+        "src/armatureDebugDraw.js"
     ]
 }

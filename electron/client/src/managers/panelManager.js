@@ -137,68 +137,8 @@ var PanelManager = (function() {
                 if (e.clientX >= rect.left && e.clientX <= rect.right &&
                     e.clientY >= rect.top && e.clientY <= rect.bottom) {
 
-                    const isElectron = !!(window && window.process && window.process.type);
-
-                    if (isElectron) {
-                        const fs = require('fs');
-                        const path = require('path');
-                        const { ipcRenderer } = require('electron');
-                        const files = e.dataTransfer.files;
-                        const arrFilePaths = [];
-
-                        // 캔버스와 동일한 FileEntry 구조체 정의
-                        class FileEntry {
-                            constructor(fileInfo) {
-                                this.fullPath = fileInfo.filePath;
-                                this.isFile = true;
-                                this.isDirectory = false;
-                                this.name = this.fullPath.split(/[\\\/]/).pop();
-                                this.content = fileInfo.content;
-                            }
-                            file(filecb) {
-                                filecb(this);
-                            }
-                        }
-
-                        // 캔버스와 동일한 폴더 순회 및 ResourceMapData 갱신 로직
-                        function walkDir(dir) {
-                            var list = fs.readdirSync(dir);
-                            list.forEach(function(file) {
-                                var fullPath = path.join(dir, file);
-                                var stat = fs.statSync(fullPath);
-                                if (stat && stat.isDirectory()) {
-                                    walkDir(fullPath);
-                                } else {
-                                    var fileInfo = { filePath: fullPath, content: null };
-                                    var fileEntry = new FileEntry(fileInfo);
-
-                                    if (typeof ResourceMapData !== 'undefined') {
-                                        if (!ResourceMapData[fileEntry.name]) {
-                                            ResourceMapData[fileEntry.name] = fileEntry;
-                                        } else {
-                                            ResourceMapData[fileEntry.name].fullPath = fullPath;
-                                        }
-                                    }
-                                }
-                            });
-                        }
-
-                        for (let i = 0; i < files.length; i++) {
-                            try {
-                                if (fs.statSync(files[i].path).isDirectory()) {
-                                    walkDir(files[i].path);
-                                } else {
-                                    arrFilePaths.push(files[i].path);
-                                }
-                            } catch (error) {
-                                console.error(error);
-                                continue;
-                            }
-                        }
-
-                        if (arrFilePaths.length > 0) {
-                            ipcRenderer.send('fileDropEvent', arrFilePaths);
-                        }
+                    if (typeof ElectronRenderer !== 'undefined') {
+                        ElectronRenderer.handleDrop(e);
                     } else {
                         if (typeof Loader !== 'undefined' && Loader.onDropHandler) {
                             console.log("Web Mode: Calling onDropHandler");

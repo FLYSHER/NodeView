@@ -86,6 +86,11 @@
 
     <div id="custom-context-menu" class="context-menu" style="display: none;">
         <ul>
+            <li data-action="copy-uiwidgets-subtree" class="jstree-only">이 노드 아래만 uiWidgets 복사</li>
+            <li data-action="copy-uiwidgets-options" class="jstree-only">uiWidgets 복사 옵션…</li>
+            <li data-action="copy-node-name" class="jstree-only">노드 이름 복사</li>
+            <li data-action="copy-node-path" class="jstree-only">경로 복사</li>
+            <li class="context-menu-separator jstree-only" role="separator"></li>
             <li data-action="delete">삭제</li>
         </ul>
     </div>'
@@ -110,17 +115,18 @@
             <div class="button-group">
                 <button type="button" id="openAll" class="styleButton" title="모든 노드 트리 열기" style="width: 22%;">Open</button>
                 <button type="button" id="closeAll" class="styleButton" title="모든 노드 트리 닫기" style="width: 22%;">Close</button>
-                <button type="button" id="copyBtn" class="styleButton" title="위젯 노드 트리 복사" style="width: 22%;">Copy</button>
+                <div class="split-button">
+                    <button type="button" id="copyBtn" class="styleButton" title="uiWidgets 코드 복사 (Ctrl+Shift+C)">uiWidgets 복사</button>
+                    <button type="button" id="copyOptionsBtn" class="styleButton" title="복사 옵션과 미리보기" aria-label="복사 옵션과 미리보기">▾</button>
+                </div>
             </div>
 
             <div id="ui-option">
             </div>
 
-            <div id="spine-option" style="visibility: hidden;">
-                <div class="button-group">
-                    <button type="button" id="debugBone" class="styleButton" style="width: 45%;">Show Bone</button>
-                    <button type="button" id="debugSlot" class="styleButton" style="width: 45%;">Show Slot</button>
-                </div>
+            <div id="debug-option" class="button-group">
+                <button type="button" id="debugBone" class="styleButton" style="width: 45%;">Show Bone</button>
+                <button type="button" id="debugSlot" class="styleButton" style="width: 45%;">Show Slot</button>
             </div>
         </div>
     </div>

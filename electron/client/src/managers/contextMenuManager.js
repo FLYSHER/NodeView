@@ -17,21 +17,17 @@ class ContextMenuManager {
         });
     }
 
-    showJsTreeContextMenu(event, targetElement, selectedNode, canDelete) {
+    showJsTreeContextMenu(event, targetElement, selectedNode, canDelete, cocosNode) {
         event.preventDefault();
-        console.log(`[DEBUG - ContextMenuManager] showJsTreeContextMenu: 호출됨. 현재 _currentlySelectedNode (진입 전): ${this._mainLayerInstance._currentlySelectedNode ? this._mainLayerInstance._currentlySelectedNode.__instanceId : 'null'}`); // _currentlySelectedNode 사용
-
         this.hide();
-        console.log(`[DEBUG - ContextMenuManager] showJsTreeContextMenu: hide() 호출 후 _currentlySelectedNode: ${this._mainLayerInstance._currentlySelectedNode ? this._mainLayerInstance._currentlySelectedNode.__instanceId : 'null'}`); // _currentlySelectedNode 사용
 
         const $menu = $('#custom-context-menu');
         this._activeMenu = $menu;
         this._targetElement = targetElement;
         this._targetNodeId = selectedNode?.data?.nodeId;
 
-        console.log(`[DEBUG - ContextMenuManager] showJsTreeContextMenu: 메뉴 표시 전. _currentlySelectedNode: ${this._mainLayerInstance._currentlySelectedNode ? this._mainLayerInstance._currentlySelectedNode.__instanceId : 'null'}`); // _currentlySelectedNode 사용
+        $menu.find('.jstree-only').show();
 
-        // 삭제 메뉴 항목 활성화/비활성화 (동일)
         const $deleteItem = $menu.find('li[data-action="delete"]');
         if (canDelete) {
             $deleteItem.removeClass('disabled').css('pointer-events', 'auto');
@@ -42,13 +38,47 @@ class ContextMenuManager {
         this._positionMenu(event, $menu);
         $menu.show();
 
-        // 메뉴 항목 클릭 이벤트 (jstree 전용) - 네임스페이스를 'ContextMenuManager'로 통일
-        $menu.off('click.ContextMenuManager').on('click.ContextMenuManager', 'li[data-action="delete"]:not(.disabled)', () => {
-            if (this._targetNodeId && this._mainLayerInstance) {
-                this._mainLayerInstance.deleteItem(this._targetNodeId);
-            }
+        $menu.off('click.ContextMenuManager').on('click.ContextMenuManager', 'li[data-action]:not(.disabled)', (e) => {
+            const action = $(e.currentTarget).data('action');
+            const nodeId = this._targetNodeId;
             this.hide();
+
+            switch (action) {
+                case 'copy-uiwidgets-subtree':
+                    if (cocosNode) UIWidgetsCopyPopover.copyNow(Object.assign(UIWidgetsCopy.loadOptions(), { scope: 'subtree' }), cocosNode);
+                    break;
+                case 'copy-uiwidgets-options':
+                    if (cocosNode) UIWidgetsCopyPopover.open(targetElement, cocosNode);
+                    break;
+                case 'copy-node-name':
+                    if (cocosNode) this._copyText(cocosNode.getName(), '노드 이름 복사됨');
+                    break;
+                case 'copy-node-path':
+                    if (cocosNode) this._copyText(this._getNodePath(cocosNode), '노드 경로 복사됨');
+                    break;
+                case 'delete':
+                    if (nodeId && this._mainLayerInstance) {
+                        this._mainLayerInstance.deleteItem(nodeId);
+                    }
+                    break;
+            }
         });
+    }
+
+    // DraggableNode(인스턴스 래퍼) 아래부터의 이름 경로. 예) Panel_14/pnlBg/imgBg
+    _getNodePath(node) {
+        const names = [];
+        for (let p = node; p && !(p instanceof DraggableNode) && !(p instanceof MainLayer); p = p.getParent()) {
+            names.unshift(p.getName() || 'Unnamed');
+        }
+        return names.length > 0 ? names.join('/') : node.getName();
+    }
+
+    _copyText(text, toastTitle) {
+        if (typeof copyStringToClipboard === 'function') {
+            copyStringToClipboard(text);
+        }
+        UIWidgetsCopyPopover.showToast(toastTitle, text);
     }
 
     showOtherContextMenu(event, targetElement, nodeId) { // 기존 showContextMenu 이름 변경
@@ -68,6 +98,8 @@ class ContextMenuManager {
         this._activeMenu = $menu;
         this._targetElement = targetElement;
         this._targetNodeId = nodeId;
+
+        $menu.find('.jstree-only').hide();
 
         // 삭제 메뉴 활성화/비활성화 (Assets 패널은 항상 삭제 가능하다고 가정)
         $menu.find('li[data-action="delete"]').removeClass('disabled').css('pointer-events', 'auto');

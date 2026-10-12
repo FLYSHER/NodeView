@@ -173,7 +173,7 @@ canvas {
     min-height: 0;
 }
 #ui-option,
-#spine-option {
+#debug-option {
     display: none;
 }
 .tab-propertiesContent {
@@ -1008,4 +1008,231 @@ ul.tabs li.current {
     background-color: transparent;
     cursor: pointer;
     padding: 2px;
+}
+
+/* --- 디버그 표시 버튼 --- */
+.styleButton.active {
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+    color: white;
+}
+
+/* --- uiWidgets 복사 스플릿 버튼 --- */
+.split-button {
+    display: inline-flex;
+}
+.split-button .styleButton {
+    white-space: nowrap;
+}
+.split-button .styleButton:first-child {
+    border-radius: 999px 0 0 999px;
+    padding-right: 12px;
+}
+.split-button .styleButton:last-child {
+    border-radius: 0 999px 999px 0;
+    border-left: 0;
+    padding: 8px 10px;
+}
+
+.context-menu li.context-menu-separator {
+    height: 1px !important;
+    padding: 0 !important;
+    margin: 4px 8px !important;
+    background-color: var(--border-color) !important;
+    pointer-events: none;
+}
+
+/* --- uiWidgets 복사 팝오버 --- */
+.uiw-popover {
+    position: fixed;
+    z-index: 3000;
+    width: 460px;
+    max-height: calc(100vh - 16px);
+    display: flex;
+    flex-direction: column;
+    background-color: var(--dropdown-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
+    color: var(--font-primary);
+    font-size: 0.85rem;
+}
+.uiw-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 14px 10px;
+    border-bottom: 1px solid var(--border-color);
+}
+.uiw-header-text {
+    flex: 1;
+    min-width: 0;
+}
+.uiw-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+.uiw-source {
+    margin-top: 2px;
+    color: var(--font-secondary);
+    font-size: 0.75rem;
+}
+.uiw-close {
+    background: none;
+    border: 0;
+    color: var(--font-secondary);
+    font-size: 1.2rem;
+    line-height: 1;
+    cursor: pointer;
+}
+.uiw-close:hover {
+    color: var(--font-primary);
+}
+.uiw-options {
+    display: grid;
+    grid-template-columns: 70px minmax(0, 1fr);
+    gap: 10px 12px;
+    align-items: center;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border-color);
+}
+.uiw-label {
+    color: var(--font-secondary);
+}
+.uiw-label-top {
+    align-self: start;
+    padding-top: 2px;
+}
+.uiw-segment {
+    display: inline-flex;
+    width: fit-content;
+    padding: 2px;
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+}
+.uiw-segment button {
+    background: none;
+    border: 0;
+    border-radius: 3px;
+    padding: 4px 12px;
+    color: var(--font-primary);
+    font: inherit;
+    cursor: pointer;
+}
+.uiw-segment button.active {
+    background-color: var(--accent-color);
+    color: white;
+}
+.uiw-segment button:disabled {
+    color: var(--font-secondary);
+    opacity: 0.6;
+    cursor: default;
+}
+.uiw-input {
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--font-primary);
+    font-family: Consolas, 'Courier New', monospace;
+    padding: 5px 8px;
+}
+.uiw-checks {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.uiw-checks label,
+.uiw-footer label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+}
+.uiw-hint {
+    color: var(--font-secondary);
+}
+.uiw-preview-head {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 14px 6px;
+    color: var(--font-secondary);
+    font-size: 0.75rem;
+}
+.uiw-preview {
+    flex: 1;
+    min-height: 120px;
+    max-height: 260px;
+    overflow: auto;
+    margin: 0 14px;
+    padding: 8px 10px;
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-family: Consolas, 'Courier New', monospace;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    color: var(--font-primary);
+    white-space: pre;
+}
+.uiw-preview .uiw-key { color: #8fc1ff; }
+.uiw-preview .uiw-null { color: #c38bff; }
+.uiw-preview .uiw-array { color: #ffc078; }
+.uiw-footer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 14px;
+    margin-top: 10px;
+    border-top: 1px solid var(--border-color);
+}
+.uiw-spacer {
+    flex: 1;
+}
+.uiw-footer .styleButton {
+    padding: 6px 14px;
+}
+.uiw-copy {
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+    color: white;
+}
+.uiw-copy:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+.uiw-shortcut {
+    margin-left: 6px;
+    font-size: 0.7rem;
+    opacity: 0.8;
+}
+
+/* --- 토스트 --- */
+.nv-toast {
+    display: none;
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: 3100;
+    max-width: 360px;
+    padding: 10px 14px;
+    background-color: #1d3a2b;
+    border: 1px solid #2f7a52;
+    border-radius: 6px;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+    color: var(--font-primary);
+    font-size: 0.85rem;
+}
+.nv-toast.error {
+    background-color: #3a1f20;
+    border-color: #8a3a3a;
+}
+.nv-toast-title {
+    font-weight: 600;
+}
+.nv-toast-detail {
+    margin-top: 3px;
+    color: #c9d8cf;
+    font-size: 0.75rem;
+    word-break: break-all;
 }
