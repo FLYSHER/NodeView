@@ -400,20 +400,12 @@ var Sequencer = (function() {
         _renderTimeline();
     }
 
-    function _snapToGrid(timeValue) {
-        return timeValue;
-    }
-
     function _timeToPixel(time) {
         return Math.round(time * PIXELS_PER_SECOND);
     }
 
     function _pixelToTime(pixel) {
         return pixel / PIXELS_PER_SECOND;
-    }
-
-    function _getSnappedPixel(pixel) {
-        return pixel;
     }
 
     function _addClipToTrack(animName, animType, targetNode, preferredTime) {

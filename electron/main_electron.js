@@ -1,6 +1,5 @@
 // Modules to control application life and create native browser window
 const {app, BrowserWindow, Menu, dialog} = require('electron')
-const path = require('path')
 const loadManager = require('./LoadManager')
 const windowStateKeeper = require('electron-window-state');
 
@@ -19,7 +18,6 @@ function createWindow () {
     height: mainWindowState.height,
     webPreferences: {
       webSecurity: false,
-      preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: true,
       contextIsolation: false
     }

@@ -1,4 +1,3 @@
-var NodeList = null;
 var Target = null;
 var TempTargetPos = null;
 var TempTargetScale = null;
@@ -681,52 +680,5 @@ var MainLayerScene = cc.Scene.extend({
             },
             swallowTouches: true
         }, this);
-    },
-
-    getFrontTouchedNode: function (touchPos) {
-        var maxZOrderList = [], frontNode = null, frontNodeName = '', zOrderList = [], node = null;
-        var updateData = function (z, n, name) { maxZOrderList = z; frontNode = n; frontNodeName = name; };
-        for (var name in NodeList) {
-            if (NodeList.hasOwnProperty(name)) {
-                node = NodeList[name];
-                if (!cc.rectContainsPoint(node.getBoundingBoxToWorld(), touchPos)) continue;
-                zOrderList = this.getZOrderList(node);
-                if (maxZOrderList.length > 0) {
-                    var determined = false;
-                    for (var i = 0; i < zOrderList.length && i < maxZOrderList.length; i++) {
-                        if (zOrderList[i] > maxZOrderList[i]) { updateData(zOrderList, node, name); determined = true; break; }
-                        else if (zOrderList[i] < maxZOrderList[i]) { determined = true; break; }
-                    }
-                    if (!determined && zOrderList.length > maxZOrderList.length) updateData(zOrderList, node, name);
-                } else {
-                    updateData(zOrderList, node, name);
-                }
-            }
-        }
-        var finalNode = this.recursiveCheckNode(frontNode, touchPos);
-        return { node: frontNode, nodeName: frontNodeName, finalNode: finalNode };
-    },
-
-    recursiveCheckNode: function (node, touchpos) {
-        if (!node || !node.children) return node;
-        for (var idx = 0; idx < node.children.length; idx++) {
-            var found = this.recursiveCheckNode(node.children[idx], touchpos);
-            if (found !== node.children[idx]) return found;
-            if (cc.rectContainsPoint(node.children[idx].getBoundingBoxToWorld(), touchpos)) {
-                return node.children[idx];
-            }
-        }
-        return node;
-    },
-
-    getZOrderList: function (node) {
-        var zOrderList = [];
-        for (let p = node; !!p; p = p.getParent()) { zOrderList.unshift(p.zIndex); }
-        return zOrderList;
-    },
-
-    onExit: function () {
-        if (typeof ScreenUtil !== 'undefined') ScreenUtil.removeAllResizeListener();
-        this._super();
     }
 });

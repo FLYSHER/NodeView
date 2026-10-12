@@ -201,24 +201,13 @@ var ElectronRenderer = {
 
                 if (jsonObj && jsonObj["skeleton"] && jsonObj["skeleton"]["spine"]) {
                     Loader._processFileData(url, fileContents, ext, cb, addToAssetPanel);
-                    if (typeof toggleJSONUI !== 'undefined') toggleJSONUI(false);
                 } else {
                     let exportjson = typeof convertToExportJson !== 'undefined' ? convertToExportJson(fileContents) : fileContents;
                     let newUrl = url.replace('.json', ' (JSON).ExportJson');
                     Loader._processFileData(newUrl, exportjson, '.exportjson', cb, addToAssetPanel);
-                    if (typeof toggleJSONUI !== 'undefined') toggleJSONUI(true);
                 }
             } else {
                 Loader._processFileData(url, fileContents, ext, cb, addToAssetPanel);
-            }
-
-            if (ext === ".exportjson") {
-                if (typeof toggleJSONUI !== 'undefined') toggleJSONUI(false);
-            }
-
-            if (ext === ".json" || ext === ".exportjson") {
-                g_fileName = url;
-                g_fileContext = fileContents;
             }
         };
 

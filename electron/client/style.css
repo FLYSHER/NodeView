@@ -199,25 +199,19 @@ canvas {
     flex-grow: 1;
     min-height: 0;
 }
-#ui-option,
-#debug-option {
+#ui-option {
     display: none;
-}
-.tab-propertiesContent {
-    overflow: auto;
-    padding: 10px;
-    flex-grow: 1;
 }
 .fileContainer,
 .widgetContainer,
-.uiAnimationContainer,
 .nodeInfoContainer {
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
     height: 100%;
 }
-.tab-fileContent, .tab-widgetContent, .tab-uiAnimContent {
+.tab-fileContent,
+.tab-widgetContent {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
@@ -228,22 +222,6 @@ canvas {
     display: flex;
     flex-direction: column;
     height: 90%;
-}
-.styleLabel {
-    color: var(--font-primary);
-    font-size: 0.9rem;
-    margin-bottom: 5px;
-}
-ul.tabs .styleLabel {
-    font-size: 1rem;
-    font-weight: 500;
-}
-.button-group {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    padding: 8px 12px;
-    flex-shrink: 0;
 }
 .styleButton {
     background-color: var(--bg-tertiary);
@@ -281,47 +259,6 @@ ul.tabs .styleLabel {
     outline: none;
     border-color: var(--accent-color);
     box-shadow: 0 0 0 2px rgba(0, 122, 204, 0.5);
-}
-ul.tabs {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-    border-bottom: 1px solid var(--border-color);
-    padding-left: 15px;
-    padding-right: 15px;
-    padding-top: 5px;
-    flex-shrink: 0;
-}
-ul.tabs li {
-    background: none;
-    color: var(--font-secondary);
-    display: inline-block;
-    padding: 10px 14px;
-    cursor: pointer;
-    position: relative;
-    border-bottom: 2px solid transparent;
-    transition: color 0.3s ease, border-color 0.3s ease;
-    margin-bottom: -1px;
-}
-ul.tabs li:not(.current):hover {
-    color: var(--font-primary);
-}
-ul.tabs li.current {
-    color: var(--accent-color);
-    font-weight: 500;
-    border-bottom-color: var(--accent-color);
-}
-.tab-content {
-    display: none;
-    overflow: auto;
-    padding: 15px;
-    background: transparent;
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-}
-.tab-content.current {
-    display: flex;
 }
 ::-webkit-scrollbar {
     width: 8px;
@@ -760,12 +697,6 @@ ul.tabs li.current {
     gap: 10px;
 }
 
-.inspector-name-icon {
-    color: var(--font-primary);
-    font-size: 1.1rem;
-    flex-shrink: 0;
-}
-
 .inspector-name-input {
     flex-grow: 1;
     font-size: 1rem;
@@ -808,130 +739,6 @@ ul.tabs li.current {
 }
 .panel-content-inner > .section-header:first-of-type {
     margin-top: 0;
-}
-
-.input-group {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 4px;
-    padding-bottom: 4px;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-}
-.input-group:last-of-type,
-.input-group:has(~ .section-header),
-.checkbox-group:last-of-type,
-.checkbox-group:has(~ .section-header) {
-    border-bottom: none;
-    padding-bottom: 0;
-    margin-bottom: 4px;
-}
-
-.input-group label {
-    width: 80px;
-    min-width: 80px;
-    color: var(--font-secondary);
-    font-size: 0.9rem;
-}
-.input-group .styleLabel {
-    color: var(--font-primary);
-    font-size: 0.9rem;
-}
-
-.input-group input[type="text"],
-.input-group input[type="number"] {
-    flex-grow: 1;
-    background-color: var(--bg-primary);
-    border: 1px solid var(--border-color);
-    color: var(--font-primary);
-    padding: 5px;
-    border-radius: 3px;
-    box-sizing: border-box;
-    font-size: 0.9rem;
-    outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
-}
-.input-group input[type="text"]:focus,
-.input-group input[type="number"]:focus {
-    border-color: var(--accent-color);
-    box-shadow: 0 0 0 2px rgba(0, 122, 204, 0.5);
-}
-
-.input-group input[type="range"] {
-    flex-grow: 1;
-    -webkit-appearance: none;
-    height: 8px;
-    background: var(--border-color);
-    border-radius: 5px;
-    outline: none;
-    opacity: 0.9;
-    transition: opacity .2s;
-}
-.input-group input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    background: var(--accent-color);
-    cursor: pointer;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
-    border: 1px solid var(--font-primary);
-}
-.value-label {
-    min-width: 50px;
-    text-align: right;
-    color: var(--font-primary);
-    font-size: 0.9rem;
-}
-.checkbox-group {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 4px;
-    padding-bottom: 4px;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-}
-
-.checkbox-group input[type="checkbox"] {
-    width: 18px;
-    height: 18px;
-    border-radius: 4px;
-    border: 1px solid var(--border-color);
-    background-color: var(--bg-primary);
-    appearance: none;
-    -webkit-appearance: none;
-    cursor: pointer;
-    position: relative;
-    flex-shrink: 0;
-    transition: background-color 0.2s, border-color 0.2s;
-}
-.checkbox-group input[type="checkbox"]:checked {
-    background-color: var(--accent-color);
-    border-color: var(--accent-color);
-}
-.checkbox-group input[type="checkbox"]:checked::before {
-    content: '✔';
-    display: block;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 14px;
-    color: var(--font-primary);
-}
-.draggable-label {
-    cursor: ew-resize;
-    user-select: none;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-.draggable-label:hover {
-    color: var(--accent-color);
-}
-.draggable-label:active {
-    color: white;
 }
 
 .timeline-track > .ui-wrapper,
@@ -1016,10 +823,6 @@ ul.tabs li.current {
     background-color: #ffcdd2;
     color: #D32F2F;
 }
-
-
-
-
 
 /* --- 디버그 표시 버튼 --- */
 .styleButton.active {
@@ -1527,7 +1330,6 @@ ul.tabs li.current {
     gap: 6px;
     margin-top: 12px;
 }
-
 
 /* --- Resource View --- */
 .rv-root {

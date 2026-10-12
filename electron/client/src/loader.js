@@ -212,19 +212,6 @@ Loader.readFile = function( file , cb, addToAssetPanel = false) { // addToAssetP
                 cb && cb();
                 return;
             }
-
-            if ( ext === ".json" ){
-                // g_fileName과 g_fileContext는 DownloadCurrent.js에서 사용될 수 있습니다.
-                // toggleJSONUI는 DownloadCurrent.js에 정의되어 있으므로 그대로 둡니다.
-                toggleJSONUI( true );
-            } else if ( ext === ".exportjson" ){
-                toggleJSONUI( false );
-            }
-
-            if (ext === ".json" || ext === ".exportjson") {
-                g_fileName = f.name;
-                g_fileContext = e.target.result;
-            }
         };
     } )( file );
 };

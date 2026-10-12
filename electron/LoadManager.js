@@ -1,6 +1,5 @@
 const { ipcMain } = require('electron');
 const path = require("path");
-const fileUtil  = require('./FileUtil');
 const fs          = require('fs' );
 const imageDataURI          = require('image-data-uri' );
 
@@ -32,7 +31,7 @@ class FileFinder {
     findFile(filePath) {
         let candidates = this.getCandidates(filePath);
         for(let j=0; j < candidates.length; j++){
-            if (fileUtil.exists(candidates[j]))
+            if (fs.existsSync(candidates[j]))
                 return candidates[j];
         }
         return null;
@@ -222,27 +221,6 @@ var LoadManager  = {
         }
 
         filesImport = this.getUniqueValuesArray(filesImport);
-
-        //
-        // // replyInputValue 송신 또는 응답
-        // //evt.reply('fileDropEventReply', "1223231");
-        // var baseFolder = path.dirname(files[0]);
-        // var searchPaths = [
-        //     path.join(baseFolder, "image"),
-        //     path.join(baseFolder, "binary/image")
-        // ];
-        //
-        // var filesImport = []
-        // searchPaths.forEach(function(folder){
-        //
-        //     if (fileUtil.exists(folder))
-        //     {
-        //         var arrayOfFiles = fileUtil.getAllFiles(folder);
-        //         filesImport = filesImport.concat(arrayOfFiles);
-        //     }
-        // });
-        //console.log("filesImport.length=" + filesImport.length);
-
 
         let promises = [];
         let dependentsFiles = [];
