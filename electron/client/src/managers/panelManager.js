@@ -187,7 +187,33 @@ var PanelManager = (function() {
         });
     }
 
+    function resetLayout() {
+        if (!window.confirm('패널 배치를 기본값으로 되돌릴까요? (로드한 에셋은 다시 불러와야 합니다)')) return;
+        localStorage.removeItem('golden-layout-config');
+        window.location.reload();
+    }
+
     return {
+        resetLayout: resetLayout,
+
+        // 메뉴용 패널 목록 [{ name, title, open }]
+        getPanels: function () {
+            const open = new Set();
+            if (_layout) _layout.root.getItemsByFilter(i => i.isComponent).forEach(i => open.add(i.componentName));
+            return Object.keys(componentRegistry).map(name => ({ name: name, title: componentRegistry[name].title, open: open.has(name) }));
+        },
+        // 패널 열기/닫기
+        setPanelOpen: function (name, open) {
+            if (!_layout || !componentRegistry[name]) return;
+            const items = _layout.root.getItemsByFilter(i => i.isComponent && i.componentName === name);
+            if (open) {
+                if (items.length === 0) _addComponent(_layout, name);
+                this.showComponent(name);
+            } else {
+                items.forEach(i => i.remove());
+            }
+        },
+
         initialize: function () {
             const layoutArea = $('#panels-container-area');
             layoutArea.empty();
@@ -258,78 +284,12 @@ var PanelManager = (function() {
                 }
             }, false);
 
-            const $dropdown = $('#panel-toggle-dropdown');
-            const $toggleButton = $('#panel-toggle-button');
-            $dropdown.empty();
-            for (const key in componentRegistry) {
-                $dropdown.append(`<label><input type="checkbox" data-component-type="${componentRegistry[key].component}"> ${componentRegistry[key].title}</label>`);
-            }
-
-            function syncCheckboxes() {
-                const openComponents = new Set();
-                myLayout.root.getItemsByFilter(item => item.isComponent).forEach(item => {
-                    openComponents.add(item.componentName);
-                });
-                $dropdown.find('input[type="checkbox"]').each(function () {
-                    $(this).prop('checked', openComponents.has($(this).data('component-type')));
-                });
-            }
-
-            $toggleButton.on('click', (e) => {
-                e.stopPropagation();
-                syncCheckboxes();
-                $dropdown.slideToggle(150);
-            });
-
-            $dropdown.on('change', 'input[type="checkbox"]', function () {
-                const componentType = $(this).data('component-type');
-                const existingItems = myLayout.root.getItemsByFilter(item => item.isComponent && item.componentName === componentType);
-                if ($(this).is(':checked')) {
-                    if (existingItems.length === 0) {
-                        const componentConfig = {
-                            type: 'component',
-                            componentName: componentType,
-                            title: componentRegistry[componentType].title
-                        };
-                        const firstStack = myLayout.root.getItemsByFilter(item => item.isStack)[0];
-                        if (firstStack) {
-                            firstStack.addChild(componentConfig);
-                        } else {
-                            myLayout.root.contentItems[0].addChild(componentConfig);
-                        }
-                    }
-                } else {
-                    existingItems.forEach(item => item.remove());
-                }
-            });
-
-            $('#layout-reset-btn').on('click', function () {
-                if (!window.confirm('패널 배치를 기본값으로 되돌릴까요? (로드한 에셋은 다시 불러와야 합니다)')) return;
-                localStorage.removeItem('golden-layout-config');
-                window.location.reload();
-            });
-
-            $(document).on('click', e => {
-                if (!$toggleButton.is(e.target) && !$dropdown.is(e.target) && $dropdown.has(e.target).length === 0) $dropdown.slideUp(150);
-            });
+            // 패널 열기/닫기 · 레이아웃 초기화 · 전체 화면은 앱 상단 바 메뉴(AppMenu)에서
+            $('#layout-reset-btn').on('click', resetLayout);
             myLayout.on('stateChanged', () => LayoutManager.save(myLayout));
-            myLayout.on('itemDestroyed', () => {
-                LayoutManager.save(myLayout);
-                syncCheckboxes();
-            });
+            myLayout.on('itemDestroyed', () => LayoutManager.save(myLayout));
 
-            $('#toggle-fullscreen-btn').on('click', function () {
-                if (!document.fullscreenElement) {
-                    document.documentElement.requestFullscreen();
-                } else {
-                    if (document.exitFullscreen) document.exitFullscreen();
-                }
-            });
-            $(document).on('fullscreenchange webkitfullscreenchange', function () {
-                const isFullscreen = !!document.fullscreenElement;
-                $('#toggle-fullscreen-btn').find('i').toggleClass('fa-compress', isFullscreen).toggleClass('fa-expand', !isFullscreen);
-            });
-
+            if (typeof AppMenu !== 'undefined') AppMenu.init();
             StatusBar.init();
 
             $(document).on('mousedown', '.lm_splitter', () => $('#resize-overlay').show());

@@ -1,5 +1,5 @@
 // Modules to control application life and create native browser window
-const {app, BrowserWindow, Menu, dialog} = require('electron')
+const {app, BrowserWindow, Menu, dialog, ipcMain} = require('electron')
 const loadManager = require('./LoadManager')
 const windowStateKeeper = require('electron-window-state');
 
@@ -16,6 +16,10 @@ function createWindow () {
     y: mainWindowState.y,
     width: mainWindowState.width,
     height: mainWindowState.height,
+    backgroundColor: '#141518',
+    // 제목 표시줄은 앱 상단 바(HTML)가 대신하고, 창 버튼(최소화/최대화/닫기)만 시스템 것을 쓴다
+    titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'hidden',
+    titleBarOverlay: process.platform === 'darwin' ? undefined : { color: '#141518', symbolColor: '#a3a7ae', height: 34 },
     webPreferences: {
       webSecurity: false,
       nodeIntegration: true,
@@ -35,69 +39,36 @@ function createWindow () {
   return mainWindow;
 }
 
-const template = [
-  {
-    label: 'File',
-    submenu: [
-      {
-        label: 'Open',
-        click () {
+// 메뉴는 앱 상단 바(HTML)에 있다. macOS 는 복사/붙여넣기 단축키를 위해 기본 앱 메뉴를 그대로 둔다
+if (process.platform !== 'darwin') Menu.setApplicationMenu(null);
 
-          dialog.showOpenDialog().then((result)=>{
-            if(result.canceled === false){
-              var files=result.filePaths;
-              //console.log("selectedPaths = "+ files);
-              loadManager.loadFiles(files);
-            }
-          });
-        }
-      },
-      {
-        type: 'separator'
-      },
-      {
-        label: 'Exit',
-        role: 'close'
-      }
+// 앱 상단 바에서 보내는 요청
+ipcMain.handle('nv:openDialog', async (evt) => {
+  const win = BrowserWindow.fromWebContents(evt.sender);
+  const result = await dialog.showOpenDialog(win, {
+    title: '파일 열기',
+    properties: ['openFile', 'multiSelections'],
+    filters: [
+      { name: 'NodeView 에셋', extensions: ['ExportJson', 'exportjson', 'json', 'png'] },
+      { name: '모든 파일', extensions: ['*'] }
     ]
-  },
-  {
-    label: 'Debug',
-    submenu: [
-      {
-        label: 'Toggle Developer Tools',
-        accelerator: 'F12',
-        click (item, focusedWindow) {
-          if (focusedWindow) {
-            focusedWindow.webContents.toggleDevTools()
-          }
-        }
-      },
-      {
-        label: 'Reload',
-        accelerator: 'F5',
-        click (item, focusedWindow) {
-          if (focusedWindow) {
-            focusedWindow.webContents.reload()
-          }
-        }
-      }
-    ]
-  },
-  {
-    role: 'Window',
-    submenu: [
-      {
-        role: 'Minimize'
-      },
-      {
-        role: 'Close'
-      }
-    ]
-  },
-]
-const menu = Menu.buildFromTemplate(template);
-Menu.setApplicationMenu(menu);
+  });
+  return result.canceled ? [] : result.filePaths;
+});
+ipcMain.handle('nv:openFolderDialog', async (evt) => {
+  const win = BrowserWindow.fromWebContents(evt.sender);
+  const result = await dialog.showOpenDialog(win, { title: '리소스 폴더 열기', properties: ['openDirectory'] });
+  return result.canceled ? [] : result.filePaths;
+});
+ipcMain.handle('nv:appInfo', () => ({ version: app.getVersion(), platform: process.platform }));
+ipcMain.on('nv:window', (evt, command) => {
+  const win = BrowserWindow.fromWebContents(evt.sender);
+  if (!win) return;
+  if (command === 'toggleDevTools') win.webContents.toggleDevTools();
+  else if (command === 'reload') win.webContents.reload();
+  else if (command === 'toggleFullScreen') win.setFullScreen(!win.isFullScreen());
+  else if (command === 'close') win.close();
+});
 
 
 // This method will be called when Electron has finished

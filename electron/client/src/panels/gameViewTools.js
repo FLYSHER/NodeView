@@ -756,6 +756,12 @@ var GameViewTools = (function () {
             syncToolbar();
         },
         getTool: function () { return _state.tool; },
+        // 보기 메뉴용: bounds / anchor / grid / frame / stats
+        isOn: function (key) { return !!_state[key]; },
+        toggle: function (key) {
+            if (_$toolbar) _$toolbar.find('[data-toggle="' + key + '"]').trigger('click');
+        },
+        zoomStep: zoomStep,
         getZoom: function () { return _view.zoom; },
         zoomAt: zoomAt,
         fitView: fitView,

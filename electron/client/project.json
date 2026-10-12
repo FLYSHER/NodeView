@@ -34,6 +34,7 @@
         "src/panels/resourceView.js",
         "src/panels/inspector.js",
         "src/panels/statusBar.js",
+        "src/panels/appMenu.js",
         "src/panels/gameViewTools.js"
     ]
 }

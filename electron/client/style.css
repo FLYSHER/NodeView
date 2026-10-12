@@ -94,60 +94,6 @@ canvas {
 }
 
 /* --- 상단 툴바 --- */
-#app-toolbar {
-    flex: 0 0 auto;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 6px 10px;
-    min-height: 34px;
-    padding: 3px 10px;
-    box-sizing: border-box;
-    background-color: #141414;
-    border-bottom: 1px solid #000;
-    font-size: 0.8rem;
-}
-.tb-group {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-.tb-spacer {
-    flex: 1;
-}
-.tb-label {
-    color: var(--font-secondary);
-}
-.tb-btn {
-    height: 26px;
-    padding: 0 10px;
-    background-color: var(--bg-tertiary);
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    color: var(--font-primary);
-    font: inherit;
-    cursor: pointer;
-    white-space: nowrap;
-}
-.tb-btn:hover {
-    border-color: var(--accent-color);
-}
-.tb-icon {
-    width: 30px;
-    padding: 0;
-}
-.tb-input {
-    width: 64px;
-    height: 26px;
-    box-sizing: border-box;
-    padding: 0 6px;
-    background-color: var(--bg-primary);
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    color: var(--font-primary);
-    font-family: var(--font-mono);
-    font-size: 0.8rem;
-}
 #bg-color-picker {
     width: 34px;
     height: 24px;
@@ -155,38 +101,6 @@ canvas {
     border: 1px solid var(--border-color);
     background-color: transparent;
     cursor: pointer;
-}
-#panel-toggle-menu-container {
-    position: relative;
-}
-#panel-toggle-dropdown {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    background-color: var(--dropdown-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 5px;
-    padding: 5px 0;
-    min-width: 200px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    margin-top: 5px;
-    z-index: 1001;
-}
-#panel-toggle-dropdown label {
-    display: block;
-    padding: 8px 15px;
-    color: var(--font-primary);
-    cursor: pointer;
-    font-size: 0.9rem;
-    white-space: nowrap;
-}
-#panel-toggle-dropdown label:hover {
-    background-color: var(--dropdown-hover-bg);
-}
-#panel-toggle-dropdown input[type="checkbox"] {
-    margin-right: 8px;
-    vertical-align: middle;
 }
 
 /* --- 내부 콘텐츠 스타일 (완전 복구) --- */
@@ -3210,4 +3124,281 @@ body .lm_header .lm_tab .lm_tab_count {
 /* 해상도를 지정해 캔버스 안에 여백이 생길 때 여백 색을 디자인 영역 바깥 색과 맞춘다 */
 .gv-viewport {
     background-color: #111215;
+}
+
+/* =====================================================================
+   앱 상단 바 (Electron 에서는 제목 표시줄 역할: 빈 곳을 끌면 창이 움직인다)
+   ===================================================================== */
+:root {
+    --wco-right: 0px;   /* 시스템 창 버튼이 겹쳐 그려지는 오른쪽 폭 (appMenu.js 가 설정) */
+}
+#app-toolbar {
+    flex: 0 0 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 calc(10px + var(--wco-right)) 0 10px;
+    background-color: var(--bg-app);
+    border-bottom: 1px solid var(--line-dark);
+    font-size: 12px;
+    -webkit-app-region: drag;
+    user-select: none;
+}
+.platform-mac #app-toolbar {
+    padding-left: 78px;   /* macOS 신호등 버튼 자리 */
+}
+#app-toolbar button,
+#app-toolbar .atb-dropdown,
+#app-toolbar input {
+    -webkit-app-region: no-drag;
+}
+.atb-brand {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-right: 6px;
+}
+.atb-logo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 5px;
+    background: var(--accent-strong);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+.atb-name {
+    font-weight: 600;
+    color: var(--font-primary);
+}
+.atb-menus {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+.atb-menu {
+    position: relative;
+}
+.atb-menu-btn {
+    height: 26px;
+    padding: 0 9px;
+    background: none;
+    border: 0;
+    border-radius: 4px;
+    color: #c9ccd2;
+    font: inherit;
+    cursor: default;
+}
+.atb-menu-btn:hover,
+.atb-menu-btn.open {
+    background: var(--bg-tertiary);
+    color: var(--font-primary);
+}
+.atb-drag {
+    flex: 1;
+    align-self: stretch;
+}
+.atb-recent {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+.atb-label {
+    color: var(--font-muted);
+    font-size: 11px;
+    white-space: nowrap;
+}
+.atb-chip {
+    max-width: 280px;
+    height: 24px;
+    padding: 0 8px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--font-primary);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    cursor: pointer;
+}
+.atb-chip:hover:not(:disabled) {
+    border-color: var(--accent-color);
+}
+.atb-chip:disabled {
+    color: var(--font-muted);
+    cursor: default;
+}
+.atb-btn {
+    height: 24px;
+    padding: 0 10px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--font-primary);
+    font: inherit;
+    white-space: nowrap;
+    cursor: pointer;
+}
+.atb-btn:hover {
+    border-color: var(--accent-color);
+}
+
+/* 드롭다운 메뉴 */
+.atb-dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    z-index: 2000;
+    min-width: 230px;
+    max-width: 420px;
+    padding: 4px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.55);
+}
+.atb-dropdown[hidden] {
+    display: none;
+}
+.atb-dropdown-right {
+    left: auto;
+    right: 0;
+}
+.atb-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    height: 26px;
+    padding: 0 10px 0 4px;
+    background: none;
+    border: 0;
+    border-radius: 4px;
+    color: var(--font-primary);
+    font: inherit;
+    text-align: left;
+    cursor: default;
+}
+.atb-item:hover:not(:disabled),
+.atb-item:focus-visible {
+    background: var(--accent-strong);
+    color: #fff;
+    outline: none;
+}
+.atb-item:disabled {
+    color: var(--font-muted);
+}
+.atb-check {
+    flex: 0 0 16px;
+    text-align: center;
+    color: var(--accent-color);
+}
+.atb-item:hover:not(:disabled) .atb-check {
+    color: #fff;
+}
+.atb-item-label {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.atb-shortcut {
+    color: var(--font-muted);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    white-space: nowrap;
+}
+.atb-item:hover:not(:disabled) .atb-shortcut {
+    color: #dce8ff;
+}
+.atb-sep {
+    height: 1px;
+    margin: 4px 6px;
+    background: var(--border-color);
+}
+.atb-menu-header {
+    padding: 4px 10px 2px 26px;
+    color: var(--font-muted);
+    font-size: 11px;
+}
+
+/* 단축키 · 정보 대화상자 */
+.app-dialog-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.45);
+}
+.app-dialog-backdrop[hidden] {
+    display: none;
+}
+.app-dialog {
+    width: min(460px, calc(100vw - 32px));
+    max-height: calc(100vh - 64px);
+    overflow: auto;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+}
+.app-dialog-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--line-dark);
+    font-weight: 600;
+}
+.app-dialog-close {
+    width: 26px;
+    height: 26px;
+    background: none;
+    border: 0;
+    border-radius: 4px;
+    color: var(--font-secondary);
+    font-size: 18px;
+    cursor: pointer;
+}
+.app-dialog-close:hover {
+    background: var(--bg-tertiary);
+    color: var(--font-primary);
+}
+.app-dialog-body {
+    padding: 10px 14px 14px;
+}
+.app-shortcuts {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+.app-shortcuts td {
+    padding: 6px 0;
+    border-bottom: 1px solid var(--bg-tertiary);
+}
+.app-shortcuts td:last-child {
+    text-align: right;
+    color: var(--font-secondary);
+}
+.app-shortcuts kbd {
+    padding: 1px 6px;
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: 3px;
+    color: var(--font-primary);
+    font-family: var(--font-mono);
+    font-size: 11px;
 }

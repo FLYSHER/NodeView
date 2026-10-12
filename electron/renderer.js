@@ -70,6 +70,7 @@ var ElectronRenderer = {
 
         if (arrFilePaths.length > 0) {
             ipcRenderer.send('fileDropEvent', arrFilePaths);
+            if (typeof AppMenu !== 'undefined') AppMenu.addRecent(arrFilePaths);
         }
     },
 
