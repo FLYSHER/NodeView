@@ -2647,3 +2647,376 @@ button.sb-item:hover {
     font-family: Consolas, 'Courier New', monospace;
     font-size: 0.7rem;
 }
+
+/* =====================================================================
+   Animation · Sequencer: 왼쪽 애니메이션 목록 + 오른쪽 타임라인
+   ===================================================================== */
+.lm_content.sequencer-panel {
+    overflow: hidden !important;
+}
+.seq-layout {
+    display: flex;
+    height: 100%;
+    min-height: 0;
+}
+.seq-anim-list {
+    flex: 0 0 220px;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    border-right: 1px solid var(--border-color);
+}
+.seq-anim-header {
+    flex: none;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 8px 10px 6px;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.78rem;
+}
+.seq-anim-title {
+    flex: none;
+    font-weight: 600;
+}
+.seq-anim-source {
+    min-width: 0;
+    overflow: hidden;
+    color: var(--font-secondary);
+    font-size: 0.72rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.seq-anim-list .actionWidget {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    padding: 4px 0;
+}
+.seq-anim-hint {
+    flex: none;
+    padding: 6px 10px;
+    border-top: 1px solid var(--border-color);
+    color: var(--font-secondary);
+    font-size: 0.7rem;
+}
+.sequencer-panel .seq-main {
+    flex: 1;
+    min-width: 0;
+    height: auto;
+}
+
+/* 애니메이션 행 (Assets 와 같은 얇은 행) */
+#actionTree.custom-tree-container {
+    padding: 0;
+    height: auto;
+    overflow: visible;
+}
+#actionTree .anim-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 26px;
+    margin: 0;
+    padding: 0 10px;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    color: var(--font-primary);
+    font-size: 0.82rem;
+    font-weight: normal;
+}
+#actionTree .anim-item:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+}
+#actionTree .anim-item.selected {
+    background-color: #2a5bb8;
+    color: #fff;
+    border: 0;
+    font-weight: normal;
+}
+#actionTree .track-type-icon {
+    width: auto;
+    min-width: 22px;
+    margin: 0;
+    padding: 0 4px;
+    background: none;
+    border: 1px solid currentColor;
+    border-radius: 3px;
+    font-family: Consolas, 'Courier New', monospace;
+    font-size: 0.62rem;
+    line-height: 14px;
+}
+#actionTree .track-type-icon.type-action { color: #5aa2ff; background: none; }
+#actionTree .track-type-icon.type-spine { color: #ff9f6b; background: none; }
+#actionTree .track-type-icon.type-armature { color: #c38bff; background: none; }
+#actionTree .anim-item.selected .track-type-icon { color: #fff; }
+#actionTree .anim-name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+#actionTree .anim-dur {
+    flex: none;
+    color: var(--font-secondary);
+    font-family: Consolas, 'Courier New', monospace;
+    font-size: 0.7rem;
+}
+#actionTree .anim-item.selected .anim-dur {
+    color: #dce8ff;
+}
+.anim-empty {
+    padding: 16px 10px;
+    color: var(--font-secondary);
+    font-size: 0.75rem;
+    line-height: 1.5;
+}
+
+/* =====================================================================
+   Sequencer 타임라인: 시안 스타일 (얇은 툴바, 테두리형 배지, 색 테두리 클립)
+   ===================================================================== */
+#timeline-top-bar {
+    justify-content: flex-start;
+    gap: 10px;
+    height: 36px;
+    padding: 0 8px;
+    border-bottom: 1px solid var(--border-color);
+}
+.seq-tool-group {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.seq-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 26px;
+    height: 24px;
+    padding: 0 6px;
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--font-primary);
+    font: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+.seq-btn svg {
+    width: 13px;
+    height: 13px;
+}
+.seq-btn:hover {
+    border-color: var(--accent-color);
+}
+.seq-btn.primary {
+    background-color: #2a5bb8;
+    border-color: #2a5bb8;
+    color: #fff;
+}
+.seq-btn.primary:hover {
+    background-color: #3367c4;
+}
+.seq-time {
+    margin-left: 4px;
+    font-family: Consolas, 'Courier New', monospace;
+    font-size: 0.8rem;
+}
+.seq-time-total {
+    color: var(--font-secondary);
+}
+.seq-spacer {
+    flex: 1;
+}
+
+#timeline-editor {
+    border: 0;
+}
+#timeline-header-label,
+#track-labels-container {
+    width: 170px;
+    background-color: #232323;
+}
+#timeline-header-ruler {
+    height: 24px;
+    background-color: #1b1b1b;
+}
+.ruler-marker {
+    font-family: Consolas, 'Courier New', monospace;
+    font-size: 10px;
+    line-height: 22px;
+}
+.track-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: normal;
+    color: var(--font-primary);
+}
+.track-label .track-name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.track-label .track-type-icon {
+    flex: none;
+    width: auto;
+    min-width: 22px;
+    margin: 0;
+    padding: 0 4px;
+    background: none;
+    border: 1px solid currentColor;
+    border-radius: 3px;
+    font-family: Consolas, 'Courier New', monospace;
+    font-size: 0.62rem;
+    line-height: 14px;
+}
+.track-label .track-type-icon.type-action { color: #5aa2ff; background: none; }
+.track-label .track-type-icon.type-spine { color: #ff9f6b; background: none; }
+.track-label .track-type-icon.type-armature { color: #c38bff; background: none; }
+
+/* 클립: 어두운 채움 + 종류 색 테두리 */
+.timeline-clip {
+    top: 3px;
+    height: 26px;
+    padding: 0 6px 0 8px;
+    border-radius: 4px;
+    background-color: #3a2a52;
+    border: 1px solid #c38bff;
+    color: #fff;
+    font-size: 0.78rem;
+    line-height: 24px;
+}
+.timeline-clip.type-action {
+    background-color: #1f3d6e;
+    border-color: #5aa2ff;
+}
+.timeline-clip.type-spine {
+    background-color: #4d3112;
+    border-color: #ff9f43;
+}
+.timeline-clip .clip-duration {
+    color: rgba(255, 255, 255, 0.65);
+    font-family: Consolas, 'Courier New', monospace;
+    font-size: 0.7rem;
+}
+.timeline-clip.selected {
+    border: 1px solid #fff;
+    box-shadow: 0 0 0 1px #fff, 0 0 8px rgba(255, 255, 255, 0.35);
+}
+
+/* 재생 헤드: 빨간 선 + 머리 */
+#timeline-playhead {
+    width: 2px;
+    margin-left: -1px;
+    background-color: #ff6b6b;
+}
+#timeline-playhead::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -5px;
+    width: 12px;
+    height: 9px;
+    border-radius: 2px;
+    background-color: #ff6b6b;
+}
+
+/* =====================================================================
+   Game View: 도구 모음 + 캔버스 영역 + 통계
+   ===================================================================== */
+.lm_content.gameview-panel {
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    overflow: hidden !important;
+}
+.gv-toolbar {
+    flex: none;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    min-height: 34px;
+    padding: 0 8px;
+    box-sizing: border-box;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.75rem;
+}
+.gv-tools {
+    display: flex;
+    gap: 2px;
+    padding: 2px;
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+}
+.gv-tool {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 22px;
+    padding: 0;
+    background: none;
+    border: 0;
+    border-radius: 3px;
+    color: var(--font-primary);
+    cursor: pointer;
+}
+.gv-tool:hover {
+    background-color: var(--bg-tertiary);
+}
+.gv-tool.active {
+    background-color: #2a5bb8;
+    color: #fff;
+}
+.gv-sep {
+    width: 1px;
+    height: 18px;
+    margin: 0 2px;
+    background-color: var(--border-color);
+}
+.gv-toggle {
+    height: 24px;
+    padding: 0 9px;
+    background: none;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--font-secondary);
+    font: inherit;
+    cursor: pointer;
+}
+.gv-toggle:hover {
+    border-color: var(--accent-color);
+}
+.gv-toggle.active {
+    background-color: var(--bg-tertiary);
+    color: var(--font-primary);
+}
+.gv-viewport {
+    flex: 1;
+    min-height: 0;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.gv-stats {
+    position: absolute;
+    left: 8px;
+    bottom: 8px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    background-color: rgba(0, 0, 0, 0.6);
+    color: #7fd3e0;
+    font-family: Consolas, 'Courier New', monospace;
+    font-size: 0.7rem;
+    line-height: 1.5;
+    pointer-events: none;
+}
+.gv-stats:empty {
+    display: none !important;
+}

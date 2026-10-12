@@ -41,6 +41,7 @@
         "src/panels/dependenciesPanel.js",
         "src/panels/resourceView.js",
         "src/panels/inspector.js",
-        "src/panels/statusBar.js"
+        "src/panels/statusBar.js",
+        "src/panels/gameViewTools.js"
     ]
 }

@@ -136,10 +136,11 @@ var Sequencer = (function() {
                 typeClass = 'type-action';
             }
 
+            const trackName = $('<div>').text(trackData.node.getName()).html();
             const labelHtml = `
-<div class="track-label" title="${trackData.node.getName()}">
+<div class="track-label" title="${trackName}">
     <span class="track-type-icon ${typeClass}">${iconText}</span>
-    ${trackData.node.getName()}
+    <span class="track-name">${trackName}</span>
 </div>`;
             const $label = $(labelHtml);
             $labelsContainer.append($label);
@@ -154,8 +155,9 @@ var Sequencer = (function() {
                 if (clip.type === 'spine') clipTypeClass = 'type-spine';
                 if (clip.type === 'armature') clipTypeClass = 'type-armature';
 
-                const clipHtml = `<div class="timeline-clip ${clipTypeClass}" data-clip-id="${clip.id}" title="${clip.animName} ${clip.duration.toFixed(1)}s">
-                <span class="clip-name">${clip.animName}</span>
+                const clipName = $('<div>').text(clip.animName).html();
+                const clipHtml = `<div class="timeline-clip ${clipTypeClass}" data-clip-id="${clip.id}" title="${clipName} ${clip.duration.toFixed(1)}s">
+                <span class="clip-name">${clipName}</span>
                 <span class="clip-duration"></span>
             </div>`;
                 const $clip = $(clipHtml);
@@ -385,6 +387,7 @@ var Sequencer = (function() {
         });
 
         _updateContentWidth();
+        _updateTimeReadout(_getCurrentTime());
     }
 
     function _deleteClip(nodeId, clipId) {
@@ -449,6 +452,13 @@ var Sequencer = (function() {
         _renderTimeline();
     }
 
+    // 애니메이션을 적용할 대상: 선택한 노드가 속한 인스턴스(DraggableNode)
+    function _animTarget() {
+        let node = mainLayerInstance && mainLayerInstance._currentlySelectedNode;
+        while (node && !(node instanceof DraggableNode)) node = node.getParent();
+        return node || null;
+    }
+
     function _onAdd() {
         let selectedAnimName, animType;
         const $selectedAction = $('#actionTree').find('.custom-tree-item.selected');
@@ -457,8 +467,9 @@ var Sequencer = (function() {
             animType = $selectedAction.data('anim-type');
         }
 
-        if (selectedAnimName && animType && mainLayerInstance._currentlySelectedNode) {
-            _addClipToTrack(selectedAnimName, animType, mainLayerInstance._currentlySelectedNode);
+        const target = _animTarget();
+        if (selectedAnimName && animType && target) {
+            _addClipToTrack(selectedAnimName, animType, target);
         } else {
             alert("목록에서 추가할 애니메이션과 씬에서 적용할 타겟을 먼저 선택하세요.");
         }
@@ -492,9 +503,22 @@ var Sequencer = (function() {
         return 0;
     }
 
+    function _formatTime(sec) {
+        const t = Math.max(0, sec || 0);
+        const m = Math.floor(t / 60);
+        const s = t - m * 60;
+        return ('0' + m).slice(-2) + ':' + (s < 10 ? '0' : '') + s.toFixed(2);
+    }
+
+    // 툴바의 "현재 시간 / 전체 길이" 표시
+    function _updateTimeReadout(currentTime) {
+        $('#seqTimeReadout').html(_formatTime(currentTime) + ' <span class="seq-time-total">/ ' + _formatTime(_getTotalDuration()) + '</span>');
+    }
+
     function _updatePlayheadPosition(optionalTime) {
         const $playhead = $('#timeline-playhead');
         const currentTime = (typeof optionalTime === 'number') ? optionalTime : _getCurrentTime();
+        _updateTimeReadout(currentTime);
 
         if (currentTime === 0 && !isScrubbing) {
             if ($playhead.is(':visible')) {
@@ -945,7 +969,8 @@ var Sequencer = (function() {
             $('#timeline-editor').droppable({
                 accept: '.custom-tree-item',
                 drop: function (event, ui) {
-                    if (!mainLayerInstance._currentlySelectedNode) {
+                    const target = _animTarget();
+                    if (!target) {
                         alert("먼저 캔버스에서 애니메이션을 적용할 타겟을 선택하세요.");
                         return;
                     }
@@ -957,7 +982,7 @@ var Sequencer = (function() {
                     }
 
                     const dropX = event.pageX - $tracksContainer.offset().left + $tracksContainer.scrollLeft();
-                    _addClipToTrack(animName, animType, mainLayerInstance._currentlySelectedNode, dropX / PIXELS_PER_SECOND);
+                    _addClipToTrack(animName, animType, target, dropX / PIXELS_PER_SECOND);
                 }
             });
 

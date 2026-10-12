@@ -15,7 +15,8 @@ var DraggableNode = cc.Node.extend({
         cc.eventManager.addListener({
             event: cc.EventListener.MOUSE,
             onMouseMove: function(event) {
-                if (!self._draggable) {
+                // 몸통을 끌어 옮기는 건 선택 도구(Q)일 때만. 이동/회전/스케일은 기즈모 손잡이로 조작
+                if (!self._draggable || (typeof GameViewTools !== 'undefined' && GameViewTools.getTool() !== 'select')) {
                     return;
                 }
 

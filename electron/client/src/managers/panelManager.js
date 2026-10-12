@@ -5,8 +5,7 @@ var PanelManager = (function() {
         widgetTree: { title: "Hierarchy",   component: 'widgetTree' },
         properties: { title: "Properties",  component: 'properties' },
         gameView:   { title: "Game View",   component: 'gameView' },
-        uiAnimation:{ title: "Animations",  component: 'uiAnimation' },
-        sequencer:  { title: "Sequencer",   component: 'sequencer' },
+        sequencer:  { title: "Animation · Sequencer", component: 'sequencer' },
         dependencies: { title: "Dependencies", component: 'dependencies' },
         console:    { title: "Console",     component: 'console' },
     };
@@ -23,8 +22,7 @@ var PanelManager = (function() {
                 { type: 'column', width: 70, content: [
                         { type: 'component', componentName: 'gameView', title: 'Game View', height: 75 },
                         { type: 'stack', height: 25, minHeight: 250, content: [
-                                { type: 'component', componentName: 'uiAnimation', title: 'Animations' },
-                                { type: 'component', componentName: 'sequencer', title: 'Sequencer' },
+                                { type: 'component', componentName: 'sequencer', title: 'Animation · Sequencer' },
                                 { type: 'component', componentName: 'dependencies', title: 'Dependencies' },
                                 { type: 'component', componentName: 'console', title: 'Console' }
                             ]}
@@ -63,8 +61,26 @@ var PanelManager = (function() {
                 item.activeItemIndex = Math.max(0, item.content.length - 1);
             }
             item.content.forEach(strip);
+            // 컴포넌트를 빼서 비어 버린 스택/행/열은 함께 제거
+            item.content = item.content.filter(child => child.type === 'component' || (child.content && child.content.length > 0));
+            if (typeof item.activeItemIndex === 'number' && item.activeItemIndex >= item.content.length) {
+                item.activeItemIndex = Math.max(0, item.content.length - 1);
+            }
         };
         strip(config);
+        return config;
+    }
+
+    // 저장된 레이아웃 보정: 예전 'Sequencer' 탭 제목을 새 이름으로 (Animations 패널은 Sequencer 안으로 합쳐짐)
+    function _migrateLayout(config) {
+        if (!config || !config.content || config.content.length === 0) return null;   // 비었으면 기본 레이아웃
+        const walk = function (item) {
+            if (item.type === 'component' && componentRegistry[item.componentName]) {
+                item.title = componentRegistry[item.componentName].title;
+            }
+            (item.content || []).forEach(walk);
+        };
+        walk(config);
         return config;
     }
 
@@ -85,15 +101,21 @@ var PanelManager = (function() {
         myLayout.registerComponent('gameView', function(container, componentState){
             const content = $('#game-canvas-template').children();
             const canvasElement = content.first();
-            container.getElement().css({'display': 'flex','justify-content': 'center','align-items': 'center','padding': '0'});
-            container.getElement().append(content);
+            // 위: 도구 모음 / 아래: 캔버스 영역 (+ 왼쪽 아래 통계)
+            const $toolbar = $('<div class="gv-toolbar" role="toolbar" aria-label="Game View 도구"></div>');
+            const $viewport = $('<div class="gv-viewport"></div>');
+            const $stats = $('<div class="gv-stats" aria-live="off"></div>');
+            container.getElement().addClass('gameview-panel').append($toolbar, $viewport);
+            $viewport.append(content, $stats);
+            GameViewTools.mount($toolbar[0], $stats[0]);
 
             const resizeCanvas = function() {
                 if (typeof cc === 'undefined' || !cc.view) return;
 
                 const margin = 20;
+                const toolbarH = $toolbar.outerHeight() || 34;
                 const panelW = container.width - margin;
-                const panelH = container.height - margin;
+                const panelH = container.height - toolbarH - margin;
                 if (!panelW || !panelH || panelW <= 0 || panelH <= 0) return;
 
                 const designW = manualResolution ? manualResolution.width : panelW;
@@ -136,8 +158,10 @@ var PanelManager = (function() {
             // 헤더(이름/클래스)는 고정하고 Inspector 본문만 스크롤
             container.getElement().addClass('properties-panel').append($('#original-content-templates').find('#nodeInfoContainer').children());
         });
-        myLayout.registerComponent('uiAnimation', function(container, componentState) { container.getElement().append($('#original-content-templates').find('#uiAnimationContainer').children()); });
-        myLayout.registerComponent('sequencer', function(container, componentState) { container.getElement().append($('#original-content-templates').find('#sequencerContainer').children()); });
+        myLayout.registerComponent('sequencer', function(container, componentState) {
+            // 왼쪽 애니메이션 목록 + 오른쪽 타임라인
+            container.getElement().addClass('sequencer-panel').append($('#original-content-templates').find('#sequencerContainer').children());
+        });
         myLayout.registerComponent('resourceView', function(container, componentState) {
             new ResourceView.Viewer(container, componentState || {});
         });
@@ -154,7 +178,7 @@ var PanelManager = (function() {
         initialize: function () {
             const layoutArea = $('#panels-container-area');
             layoutArea.empty();
-            const finalLayoutConfig = _stripComponents(LayoutManager.load(), 'resourceView') || defaultLayoutConfig;
+            const finalLayoutConfig = _migrateLayout(_stripComponents(_stripComponents(LayoutManager.load(), 'resourceView'), 'uiAnimation')) || defaultLayoutConfig;
             const myLayout = new GoldenLayout(finalLayoutConfig, layoutArea);
 
             _registerComponents(myLayout);

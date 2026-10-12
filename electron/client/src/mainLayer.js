@@ -638,6 +638,7 @@ var MainLayerScene = cc.Scene.extend({
 
         // 이 함수 안에서 이미 LayoutManager.load()를 호출하여 처리하고 있습니다.
         PanelManager.initialize();
+        GameViewTools.init();
 
         $(cc.game.canvas).droppable({
             accept: ".custom-tree-item",

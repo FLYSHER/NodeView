@@ -374,6 +374,7 @@ class UIScrollTreeViewCtrl {
         }.bind(this));
 
         Inspector.init();
+        this._renderAnimationList(null, null);
     }
 
     setNode(node) {
@@ -384,12 +385,12 @@ class UIScrollTreeViewCtrl {
             return;
         }
 
-        $('#actionTree').empty();
         Inspector.setNode(node);
 
         if (!node) {
             this._selectNode = [];
             this._masterNode = null;
+            this._renderAnimationList(null, null);
             if (typeof Gizmo_ClearDraw === 'function') {
                 Gizmo_ClearDraw();
             }
@@ -399,100 +400,120 @@ class UIScrollTreeViewCtrl {
         this._selectNode = [node];
         this._drawGizmo(node);
 
-        if (node instanceof DraggableNode) {
-            const draggableNodeInstance = node;
-            let unifiedAnimationList = [];
-            let contentNodeForAnimation = draggableNodeInstance.ui || draggableNodeInstance.armature || draggableNodeInstance.spine || draggableNodeInstance.image;
+        // 하위 노드를 골라도 그 노드가 속한 인스턴스(DraggableNode)의 애니메이션을 보여준다
+        let owner = node;
+        while (owner && !(owner instanceof DraggableNode)) owner = owner.getParent();
+        this._renderAnimationList(owner, node);
+    }
 
-            if (contentNodeForAnimation) {
-                switch (draggableNodeInstance.assetType) {
-                    case 'armature':
-                        if (contentNodeForAnimation.getAnimation && contentNodeForAnimation.getAnimation()._animationData && contentNodeForAnimation.getAnimation()._animationData.movementNames) {
-                            contentNodeForAnimation.getAnimation()._animationData.movementNames.forEach(name => unifiedAnimationList.push({ name: name, type: 'armature' }));
-                        }
-                        break;
-                    case 'spine':
-                        if (contentNodeForAnimation.getState && contentNodeForAnimation.getState().data && contentNodeForAnimation.getState().data.skeletonData && contentNodeForAnimation.getState().data.skeletonData.animations) {
-                            contentNodeForAnimation.getState().data.skeletonData.animations.forEach(anim => unifiedAnimationList.push({ name: anim.name, type: 'spine' }));
-                        }
-                        break;
-                    case 'ui':
-                    case 'cocosstudio':
-                        if (draggableNodeInstance.cocosAction && draggableNodeInstance.cocosAction._animationInfos) {
-                            for (let key in draggableNodeInstance.cocosAction._animationInfos) {
-                                unifiedAnimationList.push({ name: key, type: 'action' });
-                            }
-                        } else if (draggableNodeInstance.actionUrl) {
-                            const rawActionList = ccs.actionManager.getActionList(draggableNodeInstance.actionUrl);
-                            if (rawActionList) {
-                                rawActionList.forEach(action => unifiedAnimationList.push({ name: action.getName(), type: 'action' }));
-                            }
-                        }
-                        break;
+    // 인스턴스가 가진 애니메이션 이름 목록
+    _collectAnimations(owner) {
+        const list = [];
+        if (!owner) return list;
+        try {
+            switch (owner.assetType) {
+                case 'armature': {
+                    const data = owner.armature && owner.armature.getAnimation()._animationData;
+                    (data && data.movementNames || []).forEach(name => list.push({ name: name, type: 'armature' }));
+                    break;
                 }
+                case 'spine': {
+                    const state = owner.spine && owner.spine.getState();
+                    (state && state.data && state.data.skeletonData && state.data.skeletonData.animations || [])
+                        .forEach(anim => list.push({ name: anim.name, type: 'spine' }));
+                    break;
+                }
+                case 'ui':
+                case 'cocosstudio':
+                    if (owner.cocosAction && owner.cocosAction._animationInfos) {
+                        for (let key in owner.cocosAction._animationInfos) list.push({ name: key, type: 'action' });
+                    } else if (owner.actionUrl) {
+                        (ccs.actionManager.getActionList(owner.actionUrl) || []).forEach(action => list.push({ name: action.getName(), type: 'action' }));
+                    }
+                    break;
             }
+        } catch (e) {
+            console.warn('[Animation] 목록을 읽지 못했습니다:', e);
+        }
+        return list;
+    }
 
-            const $actionContainer = $('#actionTree');
-            const self = this;
-            unifiedAnimationList.forEach(item => {
-                let iconText = '';
-                let typeClass = `type-${item.type}`;
-                if (item.type === 'armature') iconText = 'AR';
-                if (item.type === 'spine') iconText = 'SP';
-                if (item.type === 'action') iconText = 'UI';
-                const $item = $(`
-                <div class="custom-tree-item" data-anim-name="${item.name}" data-anim-type="${item.type}">
-                    <span class="track-type-icon ${typeClass}">${iconText}</span>
-                    ${item.name}
-                </div>
-            `);
+    // Sequencer 왼쪽 애니메이션 목록 (클릭: 미리보기, 드래그: 트랙에 추가)
+    _renderAnimationList(owner, selectedNode) {
+        const $list = $('#actionTree');
+        const esc = (t) => $('<div>').text(t == null ? '' : String(t)).html();
+        $list.empty();
+        this._animOwner = owner || null;
 
-                $item.draggable({
-                    appendTo: "body",
-                    distance: 10,
-                    helper: function () {
-                        const assetName = $(this).data('anim-name');
-                        const $helper = $(`<div class="custom-drag-helper">${assetName}</div>`);
-                        $helper.data('animName', assetName);
-                        $helper.data('animType', $(this).data('anim-type'));
-                        $(this).draggable("option", "cursorAt", { left: 1, top: 1 });
-                        return $helper;
-                    },
-                    revert: 'invalid',
-                    revertDuration: 200,
-                    zIndex: 9999,
-                    start: function (event, ui) { $('#resize-overlay').show(); },
-                    stop: function (event, ui) { $('#resize-overlay').hide(); }
-                });
+        const source = !owner ? '' : (selectedNode && selectedNode !== owner ? selectedNode.getName() + ' 상위 · ' : '') + owner.getName();
+        $('#seqAnimSource').text(source).attr('title', source);
 
-                $item.on('click', function () {
-                    $actionContainer.find('.custom-tree-item').removeClass('selected');
-                    $(this).addClass('selected');
+        const items = this._collectAnimations(owner);
+        if (!owner) {
+            $list.append('<div class="anim-empty">Hierarchy 나 Game View 에서 인스턴스를 선택하세요.</div>');
+            return;
+        }
+        if (items.length === 0) {
+            $list.append('<div class="anim-empty">이 인스턴스에는 애니메이션이 없습니다.</div>');
+            return;
+        }
+
+        const badge = { armature: 'AR', spine: 'SP', action: 'UI' };
+        const self = this;
+        items.forEach(item => {
+            const seconds = this._mainLayer.getAnimationLength(owner, item.name);
+            const $item = $(`<div class="custom-tree-item anim-item" title="클릭: 미리보기 · 드래그: Sequencer 트랙에 추가">
+                <span class="track-type-icon type-${item.type}">${badge[item.type]}</span>
+                <span class="anim-name">${esc(item.name)}</span>
+                <span class="anim-dur">${seconds > 0 ? seconds.toFixed(2) + 's' : ''}</span>
+            </div>`);
+            $item.attr('data-anim-name', item.name).attr('data-anim-type', item.type);
+
+            $item.draggable({
+                appendTo: "body",
+                distance: 10,
+                helper: function () {
                     const animName = $(this).data('anim-name');
-                    const animType = $(this).data('anim-type');
-                    const draggableNode = self._selectNode[0];
-                    if (!draggableNode) return;
-                    if (draggableNode.spine) draggableNode.spine.clearTrack(0);
-                    if (draggableNode.armature) draggableNode.armature.getAnimation().stop();
-                    if (draggableNode.ui) {
-                        draggableNode.ui.getChildren().forEach(child => child.stopAllActions());
-                        draggableNode.ui.stopAllActions();
-                    }
-                    if (animType === 'spine' && draggableNode.spine) {
-                        draggableNode.spine.setAnimation(0, animName);
-                    } else if (animType === 'armature' && draggableNode.armature) {
-                        draggableNode.armature.getAnimation().play(animName, -1);
-                    } else if (animType === 'action') {
-                        if (draggableNode.cocosAction) {
-                            draggableNode.cocosAction.play(animName, false);
-                        } else if (draggableNode.ui && draggableNode.actionUrl) {
-                            ccs.actionManager.playActionByName(draggableNode.actionUrl, animName);
-                        }
-                    }
-                });
-                $actionContainer.append($item);
+                    const $helper = $(`<div class="custom-drag-helper">${esc(animName)}</div>`);
+                    $helper.data('animName', animName);
+                    $helper.data('animType', $(this).data('anim-type'));
+                    $(this).draggable("option", "cursorAt", { left: 1, top: 1 });
+                    return $helper;
+                },
+                revert: 'invalid',
+                revertDuration: 200,
+                zIndex: 9999,
+                start: function () { $('#resize-overlay').show(); },
+                stop: function () { $('#resize-overlay').hide(); }
             });
 
+            $item.on('click', function () {
+                $list.find('.custom-tree-item').removeClass('selected');
+                $(this).addClass('selected');
+                self._previewAnimation(owner, $(this).data('anim-name'), $(this).data('anim-type'));
+            });
+            $list.append($item);
+        });
+    }
+
+    _previewAnimation(owner, animName, animType) {
+        if (!owner) return;
+        if (owner.spine) owner.spine.clearTrack(0);
+        if (owner.armature) owner.armature.getAnimation().stop();
+        if (owner.ui) {
+            owner.ui.getChildren().forEach(child => child.stopAllActions());
+            owner.ui.stopAllActions();
+        }
+        if (animType === 'spine' && owner.spine) {
+            owner.spine.setAnimation(0, animName);
+        } else if (animType === 'armature' && owner.armature) {
+            owner.armature.getAnimation().play(animName, -1);
+        } else if (animType === 'action') {
+            if (owner.cocosAction) {
+                owner.cocosAction.play(animName, false);
+            } else if (owner.ui && owner.actionUrl) {
+                ccs.actionManager.playActionByName(owner.actionUrl, animName);
+            }
         }
     }
 
