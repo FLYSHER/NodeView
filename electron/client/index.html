@@ -53,33 +53,42 @@
     <script src="../renderer.js"></script>
 </head>
 <body>
-<div id="top-right-controls">
-    <div id="resolution-controller" class="toggleable-control" style="display: none;">
-        <label class="styleLabel">Resolution:</label>
-        <input type="number" id="res-width-input" class="positionInput" value="800">
-        <span class="styleLabel" style="margin: 0 5px;">x</span>
-        <input type="number" id="res-height-input" class="positionInput" value="600">
-        <button id="res-apply-btn" class="styleButton" style="margin-left: 10px;">Apply</button>
-    </div>
-
-    <div id="background-color-controller" class="toggleable-control" style="display: none;">
-        <label class="styleLabel">Background:</label>
-        <input type="color" id="bg-color-picker">
-    </div>
-
-    <div id="panel-toggle-menu-container" class="toggleable-control" style="display: none;">
-        <button id="panel-toggle-button"><i class="fas fa-layer-group"></i> 패널 목록</button>
+<div id="app-toolbar" role="toolbar" aria-label="도구 모음">
+    <div id="panel-toggle-menu-container" class="tb-group">
+        <button type="button" id="panel-toggle-button" class="tb-btn" title="패널 열기/닫기"><i class="fas fa-layer-group"></i> 패널 ▾</button>
         <div id="panel-toggle-dropdown"></div>
     </div>
+    <button type="button" id="layout-reset-btn" class="tb-btn" title="패널 배치를 기본값으로">레이아웃 초기화</button>
 
-    <button id="toggle-fullscreen-btn" title="전체화면 전환/해제"><i class="fas fa-expand"></i></button>
+    <span class="tb-spacer"></span>
 
-    <button id="main-menu-toggle-btn"><i class="fas fa-bars"></i></button>
+    <div id="resolution-controller" class="tb-group">
+        <span class="tb-label">해상도</span>
+        <input type="number" id="res-width-input" class="tb-input" placeholder="자동" aria-label="해상도 너비">
+        <span class="tb-label">×</span>
+        <input type="number" id="res-height-input" class="tb-input" placeholder="자동" aria-label="해상도 높이">
+        <button type="button" id="res-apply-btn" class="tb-btn">적용</button>
+        <button type="button" id="res-auto-btn" class="tb-btn" title="Game View 패널 크기에 맞춤">자동</button>
+    </div>
+    <div id="background-color-controller" class="tb-group">
+        <label class="tb-label" for="bg-color-picker">배경</label>
+        <input type="color" id="bg-color-picker">
+    </div>
+    <button type="button" id="toggle-fullscreen-btn" class="tb-btn tb-icon" title="전체화면 전환/해제" aria-label="전체화면 전환/해제"><i class="fas fa-expand"></i></button>
 </div>
 <div id="resize-overlay"></div>
 <div id="panels-container-area">
     <div class="vertical-guide"></div>
     <div class="horizontal-guide"></div>
+</div>
+<div id="status-bar">
+    <span class="sb-item sb-ready"><span class="sb-dot"></span>준비됨</span>
+    <span class="sb-item sb-assets"></span>
+    <span class="sb-item sb-textures"></span>
+    <button type="button" class="sb-item sb-missing" style="display: none;"><i class="fas fa-exclamation-triangle"></i> <span class="sb-missing-text"></span></button>
+    <span class="sb-spacer"></span>
+    <button type="button" class="sb-item sb-console" title="Console 열기"></button>
+    <span class="sb-item sb-fps"></span>
 </div>
 
 <div id="original-content-templates">

@@ -26,6 +26,7 @@
         "src/draggableNode.js",
         "src/eventDispatcher.js",
         "src/uiErrorLog.js",
+        "src/panels/consolePanel.js",
         "src/engineoverride.js",
         "src/sequencer.js",
         "src/managers/layoutManager.js",
@@ -39,6 +40,7 @@
         "src/resources/resourceRegistry.js",
         "src/panels/dependenciesPanel.js",
         "src/panels/resourceView.js",
-        "src/panels/inspector.js"
+        "src/panels/inspector.js",
+        "src/panels/statusBar.js"
     ]
 }

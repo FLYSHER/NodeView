@@ -8,6 +8,7 @@ var PanelManager = (function() {
         uiAnimation:{ title: "Animations",  component: 'uiAnimation' },
         sequencer:  { title: "Sequencer",   component: 'sequencer' },
         dependencies: { title: "Dependencies", component: 'dependencies' },
+        console:    { title: "Console",     component: 'console' },
     };
 
     const defaultLayoutConfig = {
@@ -24,7 +25,8 @@ var PanelManager = (function() {
                         { type: 'stack', height: 25, minHeight: 250, content: [
                                 { type: 'component', componentName: 'uiAnimation', title: 'Animations' },
                                 { type: 'component', componentName: 'sequencer', title: 'Sequencer' },
-                                { type: 'component', componentName: 'dependencies', title: 'Dependencies' }
+                                { type: 'component', componentName: 'dependencies', title: 'Dependencies' },
+                                { type: 'component', componentName: 'console', title: 'Console' }
                             ]}
                     ]}
             ]
@@ -36,7 +38,7 @@ var PanelManager = (function() {
 
     // 새로 추가된 패널을 예전에 저장된 레이아웃에도 한 번만 넣어준다
     function _addNewPanelsToSavedLayout(myLayout) {
-        const newPanels = ['dependencies'];
+        const newPanels = ['dependencies', 'console'];
         newPanels.forEach(function (name) {
             const flagKey = 'layoutPanelAdded.' + name;
             if (localStorage.getItem(flagKey)) return;
@@ -134,6 +136,9 @@ var PanelManager = (function() {
         myLayout.registerComponent('sequencer', function(container, componentState) { container.getElement().append($('#original-content-templates').find('#sequencerContainer').children()); });
         myLayout.registerComponent('resourceView', function(container, componentState) {
             new ResourceView.Viewer(container, componentState || {});
+        });
+        myLayout.registerComponent('console', function(container, componentState) {
+            ConsolePanel.mount(container);
         });
         myLayout.registerComponent('dependencies', function(container, componentState) {
             container.getElement().append('<div id="dependencies-panel" class="dependencies-panel"></div>');
@@ -253,15 +258,33 @@ var PanelManager = (function() {
                 }
             });
 
-            $('#res-apply-btn').on('click', function () {
+            const emitResolution = function (w, h) {
+                const gameViewItems = myLayout.root.getItemsByFilter(item => item.isComponent && item.componentName === 'gameView');
+                if (gameViewItems.length > 0) {
+                    gameViewItems[0].container.emit('setManualResolution', w, h);
+                }
+            };
+            const applyResolution = function () {
                 const w = parseInt($('#res-width-input').val(), 10);
                 const h = parseInt($('#res-height-input').val(), 10);
                 if (!isNaN(w) && !isNaN(h) && w > 0 && h > 0) {
-                    const gameViewItems = myLayout.root.getItemsByFilter(item => item.isComponent && item.componentName === 'gameView');
-                    if (gameViewItems.length > 0) {
-                        gameViewItems[0].container.emit('setManualResolution', w, h);
-                    }
+                    emitResolution(w, h);
                 }
+            };
+            $('#res-apply-btn').on('click', applyResolution);
+            $('#res-width-input, #res-height-input').on('keydown', function (e) {
+                if (e.key === 'Enter') applyResolution();
+            });
+            // 자동: 수동 해상도를 해제하고 Game View 패널 크기를 따른다
+            $('#res-auto-btn').on('click', function () {
+                $('#res-width-input, #res-height-input').val('');
+                emitResolution(null, null);
+            });
+
+            $('#layout-reset-btn').on('click', function () {
+                if (!window.confirm('패널 배치를 기본값으로 되돌릴까요? (로드한 에셋은 다시 불러와야 합니다)')) return;
+                localStorage.removeItem('golden-layout-config');
+                window.location.reload();
             });
 
             $('#bg-color-picker').on('input', function() {
@@ -281,13 +304,6 @@ var PanelManager = (function() {
                 syncCheckboxes();
             });
 
-            $('#main-menu-toggle-btn').on('click', function () {
-                $(this).toggleClass('is-active');
-                $('.toggleable-control').toggle('slide', {
-                    direction: 'right'
-                }, 150);
-            });
-
             $('#toggle-fullscreen-btn').on('click', function () {
                 if (!document.fullscreenElement) {
                     document.documentElement.requestFullscreen();
@@ -299,6 +315,8 @@ var PanelManager = (function() {
                 const isFullscreen = !!document.fullscreenElement;
                 $('#toggle-fullscreen-btn').find('i').toggleClass('fa-compress', isFullscreen).toggleClass('fa-expand', !isFullscreen);
             });
+
+            StatusBar.init();
 
             $(document).on('mousedown', '.lm_splitter', () => $('#resize-overlay').show());
             $(document).on('mouseup', () => {

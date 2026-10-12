@@ -109,7 +109,8 @@ var UIItemList = cc.Node.extend({
         });
 
         $item.on('click', (e) => {
-            this._select(entry.key);
+            // 로드되지 않은 에셋은 원인(누락 파일)을 바로 볼 수 있게 Dependencies 패널을 앞으로
+            this._select(entry.key, entry.loaded ? undefined : null);
             if (entry.loaded) {
                 this._mainLayer.setLastSelectedItem({
                     type: 'asset',
