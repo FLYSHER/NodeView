@@ -116,6 +116,8 @@ var Inspector = (function () {
                     get: function (n) {
                         var parent = n.getParent();
                         var p = parent ? parent.convertToWorldSpace(n.getPosition()) : n.getPosition();
+                        // Game View 확대/축소와 상관없이 디자인 좌표로 보여준다
+                        if (typeof GameViewTools !== 'undefined' && GameViewTools.toLayer) p = GameViewTools.toLayer(p);
                         return '(' + round(p.x, 2) + ', ' + round(p.y, 2) + ')';
                     } },
                 { key: 'anchor', label: 'Anchor', type: 'xy', step: 0.01,

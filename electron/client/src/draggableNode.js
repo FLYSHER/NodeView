@@ -29,16 +29,17 @@ var DraggableNode = cc.Node.extend({
                     isOver = cc.rectContainsPoint(worldRect, pos);
                     touchStart = false;
                 } else if (event.getButton() === cc.EventMouse.BUTTON_LEFT && isOver) {
+                    // 부모(MainLayer)가 확대/축소돼 있어도 맞도록 부모 좌표계에서 차이를 잰다
+                    var localPos = self.getParent().convertToNodeSpace(pos);
                     if (!touchStart) {
                         touchStart = true;
                         var centerPos = self.getPosition();
-                        centerPointDiff = cc.p(pos.x - centerPos.x, pos.y - centerPos.y);
+                        centerPointDiff = cc.p(localPos.x - centerPos.x, localPos.y - centerPos.y);
 
                         cc.eventManager.dispatchCustomEvent('node_drag_started', { nodeId: self.__instanceId });
                     }
 
-                    var nodePoint = self.getParent().convertToNodeSpace(cc.p(pos.x - centerPointDiff.x, pos.y - centerPointDiff.y));
-                    event.getCurrentTarget().setPosition(nodePoint);
+                    event.getCurrentTarget().setPosition(cc.p(localPos.x - centerPointDiff.x, localPos.y - centerPointDiff.y));
 
                     cc.eventManager.dispatchCustomEvent('node_position_changed', { nodeId: self.__instanceId });
 

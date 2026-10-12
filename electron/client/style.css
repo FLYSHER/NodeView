@@ -3183,3 +3183,36 @@ body .lm_dropTargetIndicator .lm_inner {
 .insp-flags .insp-check:hover {
     color: var(--font-primary);
 }
+
+/* --- Game View 확대/축소 --- */
+.gv-zoom {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+.gv-zoom-btn {
+    height: 24px;
+    min-width: 26px;
+    padding: 0 7px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--font-primary);
+    font: inherit;
+    cursor: pointer;
+}
+.gv-zoom-btn:hover {
+    border-color: var(--accent-color);
+}
+.gv-zoom-value {
+    min-width: 56px;
+    background: var(--bg-input);
+    font-family: var(--font-mono);
+    font-size: 11px;
+}
+
+/* 캔버스에 포커스가 있을 때 단축키(Q/W/E/R, Space)를 누르면 생기는 테두리 숨김 */
+#gameCanvas:focus {
+    outline: none;
+}

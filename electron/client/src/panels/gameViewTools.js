@@ -4,6 +4,7 @@
  *    · 선택: 기존 동작 그대로 (인스턴스를 클릭해 선택하고 몸통을 끌어 이동)
  *    · 이동·회전·스케일: 선택한 노드(하위 노드 포함)에 기즈모를 그리고 손잡이를 끌어 조작
  *  - 표시: 경계 상자, 앵커, 그리드, 통계(FPS · 마우스 좌표)
+ *  - 보기: 휠 확대/축소(마우스 위치 기준), 가운데 버튼 또는 Space+드래그로 화면 이동, F 맞춤, 배율 클릭 시 100%
  * 기즈모는 씬 최상단 DrawNode 에 매 프레임 다시 그린다 (애니메이션 중인 노드도 따라간다).
  */
 var GameViewTools = (function () {
@@ -34,6 +35,13 @@ var GameViewTools = (function () {
     var _$toolbar = null;
     var _$stats = null;
     var _lastFrames = 0, _lastTime = 0, _fps = 0;
+
+    var ZOOM_MIN = 0.1, ZOOM_MAX = 8;
+    var ZOOM_STEPS = [0.1, 0.25, 0.33, 0.5, 0.67, 0.75, 1, 1.25, 1.5, 2, 3, 4, 6, 8];
+    var _view = { zoom: 1, x: 0, y: 0 };
+    var _pan = null;           // 화면 이동 중 (가운데 버튼 또는 Space + 왼쪽 버튼)
+    var _spaceDown = false;
+    var _overCanvas = false;
 
     try { Object.assign(_state, JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}); } catch (e) { }
 
@@ -194,7 +202,7 @@ var GameViewTools = (function () {
         dn.drawPoly([tip, cc.p(to.x - uy * half, to.y + ux * half), cc.p(to.x + uy * half, to.y - ux * half)], color, 0, color);
     }
 
-    // 그리드: 배경 바로 위(인스턴스보다 아래)에 그린다
+    // 그리드: 배경 바로 위(인스턴스보다 아래)에 그린다. 화면에 보이는 영역만큼 MainLayer 좌표로 그린다
     function drawGrid() {
         var ml = window.MainLayerInstance;
         if (!ml) return;
@@ -205,14 +213,103 @@ var GameViewTools = (function () {
         _gridNode.clear();
         if (!_state.grid) return;
         var size = cc.winSize;
+        var z = _view.zoom;
         var step = 50;
-        var w = pxToWorld(1) * 0.5;
-        for (var x = 0, i = 0; x <= size.width; x += step, i++) {
-            _gridNode.drawSegment(cc.p(x, 0), cc.p(x, size.height), w, i % 2 === 0 ? COLORS.gridMajor : COLORS.gridMinor);
+        while (step * z < 12) step *= 2;   // 너무 촘촘하면 간격을 넓힌다
+        var w = pxToWorld(1) * 0.5 / z;
+        var x0 = -_view.x / z, y0 = -_view.y / z;
+        var x1 = x0 + size.width / z, y1 = y0 + size.height / z;
+        for (var i = Math.floor(x0 / step); i * step <= x1; i++) {
+            _gridNode.drawSegment(cc.p(i * step, y0), cc.p(i * step, y1), w, i % 2 === 0 ? COLORS.gridMajor : COLORS.gridMinor);
         }
-        for (var y = 0, j = 0; y <= size.height; y += step, j++) {
-            _gridNode.drawSegment(cc.p(0, y), cc.p(size.width, y), w, j % 2 === 0 ? COLORS.gridMajor : COLORS.gridMinor);
+        for (var j = Math.floor(y0 / step); j * step <= y1; j++) {
+            _gridNode.drawSegment(cc.p(x0, j * step), cc.p(x1, j * step), w, j % 2 === 0 ? COLORS.gridMajor : COLORS.gridMinor);
         }
+    }
+
+    // ---- 보기 (확대/축소 · 화면 이동) -------------------------------------
+    // MainLayer 에 배율과 위치를 준다: 화면 좌표 = MainLayer 좌표 × zoom + (x, y)
+    // 배경 레이어는 반대로 변환해 항상 화면 전체를 덮는다
+
+    function applyView() {
+        var ml = window.MainLayerInstance;
+        if (!ml) return;
+        ml.setAnchorPoint(0, 0);
+        ml.setScale(_view.zoom);
+        ml.setPosition(_view.x, _view.y);
+        var bg = ml._backgroundLayer;
+        if (bg) {
+            bg.setAnchorPoint(0, 0);
+            bg.setScale(1 / _view.zoom);
+            bg.setPosition(-_view.x / _view.zoom, -_view.y / _view.zoom);
+        }
+        drawGrid();
+        syncZoomLabel();
+    }
+
+    function clampZoom(z) {
+        return Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, z));
+    }
+
+    // 화면 좌표 p 아래의 지점을 고정한 채로 배율을 바꾼다
+    function zoomAt(z, p) {
+        z = clampZoom(z);
+        if (!p) p = cc.p(cc.winSize.width / 2, cc.winSize.height / 2);
+        var lx = (p.x - _view.x) / _view.zoom, ly = (p.y - _view.y) / _view.zoom;
+        _view.zoom = z;
+        _view.x = p.x - lx * z;
+        _view.y = p.y - ly * z;
+        applyView();
+    }
+
+    function zoomStep(dir, p) {
+        // 25% / 50% / 100% 같은 값에 딱 맞도록 단계 목록에서 다음 값을 고른다
+        var cur = _view.zoom, next = cur;
+        if (dir > 0) {
+            for (var i = 0; i < ZOOM_STEPS.length; i++) { if (ZOOM_STEPS[i] > cur + 1e-6) { next = ZOOM_STEPS[i]; break; } }
+        } else {
+            for (var j = ZOOM_STEPS.length - 1; j >= 0; j--) { if (ZOOM_STEPS[j] < cur - 1e-6) { next = ZOOM_STEPS[j]; break; } }
+        }
+        zoomAt(next, p);
+    }
+
+    function resetView() {
+        _view.zoom = 1;
+        _view.x = 0;
+        _view.y = 0;
+        applyView();
+    }
+
+    // 선택한 노드(없으면 모든 인스턴스)가 화면에 꽉 차게
+    function fitView() {
+        var ml = window.MainLayerInstance;
+        if (!ml) return;
+        var nodes = selectedNode() ? [selectedNode()] : ml.getChildren().filter(function (c) { return c instanceof DraggableNode && c.isVisible(); });
+        var box = null;
+        nodes.forEach(function (n) {
+            var b = n.getBoundingBoxToWorld();
+            if (b.width <= 0 && b.height <= 0) return;
+            box = box ? cc.rectUnion(box, b) : b;
+        });
+        if (!box) { resetView(); return; }
+        // 화면 좌표 → MainLayer 좌표
+        var z = _view.zoom;
+        var lx = (box.x - _view.x) / z, ly = (box.y - _view.y) / z, lw = Math.max(box.width / z, 1), lh = Math.max(box.height / z, 1);
+        var size = cc.winSize;
+        var nz = clampZoom(Math.min(size.width * 0.9 / lw, size.height * 0.9 / lh));
+        _view.zoom = nz;
+        _view.x = size.width / 2 - (lx + lw / 2) * nz;
+        _view.y = size.height / 2 - (ly + lh / 2) * nz;
+        applyView();
+    }
+
+    function syncZoomLabel() {
+        if (_$toolbar) _$toolbar.find('.gv-zoom-value').text(Math.round(_view.zoom * 100) + '%');
+    }
+
+    // 화면 좌표 → MainLayer(디자인) 좌표
+    function toLayer(p) {
+        return cc.p((p.x - _view.x) / _view.zoom, (p.y - _view.y) / _view.zoom);
     }
 
     // ---- 조작 --------------------------------------------------------------
@@ -279,8 +376,16 @@ var GameViewTools = (function () {
         cc.eventManager.addListener({
             event: cc.EventListener.MOUSE,
             onMouseDown: function (event) {
-                if (event.getButton() !== cc.EventMouse.BUTTON_LEFT) return;
                 var p = event.getLocation();
+                var button = event.getButton();
+                // 화면 이동: 가운데 버튼, 또는 Space 를 누른 채 왼쪽 버튼
+                if (button === cc.EventMouse.BUTTON_MIDDLE || (button === cc.EventMouse.BUTTON_LEFT && _spaceDown)) {
+                    _pan = { start: p, x: _view.x, y: _view.y };
+                    if (cc._canvas) cc._canvas.style.cursor = 'grabbing';
+                    event.stopPropagation();
+                    return;
+                }
+                if (button !== cc.EventMouse.BUTTON_LEFT) return;
                 var node = selectedNode();
                 var part = hitTest(node, p);
                 if (!part) return;
@@ -290,6 +395,13 @@ var GameViewTools = (function () {
             onMouseMove: function (event) {
                 var p = event.getLocation();
                 _mouse = p;
+                if (_pan) {
+                    _view.x = _pan.x + (p.x - _pan.start.x);
+                    _view.y = _pan.y + (p.y - _pan.start.y);
+                    applyView();
+                    event.stopPropagation();
+                    return;
+                }
                 if (_drag) {
                     updateDrag(p, !!(window.event && window.event.shiftKey));
                     event.stopPropagation();
@@ -302,12 +414,33 @@ var GameViewTools = (function () {
                 }
             },
             onMouseUp: function (event) {
+                if (_pan) {
+                    _pan = null;
+                    if (cc._canvas) cc._canvas.style.cursor = _spaceDown ? 'grab' : '';
+                    event.stopPropagation();
+                    return;
+                }
                 if (_drag) {
                     _drag = null;
                     event.stopPropagation();
                 }
             }
         }, -1);
+
+        // 휠: 마우스 위치를 기준으로 확대/축소
+        var canvas = cc.game.canvas || cc._canvas;
+        if (canvas) {
+            canvas.addEventListener('wheel', function (e) {
+                e.preventDefault();
+                if (!e.deltaY) return;
+                var factor = Math.pow(1.0015, -e.deltaY);
+                zoomAt(_view.zoom * factor, _mouse);
+            }, { passive: false });
+            // 가운데 버튼 자동 스크롤 막기
+            canvas.addEventListener('mousedown', function (e) { if (e.button === 1) e.preventDefault(); });
+            canvas.addEventListener('mouseenter', function () { _overCanvas = true; });
+            canvas.addEventListener('mouseleave', function () { _overCanvas = false; });
+        }
     }
 
     // ---- 툴바 / 통계 --------------------------------------------------------
@@ -342,7 +475,8 @@ var GameViewTools = (function () {
             _lastFrames = frames;
             _lastTime = now;
             var renderer = cc._renderType === cc.game.RENDER_TYPE_WEBGL ? 'WebGL' : 'Canvas';
-            var mouse = _mouse ? '마우스 (' + Math.round(_mouse.x) + ', ' + Math.round(_mouse.y) + ')' : '';
+            var lm = _mouse ? toLayer(_mouse) : null;
+            var mouse = lm ? '마우스 (' + Math.round(lm.x) + ', ' + Math.round(lm.y) + ')' : '';
             var size = cc.winSize;
             _$stats.html(_fps + ' FPS · Draw ' + (cc.g_NumberOfDraws || 0) + ' · ' + renderer +
                 '<br>디자인 ' + Math.round(size.width) + '×' + Math.round(size.height) + (mouse ? ' · ' + mouse : ''));
@@ -367,8 +501,22 @@ var GameViewTools = (function () {
             '<button type="button" class="gv-toggle" data-toggle="bounds">경계 상자</button>' +
             '<button type="button" class="gv-toggle" data-toggle="anchor">앵커 표시</button>' +
             '<button type="button" class="gv-toggle" data-toggle="grid">그리드</button>' +
-            '<button type="button" class="gv-toggle" data-toggle="stats">통계</button>'
+            '<button type="button" class="gv-toggle" data-toggle="stats">통계</button>' +
+            '<div class="gv-zoom" role="group" aria-label="확대/축소">' +
+            '<button type="button" class="gv-zoom-btn" data-zoom="out" title="축소 (-)" aria-label="축소">−</button>' +
+            '<button type="button" class="gv-zoom-btn gv-zoom-value" data-zoom="reset" title="클릭: 100% 로 · 휠: 확대/축소 · 가운데 버튼/Space+드래그: 화면 이동" aria-label="배율, 클릭하면 100%">100%</button>' +
+            '<button type="button" class="gv-zoom-btn" data-zoom="in" title="확대 (+)" aria-label="확대">+</button>' +
+            '<button type="button" class="gv-zoom-btn" data-zoom="fit" title="선택한 노드(없으면 전체)에 맞춤 (F)">맞춤</button>' +
+            '</div>'
         );
+        $toolbar.on('click', '[data-zoom]', function () {
+            var act = $(this).data('zoom');
+            if (act === 'in') zoomStep(1);
+            else if (act === 'out') zoomStep(-1);
+            else if (act === 'fit') fitView();
+            else resetView();
+        });
+        syncZoomLabel();
         $toolbar.on('click', '[data-tool]', function () { setTool($(this).data('tool')); });
         $toolbar.on('click', '[data-toggle]', function () {
             var key = $(this).data('toggle');
@@ -381,13 +529,33 @@ var GameViewTools = (function () {
 
     function installShortcuts() {
         var map = { q: 'select', w: 'move', e: 'rotate', r: 'scale' };
+        var isTyping = function (t) {
+            return t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable);
+        };
         document.addEventListener('keydown', function (e) {
             if (e.ctrlKey || e.metaKey || e.altKey) return;
-            var t = e.target;
-            if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable)) return;
-            var tool = map[String(e.key).toLowerCase()];
+            if (isTyping(e.target)) return;
+            if (e.code === 'Space') {
+                // 마우스가 Game View 위에 있을 때만 화면 이동 모드 (포커스된 버튼이 눌리지 않게 막는다)
+                if (!_overCanvas) return;
+                e.preventDefault();
+                if (!_spaceDown && cc._canvas && !_pan) cc._canvas.style.cursor = 'grab';
+                _spaceDown = true;
+                return;
+            }
+            var key = String(e.key).toLowerCase();
+            if (key === 'f') { fitView(); return; }
+            if (key === '+' || key === '=') { zoomStep(1, _mouse); return; }
+            if (key === '-') { zoomStep(-1, _mouse); return; }
+            var tool = map[key];
             if (tool) setTool(tool);
         });
+        document.addEventListener('keyup', function (e) {
+            if (e.code !== 'Space') return;
+            _spaceDown = false;
+            if (cc._canvas && !_pan) cc._canvas.style.cursor = '';
+        });
+        window.addEventListener('blur', function () { _spaceDown = false; });
     }
 
     return {
@@ -403,8 +571,8 @@ var GameViewTools = (function () {
             ensureDrawNode();
             installMouse();
             installShortcuts();
-            drawGrid();
-            cc.eventManager.addCustomListener('canvas-resize', drawGrid);
+            applyView();
+            cc.eventManager.addCustomListener('canvas-resize', applyView);
             // 예전 선택 표시(노란 사각형)는 이 기즈모가 대신 그린다
             window.Gizmo_DrawTouchLayerByRect = function () { ensureDrawNode(); };
             window.Gizmo_ClearDraw = function () { };
@@ -414,6 +582,11 @@ var GameViewTools = (function () {
             syncToolbar();
         },
         getTool: function () { return _state.tool; },
+        getZoom: function () { return _view.zoom; },
+        zoomAt: zoomAt,
+        fitView: fitView,
+        resetView: resetView,
+        toLayer: toLayer,
         setTool: setTool,
         isDragging: function () { return !!_drag; }
     };
