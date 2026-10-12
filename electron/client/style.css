@@ -1830,8 +1830,11 @@ input.insp-input[type="number"] {
 }
 .insp-frame-text {
     flex-shrink: 0;
-    min-width: 52px;
+    min-width: 9ch;   /* "999 / 999" 폭을 미리 잡아 두어 숫자가 바뀌어도 슬라이더가 밀리지 않게 */
     text-align: right;
+    white-space: nowrap;
+    word-break: normal;
+    font-variant-numeric: tabular-nums;
 }
 .insp-link {
     background: none;

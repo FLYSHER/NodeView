@@ -377,7 +377,9 @@ var Inspector = (function () {
                     get: function (a) {
                         var anim = a.getAnimation();
                         var total = anim._movementData ? anim._movementData.duration : 0;
-                        return { cur: anim.getCurrentFrameIndex(), total: total, playing: anim.isPlaying() && !anim.isPause() };
+                        // 재생 중에는 프레임 인덱스가 소수로 나오므로 정수 프레임으로 맞춘다
+                        var cur = Math.max(0, Math.min(Math.floor(anim.getCurrentFrameIndex() || 0), Math.max(0, total - 1)));
+                        return { cur: cur, total: total, playing: anim.isPlaying() && !anim.isPause() };
                     },
                     set: function (a, v) { a.getAnimation().gotoAndPause(v); } },
                 { key: 'armDebug', label: 'Debug Bones', type: 'bool',
