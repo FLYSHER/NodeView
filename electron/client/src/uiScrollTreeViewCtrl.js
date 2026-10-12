@@ -386,6 +386,7 @@ class UIScrollTreeViewCtrl {
         }
 
         Inspector.setNode(node);
+        UIWidgetsCopyPopover.updateCount();
 
         if (!node) {
             this._selectNode = [];
@@ -529,5 +530,6 @@ class UIScrollTreeViewCtrl {
     updateTreeView(treeData) {
         $('#widgetTree').jstree(true).settings.core.data = treeData;
         $('#widgetTree').jstree(true).refresh();
+        UIWidgetsCopyPopover.updateCount();
     }
 }

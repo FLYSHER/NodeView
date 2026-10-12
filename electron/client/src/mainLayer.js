@@ -5,7 +5,6 @@ var TempTargetRot = null;
 var TargetRunActionData = null;
 
 var MainLayer = cc.Layer.extend({
-    DESC_TAG: 99,
     _animationList: null,
     _canvasResizeListener: null,
     _currentlySelectedNode: null,
@@ -55,10 +54,6 @@ var MainLayer = cc.Layer.extend({
                 self.updateMenuWithNodeId(eventData.nodeId);
             }
         });
-
-        var label = new cc.LabelTTF("파일을 이쪽으로 드래그해 주세요", "Arial", 30);
-        label.setPosition(this.CX, this.CY);
-        this.addChild(label, 0, this.DESC_TAG);
 
         this._nodeList = {};
         this._itemList = new UIItemList(this);
@@ -123,11 +118,6 @@ var MainLayer = cc.Layer.extend({
             this._backgroundLayer.setContentSize(size.width, size.height);
         }
 
-        var label = this.getChildByTag(this.DESC_TAG);
-        if (label) {
-            label.setPosition(this.CX, this.CY);
-        }
-
         if (oldCX && oldCY && this._nodeList) {
             for (const name in this._nodeList) {
                 if (this._nodeList.hasOwnProperty(name)) {
@@ -180,9 +170,6 @@ var MainLayer = cc.Layer.extend({
     },
 
     onLoadArmature: function (ids) {
-        var children = this.getChildren();
-        var self = this;
-        children.forEach(function (c) { if (c.getTag() === self.DESC_TAG) { c.removeFromParent(); } });
 
         cc.each(ids, function (name, index) {
             const assetKey = `${name}_armature`;
@@ -200,9 +187,6 @@ var MainLayer = cc.Layer.extend({
     },
 
     onLoadUI: function (url) {
-        var children = this.getChildren();
-        var self = this;
-        children.forEach(function (c) { if (c.getTag() === self.DESC_TAG) { c.removeFromParent(); } });
 
         var name = cc.path.mainFileName(url);
         const assetKey = `${name}_ui`;
@@ -220,9 +204,6 @@ var MainLayer = cc.Layer.extend({
     },
 
     onLoadSpine: function (fileName) {
-        var children = this.getChildren();
-        var self = this;
-        children.forEach(function (c) { if (c.getTag() === self.DESC_TAG) { c.removeFromParent(); } });
 
         var name = cc.path.mainFileName(fileName);
         const assetKey = `${name}_spine`;
@@ -240,9 +221,6 @@ var MainLayer = cc.Layer.extend({
     },
 
     onLoadCocosStuido: function (url) {
-        var children = this.getChildren();
-        var self = this;
-        children.forEach(function (c) { if (c.getTag() === self.DESC_TAG) { c.removeFromParent(); } });
 
         var name = cc.path.mainFileName(url);
         const assetKey = `${name}_cocosstudio`;
@@ -260,9 +238,6 @@ var MainLayer = cc.Layer.extend({
     },
 
     onLoadImage: function (fileName) {
-        var children = this.getChildren();
-        var self = this;
-        children.forEach(function (c) { if (c.getTag() === self.DESC_TAG) { c.removeFromParent(); } });
 
         const assetKey = `${fileName}_image`;
         if (this.assetLibrary[assetKey]) {
@@ -638,6 +613,8 @@ var MainLayerScene = cc.Scene.extend({
         // 이 함수 안에서 이미 LayoutManager.load()를 호출하여 처리하고 있습니다.
         PanelManager.initialize();
         GameViewTools.init();
+        // 처음 실행했을 때도 Assets 패널에 안내 문구가 보이도록 한 번 그린다
+        layer.refreshAssetsPanel();
 
         $(cc.game.canvas).droppable({
             accept: ".custom-tree-item",

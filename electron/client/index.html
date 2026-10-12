@@ -63,18 +63,6 @@
 
     <span class="tb-spacer"></span>
 
-    <div id="resolution-controller" class="tb-group">
-        <span class="tb-label">해상도</span>
-        <input type="number" id="res-width-input" class="tb-input" placeholder="자동" aria-label="해상도 너비">
-        <span class="tb-label">×</span>
-        <input type="number" id="res-height-input" class="tb-input" placeholder="자동" aria-label="해상도 높이">
-        <button type="button" id="res-apply-btn" class="tb-btn">적용</button>
-        <button type="button" id="res-auto-btn" class="tb-btn" title="Game View 패널 크기에 맞춤">자동</button>
-    </div>
-    <div id="background-color-controller" class="tb-group">
-        <label class="tb-label" for="bg-color-picker">배경</label>
-        <input type="color" id="bg-color-picker">
-    </div>
     <button type="button" id="toggle-fullscreen-btn" class="tb-btn tb-icon" title="전체화면 전환/해제" aria-label="전체화면 전환/해제"><i class="fas fa-expand"></i></button>
 </div>
 <div id="resize-overlay"></div>
@@ -118,6 +106,7 @@
                 <div id="fileNameTree"></div>
             </div>
         </div>
+        <div id="assetsHint" class="assets-hint" hidden>리소스 더블클릭 → Resource View 탭으로 열기 · 에셋을 Game View로 드래그 → 인스턴스 생성</div>
     </div>
 
     <div id="widgetContainer" class="widgetContainer">
@@ -140,6 +129,7 @@
                     <button type="button" id="copyOptionsBtn" title="복사 옵션과 미리보기" aria-label="복사 옵션과 미리보기">▾</button>
                 </div>
                 <span class="hier-footer-hint">Ctrl+Shift+C</span>
+                <span id="uiwCount" class="hier-footer-count"></span>
             </div>
 
             <div id="ui-option">
@@ -192,6 +182,7 @@
                             <path d="M5.25 3A2.25 2.25 0 0 0 3 5.25v9.5A2.25 2.25 0 0 0 5.25 17h9.5A2.25 2.25 0 0 0 17 14.75v-9.5A2.25 2.25 0 0 0 14.75 3h-9.5Z" />
                         </svg>
                     </button>
+                    <button type="button" id="loopSequenceBtn" class="seq-btn seq-btn-text" title="끝까지 재생하면 처음부터 다시" aria-pressed="false">반복</button>
                     <button type="button" id="clearSequenceBtn" class="seq-btn" title="시퀀스 초기화 (모든 클립 삭제)" aria-label="시퀀스 초기화">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
                             <path fill-rule="evenodd" d="M16.5 4.478v.227a48.816 48.816 0 0 1 3.878.512.75.75 0 1 1-.256 1.478l-.209-.035-1.005 13.07a3 3 0 0 1-2.991 2.77H8.084a3 3 0 0 1-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 0 1-.256-1.478A48.567 48.567 0 0 1 7.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 0 1 3.369 0c1.603.051 2.815 1.387 2.815 2.951Zm-6.136-1.452a51.196 51.196 0 0 1 3.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 0 0-6 0v-.113c0-.794.609-1.428 1.364-1.452Zm-.355 5.945a.75.75 0 1 0-1.5.058l.347 9a.75.75 0 1 0 1.499-.058l-.346-9Zm5.48.058a.75.75 0 1 0-1.498-.058l-.347 9a.75.75 0 0 0 1.5.058l.345-9Z" clip-rule="evenodd" />

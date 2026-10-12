@@ -23,10 +23,16 @@ var GameViewTools = (function () {
         anchor: cc.color(255, 159, 67, 255),
         gridMinor: cc.color(255, 255, 255, 18),
         gridMajor: cc.color(255, 255, 255, 40),
+        outside: cc.color(17, 18, 21, 255),
+        frame: cc.color(76, 141, 255, 150),
         transparent: cc.color(0, 0, 0, 0)
     };
 
-    var _state = { tool: 'select', bounds: true, anchor: true, grid: false, stats: true };
+    var _state = { tool: 'select', bounds: true, anchor: true, grid: false, frame: true, stats: true };
+    var _outsideLayer = null;  // 디자인 영역 바깥 (어두운 색)
+    var _frameNode = null;     // 디자인 영역 테두리
+    var _$selLabel = null;     // 선택 노드 이름 · 크기 표시
+    var _selLabelText = '';
     var _drawNode = null;
     var _gridNode = null;
     var _hover = null;         // 마우스가 올라간 손잡이
@@ -39,6 +45,15 @@ var GameViewTools = (function () {
     var ZOOM_MIN = 0.1, ZOOM_MAX = 8;
     var ZOOM_STEPS = [0.1, 0.25, 0.33, 0.5, 0.67, 0.75, 1, 1.25, 1.5, 2, 3, 4, 6, 8];
     var _view = { zoom: 1, x: 0, y: 0 };
+    // 해상도 메뉴 항목 [너비, 높이, 설명]
+    var RES_PRESETS = [
+        [1280, 720, 'HD'],
+        [1334, 750, 'iPhone 8'],
+        [1920, 1080, 'Full HD'],
+        [2436, 1125, 'iPhone X'],
+        [2048, 1536, 'iPad'],
+        [1024, 768, '4:3']
+    ];
     var _pan = null;           // 화면 이동 중 (가운데 버튼 또는 Space + 왼쪽 버튼)
     var _spaceDown = false;
     var _overCanvas = false;
@@ -154,11 +169,13 @@ var GameViewTools = (function () {
         updateStats();
 
         var node = selectedNode();
+        if (!node || !_state.bounds) hideSelLabel();
         if (!node) return;
         var w = pxToWorld(1);
 
         if (_state.bounds) {
             var box = node.getBoundingBoxToWorld();
+            updateSelLabel(node, box);
             if (box.width < pxToWorld(4)) { box.x -= pxToWorld(5); box.width = pxToWorld(10); }
             if (box.height < pxToWorld(4)) { box.y -= pxToWorld(5); box.height = pxToWorld(10); }
             dn.drawRect(cc.p(box.x, box.y), cc.p(box.x + box.width, box.y + box.height), COLORS.transparent, w, COLORS.bounds);
@@ -186,6 +203,44 @@ var GameViewTools = (function () {
             if (_drag && _drag.part === 'rotate' && _mouse) {
                 dn.drawSegment(h.pivot, _mouse, w * 0.6, COLORS.active);
             }
+        }
+    }
+
+    // ---- 선택 노드 이름표 ("imgBg · 600 × 300") ------------------------------
+
+    // 월드 좌표 → Game View 뷰포트 요소 기준 CSS 좌표
+    function worldToViewport(p) {
+        var canvas = cc._canvas;
+        var viewport = _$selLabel && _$selLabel[0].parentNode;
+        if (!canvas || !viewport) return null;
+        var cr = canvas.getBoundingClientRect(), vr = viewport.getBoundingClientRect();
+        var vp = cc.view.getViewPortRect();
+        var css = cr.width / (canvas.width || 1);
+        var px = vp.x + p.x * cc.view.getScaleX();
+        var py = vp.y + p.y * cc.view.getScaleY();
+        return { x: cr.left - vr.left + px * css, y: cr.top - vr.top + cr.height - py * css };
+    }
+
+    function updateSelLabel(node, box) {
+        if (!_$selLabel) return;
+        // 크기는 노드 자신의 크기 × 실제 배율 (자식 영역 제외, Game View 배율과 상관없이 디자인 좌표 기준)
+        var size = node.getContentSize();
+        var t = node.getNodeToWorldTransform();
+        var sx = Math.sqrt(t.a * t.a + t.b * t.b) / _view.zoom, sy = Math.sqrt(t.c * t.c + t.d * t.d) / _view.zoom;
+        var text = (node.getName() || 'Unnamed') + ' · ' + Math.round(size.width * sx) + ' × ' + Math.round(size.height * sy);
+        if (text !== _selLabelText) {
+            _selLabelText = text;
+            _$selLabel.text(text);
+        }
+        var p = worldToViewport(cc.p(box.x, box.y + box.height));
+        if (!p) return;
+        _$selLabel.css({ left: Math.round(p.x) + 'px', top: Math.round(p.y) + 'px', display: 'block' });
+    }
+
+    function hideSelLabel() {
+        if (_$selLabel && _selLabelText !== '') {
+            _selLabelText = '';
+            _$selLabel.hide();
         }
     }
 
@@ -231,20 +286,59 @@ var GameViewTools = (function () {
     // MainLayer 에 배율과 위치를 준다: 화면 좌표 = MainLayer 좌표 × zoom + (x, y)
     // 배경 레이어는 반대로 변환해 항상 화면 전체를 덮는다
 
+    // 화면 전체를 덮도록 MainLayer 의 자식 레이어를 반대로 변환한다
+    function coverScreen(layer) {
+        layer.setAnchorPoint(0, 0);
+        layer.setScale(1 / _view.zoom);
+        layer.setPosition(-_view.x / _view.zoom, -_view.y / _view.zoom);
+    }
+
     function applyView() {
         var ml = window.MainLayerInstance;
         if (!ml) return;
         ml.setAnchorPoint(0, 0);
         ml.setScale(_view.zoom);
         ml.setPosition(_view.x, _view.y);
+
+        // 디자인 해상도 프레임: 배경색은 디자인 영역에만 칠하고 바깥은 어둡게
+        if (!_outsideLayer || _outsideLayer.getParent() !== ml) {
+            _outsideLayer = new cc.LayerColor(COLORS.outside, cc.winSize.width, cc.winSize.height);
+            ml.addChild(_outsideLayer, -2);
+        }
+        _outsideLayer.setContentSize(cc.winSize);
+        _outsideLayer.setVisible(!!_state.frame);
+        coverScreen(_outsideLayer);
+        if (cc.director.setClearColor) cc.director.setClearColor(_state.frame ? COLORS.outside : cc.color(0, 0, 0, 255));
+
         var bg = ml._backgroundLayer;
         if (bg) {
-            bg.setAnchorPoint(0, 0);
-            bg.setScale(1 / _view.zoom);
-            bg.setPosition(-_view.x / _view.zoom, -_view.y / _view.zoom);
+            if (_state.frame) {
+                bg.setAnchorPoint(0, 0);
+                bg.setScale(1);
+                bg.setPosition(0, 0);
+                bg.setContentSize(cc.winSize);
+            } else {
+                coverScreen(bg);
+            }
         }
         drawGrid();
+        drawFrame();
         syncZoomLabel();
+        syncResolutionLabel();
+    }
+
+    // 디자인 영역 테두리 (인스턴스보다 아래)
+    function drawFrame() {
+        var ml = window.MainLayerInstance;
+        if (!ml) return;
+        if (!_frameNode || _frameNode.getParent() !== ml) {
+            _frameNode = new cc.DrawNode();
+            ml.addChild(_frameNode, -1);
+        }
+        _frameNode.clear();
+        if (!_state.frame) return;
+        var size = cc.winSize;
+        _frameNode.drawRect(cc.p(0, 0), cc.p(size.width, size.height), COLORS.transparent, pxToWorld(1) / _view.zoom, COLORS.frame);
     }
 
     function clampZoom(z) {
@@ -501,7 +595,28 @@ var GameViewTools = (function () {
             '<button type="button" class="gv-toggle" data-toggle="bounds">경계 상자</button>' +
             '<button type="button" class="gv-toggle" data-toggle="anchor">앵커 표시</button>' +
             '<button type="button" class="gv-toggle" data-toggle="grid">그리드</button>' +
+            '<button type="button" class="gv-toggle" data-toggle="frame" title="디자인 해상도 영역을 테두리로 표시하고 바깥을 어둡게">디자인 해상도 프레임</button>' +
             '<button type="button" class="gv-toggle" data-toggle="stats">통계</button>' +
+            '<span class="gv-spacer"></span>' +
+            '<div class="gv-res">' +
+            '<span class="gv-label">해상도</span>' +
+            '<button type="button" class="gv-res-btn" aria-haspopup="menu" aria-expanded="false" title="디자인 해상도"></button>' +
+            '<div class="gv-res-menu" role="menu" hidden>' +
+            '<button type="button" class="gv-res-item" role="menuitemradio" data-res="auto">자동 <span class="gv-res-note">패널 크기에 맞춤</span></button>' +
+            '<div class="gv-res-sep"></div>' +
+            RES_PRESETS.map(function (r) {
+                return '<button type="button" class="gv-res-item" role="menuitemradio" data-res="' + r[0] + 'x' + r[1] + '">' + r[0] + ' × ' + r[1] + (r[2] ? ' <span class="gv-res-note">' + r[2] + '</span>' : '') + '</button>';
+            }).join('') +
+            '<div class="gv-res-sep"></div>' +
+            '<div class="gv-res-custom">' +
+            '<input type="number" class="gv-res-w" min="1" placeholder="너비" aria-label="해상도 너비">' +
+            '<span>×</span>' +
+            '<input type="number" class="gv-res-h" min="1" placeholder="높이" aria-label="해상도 높이">' +
+            '<button type="button" class="gv-res-apply">적용</button>' +
+            '</div>' +
+            '</div>' +
+            '</div>' +
+            '<label class="gv-bg" title="배경색"><input type="color" id="bg-color-picker" aria-label="배경색"></label>' +
             '<div class="gv-zoom" role="group" aria-label="확대/축소">' +
             '<button type="button" class="gv-zoom-btn" data-zoom="out" title="축소 (-)" aria-label="축소">−</button>' +
             '<button type="button" class="gv-zoom-btn gv-zoom-value" data-zoom="reset" title="클릭: 100% 로 · 휠: 확대/축소 · 가운데 버튼/Space+드래그: 화면 이동" aria-label="배율, 클릭하면 100%">100%</button>' +
@@ -524,6 +639,63 @@ var GameViewTools = (function () {
             save();
             syncToolbar();
             if (key === 'grid') drawGrid();
+            if (key === 'frame') applyView();
+        });
+
+        // 해상도 메뉴
+        var $menu = $toolbar.find('.gv-res-menu');
+        var $resBtn = $toolbar.find('.gv-res-btn');
+        var closeMenu = function () { $menu.prop('hidden', true); $resBtn.attr('aria-expanded', 'false'); };
+        $resBtn.on('click', function (e) {
+            e.stopPropagation();
+            var open = $menu.prop('hidden');
+            if (open) {
+                var cur = PanelManager.getResolution();
+                $menu.find('.gv-res-w').val(cur ? cur.width : '');
+                $menu.find('.gv-res-h').val(cur ? cur.height : '');
+                syncResolutionLabel();
+            }
+            $menu.prop('hidden', !open);
+            $resBtn.attr('aria-expanded', String(open));
+        });
+        $menu.on('click', '.gv-res-item', function () {
+            var v = String($(this).data('res'));
+            if (v === 'auto') PanelManager.setResolution(null, null);
+            else PanelManager.setResolution(parseInt(v.split('x')[0], 10), parseInt(v.split('x')[1], 10));
+            closeMenu();
+        });
+        var applyCustom = function () {
+            var w = parseInt($menu.find('.gv-res-w').val(), 10), h = parseInt($menu.find('.gv-res-h').val(), 10);
+            if (w > 0 && h > 0) { PanelManager.setResolution(w, h); closeMenu(); }
+        };
+        $menu.on('click', '.gv-res-apply', applyCustom);
+        $menu.on('keydown', 'input', function (e) {
+            if (e.key === 'Enter') applyCustom();
+            if (e.key === 'Escape') closeMenu();
+        });
+        $menu.on('click', function (e) { e.stopPropagation(); });
+        $(document).on('click', closeMenu);
+
+        // 배경색
+        var savedColor = '#323232';
+        try { savedColor = localStorage.getItem('backgroundColor') || savedColor; } catch (e) { }
+        $toolbar.find('#bg-color-picker').val(savedColor).on('input', function () {
+            try { localStorage.setItem('backgroundColor', this.value); } catch (e) { }
+            if (cc.eventManager) cc.eventManager.dispatchCustomEvent('background_color_changed', this.value);
+        });
+        syncResolutionLabel();
+    }
+
+    function syncResolutionLabel() {
+        if (!_$toolbar || typeof PanelManager === 'undefined' || !PanelManager.getResolution) return;
+        var cur = PanelManager.getResolution();
+        var size = cc.winSize;
+        var text = cur ? cur.width + ' × ' + cur.height : '자동 · ' + Math.round(size.width) + ' × ' + Math.round(size.height);
+        _$toolbar.find('.gv-res-btn').text(text + ' ▾');
+        var key = cur ? cur.width + 'x' + cur.height : 'auto';
+        _$toolbar.find('.gv-res-item').each(function () {
+            var on = String($(this).data('res')) === key;
+            $(this).toggleClass('active', on).attr('aria-checked', String(on));
         });
     }
 
@@ -563,6 +735,8 @@ var GameViewTools = (function () {
         mount: function (toolbarEl, statsEl) {
             _$toolbar = $(toolbarEl);
             _$stats = $(statsEl);
+            _$selLabel = $('<div class="gv-sel-label" aria-hidden="true"></div>').hide().insertAfter(_$stats);
+            _selLabelText = '';
             buildToolbar(_$toolbar);
             syncToolbar();
         },

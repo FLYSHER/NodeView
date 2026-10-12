@@ -7,6 +7,8 @@ var Sequencer = (function() {
     let mainLayerInstance = null;
     let isSyncingScroll = false;
     let isPlaying = false;
+    let loopEnabled = false;   // 반복: 끝까지 재생하면 처음부터 다시
+    try { loopEnabled = localStorage.getItem('sequencerLoop') === '1'; } catch (e) { }
     let isPaused = false;
     let runnerNode = null;
     let sequenceStartTime = 0;
@@ -543,6 +545,7 @@ var Sequencer = (function() {
 
         if (elapsedTimeSec >= totalDuration) {
             _onStop(true);
+            if (loopEnabled) _onPlay();
             return;
         }
 
@@ -871,6 +874,13 @@ var Sequencer = (function() {
             $('#addSequenceBtn').on('click', _onAdd);
             $('#playSequenceBtn').on('click', _togglePlayback);
             $('#stopSequenceBtn').on('click', () => _onStop(true));
+            const syncLoopBtn = () => $('#loopSequenceBtn').toggleClass('active', loopEnabled).attr('aria-pressed', String(loopEnabled));
+            $('#loopSequenceBtn').on('click', () => {
+                loopEnabled = !loopEnabled;
+                try { localStorage.setItem('sequencerLoop', loopEnabled ? '1' : '0'); } catch (e) { }
+                syncLoopBtn();
+            });
+            syncLoopBtn();
             $('#clearSequenceBtn').on('click', this.clear);
             $('#zoom-in-btn').on('click', () => _zoom('in'));
             $('#zoom-out-btn').on('click', () => _zoom('out'));

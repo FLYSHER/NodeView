@@ -3021,3 +3021,193 @@ body .lm_dropTargetIndicator .lm_inner {
 #gameCanvas:focus {
     outline: none;
 }
+
+/* --- Game View 툴바: 해상도 · 배경색 · 프레임 --- */
+.gv-spacer {
+    flex: 1;
+}
+.gv-toolbar .gv-zoom {
+    margin-left: 0;
+}
+.gv-label {
+    color: var(--font-secondary);
+    font-size: 11px;
+}
+.gv-res {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.gv-res-btn {
+    height: 24px;
+    padding: 0 8px;
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--font-primary);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.gv-res-btn:hover,
+.gv-res-btn[aria-expanded="true"] {
+    border-color: var(--accent-color);
+}
+.gv-res-menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    right: 0;
+    z-index: 50;
+    min-width: 220px;
+    padding: 4px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+.gv-res-menu[hidden] {
+    display: none;
+}
+.gv-res-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 5px 8px 5px 24px;
+    background: none;
+    border: 0;
+    border-radius: 4px;
+    color: var(--font-primary);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    text-align: left;
+    cursor: pointer;
+    position: relative;
+}
+.gv-res-item:hover {
+    background: var(--bg-tertiary);
+}
+.gv-res-item.active::before {
+    content: '✓';
+    position: absolute;
+    left: 8px;
+    color: var(--accent-color);
+}
+.gv-res-note {
+    margin-left: auto;
+    color: var(--font-muted);
+    font-family: var(--font-ui);
+    font-size: 11px;
+}
+.gv-res-sep {
+    height: 1px;
+    margin: 4px 0;
+    background: var(--border-color);
+}
+.gv-res-custom {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px;
+    color: var(--font-secondary);
+}
+.gv-res-custom input {
+    width: 64px;
+    height: 24px;
+    padding: 0 6px;
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--font-primary);
+    font-family: var(--font-mono);
+    font-size: 12px;
+}
+.gv-res-custom input:focus {
+    outline: none;
+    border-color: var(--accent-color);
+}
+.gv-res-apply {
+    margin-left: auto;
+    height: 24px;
+    padding: 0 10px;
+    background: var(--accent-strong);
+    border: 0;
+    border-radius: 4px;
+    color: #fff;
+    font-size: 12px;
+    cursor: pointer;
+}
+.gv-bg {
+    display: flex;
+    align-items: center;
+}
+.gv-bg #bg-color-picker {
+    width: 26px;
+    height: 24px;
+    padding: 2px;
+    border-radius: 4px;
+    background: var(--bg-input);
+}
+
+/* 선택 노드 이름표 */
+.gv-sel-label {
+    position: absolute;
+    z-index: 5;
+    transform: translateY(-100%);
+    margin-top: -3px;
+    padding: 1px 6px;
+    background: var(--accent-strong);
+    border-radius: 3px;
+    color: #fff;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    line-height: 16px;
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+/* --- 패널 탭의 개수 표시 · Assets 사용법 안내 --- */
+body .lm_header .lm_tab .lm_tab_count {
+    margin-left: 8px;
+    color: var(--font-muted);
+    font-size: 11px;
+    font-weight: 400;
+}
+.lm_tab_count:empty {
+    display: none;
+}
+.assets-hint {
+    flex: none;
+    padding: 6px 10px;
+    border-top: 1px solid var(--border-color);
+    color: var(--font-muted);
+    font-size: 11px;
+    line-height: 1.5;
+}
+.assets-hint[hidden] {
+    display: none;
+}
+.hier-footer-count {
+    margin-left: auto;
+    color: var(--font-secondary);
+    font-size: 11px;
+    white-space: nowrap;
+}
+
+/* --- Sequencer 반복 토글 --- */
+.seq-btn.seq-btn-text {
+    padding: 0 9px;
+    font-size: 12px;
+}
+.seq-btn.active {
+    background-color: var(--accent-strong);
+    border-color: var(--accent-strong);
+    color: #fff;
+}
+
+/* 해상도를 지정해 캔버스 안에 여백이 생길 때 여백 색을 디자인 영역 바깥 색과 맞춘다 */
+.gv-viewport {
+    background-color: #111215;
+}

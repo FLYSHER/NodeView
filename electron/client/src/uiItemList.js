@@ -113,6 +113,12 @@ var UIItemList = cc.Node.extend({
         }
         visible.forEach(entry => $container.append(this._buildAssetRow(entry)));
         $container.scrollTop(scrollTop);
+
+        // 패널 탭의 개수 표시와 하단 사용법 안내
+        const resources = new Set();
+        entries.forEach(entry => { if (entry.data) entry.data.deps.forEach(d => resources.add(d.fileName)); });
+        $('.assets-tab-count').text(entries.length ? entries.length + ' 에셋 · ' + resources.size + ' 리소스' : '');
+        $('#assetsHint').prop('hidden', entries.length === 0);
     },
 
     _renderFilters: function (entries) {

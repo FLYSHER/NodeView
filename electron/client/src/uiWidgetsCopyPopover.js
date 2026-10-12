@@ -83,6 +83,7 @@ var UIWidgetsCopyPopover = (function () {
             var toSave = Object.assign({}, _opts);
             if (_targetNode) toSave.scope = UIWidgetsCopy.loadOptions().scope;
             UIWidgetsCopy.saveOptions(toSave);
+            updateCount();
             copyNow(_opts, _targetNode);
             close();
         });
@@ -208,6 +209,27 @@ var UIWidgetsCopyPopover = (function () {
         return result;
     }
 
+    // uiWidgets 복사 버튼 옆 "전체 · 9항목" (선택·트리가 바뀐 뒤 한 번만 계산)
+    var _countTimer = null;
+    function updateCount() {
+        if (_countTimer) return;
+        _countTimer = setTimeout(function () {
+            _countTimer = null;
+            var el = document.getElementById('uiwCount');
+            if (!el || !_resolve) return;
+            var options = UIWidgetsCopy.loadOptions();
+            var source = _resolve(options, null);
+            if (!source && options.scope === 'subtree') {
+                options = Object.assign({}, options, { scope: 'all' });
+                source = _resolve(options, null);
+            }
+            if (!source || source.entries.length === 0) { el.textContent = ''; return; }
+            var result = UIWidgetsCopy.build(source.entries, options);
+            el.textContent = (options.scope === 'subtree' ? '선택 하위' : '전체') + ' · ' + result.itemCount + '항목';
+            el.title = source.sourceLabel;
+        }, 0);
+    }
+
     function showToast(title, detail, isError) {
         var $toast = $('#nv-toast');
         if ($toast.length === 0) {
@@ -244,6 +266,7 @@ var UIWidgetsCopyPopover = (function () {
         toggle: toggle,
         isOpen: isOpen,
         copyNow: copyNow,
+        updateCount: updateCount,
         showToast: showToast
     };
 })();

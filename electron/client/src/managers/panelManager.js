@@ -3,7 +3,7 @@ var PanelManager = (function() {
     const componentRegistry = {
         fileList:   { title: "Assets",      component: 'fileList' },
         widgetTree: { title: "Hierarchy",   component: 'widgetTree' },
-        properties: { title: "Properties",  component: 'properties' },
+        properties: { title: "Inspector",   component: 'properties' },
         gameView:   { title: "Game View",   component: 'gameView' },
         sequencer:  { title: "Animation · Sequencer", component: 'sequencer' },
         dependencies: { title: "Dependencies", component: 'dependencies' },
@@ -13,25 +13,34 @@ var PanelManager = (function() {
     const defaultLayoutConfig = {
         content: [{
             type: 'row',
+            // 왼쪽 Assets/Hierarchy · 가운데 Game View + 하단 탭 · 오른쪽 Inspector
             content: [
-                { type: 'column', width: 30, content: [
-                        { type: 'component', componentName: 'fileList', title: 'Assets' },
-                        { type: 'component', componentName: 'widgetTree', title: 'Hierarchy' },
-                        { type: 'component', componentName: 'properties', title: 'Properties' }
+                { type: 'column', width: 19, content: [
+                        { type: 'component', componentName: 'fileList', title: 'Assets', height: 45 },
+                        { type: 'component', componentName: 'widgetTree', title: 'Hierarchy', height: 55 }
                     ]},
-                { type: 'column', width: 70, content: [
-                        { type: 'component', componentName: 'gameView', title: 'Game View', height: 75 },
-                        { type: 'stack', height: 25, minHeight: 250, content: [
+                { type: 'column', width: 59, content: [
+                        { type: 'component', componentName: 'gameView', title: 'Game View', height: 70 },
+                        { type: 'stack', height: 30, minHeight: 250, content: [
                                 { type: 'component', componentName: 'sequencer', title: 'Animation · Sequencer' },
-                                { type: 'component', componentName: 'dependencies', title: 'Dependencies' },
-                                { type: 'component', componentName: 'console', title: 'Console' }
+                                { type: 'component', componentName: 'console', title: 'Console' },
+                                { type: 'component', componentName: 'dependencies', title: 'Dependencies' }
                             ]}
-                    ]}
+                    ]},
+                { type: 'component', componentName: 'properties', title: 'Inspector', width: 22 }
             ]
         }]
     };
 
-    let manualResolution = null;
+    const LAYOUT_VERSION_KEY = 'layoutVersion';
+    const LAYOUT_VERSION = '2';   // 2: Inspector 를 오른쪽 열로
+
+    const RESOLUTION_KEY = 'gameViewResolution';
+    let manualResolution = null;   // { width, height } 또는 null(자동: 패널 크기)
+    try {
+        const saved = JSON.parse(localStorage.getItem(RESOLUTION_KEY));
+        if (saved && saved.width > 0 && saved.height > 0) manualResolution = { width: saved.width, height: saved.height };
+    } catch (e) { }
     let _layout = null;
 
     // 새로 추가된 패널을 예전에 저장된 레이아웃에도 한 번만 넣어준다
@@ -131,14 +140,12 @@ var PanelManager = (function() {
                 if (cc.eventManager) { cc.eventManager.dispatchCustomEvent("canvas-resize"); }
             };
 
-            container.on('setManualResolution', function(w, h) {
-                manualResolution = (w && h) ? { width: w, height: h } : null;
+            container.on('setManualResolution', function() {
                 resizeCanvas();
             });
 
+            // 패널 크기가 바뀌어도 선택한 해상도는 유지한다 (자동일 때만 패널 크기를 따른다)
             container.on('resize', function() {
-                manualResolution = null;
-                $('#res-width-input, #res-height-input').val('');
                 resizeCanvas();
             });
 
@@ -148,6 +155,12 @@ var PanelManager = (function() {
         myLayout.registerComponent('fileList', function(container, componentState) {
             // 상단 검색·필터는 고정하고 목록만 스크롤
             container.getElement().attr('id', 'assets-panel-drop-zone').addClass('assets-panel');
+            // 탭 제목 옆에 "N 에셋 · M 리소스"
+            container.on('tab', function (tab) {
+                tab.element.find('.assets-tab-count').remove();
+                tab.element.find('.lm_title').after('<span class="lm_tab_count assets-tab-count"></span>');
+                if (window.MainLayerInstance) window.MainLayerInstance.refreshAssetsPanel();
+            });
             container.getElement().append($('#original-content-templates').find('#fileContainer').children());
         });
         myLayout.registerComponent('widgetTree', function(container, componentState) {
@@ -178,7 +191,13 @@ var PanelManager = (function() {
         initialize: function () {
             const layoutArea = $('#panels-container-area');
             layoutArea.empty();
-            const finalLayoutConfig = _migrateLayout(_stripComponents(_stripComponents(LayoutManager.load(), 'resourceView'), 'uiAnimation')) || defaultLayoutConfig;
+            // 기본 배치가 바뀐 버전에서는 저장된 배치 대신 새 기본 배치를 한 번 적용한다
+            let savedConfig = LayoutManager.load();
+            if (localStorage.getItem(LAYOUT_VERSION_KEY) !== LAYOUT_VERSION) {
+                savedConfig = null;
+                localStorage.setItem(LAYOUT_VERSION_KEY, LAYOUT_VERSION);
+            }
+            const finalLayoutConfig = _migrateLayout(_stripComponents(_stripComponents(savedConfig, 'resourceView'), 'uiAnimation')) || defaultLayoutConfig;
             const myLayout = new GoldenLayout(finalLayoutConfig, layoutArea);
 
             _registerComponents(myLayout);
@@ -188,8 +207,6 @@ var PanelManager = (function() {
 
             const DEFAULT_BG_COLOR = '#323232';
             const savedColor = localStorage.getItem('backgroundColor') || DEFAULT_BG_COLOR;
-
-            $('#bg-color-picker').val(savedColor);
 
             setTimeout(function() {
                 if (cc && cc.eventManager) {
@@ -286,41 +303,10 @@ var PanelManager = (function() {
                 }
             });
 
-            const emitResolution = function (w, h) {
-                const gameViewItems = myLayout.root.getItemsByFilter(item => item.isComponent && item.componentName === 'gameView');
-                if (gameViewItems.length > 0) {
-                    gameViewItems[0].container.emit('setManualResolution', w, h);
-                }
-            };
-            const applyResolution = function () {
-                const w = parseInt($('#res-width-input').val(), 10);
-                const h = parseInt($('#res-height-input').val(), 10);
-                if (!isNaN(w) && !isNaN(h) && w > 0 && h > 0) {
-                    emitResolution(w, h);
-                }
-            };
-            $('#res-apply-btn').on('click', applyResolution);
-            $('#res-width-input, #res-height-input').on('keydown', function (e) {
-                if (e.key === 'Enter') applyResolution();
-            });
-            // 자동: 수동 해상도를 해제하고 Game View 패널 크기를 따른다
-            $('#res-auto-btn').on('click', function () {
-                $('#res-width-input, #res-height-input').val('');
-                emitResolution(null, null);
-            });
-
             $('#layout-reset-btn').on('click', function () {
                 if (!window.confirm('패널 배치를 기본값으로 되돌릴까요? (로드한 에셋은 다시 불러와야 합니다)')) return;
                 localStorage.removeItem('golden-layout-config');
                 window.location.reload();
-            });
-
-            $('#bg-color-picker').on('input', function() {
-                const newColor = $(this).val();
-                localStorage.setItem('backgroundColor', newColor);
-                if (cc && cc.eventManager) {
-                    cc.eventManager.dispatchCustomEvent('background_color_changed', newColor);
-                }
             });
 
             $(document).on('click', e => {
@@ -384,6 +370,21 @@ var PanelManager = (function() {
                 const stack = _layout.root.getItemsByFilter(i => i.isStack)[0];
                 (stack || _layout.root.contentItems[0]).addChild(config);
             }
+        },
+
+        // Game View 디자인 해상도: (w, h) 지정, (null, null) 이면 자동(패널 크기)
+        setResolution: function (w, h) {
+            manualResolution = (w > 0 && h > 0) ? { width: w, height: h } : null;
+            try {
+                if (manualResolution) localStorage.setItem(RESOLUTION_KEY, JSON.stringify(manualResolution));
+                else localStorage.removeItem(RESOLUTION_KEY);
+            } catch (e) { }
+            if (!_layout) return;
+            const gameView = _layout.root.getItemsByFilter(i => i.isComponent && i.componentName === 'gameView')[0];
+            if (gameView) gameView.container.emit('setManualResolution');
+        },
+        getResolution: function () {
+            return manualResolution ? { width: manualResolution.width, height: manualResolution.height } : null;
         },
 
         // 패널을 앞으로 가져온다 (닫혀 있으면 다시 연다)
