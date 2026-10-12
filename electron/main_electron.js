@@ -2,6 +2,22 @@
 const {app, BrowserWindow, Menu, dialog, ipcMain} = require('electron')
 const loadManager = require('./LoadManager')
 const windowStateKeeper = require('electron-window-state');
+const fs = require('fs');
+const path = require('path');
+
+// 앱 이름을 바꾸면 설정 폴더(레이아웃, 최근 파일, 창 위치 등)도 바뀌므로
+// 예전 이름의 폴더가 있으면 처음 한 번 새 폴더로 복사해 설정을 이어 쓴다
+(function migrateUserData() {
+  try {
+    const current = app.getPath('userData');
+    const legacy = path.join(app.getPath('appData'), 'NodeView(flysher)');
+    if (current !== legacy && !fs.existsSync(current) && fs.existsSync(legacy)) {
+      fs.cpSync(legacy, current, { recursive: true });
+    }
+  } catch (e) {
+    console.error('설정 폴더 이전 실패:', e);
+  }
+})();
 
 
 function createWindow () {

@@ -3402,3 +3402,45 @@ body .lm_header .lm_tab .lm_tab_count {
     font-family: var(--font-mono);
     font-size: 11px;
 }
+
+/* 상단 바 부제 · 정보 창 */
+.atb-sub {
+    color: var(--font-muted);
+    font-size: 11px;
+    white-space: nowrap;
+}
+.atb-sub::before {
+    content: '·';
+    margin-right: 6px;
+}
+.app-about-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 0 12px;
+}
+.app-about-logo {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    font-size: 16px;
+}
+.app-about-name {
+    font-size: 16px;
+    font-weight: 600;
+}
+.app-about-sub {
+    color: var(--font-secondary);
+    font-size: 12px;
+}
+.app-about-foot {
+    margin-top: 12px;
+    color: var(--font-muted);
+    font-size: 11px;
+    text-align: center;
+}
+
+.app-dialog-close:focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: -2px;
+}

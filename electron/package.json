@@ -1,7 +1,8 @@
 {
-  "name": "NodeView(flysher)",
+  "name": "nodeview",
+  "productName": "NodeView",
   "version": "1.0.0",
-  "description": "A minimal Electron application",
+  "description": "NodeView · Cocos Asset Inspector",
   "main": "main_electron.js",
   "scripts": {
     "start": "electron .",
@@ -16,7 +17,7 @@
     "tutorial",
     "demo"
   ],
-  "author": "GitHub",
+  "author": "PlayLinks · Raon Studio",
   "license": "CC0-1.0",
   "devDependencies": {
     "electron": "^18.0.3",
@@ -28,7 +29,7 @@
   },
   "build": {
     "productName": "NodeView",
-    "appId": "net.flysher.nodeview",
+    "appId": "com.playlinks.nodeview",
     "asar": true,
     "protocols": {
       "name": "NodeView",

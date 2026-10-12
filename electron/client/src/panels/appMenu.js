@@ -173,9 +173,14 @@ var AppMenu = (function () {
         var render = function (version) {
             var rows = [['버전', version || '—'], ['엔진', 'cocos2d-html5 v' + (cc.ENGINE_VERSION || '3').replace(/^Cocos2d-JS v/i, '')]];
             if (isElectron && typeof process !== 'undefined' && process.versions) rows.push(['Electron', process.versions.electron]);
-            showDialog('NodeView 정보', '<table class="app-shortcuts">' + rows.map(function (r) {
-                return '<tr><td>' + esc(r[0]) + '</td><td>' + esc(r[1]) + '</td></tr>';
-            }).join('') + '</table>');
+            rows.push(['회사', 'PlayLinks'], ['스튜디오', 'Raon Studio']);
+            showDialog('NodeView 정보',
+                '<div class="app-about-head"><span class="atb-logo app-about-logo" aria-hidden="true">NV</span>' +
+                '<div><div class="app-about-name">NodeView</div><div class="app-about-sub">Cocos Asset Inspector</div></div></div>' +
+                '<table class="app-shortcuts">' + rows.map(function (r) {
+                    return '<tr><td>' + esc(r[0]) + '</td><td>' + esc(r[1]) + '</td></tr>';
+                }).join('') + '</table>' +
+                '<div class="app-about-foot">© PlayLinks · Raon Studio</div>');
         };
         if (isElectron) _ipc.invoke('nv:appInfo').then(function (info) { render(info && info.version); }, function () { render(null); });
         else render(null);
