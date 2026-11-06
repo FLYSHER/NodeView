@@ -225,6 +225,10 @@ var ResourceRegistry = (function () {
             if (owner) {
                 owner.usage = (owner.usage || 0) + 1;
                 if (owner.usedBy.indexOf(ref.node) < 0) owner.usedBy.push(ref.node);
+                // 노드별로 이 시트의 어느 프레임을 쓰는지 (사용처 목록에 표시)
+                owner.usedFrames = owner.usedFrames || {};
+                var frames = owner.usedFrames[ref.node] = owner.usedFrames[ref.node] || [];
+                if (frames.indexOf(frame) < 0) frames.push(frame);
                 return;
             }
             // 시트가 아직 로드되지 않았으면 판단 보류, 다른 에셋 시트에 있으면 정상

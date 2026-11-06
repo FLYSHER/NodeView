@@ -63,6 +63,7 @@ var MainLayer = cc.Layer.extend({
         this._contextMenuManager = new ContextMenuManager(this);
         this._deletionManager = new DeletionManager(this);
         Sequencer.initialize(this);
+        if (typeof KeyframeView !== 'undefined') KeyframeView.init();
 
         this._deleteKeyListener = (event) => {
             if (event.key === 'Delete' || event.key === 'Backspace') {
@@ -489,6 +490,19 @@ var MainLayer = cc.Layer.extend({
             // 다른 모든 노드는 드래그 비활성화
             this.setDraggableItem(null);
         }
+    },
+
+    // Hierarchy 트리에서 노드를 선택(상위를 펼치고 보이게 스크롤) → 선택 이벤트로 Inspector 등이 따라온다
+    selectNodeInHierarchy: function (node) {
+        const tree = $('#widgetTree').jstree(true);
+        if (!node || !tree || !tree.get_node(node.__instanceId)) {
+            this.updateMenuWithNodeId(node ? node.__instanceId : null);
+            return;
+        }
+        tree.deselect_all(true);
+        tree.select_node(node.__instanceId);
+        const li = tree.get_node(node.__instanceId, true);
+        if (li && li[0]) li[0].scrollIntoView({ block: 'nearest' });
     },
 
     setDraggableItem: function (name) {

@@ -465,6 +465,48 @@ var GameViewTools = (function () {
         notifyChanged(node);
     }
 
+    // ---- Alt+클릭: 클릭한 위치의 가장 안쪽(앞쪽) 노드 고르기 ---------------------
+
+    // 그려지는 순서의 역순 (앞에 보이는 것부터): localZOrder 가 크고, 같으면 나중에 추가된 것
+    function frontToBack(children) {
+        return children.map(function (c, i) { return { c: c, i: i }; })
+            .sort(function (a, b) { return (b.c.getLocalZOrder() - a.c.getLocalZOrder()) || (b.i - a.i); })
+            .map(function (x) { return x.c; });
+    }
+
+    // 노드 자기 영역(자식 제외)에 점이 들어가는지
+    function hitsOwnRect(node, p) {
+        var size = node.getContentSize();
+        if (size.width <= 0 || size.height <= 0) return false;
+        var rect = cc.rectApplyAffineTransform(cc.rect(0, 0, size.width, size.height), node.getNodeToWorldTransform());
+        return cc.rectContainsPoint(rect, p);
+    }
+
+    function pickIn(node, p, nodeMap) {
+        if (!node.isVisible()) return null;
+        var kids = frontToBack(node.getChildren());
+        for (var i = 0; i < kids.length; i++) {
+            var found = pickIn(kids[i], p, nodeMap);
+            if (found) return found;
+        }
+        // Hierarchy 에 있는 노드만 (기즈모·그리드 같은 보조 노드 제외)
+        return nodeMap[node.__instanceId] && !(node instanceof DraggableNode) && hitsOwnRect(node, p) ? node : null;
+    }
+
+    function pickDeepest(p) {
+        var ml = window.MainLayerInstance;
+        if (!ml) return null;
+        var instances = frontToBack(ml.getChildren().filter(function (c) { return c instanceof DraggableNode && c.isVisible(); }));
+        for (var i = 0; i < instances.length; i++) {
+            var inst = instances[i];
+            var found = pickIn(inst, p, ml.nodeMap);
+            if (found) return found;
+            // 안쪽에 맞는 노드가 없으면 인스턴스 자체 (Spine/Armature/이미지)
+            if (cc.rectContainsPoint(inst.getBoundingBoxToWorld(), p)) return inst;
+        }
+        return null;
+    }
+
     function installMouse() {
         // 고정 우선순위(-1)로 등록해 씬의 선택/드래그 처리보다 먼저 받는다
         cc.eventManager.addListener({
@@ -480,6 +522,14 @@ var GameViewTools = (function () {
                     return;
                 }
                 if (button !== cc.EventMouse.BUTTON_LEFT) return;
+                // Alt+클릭: 클릭한 위치의 가장 안쪽 노드를 선택 (Hierarchy 도 그 노드까지 펼침)
+                if (window.event && window.event.altKey) {
+                    var picked = pickDeepest(p);
+                    if (picked && window.MainLayerInstance) window.MainLayerInstance.selectNodeInHierarchy(picked);
+                    else if (window.MainLayerInstance) window.MainLayerInstance.updateMenuWithNodeId(null);
+                    event.stopPropagation();
+                    return;
+                }
                 var node = selectedNode();
                 var part = hitTest(node, p);
                 if (!part) return;
@@ -586,7 +636,7 @@ var GameViewTools = (function () {
         };
         $toolbar.html(
             '<div class="gv-tools" role="group" aria-label="도구">' +
-            '<button type="button" class="gv-tool" data-tool="select" title="선택 (Q)" aria-label="선택 도구 (Q)">' + icon.select + '</button>' +
+            '<button type="button" class="gv-tool" data-tool="select" title="선택 (Q) · Alt+클릭: 안쪽 노드 선택" aria-label="선택 도구 (Q)">' + icon.select + '</button>' +
             '<button type="button" class="gv-tool" data-tool="move" title="이동 (W)" aria-label="이동 도구 (W)">' + icon.move + '</button>' +
             '<button type="button" class="gv-tool" data-tool="rotate" title="회전 (E) · Shift: 15도 단위" aria-label="회전 도구 (E)">' + icon.rotate + '</button>' +
             '<button type="button" class="gv-tool" data-tool="scale" title="스케일 (R)" aria-label="스케일 도구 (R)">' + icon.scale + '</button>' +

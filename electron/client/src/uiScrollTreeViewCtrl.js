@@ -444,6 +444,8 @@ class UIScrollTreeViewCtrl {
         const $list = $('#actionTree');
         const esc = (t) => $('<div>').text(t == null ? '' : String(t)).html();
         $list.empty();
+        // 다른 인스턴스를 고르면 키프레임 보기를 비운다
+        if (this._animOwner !== (owner || null) && typeof KeyframeView !== 'undefined') KeyframeView.clear();
         this._animOwner = owner || null;
 
         const source = !owner ? '' : (selectedNode && selectedNode !== owner ? selectedNode.getName() + ' 상위 · ' : '') + owner.getName();
@@ -503,6 +505,7 @@ class UIScrollTreeViewCtrl {
 
     _previewAnimation(owner, animName, animType) {
         if (!owner) return;
+        if (typeof KeyframeView !== 'undefined') KeyframeView.setAnimation(owner, animName, animType);
         if (owner.spine) owner.spine.clearTrack(0);
         if (owner.armature) owner.armature.getAnimation().stop();
         if (owner.ui) {
@@ -529,6 +532,31 @@ class UIScrollTreeViewCtrl {
             if (worldBoundingBox.height < 5) worldBoundingBox.height = 10;
             Gizmo_DrawTouchLayerByRect(worldBoundingBox);
         }
+    }
+
+    // 리소스 사용처 강조 (Dependencies → "Hierarchy에 표시"). ids 가 비면 지운다
+    setUsageHighlight(ids, label) {
+        this._usageIds = new Set(ids || []);
+        const tree = $('#widgetTree').jstree(true);
+        if (tree) this._usageIds.forEach(id => { if (tree.get_node(id)) tree._open_to(id); });
+        this._applyUsageHighlight();
+        const on = this._usageIds.size > 0;
+        $('#hierUsageBar').prop('hidden', !on).find('.hier-usage-text').text(on ? label + ' 사용 노드 ' + this._usageIds.size + '개' : '');
+        if (!this._usageBound) {
+            this._usageBound = true;
+            // 트리를 다시 그리거나 펼치면 강조가 지워지므로 다시 입힌다
+            $('#widgetTree').on('redraw.jstree after_open.jstree refresh.jstree', () => this._applyUsageHighlight());
+            $('#hierUsageClear').on('click', () => this.setUsageHighlight([]));
+        }
+        const first = tree && Array.from(this._usageIds)[0];
+        const li = first && tree.get_node(first, true);
+        if (li && li[0]) li[0].scrollIntoView({ block: 'nearest' });
+    }
+
+    _applyUsageHighlight() {
+        const ids = this._usageIds || new Set();
+        $('#widgetTree .jstree-anchor.usage-hit').removeClass('usage-hit');
+        ids.forEach(id => $(document.getElementById(id)).children('.jstree-anchor').addClass('usage-hit'));
     }
 
     updateTreeView(treeData) {

@@ -37,6 +37,7 @@
         "src/panels/inspector.js",
         "src/panels/statusBar.js",
         "src/panels/appMenu.js",
-        "src/panels/gameViewTools.js"
+        "src/panels/gameViewTools.js",
+        "src/panels/keyframeView.js"
     ]
 }

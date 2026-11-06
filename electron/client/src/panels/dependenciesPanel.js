@@ -118,12 +118,9 @@ var DependenciesPanel = (function () {
                 }).join('<br>') + (data.missingFrames.length > 20 ? '<br>…' : '') + '</div></div>';
         }
 
-        // 선택한 파일의 사용 노드
+        // 선택한 파일의 사용 노드 (시트 png 는 짝인 plist 기준)
         var selected = data.deps.filter(function (d) { return d.fileName === _selectedFile; })[0];
-        if (selected && selected.status !== 'missing' && selected.usedBy.length > 0) {
-            html += '<div class="dep-usage"><div class="dep-alert-label">' + esc(selected.fileName) + ' 사용 노드 (' + selected.usedBy.length + ')</div>' +
-                '<div class="dep-alert-paths">' + selected.usedBy.slice(0, 30).map(esc).join('<br>') + (selected.usedBy.length > 30 ? '<br>…' : '') + '</div></div>';
-        }
+        if (selected && selected.status !== 'missing') html += usageHtml(data, selected);
 
         html += '<div class="dep-footer">' +
             (isElectron() ? '<button type="button" class="styleButton dep-reveal">탐색기에서 열기</button>' : '') +
@@ -137,6 +134,73 @@ var DependenciesPanel = (function () {
             var $sel = $el.find('.dep-item.selected');
             if ($sel.length) $sel[0].scrollIntoView({ block: 'nearest' });
         }
+    }
+
+    // ---- 사용처: 이 리소스를 쓰는 노드 --------------------------------------
+
+    // 이 에셋으로 만든 Game View 인스턴스 (선택된 인스턴스를 우선)
+    function instanceOfAsset() {
+        var ml = window.MainLayerInstance;
+        if (!ml) return null;
+        var list = ml.getChildren().filter(function (c) { return c instanceof DraggableNode && c.assetKey === _assetKey; });
+        var sel = ml._currentlySelectedNode;
+        for (var p = sel; p; p = p.getParent()) { if (list.indexOf(p) >= 0) return p; }
+        return list[0] || null;
+    }
+
+    // widgetTree 경로("Root/Panel/imgBg") → 인스턴스 안의 실제 노드
+    function nodeByPath(inst, path) {
+        var root = inst && inst.ui;
+        if (!root) return null;
+        var segs = String(path).split('/');
+        if (root.getName() !== segs[0]) return null;
+        var node = root;
+        for (var i = 1; i < segs.length && node; i++) {
+            var next = null;
+            var kids = node.getChildren();
+            for (var j = 0; j < kids.length; j++) { if (kids[j].getName() === segs[i]) { next = kids[j]; break; } }
+            node = next;
+        }
+        return node;
+    }
+
+    function usageHtml(data, selected) {
+        var dep = selected.usedBy.length === 0 && selected.pairOf ? selected.pairOf : selected;
+        if (!dep.usedBy || dep.usedBy.length === 0) return '';
+        var frameMap = dep.usedFrames || (selected.pairOf && selected.pairOf.usedFrames) || {};
+        var isUI = data.source.type === 'ui';
+        var inst = isUI ? instanceOfAsset() : null;
+        var html = '<div class="dep-usage">' +
+            '<div class="dep-usage-head"><span class="dep-alert-label">' + esc(selected.fileName) + ' 사용 노드 ' + dep.usedBy.length + '개</span>' +
+            (inst ? '<button type="button" class="styleButton dep-usage-mark">Hierarchy에 표시</button>' : '') + '</div>';
+        if (isUI && !inst) html += '<div class="dep-subtle">Game View 에 인스턴스를 만들면 노드를 눌러 바로 선택할 수 있습니다.</div>';
+        html += '<div class="dep-usage-list">';
+        dep.usedBy.slice(0, 300).forEach(function (path) {
+            var segs = String(path).split('/');
+            var name = segs.pop();
+            var frames = frameMap[path] ? frameMap[path].join(', ') : '';
+            html += '<button type="button" class="dep-usage-row"' + (inst ? '' : ' disabled') + ' data-path="' + esc(path) + '" title="' + esc(path) + '">' +
+                '<span class="dep-usage-name">' + esc(name) + '</span>' +
+                '<span class="dep-usage-path">' + esc(segs.join('/')) + '</span>' +
+                (frames ? '<span class="dep-usage-frame">' + esc(frames) + '</span>' : '') +
+                '</button>';
+        });
+        if (dep.usedBy.length > 300) html += '<div class="dep-subtle">… 외 ' + (dep.usedBy.length - 300) + '개</div>';
+        return html + '</div></div>';
+    }
+
+    // 사용 노드 전체를 Hierarchy 에 강조
+    function markUsage() {
+        var data = _assetKey ? ResourceRegistry.collect(_assetKey) : null;
+        var selected = data && data.deps.filter(function (d) { return d.fileName === _selectedFile; })[0];
+        if (!selected) return;
+        var dep = selected.usedBy.length === 0 && selected.pairOf ? selected.pairOf : selected;
+        var inst = instanceOfAsset();
+        var nodes = dep.usedBy.map(function (p) { return nodeByPath(inst, p); }).filter(Boolean);
+        if (window.MainLayerInstance && window.MainLayerInstance._treeView) {
+            window.MainLayerInstance._treeView.setUsageHighlight(nodes.map(function (n) { return n.__instanceId; }), selected.fileName);
+        }
+        UIWidgetsCopyPopover.showToast('Hierarchy 에 ' + nodes.length + '개 노드 표시', selected.fileName + (nodes.length < dep.usedBy.length ? ' · 인스턴스에서 찾지 못한 노드 ' + (dep.usedBy.length - nodes.length) + '개' : ''));
     }
 
     function stat(label, value, cls) {
@@ -210,6 +274,12 @@ var DependenciesPanel = (function () {
         on('dblclick', '.dep-item', function () {
             openSelected($(this).data('file-name') + '');
         });
+        on('click', '.dep-usage-row', function () {
+            var node = nodeByPath(instanceOfAsset(), this.getAttribute('data-path'));
+            if (node && window.MainLayerInstance) window.MainLayerInstance.selectNodeInHierarchy(node);
+            else UIWidgetsCopyPopover.showToast('노드를 찾지 못했습니다', this.getAttribute('data-path'), true);
+        });
+        on('click', '.dep-usage-mark', markUsage);
         on('click', '.dep-open-view', function () {
             openSelected(_selectedFile);
         });

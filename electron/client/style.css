@@ -3647,3 +3647,312 @@ body .lm_header .lm_tab .lm_tab_count {
 #actionTree .anim-evt {
     cursor: help;
 }
+
+/* --- 리소스 사용처 (Dependencies 목록 · Hierarchy 강조) --- */
+.dep-usage-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+.dep-usage-head .styleButton {
+    padding: 3px 10px;
+    font-size: 0.75rem;
+}
+.dep-usage-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    max-height: 260px;
+    overflow-y: auto;
+}
+.dep-usage-row {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    min-width: 0;
+    padding: 4px 8px;
+    background: none;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    color: var(--font-primary);
+    font: inherit;
+    font-size: 0.8rem;
+    text-align: left;
+    cursor: pointer;
+}
+.dep-usage-row:hover:not(:disabled) {
+    background: var(--bg-tertiary);
+    border-color: var(--border-color);
+}
+.dep-usage-row:disabled {
+    cursor: default;
+}
+.dep-usage-name {
+    flex: none;
+    font-weight: 500;
+}
+.dep-usage-path {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--font-muted);
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    direction: rtl;          /* 긴 경로는 앞쪽(상위)을 줄이고 가까운 부모를 보이게 */
+    text-align: left;
+}
+.dep-usage-frame {
+    flex: none;
+    max-width: 45%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #8fb8ff;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+}
+.hier-usage-bar {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 8px 4px 12px;
+    background: rgba(255, 192, 120, 0.1);
+    border-bottom: 1px solid rgba(255, 192, 120, 0.3);
+    color: #ffc078;
+    font-size: 0.75rem;
+}
+.hier-usage-bar[hidden] {
+    display: none;
+}
+.hier-usage-text {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+#widgetTree .jstree-anchor.usage-hit {
+    box-shadow: inset 2px 0 0 #ffc078;
+    background-color: rgba(255, 192, 120, 0.12);
+}
+#widgetTree .jstree-anchor.usage-hit .node-name {
+    color: #ffc078;
+}
+
+/* =====================================================================
+   Sequencer · 키프레임 보기
+   ===================================================================== */
+.seq-view-switch {
+    display: inline-flex;
+    margin-left: 8px;
+    padding: 2px;
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+}
+.seq-view-btn {
+    height: 20px;
+    padding: 0 10px;
+    background: none;
+    border: 0;
+    border-radius: 3px;
+    color: var(--font-secondary);
+    font: inherit;
+    font-size: 12px;
+    cursor: pointer;
+}
+.seq-view-btn.active {
+    background: var(--bg-tertiary);
+    color: var(--font-primary);
+}
+.kf-info {
+    display: none;
+    margin-left: 10px;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--font-secondary);
+    font-size: 12px;
+}
+
+/* 보기 전환: 키프레임일 때 시퀀스 편집 도구와 타임라인을 숨긴다 */
+#keyframe-view {
+    display: none;
+}
+.seq-main.kf-mode #timeline-editor,
+.seq-main.kf-mode #timeline-top-bar > .seq-tool-group:first-child,
+.seq-main.kf-mode #seqTimeReadout {
+    display: none !important;
+}
+.seq-main.kf-mode #keyframe-view {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    flex-direction: column;
+}
+.seq-main.kf-mode .kf-info {
+    display: inline;
+}
+.seq-main.kf-mode .seq-view-switch {
+    margin-left: 0;
+}
+
+.kf-view {
+    background: var(--bg-primary);
+    font-size: 12px;
+}
+.kf-empty {
+    padding: 16px;
+    color: var(--font-secondary);
+}
+/* 한 스크롤 영역: 위 눈금은 세로 고정, 왼쪽 이름 열은 가로 고정 */
+.kf-grid {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    display: grid;
+    grid-template-columns: 180px var(--kf-w);
+    grid-auto-rows: 24px;
+    align-content: start;
+}
+.kf-corner,
+.kf-ruler {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    height: 24px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--line-dark);
+}
+.kf-corner {
+    left: 0;
+    z-index: 4;
+    display: flex;
+    align-items: center;
+    padding: 0 8px;
+    border-right: 1px solid var(--line-dark);
+}
+.kf-filter {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--font-secondary);
+    font-size: 11px;
+    white-space: nowrap;
+}
+.kf-filter input {
+    margin: 0;
+    accent-color: var(--accent-color);
+}
+.kf-ruler-inner {
+    position: relative;
+    height: 100%;
+}
+.kf-tick {
+    position: absolute;
+    bottom: 0;
+    height: 5px;
+    border-left: 1px solid #4a4e55;
+    padding-left: 3px;
+    color: var(--font-muted);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    line-height: 1;
+}
+.kf-tick.major {
+    height: 100%;
+    border-left-color: #6f747c;
+    padding-top: 4px;
+}
+.kf-label {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    padding: 0 8px;
+    background: var(--bg-primary);
+    border: 0;
+    border-right: 1px solid var(--line-dark);
+    border-bottom: 1px solid var(--bg-tertiary);
+    color: var(--font-primary);
+    font: inherit;
+    font-size: 12px;
+    text-align: left;
+    cursor: pointer;
+}
+.kf-label:disabled {
+    cursor: default;
+}
+.kf-label:hover:not(:disabled) {
+    background: var(--bg-tertiary);
+}
+.kf-label-name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.kf-label-sub {
+    flex: none;
+    margin-left: auto;
+    color: var(--font-muted);
+    font-size: 10px;
+}
+.kf-track {
+    border-bottom: 1px solid var(--bg-tertiary);
+}
+.kf-track-inner {
+    position: relative;
+    height: 100%;
+}
+.kf-span {
+    position: absolute;
+    top: 10px;
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(76, 141, 255, 0.35);
+}
+.kf-key {
+    position: absolute;
+    top: 7px;
+    width: 10px;
+    height: 10px;
+    margin-left: -5px;
+    padding: 0;
+    background: var(--bg-primary);
+    border: 1.5px solid #8fb8ff;
+    transform: rotate(45deg);
+    cursor: pointer;
+}
+.kf-key.filled {
+    background: #8fb8ff;
+}
+.kf-key.event {
+    border-color: var(--evt-color);
+    background: var(--evt-color);
+}
+.kf-key:hover,
+.kf-key:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 1px;
+}
+.kf-key.current {
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.35);
+}
+.kf-playhead {
+    position: absolute;
+    top: 0;
+    width: 1px;
+    background: #ff6b6b;
+    pointer-events: none;
+    z-index: 1;
+}
