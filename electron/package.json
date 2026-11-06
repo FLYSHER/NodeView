@@ -68,6 +68,7 @@
       "./client/*",
       "./client/frameworks/**/*",
       "./client/fonts/**/*",
+      "./client/lib/**/*",
       "./client/res/**/*",
       "./client/src/**/*"
     ]
