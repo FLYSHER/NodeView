@@ -89,6 +89,11 @@
             <li data-action="copy-node-name" class="jstree-only">노드 이름 복사</li>
             <li data-action="copy-node-path" class="jstree-only">경로 복사</li>
             <li class="context-menu-separator jstree-only" role="separator"></li>
+            <li data-action="order-top" class="jstree-only">맨 위로 <span class="ctx-shortcut">Ctrl+Shift+↑</span></li>
+            <li data-action="order-up" class="jstree-only">위로 <span class="ctx-shortcut">Ctrl+↑</span></li>
+            <li data-action="order-down" class="jstree-only">아래로 <span class="ctx-shortcut">Ctrl+↓</span></li>
+            <li data-action="order-bottom" class="jstree-only">맨 아래로 <span class="ctx-shortcut">Ctrl+Shift+↓</span></li>
+            <li class="context-menu-separator jstree-only" role="separator"></li>
             <li data-action="delete">삭제</li>
         </ul>
     </div>'
@@ -126,6 +131,16 @@
             <div class = "treeWidget">
                 <div id="widgetTree"></div>
                 <div id="animationTree"></div>
+            </div>
+            <div id="hierOrderBar" class="hier-order-bar" role="group" aria-label="선택한 노드 순서" hidden>
+                <span class="hier-order-label">순서</span>
+                <span id="hierOrderPos" class="hier-order-pos"></span>
+                <span class="hier-order-btns">
+                    <button type="button" data-order="top" title="맨 위로 (Ctrl+Shift+↑)"><i class="fas fa-angle-double-up" aria-hidden="true"></i> 맨 위</button>
+                    <button type="button" data-order="up" title="한 칸 위로 (Ctrl+↑)"><i class="fas fa-arrow-up" aria-hidden="true"></i> 위로</button>
+                    <button type="button" data-order="down" title="한 칸 아래로 (Ctrl+↓)"><i class="fas fa-arrow-down" aria-hidden="true"></i> 아래로</button>
+                    <button type="button" data-order="bottom" title="맨 아래로 (Ctrl+Shift+↓)"><i class="fas fa-angle-double-down" aria-hidden="true"></i> 맨 아래</button>
+                </span>
             </div>
             <div class="hier-footer">
                 <div class="uiw-split">

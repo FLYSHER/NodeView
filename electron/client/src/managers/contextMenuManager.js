@@ -35,6 +35,13 @@ class ContextMenuManager {
             $deleteItem.addClass('disabled').css('pointer-events', 'none');
         }
 
+        // 순서 바꾸기: 맨 위/맨 아래에 있으면 해당 항목 비활성
+        const treeView = this._mainLayerInstance && this._mainLayerInstance._treeView;
+        const order = cocosNode && treeView ? treeView.getOrderInfo(cocosNode) : null;
+        const atTop = !order || order.index <= 0, atBottom = !order || order.index >= order.siblings.length - 1;
+        $menu.find('li[data-action="order-top"], li[data-action="order-up"]').toggleClass('disabled', atTop);
+        $menu.find('li[data-action="order-down"], li[data-action="order-bottom"]').toggleClass('disabled', atBottom);
+
         this._positionMenu(event, $menu);
         $menu.show();
 
@@ -43,6 +50,10 @@ class ContextMenuManager {
             const nodeId = this._targetNodeId;
             this.hide();
 
+            if (/^order-/.test(action)) {
+                if (cocosNode && treeView) treeView.moveOrder(cocosNode, action.replace('order-', ''));
+                return;
+            }
             switch (action) {
                 case 'copy-uiwidgets-subtree':
                     if (cocosNode) UIWidgetsCopyPopover.copyNow(Object.assign(UIWidgetsCopy.loadOptions(), { scope: 'subtree' }), cocosNode);

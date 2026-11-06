@@ -352,6 +352,7 @@ class UIScrollTreeViewCtrl {
         }.bind(this));
 
         UIWidgetsCopyPopover.init((opts, targetNode) => this.resolveUIWidgetsSource(opts, targetNode));
+        this._bindOrderControls();
 
         $('#copyBtn').click(function () {
             UIWidgetsCopyPopover.copyNow();
@@ -387,6 +388,7 @@ class UIScrollTreeViewCtrl {
 
         Inspector.setNode(node);
         UIWidgetsCopyPopover.updateCount();
+        this.updateOrderBar(node);
 
         if (!node) {
             this._selectNode = [];
@@ -534,6 +536,77 @@ class UIScrollTreeViewCtrl {
         }
     }
 
+    // ---- 순서 바꾸기 (맨 위 / 위로 / 아래로 / 맨 아래) ----------------------------
+    // 같은 부모 아래 형제 순서 = localZOrder (드래그로 옮길 때와 같은 규칙: 목록 순서대로 0, 1, 2 …)
+
+    getOrderInfo(node) {
+        const tree = $('#widgetTree').jstree(true);
+        if (!node || !tree || !tree.get_node(node.__instanceId)) return null;
+        const parentId = tree.get_parent(node.__instanceId);
+        const siblings = tree.get_node(parentId).children.slice();
+        // jstree 의 id 는 문자열, __instanceId 는 숫자라 문자열로 맞춰 찾는다
+        return { siblings: siblings, index: siblings.indexOf(String(node.__instanceId)) };
+    }
+
+    moveOrder(node, where) {
+        const info = this.getOrderInfo(node);
+        if (!info || info.index < 0) return;
+        const ids = info.siblings;
+        const from = info.index;
+        const to = where === 'top' ? 0 : where === 'bottom' ? ids.length - 1 : where === 'up' ? from - 1 : from + 1;
+        if (to < 0 || to >= ids.length || to === from) return;
+        ids.splice(from, 1);
+        ids.splice(to, 0, String(node.__instanceId));
+        ids.forEach((id, i) => {
+            const n = this._mainLayer.nodeMap[id];
+            if (n && n.getLocalZOrder() !== i) n.setLocalZOrder(i);
+        });
+        // 트리를 다시 그린 뒤 선택과 순서 바를 되살린다
+        $('#widgetTree').one('refresh.jstree', () => {
+            const tree = $('#widgetTree').jstree(true);
+            if (tree && !tree.is_selected(node.__instanceId)) {
+                tree.deselect_all(true);
+                tree.select_node(node.__instanceId, true);
+            }
+            const li = tree && tree.get_node(node.__instanceId, true);
+            if (li && li[0]) li[0].scrollIntoView({ block: 'nearest' });
+            this.updateOrderBar(node);
+        });
+        this._mainLayer.refreshHierarchyView();
+        Inspector.refresh();
+    }
+
+    // 하단 순서 바: 선택한 노드가 있을 때만 보인다
+    updateOrderBar(node) {
+        const $bar = $('#hierOrderBar');
+        const info = node ? this.getOrderInfo(node) : null;
+        if (!info || info.index < 0) { $bar.prop('hidden', true); return; }
+        const last = info.siblings.length - 1;
+        $bar.prop('hidden', false);
+        $('#hierOrderPos').text((info.index + 1) + ' / ' + info.siblings.length);
+        $bar.find('[data-order="top"], [data-order="up"]').prop('disabled', info.index === 0);
+        $bar.find('[data-order="down"], [data-order="bottom"]').prop('disabled', info.index === last);
+    }
+
+    _bindOrderControls() {
+        $('#hierOrderBar').on('click', '[data-order]', (e) => {
+            const node = this._selectNode[0];
+            if (node) this.moveOrder(node, $(e.currentTarget).data('order'));
+        });
+        // Ctrl+↑/↓ : 한 칸, Ctrl+Shift+↑/↓ : 맨 위/맨 아래 (입력 중에는 무시)
+        document.addEventListener('keydown', (e) => {
+            if (!e.ctrlKey || e.altKey || e.metaKey || (e.key !== 'ArrowUp' && e.key !== 'ArrowDown')) return;
+            const t = e.target;
+            if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable)) return;
+            const node = this._selectNode[0];
+            if (!node) return;
+            e.preventDefault();
+            e.stopPropagation();
+            const up = e.key === 'ArrowUp';
+            this.moveOrder(node, e.shiftKey ? (up ? 'top' : 'bottom') : (up ? 'up' : 'down'));
+        }, true);
+    }
+
     // 리소스 사용처 강조 (Dependencies → "Hierarchy에 표시"). ids 가 비면 지운다
     setUsageHighlight(ids, label) {
         this._usageIds = new Set(ids || []);
@@ -563,5 +636,7 @@ class UIScrollTreeViewCtrl {
         $('#widgetTree').jstree(true).settings.core.data = treeData;
         $('#widgetTree').jstree(true).refresh();
         UIWidgetsCopyPopover.updateCount();
+        // 노드가 추가·삭제되면 순서(n / 전체)도 바뀐다
+        $('#widgetTree').one('refresh.jstree', () => this.updateOrderBar(this._selectNode[0]));
     }
 }

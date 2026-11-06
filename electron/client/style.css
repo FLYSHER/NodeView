@@ -3956,3 +3956,73 @@ body .lm_header .lm_tab .lm_tab_count {
     pointer-events: none;
     z-index: 1;
 }
+
+/* --- Hierarchy 순서 바꾸기 (선택한 노드가 있을 때만) --- */
+.hier-order-bar {
+    flex: none;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px 8px;
+    padding: 6px 8px;
+    border-top: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+    font-size: 12px;
+}
+.hier-order-bar[hidden] {
+    display: none;
+}
+.hier-order-label {
+    color: var(--font-secondary);
+}
+.hier-order-pos {
+    min-width: 4.5ch;
+    color: var(--font-primary);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+}
+.hier-order-btns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-left: auto;
+}
+.hier-order-btns button {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    height: 24px;
+    padding: 0 8px;
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--font-primary);
+    font: inherit;
+    font-size: 12px;
+    white-space: nowrap;
+    cursor: pointer;
+}
+.hier-order-btns button i {
+    font-size: 10px;
+    color: var(--font-secondary);
+}
+.hier-order-btns button:hover:not(:disabled) {
+    border-color: var(--accent-color);
+}
+.hier-order-btns button:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+/* 우클릭 메뉴: 비활성 항목과 단축키 표시 */
+.context-menu li.disabled {
+    opacity: 0.4;
+    pointer-events: none;
+}
+.context-menu .ctx-shortcut {
+    float: right;
+    margin-left: 18px;
+    color: var(--font-muted);
+    font-family: var(--font-mono);
+    font-size: 11px;
+}
