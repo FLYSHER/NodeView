@@ -4026,3 +4026,22 @@ body .lm_header .lm_tab .lm_tab_count {
     font-family: var(--font-mono);
     font-size: 11px;
 }
+
+/* Hierarchy: 이름이 길어도 노드 줄이 펼치기 화살표 옆에 남도록 (넘치면 이름을 … 로 줄인다)
+   행은 자식 목록을 아래로 내리려고 flex-wrap 이라, 줄의 최소 폭이 남은 칸보다 크면 통째로 다음 줄로 넘어간다 */
+#widgetTree .jstree-anchor {
+    flex: 1 1 0;
+    min-width: 0;
+}
+#widgetTree .z-order-label,
+#widgetTree .visibility-toggle {
+    flex-shrink: 0;
+}
+/* 패널 탭: 제목과 개수 표시를 같은 줄 높이·위쪽 기준으로 맞춘다
+   (제목은 overflow:hidden 인 inline-block 이라 기준선이 아래 끝으로 잡혀 옆 글자가 내려가 보였다) */
+body .lm_header .lm_tab .lm_title,
+body .lm_header .lm_tab .lm_tab_count {
+    display: inline-block;
+    vertical-align: top;
+    line-height: 18px;
+}
