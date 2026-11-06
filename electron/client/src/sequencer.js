@@ -214,6 +214,7 @@ var Sequencer = (function() {
                     }
                 }
 
+                _appendEventMarkers($clip, trackData.node, clip);
                 $track.append($clip);
 
                 $clip.draggable({
@@ -400,6 +401,36 @@ var Sequencer = (function() {
             tracks.delete(nodeId);
         }
         _renderTimeline();
+    }
+
+    // 클립 위 키프레임 이벤트 ◆ (반복 구간마다 같은 위치에 반복해서 찍는다)
+    function _appendEventMarkers($clip, node, clip) {
+        if (typeof AnimationEvents === 'undefined' || clip.type === 'action') return;
+        const events = AnimationEvents.list(node, clip.animName);
+        if (events.length === 0) return;
+        const esc = (t) => $('<div>').text(t).html();
+        const loopLen = clip.originalDuration > 0.01 ? clip.originalDuration : clip.duration;
+        for (let k = 0; k * loopLen <= clip.duration + 1e-6; k++) {
+            events.forEach(ev => {
+                const t = k * loopLen + ev.time;
+                if (t > clip.duration + 1e-6) return;
+                // 바로 뜨는 툴팁 (QuickTip): 이벤트 이름 / 위치 / 애니메이션
+                const tip = ev.name + '\n' + AnimationEvents.formatAt(ev) + (k > 0 ? ' · ' + (k + 1) + '번째 반복' : '') + '\n' + clip.animName;
+                $clip.append(`<div class="timeline-clip-event" data-anim="${esc(clip.animName)}" data-evt="${esc(ev.name)}" style="left: ${_timeToPixel(t)}px;" data-tip="${esc(tip)}" aria-label="${esc(ev.name)}"></div>`);
+            });
+            if (clip.duration <= loopLen) break;
+        }
+    }
+
+    // 재생 중 이벤트가 발생하면 해당 ◆ 를 잠깐 강조
+    function _flashEventMarker(detail) {
+        if (!detail || !detail.owner) return;
+        const $markers = $(`.timeline-track[data-node-id="${detail.owner.__instanceId}"] .timeline-clip-event`).filter(function () {
+            return this.getAttribute('data-anim') === detail.animName && this.getAttribute('data-evt') === detail.name;
+        });
+        $markers.removeClass('fired');
+        void document.body.offsetWidth;   // 같은 이벤트가 연달아 오면 애니메이션을 처음부터 다시
+        $markers.addClass('fired');
     }
 
     function _timeToPixel(time) {
@@ -874,6 +905,9 @@ var Sequencer = (function() {
             $('#addSequenceBtn').on('click', _onAdd);
             $('#playSequenceBtn').on('click', _togglePlayback);
             $('#stopSequenceBtn').on('click', () => _onStop(true));
+            if (typeof AnimationEvents !== 'undefined') {
+                document.addEventListener(AnimationEvents.EVENT_NAME, e => _flashEventMarker(e.detail));
+            }
             const syncLoopBtn = () => $('#loopSequenceBtn').toggleClass('active', loopEnabled).attr('aria-pressed', String(loopEnabled));
             $('#loopSequenceBtn').on('click', () => {
                 loopEnabled = !loopEnabled;

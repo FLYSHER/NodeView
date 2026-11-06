@@ -112,13 +112,14 @@ var Inspector = (function () {
                 { key: 'position', label: 'Position', type: 'xy', step: 0.01,
                     get: function (n) { return n.getPosition(); },
                     set: function (n, v) { n.setPosition(v.x, v.y); } },
-                { key: 'worldPos', label: 'World Pos', type: 'ro',
+                // 읽기 전용 값도 같은 입력칸 모양으로 (set 이 없으면 수정 불가)
+                { key: 'worldPos', label: 'World Pos', type: 'xy', step: 0.01,
                     get: function (n) {
                         var parent = n.getParent();
                         var p = parent ? parent.convertToWorldSpace(n.getPosition()) : n.getPosition();
                         // Game View 확대/축소와 상관없이 디자인 좌표로 보여준다
                         if (typeof GameViewTools !== 'undefined' && GameViewTools.toLayer) p = GameViewTools.toLayer(p);
-                        return '(' + round(p.x, 2) + ', ' + round(p.y, 2) + ')';
+                        return { x: p.x, y: p.y };
                     } },
                 { key: 'anchor', label: 'Anchor', type: 'xy', step: 0.01,
                     get: function (n) { return n.getAnchorPoint(); },
@@ -197,7 +198,7 @@ var Inspector = (function () {
                 { key: 'ignoreSize', label: 'Ignore Size', type: 'bool',
                     get: function (n) { return n.isIgnoreContentAdaptWithSize(); },
                     set: function (n, v) { n.ignoreContentAdaptWithSize(v); } },
-                { key: 'actionTag', label: 'Action Tag', type: 'ro',
+                { key: 'actionTag', label: 'Action Tag', type: 'number',
                     get: function (n) { return n.getActionTag(); } },
                 { key: 'margin', label: 'Margin', type: 'ro',
                     get: function (n) {
@@ -296,9 +297,9 @@ var Inspector = (function () {
                     set: function (n, v) { n.setBackGroundColorOpacity(v); } },
                 { key: 'layoutType', label: 'Layout Type', type: 'ro',
                     get: function (n) { return ['Absolute', 'Vertical', 'Horizontal', 'Relative'][n.getLayoutType()] || n.getLayoutType(); } },
-                { key: 'innerSize', label: 'Inner Size', type: 'ro',
+                { key: 'innerSize', label: 'Inner Size', type: 'xy', axes: ['W', 'H'], step: 0.1,
                     applies: function (n) { return has(n, 'getInnerContainerSize'); },
-                    get: function (n) { var s = n.getInnerContainerSize(); return round(s.width, 1) + ' × ' + round(s.height, 1); } },
+                    get: function (n) { var s = n.getInnerContainerSize(); return { x: s.width, y: s.height }; } },
                 { key: 'bounce', label: 'Bounce', type: 'bool',
                     applies: function (n) { return has(n, 'isBounceEnabled'); },
                     get: function (n) { return n.isBounceEnabled(); },
@@ -353,12 +354,12 @@ var Inspector = (function () {
             target: spineOf,
             props: [
                 { key: 'version', label: 'Spine', type: 'ro', get: function (s) { return s._skeleton.data.version || '—'; } },
-                { key: 'bones', label: 'Bones', type: 'ro', get: function (s) { return s._skeleton.data.bones.length; } },
-                { key: 'slots', label: 'Slots', type: 'ro', get: function (s) { return s._skeleton.data.slots.length; } },
+                { key: 'bones', label: 'Bones', type: 'number', get: function (s) { return s._skeleton.data.bones.length; } },
+                { key: 'slots', label: 'Slots', type: 'number', get: function (s) { return s._skeleton.data.slots.length; } },
                 { key: 'skins', label: 'Skins', type: 'ro', get: function (s) { return (s._skeleton.data.skins || []).map(function (k) { return k.name; }).join(', '); } },
-                { key: 'anims', label: 'Animations', type: 'ro', get: function (s) { return (s._skeleton.data.animations || []).length; } },
+                { key: 'anims', label: 'Animations', type: 'number', get: function (s) { return (s._skeleton.data.animations || []).length; } },
                 { key: 'events', label: 'Events', type: 'ro', get: function (s) { var e = s._skeleton.data.events || []; return e.length ? e.length + ' (' + e.map(function (x) { return x.name; }).join(', ') + ')' : '0'; } },
-                { key: 'spineSize', label: 'Size', type: 'ro', get: function (s) { var d = s._skeleton.data; return d.width ? round(d.width, 1) + ' × ' + round(d.height, 1) : '—'; } }
+                { key: 'spineSize', label: 'Size', type: 'xy', axes: ['W', 'H'], step: 0.1, get: function (s) { var d = s._skeleton.data; return d.width ? { x: d.width, y: d.height } : null; } }
             ]
         },
         {
@@ -385,10 +386,30 @@ var Inspector = (function () {
                 { key: 'armDebug', label: 'Debug Bones', type: 'bool',
                     get: function (a) { return ArmatureDebugDraw.isEnabled(a); },
                     set: function (a, v) { ArmatureDebugDraw.setEnabled(a, v); } },
-                { key: 'boneCount', label: 'Bones', type: 'ro',
+                { key: 'boneCount', label: 'Bones', type: 'number',
                     get: function (a) { return Object.keys(a.getBoneDic()).length; } },
-                { key: 'frameRate', label: 'Frame Rate', type: 'ro',
+                { key: 'frameRate', label: 'Frame Rate', type: 'number',
                     get: function (a) { return a.getAnimation()._animationData && a.getAnimation()._animationData.frameRate || 60; } }
+            ]
+        },
+        {
+            id: 'animEvents', title: '키프레임 이벤트',
+            applies: function (n) { return !!(spineOf(n) || armatureOf(n)); },
+            props: [
+                { key: 'list', label: '이벤트', type: 'events', live: true,
+                    get: function (n) {
+                        var arm = armatureOf(n), skel = spineOf(n);
+                        var owner = arm || skel;
+                        var current = '';
+                        if (arm) current = arm.getAnimation().getCurrentMovementID() || '';
+                        else if (skel) { var t = skel.getCurrent(0); current = t && t.animation ? t.animation.name : ''; }
+                        // 재생 중인 애니메이션이 없으면 이벤트가 있는 애니메이션 요약
+                        var names = arm ? (arm.getAnimation()._animationData.movementNames || [])
+                            : (skel._skeleton.data.animations || []).map(function (a) { return a.name; });
+                        var summary = names.map(function (name) { return { name: name, count: AnimationEvents.list(owner, name).length }; })
+                            .filter(function (x) { return x.count > 0; });
+                        return { owner: owner, anim: current, events: current ? AnimationEvents.list(owner, current) : [], summary: summary, isArmature: !!arm };
+                    } }
             ]
         },
         {
@@ -396,8 +417,8 @@ var Inspector = (function () {
             applies: function (n) { return !!spriteOf(n); },
             target: spriteOf,
             props: [
-                { key: 'texSize', label: 'Texture', type: 'ro',
-                    get: function (s) { var t = s.getTexture(); return t ? t.getPixelsWide() + ' × ' + t.getPixelsHigh() : '—'; } }
+                { key: 'texSize', label: 'Texture', type: 'xy', axes: ['W', 'H'],
+                    get: function (s) { var t = s.getTexture(); return t ? { x: t.getPixelsWide(), y: t.getPixelsHigh() } : null; } }
             ]
         }
     ];
@@ -490,6 +511,77 @@ var Inspector = (function () {
         });
     }
 
+    // ---- 키프레임 이벤트 목록 --------------------------------------------------
+
+    // 애니메이션이 바뀌었을 때만 다시 그린다 (재생 중 100ms 마다 불린다)
+    function renderEventList($box, v) {
+        if (!$box.length) return;
+        var sig = v ? v.anim + '|' + v.events.length + '|' + v.summary.length : '';
+        if ($box.attr('data-sig') === sig) return;
+        $box.attr('data-sig', sig).empty();
+        if (!v) return;
+        if (!v.anim) {
+            if (v.summary.length === 0) {
+                $box.append('<div class="insp-subtle">이 리소스에는 키프레임 이벤트가 없습니다.</div>');
+                return;
+            }
+            // 이벤트가 있는 애니메이션 목록: 누르면 재생하고 그 애니메이션의 이벤트 목록으로 바뀐다
+            var total = v.summary.reduce(function (sum, x) { return sum + x.count; }, 0);
+            $box.append($('<div class="insp-subtle"></div>').text('이벤트가 있는 애니메이션 ' + v.summary.length + '개 · 이벤트 ' + total + '개 · 누르면 재생'));
+            var $list = $('<div class="insp-evt-anims" role="list"></div>');
+            v.summary.forEach(function (x) {
+                $('<button type="button" class="insp-evt-anim" role="listitem"></button>')
+                    .attr('data-anim', x.name).attr('title', x.name)
+                    .append($('<span class="insp-evt-anim-name"></span>').text(x.name))
+                    .append($('<span class="insp-evt-anim-count"></span>').text('◆ ' + x.count))
+                    .appendTo($list);
+            });
+            $box.append($list);
+            return;
+        }
+        if (v.events.length === 0) {
+            $box.append($('<div class="insp-subtle"></div>').text(v.anim + ' 에는 키프레임 이벤트가 없습니다.'));
+            return;
+        }
+        $box.append($('<div class="insp-subtle"></div>').text(v.anim + ' · ' + v.events.length + '개 · 누르면 그 위치로 이동'));
+        v.events.forEach(function (ev, i) {
+            $('<button type="button" class="insp-evt-item"></button>')
+                .attr('data-evt-index', i).attr('data-evt', ev.name).attr('data-time', ev.time)
+                .append($('<span class="insp-evt-at"></span>').text(AnimationEvents.formatAt(ev)))
+                .append($('<span class="insp-evt-name"></span>').text(ev.name))
+                .appendTo($box);
+        });
+    }
+
+    // 이벤트 위치로 이동 (Armature: 그 프레임에서 정지, Spine: 그 시각으로 옮기고 정지)
+    function seekToEvent(index) {
+        var found = findProp('animEvents.list');
+        if (!found) return;
+        var v = found.prop.get(found.target);
+        var ev = v && v.events[index];
+        if (!ev) return;
+        var arm = armatureOf(_node), skel = spineOf(_node);
+        if (arm) {
+            arm.getAnimation().gotoAndPause(ev.frame);
+        } else if (skel) {
+            var entry = skel.getCurrent(0);
+            if (entry) { entry.trackTime = ev.time; entry.timeScale = 0; }
+        }
+        refresh(false);
+    }
+
+    function flashEvent(detail) {
+        if (!_node || !detail || !detail.owner) return;
+        var owner = _node instanceof DraggableNode ? _node : null;
+        if (detail.owner !== owner && detail.owner.armature !== armatureOf(_node) && detail.owner.spine !== spineOf(_node)) return;
+        var $items = $('#inspector-body .insp-evt-item').filter(function () {
+            return this.getAttribute('data-evt') === detail.name && Math.abs(parseFloat(this.getAttribute('data-time')) - detail.time) < 1e-4;
+        });
+        $items.removeClass('fired');
+        void document.body.offsetWidth;
+        $items.addClass('fired');
+    }
+
     // ---- 렌더링 ----------------------------------------------------------
 
     function propApplies(prop, target) {
@@ -574,9 +666,13 @@ var Inspector = (function () {
             case 'resource':
                 field = '<span class="insp-ro" data-ro-for="' + key + '"></span>';
                 break;
+            case 'events':
+                field = '<div class="insp-events" data-events-for="' + key + '"></div>';
+                break;
             default: // ro
                 field = '<span class="insp-ro" data-ro-for="' + key + '"></span>';
         }
+        if (prop.type === 'events') return '<div class="insp-row insp-row-events" data-row="' + key + '">' + field + '</div>';
         return '<div class="insp-row' + (prop.type === 'textarea' ? ' insp-row-wide' : '') + '" data-row="' + key + '">' + label + field + '</div>';
     }
 
@@ -698,6 +794,9 @@ var Inspector = (function () {
                         break;
                     case 'ro':
                         $body.find('[data-ro-for="' + key + '"]').text(v == null ? '—' : v);
+                        break;
+                    case 'events':
+                        renderEventList($body.find('[data-events-for="' + key + '"]'), v);
                         break;
                     default:
                         $inputs.each(function () {
@@ -854,6 +953,15 @@ var Inspector = (function () {
             $icon.closest('.jstree-anchor').toggleClass('node-hidden', !this.checked);
         });
 
+        $doc.on('click', '#inspector-body .insp-evt-item', function () { seekToEvent(parseInt(this.getAttribute('data-evt-index'), 10)); });
+        // 요약 목록에서 애니메이션을 고르면 Movement / Animation 값을 바꾼 것과 같게 재생
+        $doc.on('click', '#inspector-body .insp-evt-anim', function () {
+            var found = findProp('armature.movement') || findProp('spine.animation');
+            if (!found) return;
+            try { found.prop.set(found.target, this.getAttribute('data-anim')); } catch (e) { console.error('[Inspector] 재생 실패:', e); }
+            refresh(false);
+        });
+        if (typeof AnimationEvents !== 'undefined') document.addEventListener(AnimationEvents.EVENT_NAME, function (e) { flashEvent(e.detail); });
         $doc.on('click', '#inspectorCopyBtn', copyValues);
         $doc.on('click', '#inspectorResetBtn', restoreOriginal);
 
@@ -973,6 +1081,9 @@ var Inspector = (function () {
                 return v.text || v.label || '—';
             case 'frame':
                 return v.cur + ' / ' + Math.max(0, v.total - 1);
+            case 'events':
+                if (!v.anim) return v.summary.map(function (x) { return x.name + ' (' + x.count + ')'; }).join(', ') || '—';
+                return v.anim + ': ' + (v.events.map(function (ev) { return AnimationEvents.formatAt(ev) + ' ' + ev.name; }).join(', ') || '없음');
             default:
                 return String(v).replace(/\r?\n/g, '\\n');
         }

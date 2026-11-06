@@ -463,9 +463,13 @@ class UIScrollTreeViewCtrl {
         const self = this;
         items.forEach(item => {
             const seconds = this._mainLayer.getAnimationLength(owner, item.name);
+            // 키프레임 이벤트가 있으면 개수 표시 (마우스를 올리면 목록)
+            const events = typeof AnimationEvents !== 'undefined' ? AnimationEvents.list(owner, item.name) : [];
+            const evtTitle = events.map(ev => AnimationEvents.formatAt(ev) + '  ' + ev.name).join('\n');
             const $item = $(`<div class="custom-tree-item anim-item" title="클릭: 미리보기 · 드래그: Sequencer 트랙에 추가">
                 <span class="track-type-icon type-${item.type}">${badge[item.type]}</span>
                 <span class="anim-name">${esc(item.name)}</span>
+                ${events.length ? `<span class="anim-evt" data-tip="${esc('키프레임 이벤트 ' + events.length + '개\n' + evtTitle)}">◆ ${events.length}</span>` : ''}
                 <span class="anim-dur">${seconds > 0 ? seconds.toFixed(2) + 's' : ''}</span>
             </div>`);
             $item.attr('data-anim-name', item.name).attr('data-anim-type', item.type);

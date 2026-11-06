@@ -2,7 +2,7 @@
     "project_type": "javascript",
 
     "debugMode" : 1,
-    "showFPS" : true,
+    "showFPS" : false,
     "frameRate" : 60,
     "noCache" : false,
     "id" : "gameCanvas",
@@ -29,6 +29,8 @@
         "src/uiWidgetsCopy.js",
         "src/uiWidgetsCopyPopover.js",
         "src/armatureDebugDraw.js",
+        "src/animationEvents.js",
+        "src/quickTip.js",
         "src/resources/resourceRegistry.js",
         "src/panels/dependenciesPanel.js",
         "src/panels/resourceView.js",

@@ -3444,3 +3444,206 @@ body .lm_header .lm_tab .lm_tab_count {
     outline: 2px solid var(--accent-color);
     outline-offset: -2px;
 }
+
+/* =====================================================================
+   키프레임 이벤트 (Armature frame event · Spine event)
+   ===================================================================== */
+:root {
+    --evt-color: #ffc078;
+}
+/* 애니메이션 목록의 이벤트 개수 */
+#actionTree .anim-evt {
+    flex: none;
+    padding: 0 5px;
+    border-radius: 3px;
+    background: rgba(255, 192, 120, 0.14);
+    color: var(--evt-color);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    line-height: 16px;
+}
+#actionTree .anim-item.selected .anim-evt {
+    background: rgba(255, 255, 255, 0.18);
+    color: #fff;
+}
+
+/* 타임라인 클립 위 ◆ */
+.timeline-clip-event {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 11px;
+    margin-left: -5px;
+    z-index: 3;
+}
+.timeline-clip-event::before {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: rgba(255, 192, 120, 0.55);
+}
+.timeline-clip-event::after {
+    content: '';
+    position: absolute;
+    left: 2px;
+    bottom: 3px;
+    width: 7px;
+    height: 7px;
+    background: var(--evt-color);
+    border: 1px solid rgba(0, 0, 0, 0.45);
+    transform: rotate(45deg);
+}
+.timeline-clip-event.fired::after {
+    animation: evt-flash 0.6s ease-out;
+}
+.timeline-clip-event.fired::before {
+    animation: evt-line 0.6s ease-out;
+}
+@keyframes evt-flash {
+    0% { background: #fff; box-shadow: 0 0 0 4px rgba(255, 192, 120, 0.7); }
+    100% { background: var(--evt-color); box-shadow: 0 0 0 0 rgba(255, 192, 120, 0); }
+}
+@keyframes evt-line {
+    0% { background: #fff; }
+    100% { background: rgba(255, 192, 120, 0.55); }
+}
+
+/* Inspector 이벤트 목록 */
+.insp-row.insp-row-events {
+    display: block;
+}
+.insp-events {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+.insp-evt-summary {
+    color: var(--font-primary);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    word-break: break-all;
+}
+.insp-evt-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 4px 8px;
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--font-primary);
+    font: inherit;
+    font-size: 0.8rem;
+    text-align: left;
+    cursor: pointer;
+}
+.insp-evt-item:hover {
+    border-color: var(--evt-color);
+}
+.insp-evt-at {
+    flex: none;
+    min-width: 11ch;
+    color: var(--evt-color);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-variant-numeric: tabular-nums;
+}
+.insp-evt-name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.insp-evt-item.fired {
+    animation: evt-item-flash 0.8s ease-out;
+}
+@keyframes evt-item-flash {
+    0% { background: rgba(255, 192, 120, 0.35); border-color: var(--evt-color); }
+    100% { background: var(--bg-input); border-color: var(--border-color); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .timeline-clip-event.fired::after,
+    .timeline-clip-event.fired::before,
+    .insp-evt-item.fired {
+        animation: none;
+    }
+}
+
+/* 이벤트가 있는 애니메이션 목록 (재생 전 요약) */
+.insp-evt-anims {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 3px;
+    max-height: 232px;
+    overflow-y: auto;
+    padding-right: 2px;
+}
+.insp-evt-anim {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    height: 26px;
+    padding: 0 8px;
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--font-primary);
+    font: inherit;
+    font-size: 0.78rem;
+    text-align: left;
+    cursor: pointer;
+}
+.insp-evt-anim:hover {
+    border-color: var(--evt-color);
+}
+.insp-evt-anim-name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.insp-evt-anim-count {
+    flex: none;
+    color: var(--evt-color);
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+}
+
+/* 바로 뜨는 툴팁 (QuickTip) */
+.quick-tip {
+    position: fixed;
+    z-index: 5000;
+    max-width: 320px;
+    padding: 6px 9px;
+    background: #0d0e10;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
+    color: var(--font-primary);
+    font-size: 12px;
+    line-height: 1.45;
+    pointer-events: none;
+    white-space: pre;
+}
+.quick-tip[hidden] {
+    display: none;
+}
+.quick-tip-title {
+    color: var(--evt-color);
+    font-weight: 600;
+}
+.quick-tip-line {
+    color: var(--font-secondary);
+    font-family: var(--font-mono);
+    font-size: 11px;
+}
+.timeline-clip-event,
+#actionTree .anim-evt {
+    cursor: help;
+}

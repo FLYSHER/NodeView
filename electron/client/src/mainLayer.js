@@ -389,6 +389,8 @@ var MainLayer = cc.Layer.extend({
                 }
             };
             addNodeToMap(node);
+            // 재생 중 키프레임 이벤트를 Console · Sequencer · Inspector 에 알린다
+            if (typeof AnimationEvents !== 'undefined') AnimationEvents.watch(node);
 
             this.refreshHierarchyView();
         }
