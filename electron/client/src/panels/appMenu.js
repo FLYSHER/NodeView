@@ -174,7 +174,8 @@ var AppMenu = (function () {
 
     function showAbout() {
         var render = function (version) {
-            var rows = [['버전', version || '—'], ['엔진', 'cocos2d-html5 v' + (cc.ENGINE_VERSION || '3').replace(/^Cocos2d-JS v/i, '')]];
+            var rows = [['버전', version || '—'], ['실행 환경', isElectron ? '앱 (Electron)' : '웹 모드'],
+                ['엔진', 'cocos2d-html5 v' + (cc.ENGINE_VERSION || '3').replace(/^Cocos2d-JS v/i, '')]];
             if (isElectron && typeof process !== 'undefined' && process.versions) rows.push(['Electron', process.versions.electron]);
             rows.push(['회사', 'PlayLinks'], ['스튜디오', 'Raon Studio']);
             showDialog('NodeView 정보',
@@ -185,8 +186,10 @@ var AppMenu = (function () {
                 }).join('') + '</table>' +
                 '<div class="app-about-foot">© PlayLinks · Raon Studio</div>');
         };
-        if (isElectron) _ipc.invoke('nv:appInfo').then(function (info) { render(info && info.version); }, function () { render(null); });
-        else render(null);
+        // 앱: 메인 프로세스(app.getVersion), 웹 모드: 웹 서버(app.js)의 /app-info.json — 둘 다 electron/package.json 의 version
+        var request = isElectron ? _ipc.invoke('nv:appInfo')
+            : fetch('app-info.json', { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; });
+        request.then(function (info) { render(info && info.version); }, function () { render(null); });
     }
 
     // ---- 렌더링 -----------------------------------------------------------
