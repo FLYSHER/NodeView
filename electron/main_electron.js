@@ -33,6 +33,8 @@ function createWindow () {
     width: mainWindowState.width,
     height: mainWindowState.height,
     backgroundColor: '#141518',
+    // 개발 실행(npm start)에서도 작업 표시줄에 앱 아이콘이 보이게 (빌드한 exe 는 exe 자체 아이콘을 쓴다)
+    icon: fs.existsSync(path.join(__dirname, 'build/icons/icon.ico')) ? path.join(__dirname, 'build/icons/icon.ico') : undefined,
     // 제목 표시줄은 앱 상단 바(HTML)가 대신하고, 창 버튼(최소화/최대화/닫기)만 시스템 것을 쓴다
     titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'hidden',
     titleBarOverlay: process.platform === 'darwin' ? undefined : { color: '#141518', symbolColor: '#a3a7ae', height: 34 },
