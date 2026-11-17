@@ -88,6 +88,7 @@ var AppMenu = (function () {
         ] },
         { id: 'view', label: '보기', items: [
             { label: '플레이 (실제 게임 화면)', shortcut: 'Ctrl+P', checked: function () { return GameViewTools.isPlaying(); }, run: function () { GameViewTools.setPlay(!GameViewTools.isPlaying()); } },
+            { label: '전체 화면으로 플레이', shortcut: 'Ctrl+Shift+P', run: function () { GameViewTools.setPlay(true, true); } },
             { sep: true },
             { label: '확대', shortcut: '+', run: function () { GameViewTools.zoomStep(1); } },
             { label: '축소', shortcut: '-', run: function () { GameViewTools.zoomStep(-1); } },
@@ -111,6 +112,7 @@ var AppMenu = (function () {
         ] },
         { id: 'help', label: '도움말', items: [
             { label: '단축키', run: showShortcuts },
+            { label: '업데이트 확인…', electron: true, run: function () { _ipc.send('nv:updateCheck'); } },
             { label: 'NodeView 정보', run: showAbout }
         ] }
     ];
@@ -143,6 +145,7 @@ var AppMenu = (function () {
         ['템플릿 저장 / 다른 이름으로 저장', 'Ctrl+S / Ctrl+Shift+S'],
         ['uiWidgets 복사', 'Ctrl+Shift+C'],
         ['플레이 (실제 게임 화면) / 편집으로', 'Ctrl+P / Esc'],
+        ['전체 화면으로 플레이', 'Ctrl+Shift+P'],
         ['선택 / 이동 / 회전 / 스케일 도구', 'Q / W / E / R'],
         ['클릭한 위치의 안쪽 노드 선택', 'Alt + 클릭'],
         ['선택 노드 순서 위로 / 아래로', 'Ctrl + ↑ / ↓'],
@@ -168,6 +171,7 @@ var AppMenu = (function () {
             $dlg.on('click', '.app-dialog-close', function () { $dlg.prop('hidden', true); });
             $(document).on('keydown', function (e) { if (e.key === 'Escape') $dlg.prop('hidden', true); });
         }
+        $dlg.data('update', false);   // 업데이트 대화상자면 onUpdateState 가 다시 표시한다
         $dlg.find('#appDialogTitle').text(title);
         $dlg.find('.app-dialog-body').html(bodyHtml);
         $dlg.prop('hidden', false);
@@ -200,6 +204,78 @@ var AppMenu = (function () {
         var request = isElectron ? _ipc.invoke('nv:appInfo')
             : fetch('app-info.json', { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; });
         request.then(function (info) { render(info && info.version); }, function () { render(null); });
+    }
+
+    // ---- 업데이트 (메인 프로세스 updater.js 가 보내는 상태를 대화상자로) ---------------
+
+    function updateButtons(buttons) {
+        return '<div class="app-update-actions">' + buttons.map(function (b) {
+            return '<button type="button" class="app-update-btn' + (b.primary ? ' primary' : '') + '" data-update-act="' + b.act + '">' + esc(b.label) + '</button>';
+        }).join('') + '</div>';
+    }
+
+    function formatMB(bytes) {
+        return (bytes / 1048576).toFixed(1) + ' MB';
+    }
+
+    function onUpdateState(evt, s) {
+        if (!s) return;
+        var $dlg = $('#appDialog');
+        var isOpen = $dlg.length && !$dlg.prop('hidden') && $dlg.data('update');
+        switch (s.state) {
+            case 'checking':
+                showDialog('업데이트 확인', '<p class="app-update-text">새 버전을 확인하는 중입니다…</p>');
+                break;
+            case 'none':
+                showDialog('업데이트 확인', '<p class="app-update-text">최신 버전입니다. (현재 ' + esc(s.current) + ')</p>');
+                break;
+            case 'available':
+                showDialog('새 버전 ' + s.version,
+                    '<p class="app-update-text">새 버전 <b>' + esc(s.version) + '</b>이 있습니다. (현재 ' + esc(s.current) + ')</p>' +
+                    (s.releaseNotes ? '<div class="app-update-notes">' + esc(s.releaseNotes.replace(/<[^>]+>/g, '')) + '</div>' : '') +
+                    (s.installed ? '' : '<p class="app-update-text app-update-sub">압축 파일 버전은 스스로 설치할 수 없어 설치 파일을 브라우저로 내려받습니다.</p>') +
+                    updateButtons([
+                        { act: 'later', label: '나중에' },
+                        { act: 'download', label: s.installed ? '내려받기' : '설치 파일 받기', primary: true }
+                    ]));
+                break;
+            case 'downloading':
+                // 대화상자를 닫았으면 진행률로 다시 열지 않는다 (다 받으면 다시 알림)
+                if (s.percent > 0 && !isOpen) return;
+                showDialog('업데이트 내려받는 중',
+                    '<div class="app-update-progress"><div class="app-update-bar" style="width:' + (s.percent || 0) + '%"></div></div>' +
+                    '<p class="app-update-text app-update-sub">' + (s.percent || 0) + '%' +
+                    (s.total ? ' · ' + formatMB(s.transferred || 0) + ' / ' + formatMB(s.total) : '') +
+                    ' — 창을 닫아도 계속 내려받습니다.</p>');
+                break;
+            case 'downloaded':
+                showDialog('업데이트 준비 완료',
+                    '<p class="app-update-text">버전 <b>' + esc(s.version) + '</b>을 내려받았습니다.</p>' +
+                    '<p class="app-update-text app-update-sub">지금 재시작해서 설치하거나, 나중에 앱을 닫을 때 설치됩니다.</p>' +
+                    updateButtons([
+                        { act: 'later', label: '나중에' },
+                        { act: 'install', label: '재시작해서 설치', primary: true }
+                    ]));
+                break;
+            case 'error':
+                showDialog('업데이트', '<p class="app-update-text">업데이트를 확인하지 못했습니다.</p>' +
+                    '<p class="app-update-text app-update-sub">' + esc(s.message || '') + '</p>');
+                break;
+            default:
+                return;
+        }
+        $('#appDialog').data('update', true);
+    }
+
+    function installUpdateHandlers() {
+        if (!isElectron) return;
+        _ipc.on('nv:update', onUpdateState);
+        $(document).on('click', '.app-update-btn', function () {
+            var act = $(this).data('update-act');
+            if (act === 'download') _ipc.send('nv:updateDownload');
+            else if (act === 'install') _ipc.send('nv:updateInstall');
+            if (act === 'later' || act === 'download') $('#appDialog').prop('hidden', true);
+        });
     }
 
     // ---- 렌더링 -----------------------------------------------------------
@@ -353,6 +429,7 @@ var AppMenu = (function () {
             _inited = true;
             buildMenuBar();
             syncRecentChip();
+            installUpdateHandlers();
             syncWindowControlsInset();
             if (navigator.windowControlsOverlay && navigator.windowControlsOverlay.addEventListener) {
                 navigator.windowControlsOverlay.addEventListener('geometrychange', syncWindowControlsInset);

@@ -94,6 +94,14 @@ ipcMain.handle('nv:saveTemplateDialog', async (evt, defaultPath) => {
 ipcMain.handle('nv:builtinTemplateDir', () =>
   app.isPackaged ? path.join(process.resourcesPath, 'templates') : path.join(__dirname, 'templates'));
 ipcMain.handle('nv:appInfo', () => ({ version: app.getVersion(), platform: process.platform }));
+// 전체 화면 켜기/끄기 (돌려주는 값: 바꾸기 전 상태)
+ipcMain.handle('nv:setFullScreen', (evt, on) => {
+  const win = BrowserWindow.fromWebContents(evt.sender);
+  if (!win) return false;
+  const was = win.isFullScreen();
+  win.setFullScreen(!!on);
+  return was;
+});
 ipcMain.on('nv:window', (evt, command) => {
   const win = BrowserWindow.fromWebContents(evt.sender);
   if (!win) return;
@@ -118,6 +126,7 @@ app.whenReady().then(() => {
 
 
   loadManager.init(mainWindow);
+  require('./updater').init(mainWindow);
 
 
 })

@@ -6,7 +6,7 @@
   "main": "main_electron.js",
   "scripts": {
     "start": "electron .",
-    "deploy:win": "electron-builder --windows nsis:ia32",
+    "deploy:win": "electron-builder --windows nsis:ia32 --publish never",
     "deploy:mac": "electron-builder --mac"
   },
   "repository": "https://github.com/flysher/NodeView",
@@ -24,6 +24,7 @@
     "electron-builder": "~22.11.7"
   },
   "dependencies": {
+    "electron-updater": "^4.6.5",
     "electron-window-state": "^5.0.3",
     "image-data-uri": "^2.0.1"
   },
@@ -56,7 +57,8 @@
     },
     "nsis": {
       "oneClick": false,
-      "allowToChangeInstallationDirectory": true
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "NodeView-Setup-${version}.${ext}"
     },
     "directories": {
       "buildResources": "./resources/installer/",
@@ -71,6 +73,12 @@
       "./client/lib/**/*",
       "./client/res/**/*",
       "./client/src/**/*"
+    ],
+    "publish": [
+      {
+        "provider": "generic",
+        "url": "https://rockncash-assets.s3.us-east-1.amazonaws.com/boardwalk/nodeview/"
+      }
     ],
     "extraResources": [
       {

@@ -121,10 +121,12 @@ var PanelManager = (function() {
             const resizeCanvas = function() {
                 if (typeof cc === 'undefined' || !cc.view) return;
 
+                // 전체 화면 플레이: 창 전체를 Game View 로 쓴다 (도구 모음 · 여백 없음)
+                const full = document.body.classList.contains('gv-fullscreen');
                 const margin = 20;
                 const toolbarH = $toolbar.outerHeight() || 34;
-                const panelW = container.width - margin;
-                const panelH = container.height - toolbarH - margin;
+                const panelW = full ? window.innerWidth : container.width - margin;
+                const panelH = full ? window.innerHeight : container.height - toolbarH - margin;
                 if (!panelW || !panelH || panelW <= 0 || panelH <= 0) return;
 
                 const designW = manualResolution ? manualResolution.width : panelW;
@@ -142,6 +144,10 @@ var PanelManager = (function() {
 
             container.on('setManualResolution', function() {
                 resizeCanvas();
+            });
+            // 전체 화면에서는 창 크기가 바뀔 때(전체 화면 전환 직후 포함) 다시 맞춘다
+            $(window).on('resize', function () {
+                if (document.body.classList.contains('gv-fullscreen')) resizeCanvas();
             });
 
             // 패널 크기가 바뀌어도 선택한 해상도는 유지한다 (자동일 때만 패널 크기를 따른다)
@@ -339,6 +345,12 @@ var PanelManager = (function() {
                 if (manualResolution) localStorage.setItem(RESOLUTION_KEY, JSON.stringify(manualResolution));
                 else localStorage.removeItem(RESOLUTION_KEY);
             } catch (e) { }
+            if (!_layout) return;
+            const gameView = _layout.root.getItemsByFilter(i => i.isComponent && i.componentName === 'gameView')[0];
+            if (gameView) gameView.container.emit('setManualResolution');
+        },
+        // Game View 캔버스 크기를 다시 계산 (전체 화면 전환 등)
+        refreshGameView: function () {
             if (!_layout) return;
             const gameView = _layout.root.getItemsByFilter(i => i.isComponent && i.componentName === 'gameView')[0];
             if (gameView) gameView.container.emit('setManualResolution');

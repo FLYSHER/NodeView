@@ -2735,7 +2735,65 @@ button.sb-item:hover {
     background-color: var(--accent-color);
     color: #fff;
 }
-.gv-toolbar.gv-playing > *:not(.gv-play):not(.gv-sep):not(.gv-spacer) {
+.gv-play-full {
+    width: 26px;
+    height: 24px;
+    margin-left: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: 1px solid var(--accent-color);
+    border-radius: 4px;
+    color: var(--accent-color);
+    cursor: pointer;
+}
+.gv-play-full:hover {
+    background-color: var(--bg-tertiary);
+}
+/* 전체 화면 플레이: Game View 패널이 창 전체를 덮는다 */
+body.gv-fullscreen .gameview-panel {
+    position: fixed !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 100000;
+    background: #000;
+}
+body.gv-fullscreen .gameview-panel .gv-toolbar {
+    display: none !important;
+}
+body.gv-fullscreen .gameview-panel .gv-viewport {
+    width: 100vw;
+    height: 100vh;
+    background: #000;
+}
+/* 화면 비율이 다르면 생기는 검은 띠를 위아래(좌우)로 고르게 (엔진이 넣는 위쪽 여백 대신 가운데 정렬) */
+body.gv-fullscreen #Cocos2dGameContainer {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+.gv-fs-hint {
+    position: fixed;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100001;
+    padding: 6px 14px;
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    color: #fff;
+    font-size: 12px;
+    pointer-events: none;
+    animation: gv-fs-hint-fade 3s forwards;
+}
+@keyframes gv-fs-hint-fade {
+    0%, 70% { opacity: 1; }
+    100% { opacity: 0; }
+}
+.gv-toolbar.gv-playing > *:not(.gv-play):not(.gv-play-full):not(.gv-sep):not(.gv-spacer) {
     opacity: 0.35;
     pointer-events: none;
 }
@@ -3466,6 +3524,62 @@ body .lm_header .lm_tab .lm_tab_count {
     color: var(--font-muted);
     font-size: 11px;
     text-align: center;
+}
+
+/* 업데이트 대화상자 */
+.app-update-text {
+    margin: 0 0 8px;
+    line-height: 1.5;
+}
+.app-update-sub {
+    color: var(--font-secondary);
+    font-size: 12px;
+}
+.app-update-notes {
+    max-height: 160px;
+    overflow: auto;
+    margin: 0 0 10px;
+    padding: 8px 10px;
+    background: var(--bg-tertiary);
+    border-radius: 4px;
+    white-space: pre-wrap;
+    font-size: 12px;
+}
+.app-update-progress {
+    height: 8px;
+    margin: 4px 0 10px;
+    background: var(--bg-tertiary);
+    border-radius: 4px;
+    overflow: hidden;
+}
+.app-update-bar {
+    height: 100%;
+    background: var(--accent-color);
+    transition: width 0.2s;
+}
+.app-update-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 14px;
+}
+.app-update-btn {
+    height: 28px;
+    padding: 0 14px;
+    background: none;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--font-primary);
+    font: inherit;
+    cursor: pointer;
+}
+.app-update-btn:hover {
+    border-color: var(--accent-color);
+}
+.app-update-btn.primary {
+    background: var(--accent-color);
+    border-color: var(--accent-color);
+    color: #fff;
 }
 
 .app-dialog-close:focus-visible {

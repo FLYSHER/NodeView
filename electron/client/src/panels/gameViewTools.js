@@ -353,9 +353,67 @@ var GameViewTools = (function () {
         _maskNode.drawRect(cc.p(w, 0), cc.p(far, h), MASK_COLOR, 0, MASK_COLOR);              // 오른쪽
     }
 
-    function setPlay(on) {
+    // ---- 전체 화면 플레이 ------------------------------------------------------
+    // 창 전체(앱이면 모니터 전체)를 Game View 로 쓴다. 해상도 계산은 PanelManager 가 창 크기로 다시 한다.
+    var _ipcRenderer = null;
+    try { _ipcRenderer = typeof require === 'function' ? require('electron').ipcRenderer : null; } catch (e) { _ipcRenderer = null; }
+
+    function enterFullscreen() {
+        if (!_play || _play.full) return;
+        _play.full = { wasWindowFull: false };
+        document.body.classList.add('gv-fullscreen');
+        var full = _play.full;
+        if (_ipcRenderer) {
+            _ipcRenderer.invoke('nv:setFullScreen', true).then(function (was) { full.wasWindowFull = !!was; }, function () { });
+        } else if (document.documentElement.requestFullscreen && !document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(function () { });
+        }
+        showFullscreenHint();
+        refreshCanvas();
+    }
+
+    function leaveFullscreen() {
+        if (!_play || !_play.full) return;
+        var full = _play.full;
+        _play.full = null;
+        document.body.classList.remove('gv-fullscreen');
+        $('.gv-fs-hint').remove();
+        if (_ipcRenderer) {
+            // 원래 전체 화면(F11)이었으면 그대로 둔다
+            if (!full.wasWindowFull) _ipcRenderer.invoke('nv:setFullScreen', false).catch(function () { });
+        } else if (document.fullscreenElement && document.exitFullscreen) {
+            document.exitFullscreen().catch(function () { });
+        }
+        refreshCanvas();
+    }
+
+    // 전체 화면 전환은 창 크기가 조금 늦게 바뀌므로 바로 한 번, 조금 뒤 한 번 더 맞춘다
+    function refreshCanvas() {
+        if (typeof PanelManager === 'undefined' || !PanelManager.refreshGameView) return;
+        PanelManager.refreshGameView();
+        setTimeout(function () { PanelManager.refreshGameView(); }, 300);
+    }
+
+    function showFullscreenHint() {
+        $('.gv-fs-hint').remove();
+        $('<div class="gv-fs-hint" role="status">Esc · 편집으로 돌아가기</div>').appendTo('body');
+    }
+
+    // 웹 모드: 브라우저가 Esc 로 전체 화면을 먼저 끄면 플레이도 끝낸다
+    document.addEventListener('fullscreenchange', function () {
+        if (!document.fullscreenElement && _play && _play.full && !_ipcRenderer) setPlay(false);
+    });
+
+    function setPlay(on, fullscreen) {
         var ml = window.MainLayerInstance;
-        if (!ml || !!on === !!_play) return;
+        if (!ml) return;
+        // 이미 플레이 중이면 전체 화면만 바꾼다
+        if (on && _play) {
+            if (fullscreen) enterFullscreen();
+            return;
+        }
+        if (!!on === !!_play) return;
+        if (!on) leaveFullscreen();
         if (on) {
             _play = { view: { zoom: _view.zoom, x: _view.x, y: _view.y } };
             _drag = null; _pan = null; _hover = null;
@@ -382,6 +440,7 @@ var GameViewTools = (function () {
         }
         $('.gameview-panel').toggleClass('gv-playing', !!_play);
         applyView();
+        if (on && fullscreen) enterFullscreen();
     }
 
     // 디자인 영역 테두리 (인스턴스보다 아래)
@@ -707,6 +766,8 @@ var GameViewTools = (function () {
             '</div>' +
             '<span class="gv-sep"></span>' +
             '<button type="button" class="gv-play" aria-pressed="false" title="실제 게임 화면 크기로 보기 (Ctrl+P) · 시퀀스가 있으면 처음부터 재생">▶ 플레이</button>' +
+            '<button type="button" class="gv-play-full" title="전체 화면으로 플레이 (Ctrl+Shift+P) · Esc: 편집으로" aria-label="전체 화면으로 플레이">' +
+            '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"></path></svg></button>' +
             '<span class="gv-sep"></span>' +
             '<button type="button" class="gv-toggle" data-toggle="bounds">경계 상자</button>' +
             '<button type="button" class="gv-toggle" data-toggle="anchor">앵커 표시</button>' +
@@ -750,6 +811,7 @@ var GameViewTools = (function () {
         syncZoomLabel();
         $toolbar.on('click', '[data-tool]', function () { setTool($(this).data('tool')); });
         $toolbar.on('click', '.gv-play', function () { setPlay(!_play); });
+        $toolbar.on('click', '.gv-play-full', function () { setPlay(true, true); });
         $toolbar.on('click', '[data-toggle]', function () {
             var key = $(this).data('toggle');
             _state[key] = !_state[key];
@@ -824,9 +886,15 @@ var GameViewTools = (function () {
         document.addEventListener('keydown', function (e) {
             if (isTyping(e.target)) return;
             // Ctrl+P: 플레이 모드 켜기/끄기, Esc: 끄기
-            if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && (e.key === 'p' || e.key === 'P')) {
+            if ((e.ctrlKey || e.metaKey) && !e.altKey && (e.key === 'p' || e.key === 'P')) {
                 e.preventDefault();
-                setPlay(!_play);
+                // Ctrl+Shift+P: 전체 화면 플레이 (전체 화면 중이면 끄기)
+                if (e.shiftKey) {
+                    if (_play && _play.full) setPlay(false);
+                    else setPlay(true, true);
+                } else {
+                    setPlay(!_play);
+                }
                 return;
             }
             if (_play) {
@@ -897,6 +965,7 @@ var GameViewTools = (function () {
         setTool: setTool,
         setPlay: setPlay,
         isPlaying: function () { return !!_play; },
+        isFullscreenPlay: function () { return !!(_play && _play.full); },
         isDragging: function () { return !!_drag; }
     };
 })();
