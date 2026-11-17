@@ -449,7 +449,8 @@ var AppMenu = (function () {
                 if ($(e.target).closest('.atb-dropdown').length === 0) closeMenus();
             });
             document.addEventListener('keydown', onMenuKeydown);
-            document.addEventListener('keydown', onShortcut);
+            // 캡처: 캔버스에 포커스가 있어도 F5 · F11 · Ctrl+O · Ctrl+S 가 먹도록 (엔진이 키 입력을 가로챔)
+            document.addEventListener('keydown', onShortcut, true);
         },
         addRecent: addRecent,
         isElectron: function () { return isElectron; }

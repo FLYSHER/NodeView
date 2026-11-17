@@ -97,7 +97,8 @@ var MainLayer = cc.Layer.extend({
                 }
             }
         };
-        document.addEventListener('keydown', this._deleteKeyListener);
+        // 캡처: Game View 캔버스에 포커스가 있으면 엔진이 키 입력을 가로채므로 먼저 받는다
+        document.addEventListener('keydown', this._deleteKeyListener, true);
 
         return true;
     },
@@ -610,7 +611,7 @@ var MainLayer = cc.Layer.extend({
         if (this._backgroundColorListener) {
             cc.eventManager.removeListener(this._backgroundColorListener);
         }
-        document.removeEventListener('keydown', this._deleteKeyListener);
+        document.removeEventListener('keydown', this._deleteKeyListener, true);
         this._super();
     }
 });

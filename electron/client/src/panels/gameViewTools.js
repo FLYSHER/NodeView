@@ -883,6 +883,8 @@ var GameViewTools = (function () {
         var isTyping = function (t) {
             return t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable);
         };
+        // 캡처 단계에서 받는다: 캔버스에 포커스가 있으면 엔진(CCInputExtension)이 키 입력을 가로채
+        // 문서까지 올라오지 않는다 (전체 화면 플레이에서 Esc 가 안 먹던 문제)
         document.addEventListener('keydown', function (e) {
             if (isTyping(e.target)) return;
             // Ctrl+P: 플레이 모드 켜기/끄기, Esc: 끄기
@@ -916,12 +918,12 @@ var GameViewTools = (function () {
             if (key === '-') { zoomStep(-1, _mouse); return; }
             var tool = map[key];
             if (tool) setTool(tool);
-        });
+        }, true);
         document.addEventListener('keyup', function (e) {
             if (e.code !== 'Space') return;
             _spaceDown = false;
             if (cc._canvas && !_pan) cc._canvas.style.cursor = '';
-        });
+        }, true);
         window.addEventListener('blur', function () { _spaceDown = false; });
     }
 
