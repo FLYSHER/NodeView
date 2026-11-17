@@ -87,6 +87,8 @@ var AppMenu = (function () {
             { label: '속성 원래대로', enabled: function () { return inspectorButtonEnabled('inspectorResetBtn'); }, run: function () { $('#inspectorResetBtn').trigger('click'); } }
         ] },
         { id: 'view', label: '보기', items: [
+            { label: '플레이 (실제 게임 화면)', shortcut: 'Ctrl+P', checked: function () { return GameViewTools.isPlaying(); }, run: function () { GameViewTools.setPlay(!GameViewTools.isPlaying()); } },
+            { sep: true },
             { label: '확대', shortcut: '+', run: function () { GameViewTools.zoomStep(1); } },
             { label: '축소', shortcut: '-', run: function () { GameViewTools.zoomStep(-1); } },
             { label: '100%', run: function () { GameViewTools.resetView(); } },
@@ -140,6 +142,7 @@ var AppMenu = (function () {
         ['파일 열기', 'Ctrl+O'],
         ['템플릿 저장 / 다른 이름으로 저장', 'Ctrl+S / Ctrl+Shift+S'],
         ['uiWidgets 복사', 'Ctrl+Shift+C'],
+        ['플레이 (실제 게임 화면) / 편집으로', 'Ctrl+P / Esc'],
         ['선택 / 이동 / 회전 / 스케일 도구', 'Q / W / E / R'],
         ['클릭한 위치의 안쪽 노드 선택', 'Alt + 클릭'],
         ['선택 노드 순서 위로 / 아래로', 'Ctrl + ↑ / ↓'],

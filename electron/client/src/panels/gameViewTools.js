@@ -54,6 +54,12 @@ var GameViewTools = (function () {
         [2048, 1536, 'iPad'],
         [1024, 768, '4:3']
     ];
+    // 플레이 모드: 실제 게임 화면(디자인 해상도 영역)만 보이고 편집은 막는다
+    //  - 화면 크기 규칙은 PanelManager.resizeCanvas (게임과 같은 규칙)로 정해진 cc.winSize 영역
+    var _play = null;          // { view: 들어가기 전 보기 } 또는 null
+    var _maskNode = null;      // 디자인 영역 바깥을 가리는 검은 덮개 (인스턴스보다 위)
+    var MASK_Z = 999990;
+    var MASK_COLOR = cc.color(0, 0, 0, 255);
     var _pan = null;           // 화면 이동 중 (가운데 버튼 또는 Space + 왼쪽 버튼)
     var _spaceDown = false;
     var _overCanvas = false;
@@ -167,6 +173,7 @@ var GameViewTools = (function () {
         if (!dn) return;
         dn.clear();
         updateStats();
+        if (_play) { hideSelLabel(); return; }
 
         var node = selectedNode();
         if (!node || !_state.bounds) hideSelLabel();
@@ -323,8 +330,58 @@ var GameViewTools = (function () {
         }
         drawGrid();
         drawFrame();
+        drawMask();
+        if (_play && cc.director.setClearColor) cc.director.setClearColor(MASK_COLOR);
         syncZoomLabel();
         syncResolutionLabel();
+    }
+
+    // 플레이 모드: 디자인 영역 바깥을 모두 검게 덮는다 (영역 밖으로 나간 배경 · 연출이 보이지 않게)
+    function drawMask() {
+        var ml = window.MainLayerInstance;
+        if (!ml) return;
+        if (!_maskNode || _maskNode.getParent() !== ml) {
+            _maskNode = new cc.DrawNode();
+            ml.addChild(_maskNode, MASK_Z);
+        }
+        _maskNode.clear();
+        if (!_play) return;
+        var w = cc.winSize.width, h = cc.winSize.height, far = 100000;
+        _maskNode.drawRect(cc.p(-far, -far), cc.p(far, 0), MASK_COLOR, 0, MASK_COLOR);        // 아래
+        _maskNode.drawRect(cc.p(-far, h), cc.p(far, far), MASK_COLOR, 0, MASK_COLOR);         // 위
+        _maskNode.drawRect(cc.p(-far, 0), cc.p(0, h), MASK_COLOR, 0, MASK_COLOR);             // 왼쪽
+        _maskNode.drawRect(cc.p(w, 0), cc.p(far, h), MASK_COLOR, 0, MASK_COLOR);              // 오른쪽
+    }
+
+    function setPlay(on) {
+        var ml = window.MainLayerInstance;
+        if (!ml || !!on === !!_play) return;
+        if (on) {
+            _play = { view: { zoom: _view.zoom, x: _view.x, y: _view.y } };
+            _drag = null; _pan = null; _hover = null;
+            ml.updateMenuWithNodeId(null);
+            if (cc._canvas) cc._canvas.style.cursor = '';
+            // 배율 100%, 이동 없음 = 패널에 디자인 영역이 꽉 차게 (SHOW_ALL)
+            _view.zoom = 1; _view.x = 0; _view.y = 0;
+            if (_gridNode) _gridNode.setVisible(false);
+            if (_frameNode) _frameNode.setVisible(false);
+            if (typeof Sequencer !== 'undefined' && Sequencer.playFromStart) Sequencer.playFromStart();
+        } else {
+            var v = _play.view;
+            _play = null;
+            _view.zoom = v.zoom; _view.x = v.x; _view.y = v.y;
+            if (_gridNode) _gridNode.setVisible(true);
+            if (_frameNode) _frameNode.setVisible(true);
+            if (typeof Sequencer !== 'undefined' && Sequencer.stop) Sequencer.stop();
+        }
+        if (_$toolbar) {
+            _$toolbar.toggleClass('gv-playing', !!_play);
+            _$toolbar.find('.gv-play').toggleClass('active', !!_play).attr('aria-pressed', String(!!_play))
+                .html(_play ? '■ 편집으로' : '▶ 플레이')
+                .attr('title', _play ? '편집 화면으로 돌아가기 (Esc · Ctrl+P)' : '실제 게임 화면 크기로 보기 (Ctrl+P) · 시퀀스가 있으면 처음부터 재생');
+        }
+        $('.gameview-panel').toggleClass('gv-playing', !!_play);
+        applyView();
     }
 
     // 디자인 영역 테두리 (인스턴스보다 아래)
@@ -347,6 +404,7 @@ var GameViewTools = (function () {
 
     // 화면 좌표 p 아래의 지점을 고정한 채로 배율을 바꾼다
     function zoomAt(z, p) {
+        if (_play) return;
         z = clampZoom(z);
         if (!p) p = cc.p(cc.winSize.width / 2, cc.winSize.height / 2);
         var lx = (p.x - _view.x) / _view.zoom, ly = (p.y - _view.y) / _view.zoom;
@@ -368,6 +426,7 @@ var GameViewTools = (function () {
     }
 
     function resetView() {
+        if (_play) return;
         _view.zoom = 1;
         _view.x = 0;
         _view.y = 0;
@@ -377,7 +436,7 @@ var GameViewTools = (function () {
     // 선택한 노드(없으면 모든 인스턴스)가 화면에 꽉 차게
     function fitView() {
         var ml = window.MainLayerInstance;
-        if (!ml) return;
+        if (!ml || _play) return;
         var nodes = selectedNode() ? [selectedNode()] : ml.getChildren().filter(function (c) { return c instanceof DraggableNode && c.isVisible(); });
         var box = null;
         nodes.forEach(function (n) {
@@ -512,6 +571,8 @@ var GameViewTools = (function () {
         cc.eventManager.addListener({
             event: cc.EventListener.MOUSE,
             onMouseDown: function (event) {
+                // 플레이 모드에서는 선택 · 이동 · 화면 이동을 모두 막는다
+                if (_play) { event.stopPropagation(); return; }
                 var p = event.getLocation();
                 var button = event.getButton();
                 // 화면 이동: 가운데 버튼, 또는 Space 를 누른 채 왼쪽 버튼
@@ -539,6 +600,7 @@ var GameViewTools = (function () {
             onMouseMove: function (event) {
                 var p = event.getLocation();
                 _mouse = p;
+                if (_play) { event.stopPropagation(); return; }
                 if (_pan) {
                     _view.x = _pan.x + (p.x - _pan.start.x);
                     _view.y = _pan.y + (p.y - _pan.start.y);
@@ -558,6 +620,7 @@ var GameViewTools = (function () {
                 }
             },
             onMouseUp: function (event) {
+                if (_play) { event.stopPropagation(); return; }
                 if (_pan) {
                     _pan = null;
                     if (cc._canvas) cc._canvas.style.cursor = _spaceDown ? 'grab' : '';
@@ -576,7 +639,7 @@ var GameViewTools = (function () {
         if (canvas) {
             canvas.addEventListener('wheel', function (e) {
                 e.preventDefault();
-                if (!e.deltaY) return;
+                if (!e.deltaY || _play) return;
                 var factor = Math.pow(1.0015, -e.deltaY);
                 zoomAt(_view.zoom * factor, _mouse);
             }, { passive: false });
@@ -642,6 +705,8 @@ var GameViewTools = (function () {
             '<button type="button" class="gv-tool" data-tool="scale" title="스케일 (R)" aria-label="스케일 도구 (R)">' + icon.scale + '</button>' +
             '</div>' +
             '<span class="gv-sep"></span>' +
+            '<button type="button" class="gv-play" aria-pressed="false" title="실제 게임 화면 크기로 보기 (Ctrl+P) · 시퀀스가 있으면 처음부터 재생">▶ 플레이</button>' +
+            '<span class="gv-sep"></span>' +
             '<button type="button" class="gv-toggle" data-toggle="bounds">경계 상자</button>' +
             '<button type="button" class="gv-toggle" data-toggle="anchor">앵커 표시</button>' +
             '<button type="button" class="gv-toggle" data-toggle="grid">그리드</button>' +
@@ -683,6 +748,7 @@ var GameViewTools = (function () {
         });
         syncZoomLabel();
         $toolbar.on('click', '[data-tool]', function () { setTool($(this).data('tool')); });
+        $toolbar.on('click', '.gv-play', function () { setPlay(!_play); });
         $toolbar.on('click', '[data-toggle]', function () {
             var key = $(this).data('toggle');
             _state[key] = !_state[key];
@@ -755,8 +821,18 @@ var GameViewTools = (function () {
             return t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable);
         };
         document.addEventListener('keydown', function (e) {
-            if (e.ctrlKey || e.metaKey || e.altKey) return;
             if (isTyping(e.target)) return;
+            // Ctrl+P: 플레이 모드 켜기/끄기, Esc: 끄기
+            if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && (e.key === 'p' || e.key === 'P')) {
+                e.preventDefault();
+                setPlay(!_play);
+                return;
+            }
+            if (_play) {
+                if (e.key === 'Escape') { e.preventDefault(); setPlay(false); }
+                return;
+            }
+            if (e.ctrlKey || e.metaKey || e.altKey) return;
             if (e.code === 'Space') {
                 // 마우스가 Game View 위에 있을 때만 화면 이동 모드 (포커스된 버튼이 눌리지 않게 막는다)
                 if (!_overCanvas) return;
@@ -818,6 +894,8 @@ var GameViewTools = (function () {
         resetView: resetView,
         toLayer: toLayer,
         setTool: setTool,
+        setPlay: setPlay,
+        isPlaying: function () { return !!_play; },
         isDragging: function () { return !!_drag; }
     };
 })();

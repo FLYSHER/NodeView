@@ -897,6 +897,16 @@ var Sequencer = (function() {
     return {
         _deleteClip: _deleteClip,
         _clearClipsForNode: _clearClipsForNode,
+        // 플레이 모드: 시퀀스가 있으면 처음부터 재생 / 멈춤
+        playFromStart: function () {
+            if (tracks.size === 0) return false;
+            _onStop(true);
+            _onPlay();
+            return true;
+        },
+        stop: function () {
+            if (isPlaying) _onStop(true);
+        },
         // 템플릿 저장용: 인스턴스별 클립 목록
         exportTracks: function () {
             const out = [];

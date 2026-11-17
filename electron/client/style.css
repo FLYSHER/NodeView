@@ -2715,6 +2715,34 @@ button.sb-item:hover {
     background-color: var(--bg-tertiary);
     color: var(--font-primary);
 }
+/* 플레이 모드 버튼 · 플레이 중에는 다른 도구를 막는다 */
+.gv-play {
+    height: 24px;
+    padding: 0 10px;
+    background: none;
+    border: 1px solid var(--accent-color);
+    border-radius: 4px;
+    color: var(--accent-color);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.gv-play:hover {
+    background-color: var(--bg-tertiary);
+}
+.gv-play.active {
+    background-color: var(--accent-color);
+    color: #fff;
+}
+.gv-toolbar.gv-playing > *:not(.gv-play):not(.gv-sep):not(.gv-spacer) {
+    opacity: 0.35;
+    pointer-events: none;
+}
+.gameview-panel.gv-playing .gv-stats,
+.gameview-panel.gv-playing .gv-sel-label {
+    display: none !important;
+}
 .gv-viewport {
     flex: 1;
     min-height: 0;
