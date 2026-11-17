@@ -1,8 +1,8 @@
 {
   "nodeviewTemplate": 1,
-  "savedAt": "2026-11-17T06:04:58.114Z",
+  "savedAt": "2026-11-17T06:26:37.951Z",
   "resolution": {
-    "width": 1136,
+    "width": 1084,
     "height": 610
   },
   "backgroundColor": null,
@@ -12,7 +12,7 @@
       "asset": "LB_bgLoungeUI",
       "type": "ui",
       "file": "res/LB_bgLoungeUI.ExportJson",
-      "absFile": "D:\\Data\\VegasCraze\\NodeView Templetes\\lobby\\res\\LB_bgLoungeUI.ExportJson",
+      "absFile": "D:\\WebstormProjects\\NodeView\\electron\\templates\\lobby\\res\\LB_bgLoungeUI.ExportJson",
       "parent": null,
       "x": 0,
       "y": 0,
@@ -33,12 +33,12 @@
       "asset": "LB_newTopUI",
       "type": "ui",
       "file": "res/LB_newTopUI.ExportJson",
-      "absFile": "D:\\Data\\VegasCraze\\NodeView Templetes\\lobby\\res\\LB_newTopUI.ExportJson",
+      "absFile": "D:\\WebstormProjects\\NodeView\\electron\\templates\\lobby\\res\\LB_newTopUI.ExportJson",
       "parent": null,
-      "x": 0.005,
-      "y": 272,
-      "scaleX": 1,
-      "scaleY": 1,
+      "x": 0.009,
+      "y": 269,
+      "scaleX": 1.1,
+      "scaleY": 1.1,
       "rotation": 0,
       "opacity": 255,
       "visible": true,
@@ -123,7 +123,7 @@
       "asset": "PU_shopBtnFxAR",
       "type": "armature",
       "file": "res/PU_shopBtnFxAR.ExportJson",
-      "absFile": "D:\\Data\\VegasCraze\\NodeView Templetes\\lobby\\res\\PU_shopBtnFxAR.ExportJson",
+      "absFile": "D:\\WebstormProjects\\NodeView\\electron\\templates\\lobby\\res\\PU_shopBtnFxAR.ExportJson",
       "parent": {
         "instance": "LB_newTopUI",
         "path": [
@@ -137,7 +137,7 @@
           }
         ]
       },
-      "x": 425,
+      "x": 420,
       "y": 5,
       "scaleX": 1,
       "scaleY": 1,
@@ -156,7 +156,7 @@
       "asset": "LB_bottomNaviUI",
       "type": "ui",
       "file": "res/LB_bottomNaviUI.ExportJson",
-      "absFile": "D:\\Data\\VegasCraze\\NodeView Templetes\\lobby\\res\\LB_bottomNaviUI.ExportJson",
+      "absFile": "D:\\WebstormProjects\\NodeView\\electron\\templates\\lobby\\res\\LB_bottomNaviUI.ExportJson",
       "parent": null,
       "x": 0.001,
       "y": -165,
@@ -174,12 +174,12 @@
       "asset": "LB_newBottomUI",
       "type": "ui",
       "file": "res/LB_newBottomUI.ExportJson",
-      "absFile": "D:\\Data\\VegasCraze\\NodeView Templetes\\lobby\\res\\LB_newBottomUI.ExportJson",
+      "absFile": "D:\\WebstormProjects\\NodeView\\electron\\templates\\lobby\\res\\LB_newBottomUI.ExportJson",
       "parent": null,
       "x": 0.005,
       "y": -255,
-      "scaleX": 1,
-      "scaleY": 1,
+      "scaleX": 1.1,
+      "scaleY": 1.1,
       "rotation": 0,
       "opacity": 255,
       "visible": true,
@@ -227,7 +227,7 @@
       "asset": "LB_crazeTourneyAR",
       "type": "armature",
       "file": "res/LB_crazeTourneyAR.ExportJson",
-      "absFile": "D:\\Data\\VegasCraze\\NodeView Templetes\\lobby\\res\\LB_crazeTourneyAR.ExportJson",
+      "absFile": "D:\\WebstormProjects\\NodeView\\electron\\templates\\lobby\\res\\LB_crazeTourneyAR.ExportJson",
       "parent": {
         "instance": "LB_newBottomUI",
         "path": [
@@ -264,7 +264,7 @@
       "asset": "LB_clubRaceAR",
       "type": "armature",
       "file": "res/LB_clubRaceAR.ExportJson",
-      "absFile": "D:\\Data\\VegasCraze\\NodeView Templetes\\lobby\\res\\LB_clubRaceAR.ExportJson",
+      "absFile": "D:\\WebstormProjects\\NodeView\\electron\\templates\\lobby\\res\\LB_clubRaceAR.ExportJson",
       "parent": {
         "instance": "LB_newBottomUI",
         "path": [
@@ -289,7 +289,7 @@
       "rotation": 0,
       "opacity": 255,
       "visible": true,
-      "z": 11,
+      "z": 0,
       "anim": {
         "name": "loop",
         "type": "armature"
@@ -297,11 +297,45 @@
       "nodeVisible": []
     },
     {
+      "name": "LB_clubRaceUI",
+      "asset": "LB_clubRaceUI",
+      "type": "ui",
+      "file": "res/LB_clubRaceUI.ExportJson",
+      "absFile": "D:\\WebstormProjects\\NodeView\\electron\\templates\\lobby\\res\\LB_clubRaceUI.ExportJson",
+      "parent": {
+        "instance": "LB_newBottomUI",
+        "path": [
+          {
+            "name": "Panel_14",
+            "index": 0
+          },
+          {
+            "name": "pnlBase",
+            "index": 0
+          },
+          {
+            "name": "btnClubRace",
+            "index": 3
+          }
+        ]
+      },
+      "x": 60,
+      "y": 60,
+      "scaleX": 1,
+      "scaleY": 1,
+      "rotation": 0,
+      "opacity": 255,
+      "visible": true,
+      "z": 1,
+      "anim": null,
+      "nodeVisible": []
+    },
+    {
       "name": "LB_RollToRichesIconAR",
       "asset": "LB_RollToRichesIconAR",
       "type": "armature",
       "file": "res/LB_RollToRichesIconAR.ExportJson",
-      "absFile": "D:\\Data\\VegasCraze\\NodeView Templetes\\lobby\\res\\LB_RollToRichesIconAR.ExportJson",
+      "absFile": "D:\\WebstormProjects\\NodeView\\electron\\templates\\lobby\\res\\LB_RollToRichesIconAR.ExportJson",
       "parent": {
         "instance": "LB_newBottomUI",
         "path": [
@@ -338,7 +372,7 @@
       "asset": "LB_RollToRichesIconUI",
       "type": "ui",
       "file": "res/LB_RollToRichesIconUI.ExportJson",
-      "absFile": "D:\\Data\\VegasCraze\\NodeView Templetes\\lobby\\res\\LB_RollToRichesIconUI.ExportJson",
+      "absFile": "D:\\WebstormProjects\\NodeView\\electron\\templates\\lobby\\res\\LB_RollToRichesIconUI.ExportJson",
       "parent": {
         "instance": "LB_newBottomUI",
         "path": [
@@ -372,7 +406,7 @@
       "asset": "LB_inBoxAR",
       "type": "armature",
       "file": "res/LB_inBoxAR.ExportJson",
-      "absFile": "D:\\Data\\VegasCraze\\NodeView Templetes\\lobby\\res\\LB_inBoxAR.ExportJson",
+      "absFile": "D:\\WebstormProjects\\NodeView\\electron\\templates\\lobby\\res\\LB_inBoxAR.ExportJson",
       "parent": {
         "instance": "LB_newBottomUI",
         "path": [
@@ -409,7 +443,7 @@
       "asset": "LB_likeChallengeAR",
       "type": "armature",
       "file": "res/LB_likeChallengeAR.ExportJson",
-      "absFile": "D:\\Data\\VegasCraze\\NodeView Templetes\\lobby\\res\\LB_likeChallengeAR.ExportJson",
+      "absFile": "D:\\WebstormProjects\\NodeView\\electron\\templates\\lobby\\res\\LB_likeChallengeAR.ExportJson",
       "parent": {
         "instance": "LB_newBottomUI",
         "path": [
@@ -446,7 +480,7 @@
       "asset": "LB_vip_wheelAR",
       "type": "armature",
       "file": "res/LB_vip_wheelAR.ExportJson",
-      "absFile": "D:\\Data\\VegasCraze\\NodeView Templetes\\lobby\\res\\LB_vip_wheelAR.ExportJson",
+      "absFile": "D:\\WebstormProjects\\NodeView\\electron\\templates\\lobby\\res\\LB_vip_wheelAR.ExportJson",
       "parent": {
         "instance": "LB_newBottomUI",
         "path": [
@@ -480,7 +514,7 @@
       "asset": "LB_crazeBonusAR",
       "type": "armature",
       "file": "res/LB_crazeBonusAR.ExportJson",
-      "absFile": "D:\\Data\\VegasCraze\\NodeView Templetes\\lobby\\res\\LB_crazeBonusAR.ExportJson",
+      "absFile": "D:\\WebstormProjects\\NodeView\\electron\\templates\\lobby\\res\\LB_crazeBonusAR.ExportJson",
       "parent": {
         "instance": "LB_newBottomUI",
         "path": [
@@ -517,10 +551,10 @@
       "asset": "LB_sideMenuUI",
       "type": "ui",
       "file": "res/LB_sideMenuUI.ExportJson",
-      "absFile": "D:\\Data\\VegasCraze\\NodeView Templetes\\lobby\\res\\LB_sideMenuUI.ExportJson",
+      "absFile": "D:\\WebstormProjects\\NodeView\\electron\\templates\\lobby\\res\\LB_sideMenuUI.ExportJson",
       "parent": null,
-      "x": -474.625,
-      "y": 65,
+      "x": -545.311,
+      "y": 85,
       "scaleX": 1,
       "scaleY": 1,
       "rotation": 0,
@@ -575,20 +609,38 @@
       ]
     },
     {
-      "name": "LB_newSlotEntryFrameUI",
-      "asset": "LB_newSlotEntryFrameUI",
-      "type": "ui",
-      "file": "res/LB_newSlotEntryFrameUI.ExportJson",
-      "absFile": "D:\\Data\\VegasCraze\\NodeView Templetes\\lobby\\res\\LB_newSlotEntryFrameUI.ExportJson",
+      "name": "LB_sideEventIconAR",
+      "asset": "LB_sideEventIconAR",
+      "type": "armature",
+      "file": "res/LB_sideEventIconAR.ExportJson",
+      "absFile": "D:\\WebstormProjects\\NodeView\\electron\\templates\\lobby\\res\\LB_sideEventIconAR.ExportJson",
       "parent": null,
-      "x": -309.625,
-      "y": 45,
+      "x": -595.311,
+      "y": -135,
       "scaleX": 1,
       "scaleY": 1,
       "rotation": 0,
       "opacity": 255,
       "visible": true,
       "z": 5,
+      "anim": null,
+      "nodeVisible": []
+    },
+    {
+      "name": "LB_newSlotEntryFrameUI",
+      "asset": "LB_newSlotEntryFrameUI",
+      "type": "ui",
+      "file": "res/LB_newSlotEntryFrameUI.ExportJson",
+      "absFile": "D:\\WebstormProjects\\NodeView\\electron\\templates\\lobby\\res\\LB_newSlotEntryFrameUI.ExportJson",
+      "parent": null,
+      "x": -375.311,
+      "y": 45,
+      "scaleX": 1,
+      "scaleY": 1,
+      "rotation": 0,
+      "opacity": 255,
+      "visible": true,
+      "z": 6,
       "anim": null,
       "nodeVisible": [
         {
@@ -663,7 +715,7 @@
       "asset": "banner_findpicture",
       "type": "image",
       "file": "res/banner_findpicture.png",
-      "absFile": "D:\\Data\\VegasCraze\\NodeView Templetes\\lobby\\res\\banner_findpicture.png",
+      "absFile": "D:\\WebstormProjects\\NodeView\\electron\\templates\\lobby\\res\\banner_findpicture.png",
       "parent": {
         "instance": "LB_newSlotEntryFrameUI",
         "path": [
@@ -689,7 +741,7 @@
       "asset": "LB_newSlotEntryFrameFxAR",
       "type": "armature",
       "file": "res/LB_newSlotEntryFrameFxAR.ExportJson",
-      "absFile": "D:\\Data\\VegasCraze\\NodeView Templetes\\lobby\\res\\LB_newSlotEntryFrameFxAR.ExportJson",
+      "absFile": "D:\\WebstormProjects\\NodeView\\electron\\templates\\lobby\\res\\LB_newSlotEntryFrameFxAR.ExportJson",
       "parent": {
         "instance": "LB_newSlotEntryFrameUI",
         "path": []
@@ -713,7 +765,7 @@
       "asset": "LB_newSlotEntryFrameUI",
       "type": "ui",
       "file": "res/LB_newSlotEntryFrameUI.ExportJson",
-      "absFile": "D:\\Data\\VegasCraze\\NodeView Templetes\\lobby\\res\\LB_newSlotEntryFrameUI.ExportJson",
+      "absFile": "D:\\WebstormProjects\\NodeView\\electron\\templates\\lobby\\res\\LB_newSlotEntryFrameUI.ExportJson",
       "parent": null,
       "x": -94.625,
       "y": 45,
@@ -731,7 +783,7 @@
       "asset": "LB_entryLong157",
       "type": "image",
       "file": "res/LB_entryLong157.png",
-      "absFile": "D:\\Data\\VegasCraze\\NodeView Templetes\\lobby\\res\\LB_entryLong157.png",
+      "absFile": "D:\\WebstormProjects\\NodeView\\electron\\templates\\lobby\\res\\LB_entryLong157.png",
       "parent": {
         "instance": "LB_newSlotEntryFrameUI (1)",
         "path": [
@@ -757,9 +809,9 @@
       "asset": "LB_newSlotEntryFrameUI",
       "type": "ui",
       "file": "res/LB_newSlotEntryFrameUI.ExportJson",
-      "absFile": "D:\\Data\\VegasCraze\\NodeView Templetes\\lobby\\res\\LB_newSlotEntryFrameUI.ExportJson",
+      "absFile": "D:\\WebstormProjects\\NodeView\\electron\\templates\\lobby\\res\\LB_newSlotEntryFrameUI.ExportJson",
       "parent": null,
-      "x": 115.375,
+      "x": 134.689,
       "y": 45,
       "scaleX": 1,
       "scaleY": 1,
@@ -775,7 +827,7 @@
       "asset": "LB_entryLong196",
       "type": "image",
       "file": "res/LB_entryLong196.png",
-      "absFile": "D:\\Data\\VegasCraze\\NodeView Templetes\\lobby\\res\\LB_entryLong196.png",
+      "absFile": "D:\\WebstormProjects\\NodeView\\electron\\templates\\lobby\\res\\LB_entryLong196.png",
       "parent": {
         "instance": "LB_newSlotEntryFrameUI (2)",
         "path": [
@@ -801,9 +853,9 @@
       "asset": "LB_newSlotEntryFrameUI",
       "type": "ui",
       "file": "res/LB_newSlotEntryFrameUI.ExportJson",
-      "absFile": "D:\\Data\\VegasCraze\\NodeView Templetes\\lobby\\res\\LB_newSlotEntryFrameUI.ExportJson",
+      "absFile": "D:\\WebstormProjects\\NodeView\\electron\\templates\\lobby\\res\\LB_newSlotEntryFrameUI.ExportJson",
       "parent": null,
-      "x": 325.375,
+      "x": 364.689,
       "y": 45,
       "scaleX": 1,
       "scaleY": 1,
@@ -819,7 +871,7 @@
       "asset": "LB_entryLong186",
       "type": "image",
       "file": "res/LB_entryLong186.png",
-      "absFile": "D:\\Data\\VegasCraze\\NodeView Templetes\\lobby\\res\\LB_entryLong186.png",
+      "absFile": "D:\\WebstormProjects\\NodeView\\electron\\templates\\lobby\\res\\LB_entryLong186.png",
       "parent": {
         "instance": "LB_newSlotEntryFrameUI (3)",
         "path": [
