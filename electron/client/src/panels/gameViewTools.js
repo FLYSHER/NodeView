@@ -489,6 +489,7 @@ var GameViewTools = (function () {
     function updateDrag(p, shiftKey) {
         var d = _drag, node = d.node;
         if (!node.isRunning()) { _drag = null; return; }
+        node._transformChanged = true;   // 템플릿에 저장할 하위 노드 트랜스폼
         var pivot = d.startWorld;
 
         if (_state.tool === 'move') {

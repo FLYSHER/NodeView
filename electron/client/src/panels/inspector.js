@@ -880,11 +880,14 @@ var Inspector = (function () {
         }
         try {
             prop.set(target, value);
+            // 템플릿에 저장할 하위 노드 트랜스폼
+            if (TRANSFORM_KEYS.indexOf(key) >= 0 && target && target.setPosition) target._transformChanged = true;
         } catch (e) {
             console.error('[Inspector] 값 적용 실패:', key, e);
         }
         afterChange(prop);
     }
+    var TRANSFORM_KEYS = ['position', 'anchor', 'scale', 'rotation', 'skew', 'opacity'];
 
     // ---- 이벤트 ----------------------------------------------------------
 

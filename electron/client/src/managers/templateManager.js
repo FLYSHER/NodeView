@@ -186,6 +186,49 @@ var TemplateManager = (function () {
         });
     }
 
+    // 인스턴스 안에서 기즈모 · Inspector 로 트랜스폼을 바꾼 하위 노드: [{ path, x, y, scaleX, ... }]
+    function changedTransformOf(instance) {
+        var out = [];
+        var walk = function (node) {
+            node.getChildren().forEach(function (c) {
+                if (c instanceof DraggableNode) return;
+                if (c._transformChanged) {
+                    var a = c.getAnchorPoint();
+                    out.push({
+                        path: pathFrom(instance, c),
+                        x: round(c.getPositionX()), y: round(c.getPositionY()),
+                        scaleX: round(c.getScaleX()), scaleY: round(c.getScaleY()),
+                        rotation: round(c.getRotation()),
+                        skewX: round(c.getSkewX()), skewY: round(c.getSkewY()),
+                        anchorX: round(a.x), anchorY: round(a.y),
+                        opacity: c.getOpacity()
+                    });
+                }
+                walk(c);
+            });
+        };
+        walk(instance);
+        return out;
+    }
+
+    function applyTransforms(instance, list) {
+        (list || []).forEach(function (t) {
+            var target = resolvePath(instance, t.path || []);
+            if (!target || target === instance) {
+                var names = (t.path || []).map(function (s) { return s.name; }).join('/');
+                log('트랜스폼을 적용할 노드를 찾지 못함: ' + instance.getName() + ' › ' + names);
+                return;
+            }
+            if (typeof t.anchorX === 'number') target.setAnchorPoint(cc.p(t.anchorX, t.anchorY));
+            if (typeof t.x === 'number') target.setPosition(t.x, t.y);
+            if (typeof t.scaleX === 'number') { target.setScaleX(t.scaleX); target.setScaleY(t.scaleY); }
+            if (typeof t.rotation === 'number') target.setRotation(t.rotation);
+            if (typeof t.skewX === 'number') { target.setSkewX(t.skewX); target.setSkewY(t.skewY); }
+            if (typeof t.opacity === 'number') target.setOpacity(t.opacity);
+            target._transformChanged = true;
+        });
+    }
+
     // pathMap: 패키지로 저장할 때 원본 경로 → 패키지 안 복사본 경로
     function buildData(templatePath, pathMap) {
         var l = layer();
@@ -221,7 +264,12 @@ var TemplateManager = (function () {
                 visible: node.isVisible(),
                 z: node.getLocalZOrder(),
                 anim: selectedAnimOf(node),
-                nodeVisible: changedVisibilityOf(node)
+                nodeVisible: changedVisibilityOf(node),
+                nodeTransform: changedTransformOf(node),
+                skewX: round(node.getSkewX()),
+                skewY: round(node.getSkewY()),
+                anchorX: round(node.getAnchorPoint().x),
+                anchorY: round(node.getAnchorPoint().y)
             };
         });
 
@@ -433,6 +481,9 @@ var TemplateManager = (function () {
             node.setName(inst.name);
             l.sceneNodes[inst.name] = node;
         }
+        // 앵커는 위치보다 먼저 (앵커를 바꾸면 보이는 위치가 달라진다)
+        if (typeof inst.anchorX === 'number') node.setAnchorPoint(cc.p(inst.anchorX, inst.anchorY));
+        if (typeof inst.skewX === 'number') { node.setSkewX(inst.skewX); node.setSkewY(inst.skewY); }
         var base = parentNode ? cc.p(0, 0) : cc.p(l.CX, l.CY);
         node.setPosition(base.x + (inst.x || 0), base.y + (inst.y || 0));
         if (typeof inst.scaleX === 'number') node.setScaleX(inst.scaleX);
@@ -442,6 +493,7 @@ var TemplateManager = (function () {
         node.setVisible(inst.visible !== false);
         if (typeof inst.z === 'number') node.setLocalZOrder(inst.z);
         applyVisibility(node, inst.nodeVisible);
+        applyTransforms(node, inst.nodeTransform);
         playAnim(node, inst.anim);
         return node;
     }
