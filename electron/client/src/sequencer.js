@@ -897,6 +897,31 @@ var Sequencer = (function() {
     return {
         _deleteClip: _deleteClip,
         _clearClipsForNode: _clearClipsForNode,
+        // 템플릿 저장용: 인스턴스별 클립 목록
+        exportTracks: function () {
+            const out = [];
+            tracks.forEach(function (trackData) {
+                if (!trackData.node || !trackData.clips.length) return;
+                out.push({
+                    node: trackData.node,
+                    clips: trackData.clips.map(function (c) {
+                        return { animName: c.animName, type: c.type, startTime: c.startTime, duration: c.duration };
+                    })
+                });
+            });
+            return out;
+        },
+        // 템플릿 불러오기용: 저장된 시작 시간 · 길이 그대로 클립을 추가
+        restoreClip: function (targetNode, clip) {
+            if (!targetNode || !clip || !clip.animName) return;
+            _addClipToTrack(clip.animName, clip.type, targetNode, clip.startTime);
+            const trackData = tracks.get(targetNode.__instanceId);
+            const added = trackData && trackData.clips[trackData.clips.length - 1];
+            if (added && clip.duration > 0) {
+                added.duration = Math.max(GRID_TIME_INTERVAL, clip.duration);
+                _renderTimeline();
+            }
+        },
         initialize: function(layerInstance) {
             mainLayerInstance = layerInstance;
             const $tracksContainer = $('#timeline-tracks-container');

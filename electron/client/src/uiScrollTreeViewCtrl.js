@@ -253,6 +253,7 @@ class UIScrollTreeViewCtrl {
             if (cocosNode) {
                 const newVisibility = !cocosNode.isVisible();
                 cocosNode.setVisible(newVisibility);
+                cocosNode._visibleChanged = true;   // 템플릿에 저장할 하위 노드 보이기
                 $icon.toggleClass('fa-eye', newVisibility).toggleClass('fa-eye-slash', !newVisibility);
                 $icon.closest('.jstree-anchor').toggleClass('node-hidden', !newVisibility);
                 if (self._selectNode.length > 0 && self._selectNode[0].__instanceId === nodeId) {
@@ -334,6 +335,7 @@ class UIScrollTreeViewCtrl {
         $('#toggleVisible').click(function () {
             this._selectNode.forEach(item => {
                 item.setVisible(!item.isVisible());
+                item._visibleChanged = true;
             });
         }.bind(this));
 
@@ -507,6 +509,8 @@ class UIScrollTreeViewCtrl {
 
     _previewAnimation(owner, animName, animType) {
         if (!owner) return;
+        // 템플릿에 저장할 "선택한 애니메이션"
+        owner._selectedAnim = { name: animName, type: animType };
         if (typeof KeyframeView !== 'undefined') KeyframeView.setAnimation(owner, animName, animType);
         if (owner.spine) owner.spine.clearTrack(0);
         if (owner.armature) owner.armature.getAnimation().stop();

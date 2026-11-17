@@ -78,6 +78,18 @@ ipcMain.handle('nv:openFolderDialog', async (evt) => {
   const result = await dialog.showOpenDialog(win, { title: '리소스 폴더 열기', properties: ['openDirectory'] });
   return result.canceled ? [] : result.filePaths;
 });
+// 템플릿(.nvtemplate) 열기 · 저장 대화상자
+const TEMPLATE_FILTERS = [{ name: 'NodeView 템플릿', extensions: ['nvtemplate'] }, { name: '모든 파일', extensions: ['*'] }];
+ipcMain.handle('nv:openTemplateDialog', async (evt) => {
+  const win = BrowserWindow.fromWebContents(evt.sender);
+  const result = await dialog.showOpenDialog(win, { title: '템플릿 열기', properties: ['openFile'], filters: TEMPLATE_FILTERS });
+  return result.canceled ? null : result.filePaths[0];
+});
+ipcMain.handle('nv:saveTemplateDialog', async (evt, defaultPath) => {
+  const win = BrowserWindow.fromWebContents(evt.sender);
+  const result = await dialog.showSaveDialog(win, { title: '템플릿 저장', defaultPath: defaultPath || '템플릿.nvtemplate', filters: TEMPLATE_FILTERS });
+  return result.canceled ? null : result.filePath;
+});
 ipcMain.handle('nv:appInfo', () => ({ version: app.getVersion(), platform: process.platform }));
 ipcMain.on('nv:window', (evt, command) => {
   const win = BrowserWindow.fromWebContents(evt.sender);

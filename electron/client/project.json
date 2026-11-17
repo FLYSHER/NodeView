@@ -26,6 +26,7 @@
         "src/managers/panelManager.js",
         "src/managers/contextMenuManager.js",
         "src/managers/deletionManager.js",
+        "src/managers/templateManager.js",
         "src/uiWidgetsCopy.js",
         "src/uiWidgetsCopyPopover.js",
         "src/armatureDebugDraw.js",

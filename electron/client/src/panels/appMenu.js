@@ -71,6 +71,11 @@ var AppMenu = (function () {
             { label: '리소스 폴더 열기…', electron: true, run: openFolderDialog },
             { label: '최근 파일', electron: true, submenu: 'recent' },
             { sep: true, electron: true },
+            { label: '템플릿 열기…', electron: true, run: function () { TemplateManager.open(); } },
+            { label: '템플릿 저장', shortcut: 'Ctrl+S', electron: true, enabled: function () { return TemplateManager.hasInstances(); }, run: function () { TemplateManager.save(); } },
+            { label: '템플릿 다른 이름으로 저장…', shortcut: 'Ctrl+Shift+S', electron: true, enabled: function () { return TemplateManager.hasInstances(); }, run: function () { TemplateManager.saveAs(); } },
+            { label: '템플릿을 리소스와 함께 저장…', electron: true, enabled: function () { return TemplateManager.hasInstances(); }, run: function () { TemplateManager.savePackage(); } },
+            { sep: true, electron: true },
             { label: '종료', electron: true, run: function () { _ipc.send('nv:window', 'close'); } }
         ] },
         { id: 'edit', label: '편집', items: [
@@ -132,6 +137,7 @@ var AppMenu = (function () {
 
     var SHORTCUTS = [
         ['파일 열기', 'Ctrl+O'],
+        ['템플릿 저장 / 다른 이름으로 저장', 'Ctrl+S / Ctrl+Shift+S'],
         ['uiWidgets 복사', 'Ctrl+Shift+C'],
         ['선택 / 이동 / 회전 / 스케일 도구', 'Q / W / E / R'],
         ['클릭한 위치의 안쪽 노드 선택', 'Alt + 클릭'],
@@ -308,6 +314,10 @@ var AppMenu = (function () {
         if (e.key === 'F12' && isElectron) { e.preventDefault(); _ipc.send('nv:window', 'toggleDevTools'); return; }
         if (typing) return;
         if (isElectron && e.ctrlKey && !e.shiftKey && !e.altKey && (e.key === 'o' || e.key === 'O')) { e.preventDefault(); openFileDialog(); }
+        if (isElectron && e.ctrlKey && !e.altKey && (e.key === 's' || e.key === 'S')) {
+            e.preventDefault();
+            if (TemplateManager.hasInstances()) e.shiftKey ? TemplateManager.saveAs() : TemplateManager.save();
+        }
     }
 
     // Windows 창 버튼(시스템)이 겹쳐 그려지는 오른쪽 영역만큼 비워 둔다

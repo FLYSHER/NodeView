@@ -395,6 +395,7 @@ var MainLayer = cc.Layer.extend({
 
             this.refreshHierarchyView();
         }
+        return node || null;
     },
 
     // Hierarchy 오른쪽에 회색으로 보여줄 노드 종류 이름

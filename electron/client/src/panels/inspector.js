@@ -948,6 +948,7 @@ var Inspector = (function () {
         $doc.on('change', '#inspector-visible', function () {
             if (!_node) return;
             _node.setVisible(this.checked);
+            _node._visibleChanged = true;   // 템플릿에 저장할 하위 노드 보이기
             var $icon = $('#' + _node.__instanceId).children('.jstree-anchor').find('.visibility-toggle');
             $icon.toggleClass('fa-eye', this.checked).toggleClass('fa-eye-slash', !this.checked);
             $icon.closest('.jstree-anchor').toggleClass('node-hidden', !this.checked);
