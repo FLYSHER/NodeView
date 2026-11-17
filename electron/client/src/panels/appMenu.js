@@ -71,6 +71,7 @@ var AppMenu = (function () {
             { label: '리소스 폴더 열기…', electron: true, run: openFolderDialog },
             { label: '최근 파일', electron: true, submenu: 'recent' },
             { sep: true, electron: true },
+            { electron: true, submenu: 'templates' },
             { label: '템플릿 열기…', electron: true, run: function () { TemplateManager.open(); } },
             { label: '템플릿 저장', shortcut: 'Ctrl+S', electron: true, enabled: function () { return TemplateManager.hasInstances(); }, run: function () { TemplateManager.save(); } },
             { label: '템플릿 다른 이름으로 저장…', shortcut: 'Ctrl+Shift+S', electron: true, enabled: function () { return TemplateManager.hasInstances(); }, run: function () { TemplateManager.saveAs(); } },
@@ -208,6 +209,15 @@ var AppMenu = (function () {
                 PanelManager.getPanels().forEach(function (p) {
                     out.push({ label: p.title, checked: function () { return p.open; },
                         run: function () { PanelManager.setPanelOpen(p.name, !p.open); } });
+                });
+                return;
+            }
+            if (it.submenu === 'templates') {
+                var templates = TemplateManager.listBuiltin();
+                if (templates.length === 0) return;
+                out.push({ header: '기본 템플릿' });
+                templates.forEach(function (t) {
+                    out.push({ label: t.name, title: t.path, run: function () { TemplateManager.load(t.path); } });
                 });
                 return;
             }

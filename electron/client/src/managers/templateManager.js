@@ -508,7 +508,8 @@ var TemplateManager = (function () {
             l.updateMenuWithNodeId(null);
             if (typeof GameViewTools !== 'undefined') GameViewTools.fitView();
 
-            _currentPath = filePath;
+            // 기본 템플릿은 앱 안의 파일이라 덮어쓰지 않는다 (Ctrl+S 는 저장 위치를 새로 묻는다)
+            _currentPath = isBuiltin(filePath) ? null : filePath;
             _currentPackaged = !!raw.packaged;
             _loading = false;
             log('템플릿 불러오기 완료: 인스턴스 ' + Object.keys(byName).length + ' / ' + raw.instances.length + '개');
@@ -520,10 +521,39 @@ var TemplateManager = (function () {
         _ipc.invoke('nv:openTemplateDialog').then(function (p) { if (p) load(p); });
     }
 
+    // ---- 기본 템플릿 (앱에 내장) --------------------------------------------------
+    // templates/<폴더>/<이름>.nvtemplate 를 찾는다. 폴더 경로는 시작할 때 메인 프로세스에서 받아 둔다.
+    var _builtinDir = null;
+    if (isAvailable()) {
+        _ipc.invoke('nv:builtinTemplateDir').then(function (dir) { _builtinDir = dir; }, function () { });
+    }
+
+    function listBuiltin() {
+        if (!_builtinDir || !_fs) return [];
+        var out = [];
+        try {
+            _fs.readdirSync(_builtinDir, { withFileTypes: true }).forEach(function (d) {
+                if (!d.isDirectory()) return;
+                var folder = _path.join(_builtinDir, d.name);
+                _fs.readdirSync(folder).filter(function (f) { return /\.nvtemplate$/i.test(f); }).forEach(function (f) {
+                    out.push({ name: f.replace(/\.nvtemplate$/i, ''), path: _path.join(folder, f) });
+                });
+            });
+        } catch (e) { return []; }
+        return out.sort(function (a, b) { return a.name.localeCompare(b.name); });
+    }
+
+    function isBuiltin(filePath) {
+        if (!_builtinDir) return false;
+        var rel = _path.relative(_builtinDir, filePath);
+        return !!rel && rel.indexOf('..') !== 0 && !_path.isAbsolute(rel);
+    }
+
     return {
         isAvailable: isAvailable,
         open: open,
         load: load,
+        listBuiltin: listBuiltin,
         save: function () { save(false); },
         saveAs: function () { save(true, false); },
         savePackage: function () { save(true, true); },

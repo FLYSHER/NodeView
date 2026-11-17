@@ -1,0 +1,858 @@
+{
+  "nodeviewTemplate": 1,
+  "savedAt": "2026-11-17T06:04:58.114Z",
+  "resolution": {
+    "width": 1136,
+    "height": 610
+  },
+  "backgroundColor": null,
+  "instances": [
+    {
+      "name": "LB_bgLoungeUI",
+      "asset": "LB_bgLoungeUI",
+      "type": "ui",
+      "file": "res/LB_bgLoungeUI.ExportJson",
+      "absFile": "D:\\Data\\VegasCraze\\NodeView Templetes\\lobby\\res\\LB_bgLoungeUI.ExportJson",
+      "parent": null,
+      "x": 0,
+      "y": 0,
+      "scaleX": 1,
+      "scaleY": 1,
+      "rotation": 0,
+      "opacity": 255,
+      "visible": true,
+      "z": 0,
+      "anim": {
+        "name": "normal",
+        "type": "action"
+      },
+      "nodeVisible": []
+    },
+    {
+      "name": "LB_newTopUI",
+      "asset": "LB_newTopUI",
+      "type": "ui",
+      "file": "res/LB_newTopUI.ExportJson",
+      "absFile": "D:\\Data\\VegasCraze\\NodeView Templetes\\lobby\\res\\LB_newTopUI.ExportJson",
+      "parent": null,
+      "x": 0.005,
+      "y": 272,
+      "scaleX": 1,
+      "scaleY": 1,
+      "rotation": 0,
+      "opacity": 255,
+      "visible": true,
+      "z": 1,
+      "anim": {
+        "name": "normal",
+        "type": "action"
+      },
+      "nodeVisible": [
+        {
+          "path": [
+            {
+              "name": "Panel_14",
+              "index": 0
+            },
+            {
+              "name": "pnlBase",
+              "index": 1
+            },
+            {
+              "name": "imgBg",
+              "index": 0
+            }
+          ],
+          "visible": false
+        },
+        {
+          "path": [
+            {
+              "name": "Panel_14",
+              "index": 0
+            },
+            {
+              "name": "pnlBase",
+              "index": 1
+            },
+            {
+              "name": "imgBgVip",
+              "index": 1
+            }
+          ],
+          "visible": true
+        },
+        {
+          "path": [
+            {
+              "name": "Panel_14",
+              "index": 0
+            },
+            {
+              "name": "pnlCommon",
+              "index": 4
+            },
+            {
+              "name": "pnlClass",
+              "index": 7
+            }
+          ],
+          "visible": true
+        },
+        {
+          "path": [
+            {
+              "name": "Panel_14",
+              "index": 0
+            },
+            {
+              "name": "pnlCommon",
+              "index": 4
+            },
+            {
+              "name": "imgFreepass",
+              "index": 10
+            }
+          ],
+          "visible": false
+        }
+      ]
+    },
+    {
+      "name": "PU_shopBtnFxAR",
+      "asset": "PU_shopBtnFxAR",
+      "type": "armature",
+      "file": "res/PU_shopBtnFxAR.ExportJson",
+      "absFile": "D:\\Data\\VegasCraze\\NodeView Templetes\\lobby\\res\\PU_shopBtnFxAR.ExportJson",
+      "parent": {
+        "instance": "LB_newTopUI",
+        "path": [
+          {
+            "name": "Panel_14",
+            "index": 0
+          },
+          {
+            "name": "pnlCommon",
+            "index": 4
+          }
+        ]
+      },
+      "x": 425,
+      "y": 5,
+      "scaleX": 1,
+      "scaleY": 1,
+      "rotation": 0,
+      "opacity": 255,
+      "visible": true,
+      "z": 14,
+      "anim": {
+        "name": "loop01",
+        "type": "armature"
+      },
+      "nodeVisible": []
+    },
+    {
+      "name": "LB_bottomNaviUI",
+      "asset": "LB_bottomNaviUI",
+      "type": "ui",
+      "file": "res/LB_bottomNaviUI.ExportJson",
+      "absFile": "D:\\Data\\VegasCraze\\NodeView Templetes\\lobby\\res\\LB_bottomNaviUI.ExportJson",
+      "parent": null,
+      "x": 0.001,
+      "y": -165,
+      "scaleX": 1,
+      "scaleY": 1,
+      "rotation": 0,
+      "opacity": 255,
+      "visible": true,
+      "z": 2,
+      "anim": null,
+      "nodeVisible": []
+    },
+    {
+      "name": "LB_newBottomUI",
+      "asset": "LB_newBottomUI",
+      "type": "ui",
+      "file": "res/LB_newBottomUI.ExportJson",
+      "absFile": "D:\\Data\\VegasCraze\\NodeView Templetes\\lobby\\res\\LB_newBottomUI.ExportJson",
+      "parent": null,
+      "x": 0.005,
+      "y": -255,
+      "scaleX": 1,
+      "scaleY": 1,
+      "rotation": 0,
+      "opacity": 255,
+      "visible": true,
+      "z": 3,
+      "anim": null,
+      "nodeVisible": [
+        {
+          "path": [
+            {
+              "name": "Panel_14",
+              "index": 0
+            },
+            {
+              "name": "pnlBase",
+              "index": 0
+            },
+            {
+              "name": "imgBg",
+              "index": 0
+            }
+          ],
+          "visible": false
+        },
+        {
+          "path": [
+            {
+              "name": "Panel_14",
+              "index": 0
+            },
+            {
+              "name": "pnlBase",
+              "index": 0
+            },
+            {
+              "name": "imgBgVip",
+              "index": 1
+            }
+          ],
+          "visible": true
+        }
+      ]
+    },
+    {
+      "name": "LB_crazeTourneyAR",
+      "asset": "LB_crazeTourneyAR",
+      "type": "armature",
+      "file": "res/LB_crazeTourneyAR.ExportJson",
+      "absFile": "D:\\Data\\VegasCraze\\NodeView Templetes\\lobby\\res\\LB_crazeTourneyAR.ExportJson",
+      "parent": {
+        "instance": "LB_newBottomUI",
+        "path": [
+          {
+            "name": "Panel_14",
+            "index": 0
+          },
+          {
+            "name": "pnlBase",
+            "index": 0
+          },
+          {
+            "name": "btnTourney",
+            "index": 2
+          }
+        ]
+      },
+      "x": 20,
+      "y": 15,
+      "scaleX": 1,
+      "scaleY": 1,
+      "rotation": 0,
+      "opacity": 255,
+      "visible": true,
+      "z": 11,
+      "anim": {
+        "name": "loop",
+        "type": "armature"
+      },
+      "nodeVisible": []
+    },
+    {
+      "name": "LB_clubRaceAR",
+      "asset": "LB_clubRaceAR",
+      "type": "armature",
+      "file": "res/LB_clubRaceAR.ExportJson",
+      "absFile": "D:\\Data\\VegasCraze\\NodeView Templetes\\lobby\\res\\LB_clubRaceAR.ExportJson",
+      "parent": {
+        "instance": "LB_newBottomUI",
+        "path": [
+          {
+            "name": "Panel_14",
+            "index": 0
+          },
+          {
+            "name": "pnlBase",
+            "index": 0
+          },
+          {
+            "name": "btnClubRace",
+            "index": 3
+          }
+        ]
+      },
+      "x": 20,
+      "y": 20,
+      "scaleX": 1,
+      "scaleY": 1,
+      "rotation": 0,
+      "opacity": 255,
+      "visible": true,
+      "z": 11,
+      "anim": {
+        "name": "loop",
+        "type": "armature"
+      },
+      "nodeVisible": []
+    },
+    {
+      "name": "LB_RollToRichesIconAR",
+      "asset": "LB_RollToRichesIconAR",
+      "type": "armature",
+      "file": "res/LB_RollToRichesIconAR.ExportJson",
+      "absFile": "D:\\Data\\VegasCraze\\NodeView Templetes\\lobby\\res\\LB_RollToRichesIconAR.ExportJson",
+      "parent": {
+        "instance": "LB_newBottomUI",
+        "path": [
+          {
+            "name": "Panel_14",
+            "index": 0
+          },
+          {
+            "name": "pnlBase",
+            "index": 0
+          },
+          {
+            "name": "btnRollToRiches",
+            "index": 4
+          }
+        ]
+      },
+      "x": -70,
+      "y": -70,
+      "scaleX": 1,
+      "scaleY": 1,
+      "rotation": 0,
+      "opacity": 255,
+      "visible": true,
+      "z": 11,
+      "anim": {
+        "name": "loop",
+        "type": "armature"
+      },
+      "nodeVisible": []
+    },
+    {
+      "name": "LB_RollToRichesIconUI",
+      "asset": "LB_RollToRichesIconUI",
+      "type": "ui",
+      "file": "res/LB_RollToRichesIconUI.ExportJson",
+      "absFile": "D:\\Data\\VegasCraze\\NodeView Templetes\\lobby\\res\\LB_RollToRichesIconUI.ExportJson",
+      "parent": {
+        "instance": "LB_newBottomUI",
+        "path": [
+          {
+            "name": "Panel_14",
+            "index": 0
+          },
+          {
+            "name": "pnlBase",
+            "index": 0
+          },
+          {
+            "name": "btnRollToRiches",
+            "index": 4
+          }
+        ]
+      },
+      "x": 60,
+      "y": 60,
+      "scaleX": 1,
+      "scaleY": 1,
+      "rotation": 0,
+      "opacity": 255,
+      "visible": true,
+      "z": 11,
+      "anim": null,
+      "nodeVisible": []
+    },
+    {
+      "name": "LB_inBoxAR",
+      "asset": "LB_inBoxAR",
+      "type": "armature",
+      "file": "res/LB_inBoxAR.ExportJson",
+      "absFile": "D:\\Data\\VegasCraze\\NodeView Templetes\\lobby\\res\\LB_inBoxAR.ExportJson",
+      "parent": {
+        "instance": "LB_newBottomUI",
+        "path": [
+          {
+            "name": "Panel_14",
+            "index": 0
+          },
+          {
+            "name": "pnlBase",
+            "index": 0
+          },
+          {
+            "name": "btnInbox",
+            "index": 5
+          }
+        ]
+      },
+      "x": 20,
+      "y": 20,
+      "scaleX": 1,
+      "scaleY": 1,
+      "rotation": 0,
+      "opacity": 255,
+      "visible": true,
+      "z": 11,
+      "anim": {
+        "name": "loop",
+        "type": "armature"
+      },
+      "nodeVisible": []
+    },
+    {
+      "name": "LB_likeChallengeAR",
+      "asset": "LB_likeChallengeAR",
+      "type": "armature",
+      "file": "res/LB_likeChallengeAR.ExportJson",
+      "absFile": "D:\\Data\\VegasCraze\\NodeView Templetes\\lobby\\res\\LB_likeChallengeAR.ExportJson",
+      "parent": {
+        "instance": "LB_newBottomUI",
+        "path": [
+          {
+            "name": "Panel_14",
+            "index": 0
+          },
+          {
+            "name": "pnlBase",
+            "index": 0
+          },
+          {
+            "name": "btnLikeChallenge",
+            "index": 6
+          }
+        ]
+      },
+      "x": 20,
+      "y": 20,
+      "scaleX": 1,
+      "scaleY": 1,
+      "rotation": 0,
+      "opacity": 255,
+      "visible": true,
+      "z": 11,
+      "anim": {
+        "name": "loop",
+        "type": "armature"
+      },
+      "nodeVisible": []
+    },
+    {
+      "name": "LB_vip_wheelAR",
+      "asset": "LB_vip_wheelAR",
+      "type": "armature",
+      "file": "res/LB_vip_wheelAR.ExportJson",
+      "absFile": "D:\\Data\\VegasCraze\\NodeView Templetes\\lobby\\res\\LB_vip_wheelAR.ExportJson",
+      "parent": {
+        "instance": "LB_newBottomUI",
+        "path": [
+          {
+            "name": "Panel_14",
+            "index": 0
+          },
+          {
+            "name": "pnlBase",
+            "index": 0
+          },
+          {
+            "name": "btnVip",
+            "index": 7
+          }
+        ]
+      },
+      "x": 40,
+      "y": 35,
+      "scaleX": 1,
+      "scaleY": 1,
+      "rotation": 0,
+      "opacity": 255,
+      "visible": true,
+      "z": 8,
+      "anim": null,
+      "nodeVisible": []
+    },
+    {
+      "name": "LB_crazeBonusAR",
+      "asset": "LB_crazeBonusAR",
+      "type": "armature",
+      "file": "res/LB_crazeBonusAR.ExportJson",
+      "absFile": "D:\\Data\\VegasCraze\\NodeView Templetes\\lobby\\res\\LB_crazeBonusAR.ExportJson",
+      "parent": {
+        "instance": "LB_newBottomUI",
+        "path": [
+          {
+            "name": "Panel_14",
+            "index": 0
+          },
+          {
+            "name": "pnlBase",
+            "index": 0
+          },
+          {
+            "name": "btnBonus",
+            "index": 8
+          }
+        ]
+      },
+      "x": 0,
+      "y": 0,
+      "scaleX": 1,
+      "scaleY": 1,
+      "rotation": 0,
+      "opacity": 255,
+      "visible": true,
+      "z": 11,
+      "anim": {
+        "name": "loop",
+        "type": "armature"
+      },
+      "nodeVisible": []
+    },
+    {
+      "name": "LB_sideMenuUI",
+      "asset": "LB_sideMenuUI",
+      "type": "ui",
+      "file": "res/LB_sideMenuUI.ExportJson",
+      "absFile": "D:\\Data\\VegasCraze\\NodeView Templetes\\lobby\\res\\LB_sideMenuUI.ExportJson",
+      "parent": null,
+      "x": -474.625,
+      "y": 65,
+      "scaleX": 1,
+      "scaleY": 1,
+      "rotation": 0,
+      "opacity": 255,
+      "visible": true,
+      "z": 4,
+      "anim": null,
+      "nodeVisible": [
+        {
+          "path": [
+            {
+              "name": "Panel_14",
+              "index": 0
+            },
+            {
+              "name": "pnlSideMenu01",
+              "index": 0
+            },
+            {
+              "name": "btnSlot01",
+              "index": 0
+            }
+          ],
+          "visible": true
+        },
+        {
+          "path": [
+            {
+              "name": "Panel_14",
+              "index": 0
+            },
+            {
+              "name": "pnlSideMenu02",
+              "index": 1
+            }
+          ],
+          "visible": false
+        },
+        {
+          "path": [
+            {
+              "name": "Panel_14",
+              "index": 0
+            },
+            {
+              "name": "imgTooltipHome",
+              "index": 3
+            }
+          ],
+          "visible": false
+        }
+      ]
+    },
+    {
+      "name": "LB_newSlotEntryFrameUI",
+      "asset": "LB_newSlotEntryFrameUI",
+      "type": "ui",
+      "file": "res/LB_newSlotEntryFrameUI.ExportJson",
+      "absFile": "D:\\Data\\VegasCraze\\NodeView Templetes\\lobby\\res\\LB_newSlotEntryFrameUI.ExportJson",
+      "parent": null,
+      "x": -309.625,
+      "y": 45,
+      "scaleX": 1,
+      "scaleY": 1,
+      "rotation": 0,
+      "opacity": 255,
+      "visible": true,
+      "z": 5,
+      "anim": null,
+      "nodeVisible": [
+        {
+          "path": [
+            {
+              "name": "Panel_14",
+              "index": 0
+            },
+            {
+              "name": "imgFrame01",
+              "index": 0
+            }
+          ],
+          "visible": false
+        },
+        {
+          "path": [
+            {
+              "name": "Panel_14",
+              "index": 0
+            },
+            {
+              "name": "lbNoti01",
+              "index": 5
+            }
+          ],
+          "visible": false
+        },
+        {
+          "path": [
+            {
+              "name": "Panel_14",
+              "index": 0
+            },
+            {
+              "name": "lbNoti02",
+              "index": 6
+            }
+          ],
+          "visible": false
+        },
+        {
+          "path": [
+            {
+              "name": "Panel_14",
+              "index": 0
+            },
+            {
+              "name": "lbNoti03",
+              "index": 7
+            }
+          ],
+          "visible": false
+        },
+        {
+          "path": [
+            {
+              "name": "Panel_14",
+              "index": 0
+            },
+            {
+              "name": "imgFrameBanner",
+              "index": 8
+            }
+          ],
+          "visible": true
+        }
+      ]
+    },
+    {
+      "name": "banner_findpicture",
+      "asset": "banner_findpicture",
+      "type": "image",
+      "file": "res/banner_findpicture.png",
+      "absFile": "D:\\Data\\VegasCraze\\NodeView Templetes\\lobby\\res\\banner_findpicture.png",
+      "parent": {
+        "instance": "LB_newSlotEntryFrameUI",
+        "path": [
+          {
+            "name": "Panel_14",
+            "index": 0
+          }
+        ]
+      },
+      "x": 100,
+      "y": 190,
+      "scaleX": 1,
+      "scaleY": 1,
+      "rotation": 0,
+      "opacity": 255,
+      "visible": true,
+      "z": 0,
+      "anim": null,
+      "nodeVisible": []
+    },
+    {
+      "name": "LB_newSlotEntryFrameFxAR",
+      "asset": "LB_newSlotEntryFrameFxAR",
+      "type": "armature",
+      "file": "res/LB_newSlotEntryFrameFxAR.ExportJson",
+      "absFile": "D:\\Data\\VegasCraze\\NodeView Templetes\\lobby\\res\\LB_newSlotEntryFrameFxAR.ExportJson",
+      "parent": {
+        "instance": "LB_newSlotEntryFrameUI",
+        "path": []
+      },
+      "x": 0,
+      "y": 0,
+      "scaleX": 1,
+      "scaleY": 1,
+      "rotation": 0,
+      "opacity": 255,
+      "visible": true,
+      "z": 6,
+      "anim": {
+        "name": "loop_banner",
+        "type": "armature"
+      },
+      "nodeVisible": []
+    },
+    {
+      "name": "LB_newSlotEntryFrameUI (1)",
+      "asset": "LB_newSlotEntryFrameUI",
+      "type": "ui",
+      "file": "res/LB_newSlotEntryFrameUI.ExportJson",
+      "absFile": "D:\\Data\\VegasCraze\\NodeView Templetes\\lobby\\res\\LB_newSlotEntryFrameUI.ExportJson",
+      "parent": null,
+      "x": -94.625,
+      "y": 45,
+      "scaleX": 1,
+      "scaleY": 1,
+      "rotation": 0,
+      "opacity": 255,
+      "visible": true,
+      "z": 7,
+      "anim": null,
+      "nodeVisible": []
+    },
+    {
+      "name": "LB_entryLong157",
+      "asset": "LB_entryLong157",
+      "type": "image",
+      "file": "res/LB_entryLong157.png",
+      "absFile": "D:\\Data\\VegasCraze\\NodeView Templetes\\lobby\\res\\LB_entryLong157.png",
+      "parent": {
+        "instance": "LB_newSlotEntryFrameUI (1)",
+        "path": [
+          {
+            "name": "Panel_14",
+            "index": 0
+          }
+        ]
+      },
+      "x": 100,
+      "y": 185,
+      "scaleX": 1,
+      "scaleY": 1,
+      "rotation": 0,
+      "opacity": 255,
+      "visible": true,
+      "z": -1,
+      "anim": null,
+      "nodeVisible": []
+    },
+    {
+      "name": "LB_newSlotEntryFrameUI (2)",
+      "asset": "LB_newSlotEntryFrameUI",
+      "type": "ui",
+      "file": "res/LB_newSlotEntryFrameUI.ExportJson",
+      "absFile": "D:\\Data\\VegasCraze\\NodeView Templetes\\lobby\\res\\LB_newSlotEntryFrameUI.ExportJson",
+      "parent": null,
+      "x": 115.375,
+      "y": 45,
+      "scaleX": 1,
+      "scaleY": 1,
+      "rotation": 0,
+      "opacity": 255,
+      "visible": true,
+      "z": 8,
+      "anim": null,
+      "nodeVisible": []
+    },
+    {
+      "name": "LB_entryLong196",
+      "asset": "LB_entryLong196",
+      "type": "image",
+      "file": "res/LB_entryLong196.png",
+      "absFile": "D:\\Data\\VegasCraze\\NodeView Templetes\\lobby\\res\\LB_entryLong196.png",
+      "parent": {
+        "instance": "LB_newSlotEntryFrameUI (2)",
+        "path": [
+          {
+            "name": "Panel_14",
+            "index": 0
+          }
+        ]
+      },
+      "x": 100,
+      "y": 185,
+      "scaleX": 1,
+      "scaleY": 1,
+      "rotation": 0,
+      "opacity": 255,
+      "visible": true,
+      "z": -1,
+      "anim": null,
+      "nodeVisible": []
+    },
+    {
+      "name": "LB_newSlotEntryFrameUI (3)",
+      "asset": "LB_newSlotEntryFrameUI",
+      "type": "ui",
+      "file": "res/LB_newSlotEntryFrameUI.ExportJson",
+      "absFile": "D:\\Data\\VegasCraze\\NodeView Templetes\\lobby\\res\\LB_newSlotEntryFrameUI.ExportJson",
+      "parent": null,
+      "x": 325.375,
+      "y": 45,
+      "scaleX": 1,
+      "scaleY": 1,
+      "rotation": 0,
+      "opacity": 255,
+      "visible": true,
+      "z": 9,
+      "anim": null,
+      "nodeVisible": []
+    },
+    {
+      "name": "LB_entryLong186",
+      "asset": "LB_entryLong186",
+      "type": "image",
+      "file": "res/LB_entryLong186.png",
+      "absFile": "D:\\Data\\VegasCraze\\NodeView Templetes\\lobby\\res\\LB_entryLong186.png",
+      "parent": {
+        "instance": "LB_newSlotEntryFrameUI (3)",
+        "path": [
+          {
+            "name": "Panel_14",
+            "index": 0
+          }
+        ]
+      },
+      "x": 100,
+      "y": 185,
+      "scaleX": 1,
+      "scaleY": 1,
+      "rotation": 0,
+      "opacity": 255,
+      "visible": true,
+      "z": -1,
+      "anim": null,
+      "nodeVisible": []
+    }
+  ],
+  "sequence": [
+    {
+      "instance": "PU_shopBtnFxAR",
+      "clips": [
+        {
+          "animName": "loop02",
+          "type": "armature",
+          "startTime": 0,
+          "duration": 5.611111111111112
+        }
+      ]
+    }
+  ],
+  "packaged": true
+}

@@ -90,6 +90,9 @@ ipcMain.handle('nv:saveTemplateDialog', async (evt, defaultPath) => {
   const result = await dialog.showSaveDialog(win, { title: '템플릿 저장', defaultPath: defaultPath || '템플릿.nvtemplate', filters: TEMPLATE_FILTERS });
   return result.canceled ? null : result.filePath;
 });
+// 앱에 내장한 기본 템플릿 폴더 (빌드: resources/templates, 개발 실행: electron/templates)
+ipcMain.handle('nv:builtinTemplateDir', () =>
+  app.isPackaged ? path.join(process.resourcesPath, 'templates') : path.join(__dirname, 'templates'));
 ipcMain.handle('nv:appInfo', () => ({ version: app.getVersion(), platform: process.platform }));
 ipcMain.on('nv:window', (evt, command) => {
   const win = BrowserWindow.fromWebContents(evt.sender);

@@ -71,6 +71,12 @@
       "./client/lib/**/*",
       "./client/res/**/*",
       "./client/src/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "./templates",
+        "to": "templates"
+      }
     ]
   }
 }
